@@ -1,0 +1,6 @@
+[submodule "src"]
+	path = src
+	url = git@github.com:gakimaru/gasha_src.git
+[submodule "settings"]
+	path = settings
+	url = git@github.com:gakimaru/gasha_settings.git
