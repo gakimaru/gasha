@@ -240,7 +240,7 @@ inline void _aligned_free(void* p)
 }
 #endif//IS_GCC
 #ifdef IS_VC
-#include <memory.h>//_aligned_malloc(), _aligned_free()用
+#include <malloc.h>//_aligned_malloc(), _aligned_free()用
 //void* _aligned_malloc(size_t size, size_t alignment);
 //void _aligned_free(void* p);
 #endif//IS_VC
