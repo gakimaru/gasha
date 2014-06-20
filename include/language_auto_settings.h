@@ -9,7 +9,7 @@
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license
-//     git@github.com:gakimaru/gasha.git/MIT-LICENSE.txt 
+//     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
 //依存ヘッダー：project_build_settings_first.h
@@ -124,14 +124,16 @@
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
 		#define HAS_CONSTEXPR
 	#else//_MSC_VER
-		#define constexpr const
+		//#define constexpr const
+		#define constexpr
 	#endif//_MSC_VER
 #endif//IS_VC
 #ifdef IS_GCC
 	#if defined(HAS_CPP11) && __GNUC_PREREQ(4, 6)
 		#define HAS_CONSTEXPR
 	#else//HAS_CPP11
-		#define constexpr const
+		//#define constexpr const
+		#define constexpr
 	#endif//HAS_CPP11
 #endif//IS_GCC
 

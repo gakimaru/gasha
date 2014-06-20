@@ -9,7 +9,7 @@
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license
-//     git@github.com:gakimaru/gasha.git/MIT-LICENSE.txt 
+//     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
 #include <project_build_settings_first.h>//プロジェクト固有のビルド設定（先行設定） リポジトリ：gasha_settings
