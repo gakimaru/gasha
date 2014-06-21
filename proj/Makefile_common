@@ -10,11 +10,29 @@
 
 #-------------------------------------------------------------------------------
 
+# アーカイブファイル用ディレクトリ
+ARC_DIR := $(LIB_SRC_BASE)/gasha/lib/gcc
+
+# アーカイブファイル
+ifeq ($(BUILD_TYPE),Release)
+	# リリースビルド用
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM).a
+endif
+ifeq ($(BUILD_TYPE),Debug)
+	# デバッグビルド用
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM)_debug.a
+endif
+ifndef ARC
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM)_unknown.a
+endif
+
+#-------------------------------------------------------------------------------
+
 # アーカイブコマンド
 AR := ar
 
 # アーカイブオプション
-ARFLAGS = rcsv
+ARFLAGS := rcsv
 
 # C++コマンド
 CXX := g++ -std=c++11
@@ -23,13 +41,13 @@ CXX := g++ -std=c++11
 CPPFLAGS := \
 	-I$(dir $PC_STD_HEADER) \
 	-I. \
-	-I../../gasha/include \
-	-I../../gasha_settings/include \
+	$(INCLIDE_DIRS) \
+	-I$(LIB_SRC_BASE)/gasha/include \
+	-I$(LIB_SRC_BASE)/gasha_settings/include \
 
 # C++コンパイルオプション
 CXXFLAGS := \
 	-Wall \
-	-Wextra \
 	-msse4.2 \
 	-fopenmp \
 
