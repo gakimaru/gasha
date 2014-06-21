@@ -10,13 +10,13 @@ Released under the [MIT license][MIT].
 ---
 このリポジトリは、「GASHA」のライブラリ本体です。  
 > ライブラリのヘッダーファイルとライブラリファイルを扱っています。
-> 
-> **関連リポジトリ**
-> * [`gasha` ライブラリ本体用リポジトリ][gasha]  
-> * [`gasha_settings` ライブラリ挙動設定用リポジトリ][gasha_settings]  
-> * [`gasha_src` ライブラリソース用リポジトリ][gasha_src]  
-> * [`gasha_examples` サンプルプログラム用リポジトリ][gasha_examples]  
-> * [`gasha_proj` ライブラリビルド用リポジトリ][gasha_proj]  
+
+**関連リポジトリ**
+* [`gasha` ライブラリ本体用リポジトリ][gasha]  
+* [`gasha_settings` ライブラリ挙動設定用リポジトリ][gasha_settings]  
+* [`gasha_src` ライブラリソース用リポジトリ][gasha_src]  
+* [`gasha_examples` サンプルプログラム用リポジトリ][gasha_examples]  
+* [`gasha_proj` ライブラリビルド用リポジトリ][gasha_proj]  
 [gasha]: https://github.com/gakimaru/gasha
 [gasha_settings]: https://github.com/gakimaru/gasha_settings
 [gasha_src]: https://github.com/gakimaru/gasha_src
