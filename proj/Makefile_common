@@ -1,0 +1,128 @@
+﻿#-------------------------------------------------------------------------------
+# Makefile_common
+# メイクファイル（共通部分）
+#
+# Gakimaru's researched and standard library for C++ - GASHA
+#   Copyright (c) 2014 Itagaki Mamoru
+#   Released under the MIT license
+#     https://github.com/gakimaru/gasha/blob/master/LICENSE
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+
+# アーカイブファイル用ディレクトリ
+ARC_DIR := $(LIB_SRC_BASE)/gasha/lib/gcc
+
+# アーカイブファイル
+ifeq ($(BUILD_TYPE),Release)
+	# リリースビルド用
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM).a
+endif
+ifeq ($(BUILD_TYPE),Debug)
+	# デバッグビルド用
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM)_debug.a
+endif
+ifndef ARC
+	ARC := $(ARC_DIR)/gasha_$(BUILD_PLATFORM)_unknown.a
+endif
+
+#-------------------------------------------------------------------------------
+
+# アーカイブコマンド
+AR := ar
+
+# アーカイブオプション
+ARFLAGS := rcsv
+
+# C++コマンド
+CXX := g++ -std=c++11
+
+# C++プリプロセッサオプション
+CPPFLAGS := \
+	-I$(dir $PC_STD_HEADER) \
+	-I. \
+	$(INCLIDE_DIRS) \
+	-I$(LIB_SRC_BASE)/gasha/include \
+	-I$(LIB_SRC_BASE)/gasha_settings/include \
+
+# C++コンパイルオプション
+CXXFLAGS := \
+	-Wall \
+	-msse4.2 \
+	-fopenmp \
+
+# C++コンパイルオプション（ビルド設定別）
+ifeq ($(BUILD_TYPE),Release)
+	# リリースビルド用
+	CXXFLAGS += \
+		-O3 \
+
+endif
+ifeq ($(BUILD_TYPE),Debug)
+	# デバッグビルド用
+	CXXFLAGS += \
+		-g \
+
+endif
+
+# C++コンパイルオプション（プラットフォーム別）
+ifeq ($(BUILD_PLATFORM),x86)
+	CXXFLAGS += -m32
+endif
+ifeq ($(BUILD_PLATFORM),x64)
+	CXXFLAGS += -m64
+endif
+
+# C++コンパイルオプション（定数）
+CXXFLAGS_DEF := \
+
+# C++コンパイルオプション（定数：ビルド設定別）
+ifeq ($(BUILD_TYPE),Release)
+	# リリースビルド用
+	CXXFLAGS_DEF += \
+		-DNDEBUG \
+
+endif
+ifeq ($(BUILD_TYPE),Debug)
+	# デバッグビルド用
+	CXXFLAGS_DEF += \
+		-D_DEBUG \
+
+endif
+
+# C++コンパイルオプション（定数：プラットフォーム別）
+ifeq ($(BUILD_PLATFORM),x86)
+	CXXFLAGS_DEF += \
+
+endif
+ifeq ($(BUILD_PLATFORM),x64)
+	CXXFLAGS_DEF += \
+
+endif
+
+# C++コンパイルオプション（C++ファイル用）
+CXXFLAGS_CPP := \
+	-include $(STD_HEADER_NAME) \
+
+# C++コンパイルオプション（プリコンパイル済みヘッダー用）
+CXXFLAGS_GCH := \
+	-x c++-header
+
+#-------------------------------------------------------------------------------
+
+# 型ルール：オブジェクトファイル生成
+# ※依存関係定義ファイルも自動生成
+# ※（なぜか）ここでプリコンパイル済みヘッダーを依存ファイルに指定すると、うまく依存ファイルを生成してくれる。
+$(OUT_DIR)/%.o : %.cpp $(PC_STD_HEADER)
+	mkdir -p $(dir $@); \
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_CPP) -MMD -MP -MF $(@:%.o=%.d) -c $< -o $@
+
+# 型ルール：プリコンパイル済みヘッダーファイル
+# ※依存関係定義ファイルも自動生成
+$(OUT_DIR)/%.h.gch : %.h
+	mkdir -p $(dir $@); \
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MMD -MP -MF $(@:%.gch=%.d) -c $< -o $@
+
+#-------------------------------------------------------------------------------
+
+# End of file
