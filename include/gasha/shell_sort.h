@@ -13,14 +13,12 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/swap_values.h>//値交換
 
 #include <gasha/iterator.h>//イテレータ
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -147,7 +145,7 @@ std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 }
 iteratorSortFuncSet(iteratorShellSort);
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__SHELL_SORT_H_
 

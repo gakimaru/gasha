@@ -12,8 +12,6 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <cstddef>//std::size_t用
 #include <cstdint>//std::int**_t用
 
@@ -21,7 +19,7 @@
 #define CALC_RUNTIME_CRC32_BY_SSE//ランタイムCRC32の算出にSSE命令を使用する（CRC-32Cを算出する）
 #endif
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //--------------------
 //型
@@ -165,7 +163,7 @@ inline crc32_t calcCRC32(const char* data, const std::size_t len)
 //※ソースコードを生成して標準出力に出力する。
 void makeAndPrintPolyTable();
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__CRC32_H_
 

@@ -13,9 +13,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソート／探索補助処理
@@ -159,7 +157,7 @@ void reverseForEach(const T* array, const std::size_t size, FUNCTOR functor)
 	reverseForEach(begin, end, functor);
 }
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__ITERATOR_H_
 

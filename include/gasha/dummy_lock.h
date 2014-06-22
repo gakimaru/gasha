@@ -12,14 +12,12 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/unique_lock.h>//安全ロック制御
+#include <gasha/unique_lock.h>//単一ロック
 #include <gasha/lock_guard.h>//ロックガード
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //ダミーロッククラス
@@ -31,22 +29,21 @@ class dummy_lock
 public:
 	//メソッド
 
-	//安全ロック制御取得
-	inline unique_lock<dummy_lock> unique(const bool is_safe_lock = true)
-	{
-		unique_lock<dummy_lock> lock(*this, is_safe_lock);
-		return lock;
-	}
-	
+	//単一ロック取得
+	inline GASHA_ unique_lock<dummy_lock> get_unique_lock(const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<dummy_lock> lock(*this, spin_count); return lock; }
+	inline GASHA_ unique_lock<dummy_lock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<dummy_lock> lock(*this, with_lock, spin_count); return lock; }
+	inline GASHA_ unique_lock<dummy_lock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummy_lock> lock(*this, adopt_lock); return lock; }
+	inline GASHA_ unique_lock<dummy_lock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummy_lock> lock(*this, defer_lock); return lock; }
+
 	//ロック取得
-	inline void lock(const int dummy_count = DEFAULT_SPIN_COUNT)
+	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		//何もしない
 	}
 	//ロックガード取得
-	inline lock_guard<dummy_lock> lock_scoped(const int dummy_count = DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<dummy_lock> lock_scoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
-		lock_guard<dummy_lock> lock(*this);
+		GASHA_ lock_guard<dummy_lock> lock(*this);
 		return lock;
 	}
 	//ロック取得を試行
@@ -83,7 +80,7 @@ public:
 	}
 };
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__DUMMY_LOCK_H_
 

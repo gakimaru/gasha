@@ -13,11 +13,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/lock_common.h>//ロック共通設定
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //共有ロックガードクラス（スコープロック）
@@ -44,7 +42,7 @@ public:
 	//コピーコンストラクタ
 	shared_lock_guard(const shared_lock_guard&) = delete;
 	//コンストラクタ
-	inline explicit shared_lock_guard(lock_type& lock, const int spin_count = DEFAULT_SPIN_COUNT) :
+	inline explicit shared_lock_guard(lock_type& lock, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
 		m_lock(lock),
 		m_isLocked(true)
 	{
@@ -62,7 +60,7 @@ private:
 	bool m_isLocked;//ロック取得中フラグ
 };
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__SHARED_shared_lock_guard_H_
 

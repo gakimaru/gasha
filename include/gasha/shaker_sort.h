@@ -13,12 +13,10 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/swap_values.h>//値交換
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -98,7 +96,7 @@ std::size_t shakerSort(T* array, const std::size_t size, PREDICATE predicate)
 }
 sortFuncSet(shakerSort);
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__SHAKER_SORT_H_
 

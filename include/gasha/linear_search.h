@@ -13,13 +13,11 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/search_basic.h>//探索処理基本
 
 //#include <gasha/iterator.h>//イテレータ
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //========================================
 //探索アルゴリズムの説明
@@ -78,7 +76,7 @@ ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 }
 iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__LINERAR_SEARCH_H_
 

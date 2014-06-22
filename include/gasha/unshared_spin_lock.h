@@ -12,17 +12,15 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/unique_shared_lock.h>//共有安全ロック制御
+#include <gasha/unique_shared_lock.h>//単一共有ロック
 #include <gasha/lock_guard.h>//ロックガード
 #include <gasha/shared_lock_guard.h>//共有ロックガード
 
 #include <atomic>//C++11 std::atomic
 
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //非共有スピンロッククラス
@@ -35,19 +33,19 @@ class unshared_spin_lock
 public:
 	//メソッド
 
-	//安全ロック制御取得
-	//※ロック未取得状態とみなして処理する
-	inline unique_shared_lock<unshared_spin_lock> unique(const bool is_safe_lock = true)
-	{
-		unique_shared_lock<unshared_spin_lock> lock(*this, is_safe_lock);
-		return lock;
-	}
+	//単一ロック取得
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const with_lock_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, with_lock, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const with_lock_shared_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, with_lock_shared, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const adopt_lock_t){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, adopt_lock); return lock; }
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const adopt_shared_lock_t){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, adopt_shared_lock); return lock; }
+	inline GASHA_ unique_shared_lock<unshared_spin_lock> get_unique_lock(const defer_lock_t){ GASHA_ unique_shared_lock<unshared_spin_lock> lock(*this, defer_lock); return lock; }
 
 	//排他ロック（ライトロック）取得
 	void lock(const int spin_count = DEFAULT_SPIN_COUNT);
 	//排他ロック（ライトロック）用のロックガード取得
 	//※排他ロック（ライトロック）取得を伴う
-	inline lock_guard<unshared_spin_lock> lock_scoped(const int spin_count = DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<unshared_spin_lock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		lock_guard<unshared_spin_lock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -65,13 +63,13 @@ public:
 	}
 
 	//共有ロック（リードロック）取得
-	void lock_shared(const int spin_count = DEFAULT_SPIN_COUNT)
+	void lock_shared(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		lock(spin_count);
 	}
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
-	inline shared_lock_guard<unshared_spin_lock> lock_shared_scoped(const int spin_count = DEFAULT_SPIN_COUNT)
+	inline GASHA_ shared_lock_guard<unshared_spin_lock> lock_shared_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		shared_lock_guard<unshared_spin_lock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -110,7 +108,7 @@ private:
 	std::atomic_flag m_lock;//ロック用フラグ
 };
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__UNSHARED_SPIN_LOCK_H_
 

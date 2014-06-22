@@ -13,9 +13,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/build_settings.h>//ビルド設定
-
-NAMESPACE_GASHA_BEGIN//ネームスペース：開始
+NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //========================================
 //探索アルゴリズムの説明
@@ -445,7 +443,7 @@ struct compare_to{
 	iteratorSearchFuncSetByComparisonAndValue(func_name) \
 	iteratorSearchFuncSetByDefaultComparisonAndValue(func_name)
 
-NAMESPACE_GASHA_END//ネームスペース：終了
+NAMESPACE_GASHA_END;//ネームスペース：終了
 
 #endif//__SEARCH_BASIC_H_
 
