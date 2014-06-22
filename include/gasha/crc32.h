@@ -8,9 +8,11 @@
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
-//   Released under the MIT license
+//   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
+
+#include <gasha/build_settings/build_settings.h>//ビルド設定
 
 #include <cstddef>//std::size_t用
 #include <cstdint>//std::int**_t用

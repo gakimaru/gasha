@@ -48,8 +48,31 @@ CPPFLAGS := \
 # C++コンパイルオプション
 CXXFLAGS := \
 	-Wall \
+	-Wno-switch \
+	-Wno-unknown-pragmas \
+	-Wno-unused-local-typedefs \
 	-msse4.2 \
 	-fopenmp \
+
+#【補足】C++コンパイルオプションの警告オプション
+# 以下、Wallに含まれるもの
+#  -Wcomment
+#  -Wformat
+#  -Wimplicit-int                        ←C++には不要
+#  -Wimplicit-function-declaration       ←C++には不要
+#  -Werror-implicit-function-declaration ←C++には不要
+#  -Wimplicit                            ←C++には不要
+#  -Wmain
+#  -Wmultichar
+#  -Wparentheses
+#  -Wreturn-type
+#  -Wswitch ←この警告を出したくない
+#  -Wtrigraphs
+#  -Wunused
+#  -Wuninitialized
+#  -Wunknown-pragmas ←この警告を出したくない
+#  以下、GCC4.8追加(?)
+#  -Wunused-local-typedefs ←この警告を出したくない
 
 # C++コンパイルオプション（ビルド設定別）
 ifeq ($(BUILD_TYPE),Release)
@@ -115,13 +138,13 @@ CXXFLAGS_GCH := \
 # ※（なぜか）ここでプリコンパイル済みヘッダーを依存ファイルに指定すると、うまく依存ファイルを生成してくれる。
 $(OUT_DIR)/%.o : %.cpp $(PC_STD_HEADER)
 	mkdir -p $(dir $@); \
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_CPP) -MMD -MP -MF $(@:%.o=%.d) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_CPP) -MD -MP -MF $(@:%.o=%.d) -c $< -o $@
 
 # 型ルール：プリコンパイル済みヘッダーファイル
 # ※依存関係定義ファイルも自動生成
 $(OUT_DIR)/%.h.gch : %.h
 	mkdir -p $(dir $@); \
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MMD -MP -MF $(@:%.gch=%.d) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MD -MP -MF $(@:%.gch=%.d) -c $< -o $@
 
 #-------------------------------------------------------------------------------
 
