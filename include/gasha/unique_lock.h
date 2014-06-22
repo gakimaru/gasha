@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef __LOCK_HELPER_H_
-#define __LOCK_HELPER_H_
+#ifndef __UNIQUE_LOCK_H_
+#define __UNIQUE_LOCK_H_
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// lock_helper.h
-// ロックヘルパー
+// unique_lock.h
+// 安全ロック制御
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -20,10 +20,12 @@
 NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
-//ロックヘルパークラス
+//安全ロック制御クラス
+//※std::unique_lock がモデル。
 //※実装を隠ぺいしてロックを操作するためのヘルパークラス。
+//※デストラクタでロックの解放を確実に行うことができる。
 template<class T>
-class lock_helper
+class unique_lock
 {
 public:
 	typedef T lock_type;//ロックオブジェクト型
@@ -54,33 +56,47 @@ public:
 		m_lock.unlock();
 		m_isLocked = false;
 	}
+private:
+	//ロック取得状態をチェックしてアンロック
+	inline void check_and_unlock()
+	{
+		if(m_isSafeLock && m_isLocked)
+			unlock();
+	}
 public:
 	//ムーブオペレータ
-	lock_helper& operator=(lock_helper&&) = delete;
+	inline unique_lock& operator=(unique_lock&& rhs)
+	{
+		check_and_unlock();
+		m_lock = rhs.m_lock;
+		m_isLocked = rhs.m_isLocked;
+		m_isSafeLock = rhs.m_isSafeLock;
+		rhs.m_isLocked = false;
+		return *this;
+	}
 	//コピーオペレータ
-	lock_helper& operator=(const lock_helper&) = delete;
+	unique_lock& operator=(const unique_lock&) = delete;
 public:
 	//ムーブコンストラクタ
-	inline explicit lock_helper(lock_helper&& obj) :
+	inline unique_lock(unique_lock&& obj) :
 		m_lock(obj.m_lock),
 		m_isLocked(obj.m_isLocked),
-		m_isAutoUnlock(obj.m_isAutoUnlock)
+		m_isSafeLock(obj.m_isSafeLock)
 	{
 		obj.m_isLocked = false;
 	}
 	//コピーコンストラクタ
-	//lock_helper(const lock_helper&) = delete;
+	unique_lock(const unique_lock&) = delete;
 	//コンストラクタ
-	inline explicit lock_helper(lock_type& lock, const bool is_safe_lock = true) :
+	inline explicit unique_lock(lock_type& lock, const bool is_safe_lock = true) :
 		m_lock(lock),
 		m_isLocked(false),
 		m_isSafeLock(is_safe_lock)
 	{}
 	//デストラクタ
-	inline ~lock_helper()
+	inline ~unique_lock()
 	{
-		if(m_isSafeLock && m_isLocked)
-			unlock();
+		check_and_unlock();
 	}
 private:
 	//フィールド
@@ -91,6 +107,6 @@ private:
 
 NAMESPACE_GASHA_END//ネームスペース：終了
 
-#endif//__LOCK_HELPER_H_
+#endif//__UNIQUE_LOCK_H_
 
 // End of file

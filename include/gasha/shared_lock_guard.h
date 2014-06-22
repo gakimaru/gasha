@@ -21,6 +21,7 @@ NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //共有ロックガードクラス（スコープロック）
+//※std::lock_guard がモデル。
 //※スコープロックで共有ロック（リードロック）のロック取得と解放を行う
 template<class T>
 class shared_lock_guard
@@ -34,14 +35,14 @@ public:
 	shared_lock_guard& operator=(const shared_lock_guard&) = delete;
 public:
 	//ムーブコンストラクタ
-	inline explicit shared_lock_guard(shared_lock_guard&& obj) :
+	inline shared_lock_guard(shared_lock_guard&& obj) :
 		m_lock(obj.m_lock),
 		m_isLocked(obj.m_isLocked)
 	{
 		obj.m_isLocked = false;
 	}
 	//コピーコンストラクタ
-	//shared_lock_guard(const shared_lock_guard&) = delete;
+	shared_lock_guard(const shared_lock_guard&) = delete;
 	//コンストラクタ
 	inline explicit shared_lock_guard(lock_type& lock, const int spin_count = DEFAULT_SPIN_COUNT) :
 		m_lock(lock),

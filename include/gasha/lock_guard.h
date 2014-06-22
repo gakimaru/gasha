@@ -21,6 +21,7 @@ NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //ロックガードクラス（スコープロック）
+//※std::lock_guard がモデル。
 //※スコープロックで通常ロックもしくは排他ロック（ライトロック）のロック取得と解放を行う。
 template<class T>
 class lock_guard
@@ -34,14 +35,14 @@ public:
 	lock_guard& operator=(const lock_guard&) = delete;
 public:
 	//ムーブコンストラクタ
-	inline explicit lock_guard(lock_guard&& obj) :
+	inline lock_guard(lock_guard&& obj) :
 		m_lock(obj.m_lock),
 		m_isLocked(obj.m_isLocked)
 	{
 		obj.m_isLocked = false;
 	}
 	//コピーコンストラクタ
-	//lock_guard(const lock_guard&) = delete;
+	lock_guard(const lock_guard&) = delete;
 	//コンストラクタ
 	inline explicit lock_guard(lock_type& lock, const int spin_count = DEFAULT_SPIN_COUNT) :
 		m_lock(lock),

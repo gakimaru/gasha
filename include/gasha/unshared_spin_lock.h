@@ -16,7 +16,7 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/shared_lock_helper.h>//共有ロックヘルパー
+#include <gasha/unique_shared_lock.h>//共有安全ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 #include <gasha/shared_lock_guard.h>//共有ロックガード
 
@@ -26,7 +26,7 @@ NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //非共有スピンロッククラス
-//※std::shared_mutexがモデル。
+//※std::shared_mutex がモデル。
 //※サイズは4バイト(std::atomic_flag型一つ分のサイズ)。
 //※共有ロックと同じインターフェースを備えるが、実際には
 //　通常ロックと同じく全て排他ロックする。
@@ -35,12 +35,12 @@ class unshared_spin_lock
 public:
 	//メソッド
 
-	//ロックヘルパー取得
+	//安全ロック制御取得
 	//※ロック未取得状態とみなして処理する
-	inline shared_lock_helper<unshared_spin_lock> get_helper(const bool is_safe_lock = true)
+	inline unique_shared_lock<unshared_spin_lock> unique(const bool is_safe_lock = true)
 	{
-		shared_lock_helper<unshared_spin_lock> helper(*this, is_safe_lock);
-		return helper;
+		unique_shared_lock<unshared_spin_lock> lock(*this, is_safe_lock);
+		return lock;
 	}
 
 	//排他ロック（ライトロック）取得
@@ -65,7 +65,10 @@ public:
 	}
 
 	//共有ロック（リードロック）取得
-	void lock_shared(const int spin_count = DEFAULT_SPIN_COUNT);
+	void lock_shared(const int spin_count = DEFAULT_SPIN_COUNT)
+	{
+		lock(spin_count);
+	}
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
 	inline shared_lock_guard<unshared_spin_lock> lock_shared_scoped(const int spin_count = DEFAULT_SPIN_COUNT)

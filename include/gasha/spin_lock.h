@@ -16,7 +16,7 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/lock_helper.h>//ロックヘルパー
+#include <gasha/unique_lock.h>//安全ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 
 #include <atomic>//C++11 std::atomic
@@ -25,19 +25,19 @@ NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //スピンロッククラス
-//※std::mutexがモデル。
+//※std::mutex がモデル。
 //※サイズは4バイト(std::atomic_flag一つ分のサイズ)。
 class spin_lock
 {
 public:
 	//メソッド
 
-	//ロックヘルパー取得
+	//安全ロック制御取得
 	//※ロック未取得状態とみなして処理する
-	inline lock_helper<spin_lock> get_helper(const bool is_safe_lock = true)
+	inline unique_lock<spin_lock> unique(const bool is_safe_lock = true)
 	{
-		lock_helper<spin_lock> helper(*this, is_safe_lock);
-		return helper;
+		unique_lock<spin_lock> lock(*this, is_safe_lock);
+		return lock;
 	}
 	
 	//ロック取得

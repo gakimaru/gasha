@@ -16,14 +16,14 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/lock_helper.h>//ロックヘルパー
+#include <gasha/unique_shared_lock.h>//安全共有ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 
 NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //ダミー共有ロッククラス
-//※std::mutexがモデル。
+//※std::shared_mutex がモデル。
 //※共有ロッククラスのインターフェースのみ実装し、実際には何もしない。
 //※コンテナクラスのロック制御を無効化する際などに使用する。
 class dummy_shared_lock
@@ -31,11 +31,11 @@ class dummy_shared_lock
 public:
 	//メソッド
 
-	//共有ロックヘルパー取得
-	inline shared_lock_helper<dummy_shared_lock> get_helper(const bool is_safe_lock = true)
+	//共有安全ロック制御取得
+	inline unique_shared_lock<dummy_shared_lock> unique(const bool is_safe_lock = true)
 	{
-		shared_lock_helper<dummy_shared_lock> helper(*this, is_safe_lock);
-		return helper;
+		unique_shared_lock<dummy_shared_lock> lock(*this, is_safe_lock);
+		return lock;
 	}
 
 	//排他ロック（ライトロック）取得

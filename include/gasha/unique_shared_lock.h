@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef __SHARED_LOCK_HELPER_H_
-#define __SHARED_LOCK_HELPER_H_
+#ifndef __UNIQUE_SHARED_LOCK_H_
+#define __UNIQUE_SHARED_LOCK_H_
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// shared_lock_helper.h
-// 共有ロックヘルパー
+// unique_shared_lock.h
+// 安全共有ロック制御
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -20,10 +20,12 @@
 NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
-//共有ロックヘルパークラス
-//※実装を隠ぺいして共有ロックを操作するためのヘルパークラス
+//共有安全ロック制御クラス
+//※std::unique_lock がモデル。
+//※実装を隠ぺいして共有ロックを操作するためのヘルパークラス。
+//※デストラクタでロックの解放を確実に行うことができる。
 template<class T>
-class shared_lock_helper
+class unique_shared_lock
 {
 public:
 	typedef T lock_type;//ロックオブジェクト型
@@ -42,16 +44,16 @@ public:
 		if(m_isSafeLock && m_status != UNLOCKED)
 			return;
 		m_lock.lock(spin_count);
-		m_status = LOCKING_EXLUSIVELY;
+		m_status = LOCKING_EXCLUSIVELY;
 	}
 	//排他ロック（ライトロック）取得を試行
 	inline bool try_lock()
 	{
 		if(m_isSafeLock && m_status != UNLOCKED)
 			return true;
-		const bool locked m_lock.try_lock();
+		const bool locked = m_lock.try_lock();
 		if(locked)
-			m_status = LOCKING_EXLUSIVELY;
+			m_status = LOCKING_EXCLUSIVELY;
 		return locked;
 	}
 	//排他ロック（ライトロック）解放
@@ -76,7 +78,7 @@ public:
 	{
 		if(m_isSafeLock && m_status != UNLOCKED)
 			return true;
-		const bool locked m_lock.try_lock_shared();
+		const bool locked = m_lock.try_lock_shared();
 		if(locked)
 			m_status = LOCKING_SHARED;
 		return locked;
@@ -89,30 +91,9 @@ public:
 		m_lock.unlock_shared();
 		m_status = UNLOCKED;
 	}
-public:
-	//ムーブオペレータ
-	shared_lock_helper& operator=(shared_lock_helper&&) = delete;
-	//コピーオペレータ
-	shared_lock_helper& operator=(const shared_lock_helper&) = delete;
-public:
-	//ムーブコンストラクタ
-	inline explicit shared_lock_helper(shared_lock_helper&& obj) :
-		m_lock(obj.m_lock),
-		m_status(obj.m_status),
-		m_isAutoUnlock(obj.m_isAutoUnlock)
-	{
-		obj.m_status = UNLOCKED;
-	}
-	//コピーコンストラクタ
-	//shared_lock_helper(const shared_lock_helper&) = delete;
-	//コンストラクタ
-	inline explicit shared_lock_helper(lock_type& lock, const bool is_safe_lock = true) :
-		m_lock(lock),
-		m_status(UNLOCKED),
-		m_isSafeLock(is_safe_lock)
-	{}
-	//デストラクタ
-	inline ~shared_lock_helper()
+private:
+	//ロック取得状態をチェックしてアンロック
+	inline void check_and_unlock()
 	{
 		if(m_isSafeLock)
 		{
@@ -121,6 +102,41 @@ public:
 			else if(m_status == LOCKING_SHARED)
 				unlock_shared();
 		}
+	}
+public:
+	//ムーブオペレータ
+	inline unique_shared_lock& operator=(unique_shared_lock&& rhs)
+	{
+		check_and_unlock();
+		m_lock = rhs.m_lock;
+		m_status = rhs.m_status;
+		m_isSafeLock = rhs.m_isSafeLock;
+		rhs.m_status = UNLOCKED;
+		return *this;
+	}
+	//コピーオペレータ
+	unique_shared_lock& operator=(const unique_shared_lock&) = delete;
+public:
+	//ムーブコンストラクタ
+	inline unique_shared_lock(unique_shared_lock&& obj) :
+		m_lock(obj.m_lock),
+		m_status(obj.m_status),
+		m_isSafeLock(obj.m_isSafeLock)
+	{
+		obj.m_status = UNLOCKED;
+	}
+	//コピーコンストラクタ
+	unique_shared_lock(const unique_shared_lock&) = delete;
+	//コンストラクタ
+	inline explicit unique_shared_lock(lock_type& lock, const bool is_safe_lock = true) :
+		m_lock(lock),
+		m_status(UNLOCKED),
+		m_isSafeLock(is_safe_lock)
+	{}
+	//デストラクタ
+	inline ~unique_shared_lock()
+	{
+		check_and_unlock();
 	}
 private:
 	//フィールド
@@ -131,6 +147,6 @@ private:
 
 NAMESPACE_GASHA_END//ネームスペース：終了
 
-#endif//__SHARED_LOCK_HELPER_H_
+#endif//__UNIQUE_SHARED_LOCK_H_
 
 // End of file

@@ -16,7 +16,7 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/shared_lock_helper.h>//共有ロックヘルパー
+#include <gasha/unique_shared_lock.h>//共有安全ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 #include <gasha/shared_lock_guard.h>//共有ロックガード
 
@@ -26,7 +26,7 @@ NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //単純共有スピンロッククラス
-//※std::shared_mutexがモデル。
+//※std::shared_mutex がモデル。
 //※サイズは4バイト(int型一つ分のサイズ)。
 //※読み込み操作（共有ロック）が込み合っていると、
 //　書き込み操作（排他ロック）が待たされるので注意。
@@ -35,12 +35,12 @@ class simple_shared_spin_lock
 public:
 	//メソッド
 
-	//ロックヘルパー取得
+	//安全ロック制御取得
 	//※ロック未取得状態とみなして処理する
-	inline shared_lock_helper<simple_shared_spin_lock> get_helper(const bool is_safe_lock = true)
+	inline unique_shared_lock<simple_shared_spin_lock> unique(const bool is_safe_lock = true)
 	{
-		shared_lock_helper<simple_shared_spin_lock> helper(*this, is_safe_lock);
-		return helper;
+		unique_shared_lock<simple_shared_spin_lock> lock(*this, is_safe_lock);
+		return lock;
 	}
 
 	//排他ロック（ライトロック）取得

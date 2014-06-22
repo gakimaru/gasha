@@ -16,14 +16,14 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <gasha/lock_helper.h>//ロックヘルパー
+#include <gasha/unique_lock.h>//安全ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 
 NAMESPACE_GASHA_BEGIN//ネームスペース：開始
 
 //----------------------------------------
 //ダミーロッククラス
-//※std::mutexがモデル。
+//※std::mutex がモデル。
 //※ロッククラスのインターフェースのみ実装し、実際には何もしない。
 //※コンテナクラスのロック制御を無効化する際などに使用する。
 class dummy_lock
@@ -31,11 +31,11 @@ class dummy_lock
 public:
 	//メソッド
 
-	//ロックヘルパー取得
-	inline lock_helper<dummy_lock> get_helper(const bool is_safe_lock = true)
+	//安全ロック制御取得
+	inline unique_lock<dummy_lock> unique(const bool is_safe_lock = true)
 	{
-		lock_helper<dummy_lock> helper(*this, is_safe_lock);
-		return helper;
+		unique_lock<dummy_lock> lock(*this, is_safe_lock);
+		return lock;
 	}
 	
 	//ロック取得
