@@ -48,11 +48,11 @@
 
 //noinline / always_inline
 #ifdef IS_VC
-	#define noinline __declspec(noinline)
+	#define no_inline __declspec(noinline)
 	#define always_inline __forceinline
 #endif//IS_VC
 #ifdef IS_GCC
-	#define noinline __attribute__ ((noinline))
+	#define no_inline __attribute__ ((noinline))
 	#define always_inline __attribute__ ((always_inline)) inline
 #endif//IS_GCC
 
