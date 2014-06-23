@@ -3,7 +3,7 @@
 #define __SPIN_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// spin_lock.h
+// spinLock.h
 // スピンロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -25,24 +25,24 @@ NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 //スピンロッククラス
 //※std::mutex がモデル。
 //※サイズは4バイト(std::atomic_flag一つ分のサイズ)。
-class spin_lock
+class spinLock
 {
 public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<spin_lock> get_unique_lock(const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<spin_lock> lock(*this, spin_count); return lock; }
-	inline GASHA_ unique_lock<spin_lock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<spin_lock> lock(*this, with_lock, spin_count); return lock; }
-	inline GASHA_ unique_lock<spin_lock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<spin_lock> lock(*this, adopt_lock); return lock; }
-	inline GASHA_ unique_lock<spin_lock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<spin_lock> lock(*this, defer_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> get_unique_lock(const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<spinLock> lock(*this, spin_count); return lock; }
+	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<spinLock> lock(*this, with_lock, spin_count); return lock; }
+	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, adopt_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, defer_lock); return lock; }
 
 	//ロック取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
 	//※ロック取得を伴う
-	inline GASHA_ lock_guard<spin_lock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<spinLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
-		GASHA_ lock_guard<spin_lock> lock(*this);
+		GASHA_ lock_guard<spinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
 	}
 	//ロック取得を試行
@@ -58,21 +58,21 @@ public:
 	}
 public:
 	//ムーブオペレータ
-	spin_lock& operator=(spin_lock&&) = delete;
+	spinLock& operator=(spinLock&&) = delete;
 	//コピーオペレータ
-	spin_lock& operator=(const spin_lock&) = delete;
+	spinLock& operator=(const spinLock&) = delete;
 public:
 	//ムーブコンストラクタ
-	spin_lock(spin_lock&&) = delete;
+	spinLock(spinLock&&) = delete;
 	//コピーコンストラクタ
-	spin_lock(const spin_lock&) = delete;
+	spinLock(const spinLock&) = delete;
 	//コンストラクタ
-	inline spin_lock()
+	inline spinLock()
 	{
 		m_lock.clear();
 	}
 	//デストラクタ
-	inline ~spin_lock()
+	inline ~spinLock()
 	{}
 private:
 	//フィールド

@@ -3,7 +3,7 @@
 #define __SHARED_SPIN_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// shared_spin_lock.h
+// sharedSpinLock.h
 // 共有スピンロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -35,26 +35,26 @@ NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 //　共有ロックが全て解放されるのを待ってから処理を続行する。
 //　この時、別の排他ロックが待ち状態になっても、共有ロック
 //　より先にロックを取得することは保証しない。
-class shared_spin_lock
+class sharedSpinLock
 {
 public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, spin_count); return lock; }
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, with_lock, spin_count); return lock; }
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const GASHA_ with_lock_shared_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, with_lock_shared, spin_count); return lock; }
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, adopt_lock); return lock; }
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, adopt_shared_lock); return lock; }
-	inline GASHA_ unique_shared_lock<shared_spin_lock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<shared_spin_lock> lock(*this, defer_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, with_lock, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ with_lock_shared_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, with_lock_shared, spin_count); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, adopt_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, adopt_shared_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, defer_lock); return lock; }
 
 	//排他ロック（ライトロック）取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//排他ロック（ライトロック）用のロックガード取得
 	//※排他ロック（ライトロック）取得を伴う
-	inline GASHA_ lock_guard<shared_spin_lock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<sharedSpinLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
-		GASHA_ lock_guard<shared_spin_lock> lock(*this);
+		GASHA_ lock_guard<sharedSpinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
 	}
 	//排他ロック（ライトロック）取得を試行
@@ -70,9 +70,9 @@ public:
 	void lock_shared(const int spin_count = DEFAULT_SPIN_COUNT);
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
-	inline GASHA_ shared_lock_guard<shared_spin_lock> lock_shared_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ shared_lock_guard<sharedSpinLock> lock_shared_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
-		GASHA_ shared_lock_guard<shared_spin_lock> lock(*this);
+		GASHA_ shared_lock_guard<sharedSpinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
 	}
 	//共有ロック（リードロック）取得を試行
@@ -85,21 +85,21 @@ public:
 	}
 public:
 	//ムーブオペレータ
-	shared_spin_lock& operator=(shared_spin_lock&&) = delete;
+	sharedSpinLock& operator=(sharedSpinLock&&) = delete;
 	//コピーオペレータ
-	shared_spin_lock& operator=(const shared_spin_lock&) = delete;
+	sharedSpinLock& operator=(const sharedSpinLock&) = delete;
 public:
 	//ムーブコンストラクタ
-	shared_spin_lock(shared_spin_lock&&) = delete;
+	sharedSpinLock(sharedSpinLock&&) = delete;
 	//コピーコンストラクタ
-	shared_spin_lock(const shared_spin_lock&) = delete;
+	sharedSpinLock(const sharedSpinLock&) = delete;
 	//コンストラクタ
-	inline shared_spin_lock()
+	inline sharedSpinLock()
 	{
 		m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
 	}
 	//デストラクタ
-	inline ~shared_spin_lock()
+	inline ~sharedSpinLock()
 	{}
 private:
 	//フィールド
