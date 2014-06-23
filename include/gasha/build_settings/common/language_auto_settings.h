@@ -227,9 +227,9 @@
 //アラインメント指定付きメモリ確保関数
 //※VC++仕様に合わせて共通化
 #ifdef IS_GCC
-#include <cstddef>//std::size_t用
-#include <stdlib.h>//posix_memalign()用
-#include <memory.h>//free()用
+#include <cstddef>//std::size_t
+#include <stdlib.h>//posix_memalign()
+#include <memory.h>//free()
 inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
 {
 	void *p;
@@ -242,7 +242,7 @@ inline void _aligned_free(void* p)
 }
 #endif//IS_GCC
 #ifdef IS_VC
-#include <malloc.h>//_aligned_malloc(), _aligned_free()用
+#include <malloc.h>//_aligned_malloc(), _aligned_free()
 //void* _aligned_malloc(size_t size, size_t alignment);
 //void _aligned_free(void* p);
 #endif//IS_VC

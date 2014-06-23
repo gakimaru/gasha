@@ -15,7 +15,7 @@
 
 #include <gasha/search_basic.h>//探索処理基本
 
-#include <gasha/iterator.h>//イテレータ
+#include <gasha/iterator.h>//イテレータ用アルゴリズム
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 

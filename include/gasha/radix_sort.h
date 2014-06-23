@@ -15,9 +15,9 @@
 
 #include <gasha/sort_basic.h>//ソート処理基本
 
-#include <climits>//***_MAX用
-#include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant用
-#include <malloc.h>//_aligned_malloc(), _aligned_free()用
+#include <climits>//***_MAX
+#include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
+#include <malloc.h>//_aligned_malloc(), _aligned_free()
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 

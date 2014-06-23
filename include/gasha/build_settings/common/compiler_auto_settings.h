@@ -18,7 +18,7 @@
 #ifdef _MSC_VER 
 	#include <cstddef>//VC++では、これを最初にインクルードしておかないと、コンパイルに影響がでることがある。
                       //※先に #define constexpr や #define thread_local を行ったあとで、
-	                  //　#include<cstddef>(std::size_tなど用)を行うと、以後の処理で不可解なコンパイルエラーが発生する。
+	                  //　#include<cstddef>(std::size_tなど)を行うと、以後の処理で不可解なコンパイルエラーが発生する。
 	#define IS_VC//コンパイラ：Visual C++
 	#define COMPILER_NAME "VC++"
 	#define COMPILER_VER _MSC_VER//コンパイラバージョン（メジャーバージョン）

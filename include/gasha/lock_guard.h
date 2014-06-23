@@ -15,8 +15,6 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-#include <mutex>
-
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //----------------------------------------

@@ -14,11 +14,11 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/swap_values.h>//値交換
+#include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-#include <math.h>//sqrt()用
+#include <math.h>//sqrt()
 #ifdef SHEAR_SORT_USE_OPENMP_NEST
-#include <omp.h>//omp_set_nested()用
+#include <omp.h>//omp_set_nested()
 #endif//SHEAR_SORT_USE_OPENMP_NEST
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始

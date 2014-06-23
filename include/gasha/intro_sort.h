@@ -14,13 +14,13 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/swap_values.h>//値交換
+#include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
 #include <gasha/insertion_sort.h>//挿入ソート
 #include <gasha/shell_sort.h>//シェルソート
 #include <gasha/heap_sort.h>//ヒープソート
 
-#include <gasha/iterator.h>//イテレータ
+#include <gasha/iterator.h>//イテレータ用アルゴリズム
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 

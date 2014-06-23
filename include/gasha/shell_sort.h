@@ -14,9 +14,9 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/swap_values.h>//値交換
+#include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-#include <gasha/iterator.h>//イテレータ
+#include <gasha/iterator.h>//イテレータ用アルゴリズム
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 

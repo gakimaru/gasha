@@ -20,6 +20,11 @@
 
 #include <gasha/build_settings/project/last_settings.h>//プロジェクト固有のビルド設定 リポジトリ：gasha_settings
 
+//--------------------
+//ビルド設定が実行環境に適合するかチェック
+//※ダメな要素があった場合、即abort
+void checkBuildSettings();
+
 #endif//__BUIILD_SETTINGS_H_
 
 // End of file

@@ -12,8 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <cstddef>//std::size_t用
-#include <cstdint>//std::int**_t用
+#include <cstddef>//std::size_t
+#include <cstdint>//std::int**_t
 
 #if defined(USE_SSE4_2) && defined(CRC32_IS_CRC32C)
 #define CALC_RUNTIME_CRC32_BY_SSE//ランタイムCRC32の算出にSSE命令を使用する（CRC-32Cを算出する）
