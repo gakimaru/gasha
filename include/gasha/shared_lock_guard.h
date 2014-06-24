@@ -42,11 +42,11 @@ public:
 	//コピーコンストラクタ
 	shared_lock_guard(const shared_lock_guard&) = delete;
 	//コンストラクタ
-	inline explicit shared_lock_guard(lock_type& lock, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline explicit shared_lock_guard(lock_type& lock) :
 		m_lock(lock),
 		m_isLocked(true)
 	{
-		m_lock.lock_shared(spin_count);
+		m_lock.lock_shared();
 	}
 	//デストラクタ
 	inline ~shared_lock_guard()

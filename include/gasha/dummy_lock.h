@@ -30,10 +30,11 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<dummyLock> lock(*this, spin_count); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ with_lock_t, const int spin_count = DEFAULT_SPIN_COUNT){ GASHA_ unique_lock<dummyLock> lock(*this, with_lock, spin_count); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, adopt_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, defer_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> get_unique_lock(){ GASHA_ unique_lock<dummyLock> lock(*this); return lock; }
+	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//ロック取得
 	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)

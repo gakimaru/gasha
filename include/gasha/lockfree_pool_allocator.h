@@ -13,9 +13,14 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+//例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
+#include <cstddef>//std::size_t
 #include <new>//new(void*), delete(void*, void*)
-#include <bitset>//std::bitset
-#include <thread>//C++11 std::this_thread
+#include <atomic>//C++11 std::atomic
+#include <stdio.h>//printf()
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
@@ -23,11 +28,11 @@ NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 //ロックフリープールアロケータクラス
 //※ABA問題対策あり（プールの再利用インデックスに8ビットのタグを付けて管理）
 //※プール可能な要素数の最大は2^(32-8)-2 = 16,777,214個（2^(32-8)-1だと、値がINVALID_INDEXになる可能性があるのでNG）
-template<class T, std::size_t POOL>
-class lf_pool_allocator
+template<class T, std::size_t _POOL_SIZE>
+class lfPoolAllocator
 {
 	static_assert(sizeof(T) >= 4, "sizeof(T) is too small.");
-	static_assert(POOL < 0x00ffffff, "POOL is too large.");
+	static_assert(_POOL_SIZE < 0x00ffffff, "POOL is too large.");
 
 public:
 	//型
@@ -41,7 +46,7 @@ public:
 
 public:
 	//定数
-	static const std::size_t POOL_SIZE = POOL;//プールサイズ
+	static const std::size_t POOL_SIZE = _POOL_SIZE;//プールサイズ（プールする個数）
 	static const std::size_t VALUE_SIZE = sizeof(value_type);//値のサイズ
 	static const std::size_t INVALID_INDEX = 0xffffffff;//無効なインデックス
 	static const std::size_t DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
@@ -59,8 +64,8 @@ public:
 			if (vacant_index < POOL_SIZE)//プールサイズ未満なら確保成功
 			{
 				m_using[vacant_index].fetch_add(1);//インデックスを使用中状態にする
-			//	m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
-			//	m_allocCount[vacant_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
+				//m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
+				//m_allocCount[vacant_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
 				return m_pool[vacant_index];//メモリ確保成功
 			}
 			if (vacant_index > POOL_SIZE)//インクリメントでオーバーしたインデックスを元に戻す
@@ -69,10 +74,6 @@ public:
 		//再利用プールを確保
 		{
 			std::size_t recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
-		#ifdef USE_SAFE_ALLOC_LF_POOL_ALLOCATOR//【安全対策】※同じインデックスのアロケートを排他制御
-			static const int retry_max = 32;
-			int retry_count = retry_max;//リトライ回数
-		#endif//USE_SAFE_ALLOC_LF_POOL_ALLOCATOR
 			while (true)
 			{
 				if (recycable_index_and_tag == INVALID_INDEX)//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
@@ -83,33 +84,11 @@ public:
 					recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを再取得
 					continue;//リトライ
 				}
-			#ifdef USE_SAFE_ALLOC_LF_POOL_ALLOCATOR//【安全対策】※同じインデックスのアロケートを排他制御
-				const std::size_t index_using = m_using[recyclable_index].fetch_add(1);//インデックスを使用中状態にする
-				if (index_using != 0)//他のスレッドがインデックスを処理中ならリトライ
-				{
-					m_using[recyclable_index].fetch_sub(1);//インデックスの使用中状態を戻す
-					--retry_count;
-					if (retry_count == 0)//一定数のリトライごとにコンテキストスイッチ
-					{
-						retry_count = retry_max;//リトライ回数を初期状態に戻す
-						std::this_thread::sleep_for(std::chrono::nanoseconds(0));//コンテキストスイッチ（ゼロスリープ）
-					}
-					recycable_index_and_tag = m_recyclableHead.load();//再利用プールのインデックスを再取得
-					continue;//リトライ
-				}
-			#endif//USE_SAFE_ALLOC_LF_POOL_ALLOCATOR
 				recycable_t* recyclable_pool = reinterpret_cast<recycable_t*>(m_pool[recyclable_index]);//再利用プールの先頭を割り当て
 				const std::size_t next_index_and_tag = recyclable_pool->m_next_index.load();//次の再利用プールのインデックスを取得
 
 				//CAS操作①
-			#ifdef USE_SAFE_CAS_LF_POOL_ALLOCATOR//【安全対策】※スピンロックでCAS操作を保護
-				m_lock.lock();//ロック取得
-				const bool result = m_recyclableHead.compare_exchange_weak(recycable_index_and_tag, next_index_and_tag);//CAS操作
-				m_lock.unlock();//ロック解除
-				if (result)
-			#else//USE_SAFE_CAS_LF_POOL_ALLOCATOR
 				if (m_recyclableHead.compare_exchange_weak(recycable_index_and_tag, next_index_and_tag))//CAS操作
-			#endif//USE_SAFE_CAS_LF_POOL_ALLOCATOR
 				//【CAS操作の内容】
 				//    if(m_recyclableHead == recyclable_index)//再利用プールの先頭インデックスを他のスレッドが書き換えていないか？
 				//        m_recyclableHead = next;//再利用プールの先頭インデックスを次の再利用インデックスに変更（メモリ確保成功）
@@ -117,17 +96,11 @@ public:
 				//        recycable_index_and_tag = m_recyclableHead;//再利用プールの先頭インデックスを再取得
 				{
 					recyclable_pool->m_next_index.store(DIRTY_INDEX);//再利用プールの連結インデックスを削除
-				#ifndef USE_SAFE_ALLOC_LF_POOL_ALLOCATOR
-					m_using[recyclable_index].fetch_sub(1);//インデックスを使用中状態にする
-				#endif//USE_SAFE_ALLOC_LF_POOL_ALLOCATOR
-				//	m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
-				//	m_allocCount[recyclable_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
+					m_using[recyclable_index].fetch_add(1);//インデックスを使用中状態にする
+					//m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
+					//m_allocCount[recyclable_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
 					return recyclable_pool;//メモリ確保成功
 				}
-				
-		#ifdef USE_SAFE_ALLOC_LF_POOL_ALLOCATOR//【安全対策】※同じインデックスのアロケートを排他制御
-				m_using[recyclable_index].fetch_sub(1);//インデックスの使用中状態を戻してリトライ
-		#endif//USE_SAFE_ALLOC_LF_POOL_ALLOCATOR
 			}
 			return nullptr;//ダミー
 		}
@@ -146,14 +119,7 @@ private:
 			deleted_pool->m_next_index.store(recycable_index_and_tag);//次の再利用プールのインデックスを保存
 			
 			//CAS操作②
-		#ifdef USE_SAFE_CAS_LF_POOL_ALLOCATOR//【安全対策】※スピンロックでCAS操作を保護
-			m_lock.lock();//ロック取得
-			const bool result = m_recyclableHead.compare_exchange_weak(recycable_index_and_tag, index_and_tag);//CAS操作
-			m_lock.unlock();//ロック解除
-			if (result)
-		#else//USE_SAFE_CAS_LF_POOL_ALLOCATOR
 			if (m_recyclableHead.compare_exchange_weak(recycable_index_and_tag, index_and_tag))//CAS操作
-		#endif//USE_SAFE_CAS_LF_POOL_ALLOCATOR
 			//【CAS操作の内容】
 			//    if(m_recyclableHead == recycable_index_and_tag)//再利用プールの先頭インデックスを他のスレッドが書き換えていないか？
 			//        m_recyclableHead = index_and_tag;//再利用プールの先頭インデックスを次のインデックスに変更（メモリ解放成功）
@@ -161,8 +127,8 @@ private:
 			//        recycable_index_and_tag = m_recyclableHead;//再利用プールの先頭インデックスを再取得
 			{
 				m_using[index].fetch_sub(1);//インデックスを未使用状態にする
-			//	m_usingCount.fetch_sub(1);//使用中の数を減らす（デバッグ用）
-			//	m_freeCount[index].fetch_add(1);//フリー回数をカウントアップ（デバッグ用）
+				//m_usingCount.fetch_sub(1);//使用中の数を減らす（デバッグ用）
+				//m_freeCount[index].fetch_add(1);//フリー回数をカウントアップ（デバッグ用）
 				return true;//メモリ解放成功
 			}
 		}
@@ -175,14 +141,18 @@ private:
 		const std::size_t index = (reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE;
 		if (index >= POOL_SIZE)//範囲外のインデックスなら終了
 		{
+		#ifdef _DEBUG
 			static const bool IS_INVALID_POINTER_OF_POOL = false;
 			assert(IS_INVALID_POINTER_OF_POOL);
+		#endif//_DEBUG
 			return INVALID_INDEX;
 		}
 		if (m_using[index].load() == 0)//インデックスが既に未使用状態なら終了
 		{
+		#ifdef _DEBUG
 			static const bool IS_ALREADY_DELETE_POINTER = false;
 			assert(IS_ALREADY_DELETE_POINTER);
+		#endif//_DEBUG
 			return INVALID_INDEX;
 		}
 		return index;
@@ -246,8 +216,8 @@ public:
 	//デバッグ情報表示
 	void printDebugInfo(std::function<void(const value_type& value)> print_node)
 	{
-		printf("----- Debug Info for lf_pool_allocator -----\n");
-	//	printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d, usingCount=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead.load(), m_usingCount.load());
+		printf("----- Debug Info for lfPoolAllocator -----\n");
+		//printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d, usingCount=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead.load(), m_usingCount.load());
 		printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead.load());
 		printf("Using:\n");
 		for (int index = 0; index < POOL_SIZE; ++index)
@@ -257,15 +227,16 @@ public:
 				printf("[%d]", index);
 				if (m_using[index].load() != 1)
 					printf("(using=%d)", m_using[index].load());
-			//	printf("(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
-				print_node(*reinterpret_cast<const value_type*>(m_pool[index]));
+				//printf("(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+				value_type* value = reinterpret_cast<value_type*>(m_pool[index]);
+				print_node(*value);
 				printf("\n");
 			}
-		//	else
-		//	{
-		//		if (m_allocCount[index].load() != m_freeCount[index].load())
-		//			printf("[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
-		//	}
+			//else
+			//{
+			//	if (m_allocCount[index].load() != m_freeCount[index].load())
+			//		printf("[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+			//}
 		}
 		printf("Recycable pool:\n");
 		std::size_t recycable_index_and_tag = m_recyclableHead;
@@ -283,20 +254,20 @@ public:
 
 public:
 	//コンストラクタ
-	lf_pool_allocator()
+	lfPoolAllocator()
 	{
 		m_vacantHead.store(0);
 		m_recyclableHead.store(INVALID_INDEX);
-	//	m_usingCount.store(0);
+		//m_usingCount.store(0);
 		for (int i = 0; i < POOL_SIZE; ++i)
 		{
 			m_using[i].store(0);
-		//	m_allocCount[i].store(0);
-		//	m_freeCount[i].store(0);
+			//m_allocCount[i].store(0);
+			//m_freeCount[i].store(0);
 		}
 	}
 	//デストラクタ
-	~lf_pool_allocator()
+	~lfPoolAllocator()
 	{}
 
 private:
@@ -306,9 +277,9 @@ private:
 	std::atomic<std::size_t> m_recyclableHead;//再利用プールの先頭インデックス
 	std::atomic<unsigned char> m_tag;//ABA問題対策用のタグ
 	std::atomic<char> m_using[POOL_SIZE];//使用中インデックス（二重解放判定＆保険の排他制御用）  ※std::bitset使用不可
-//	std::atomic<std::size_t> m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない
-//	std::atomic<std::size_t> m_allocCount[POOL_SIZE];//アロケート回数（デバッグ用）※必須の情報ではない
-//	std::atomic<std::size_t> m_freeCount[POOL_SIZE];//フリー回数（デバッグ用）※必須の情報ではない
+	//std::atomic<std::size_t> m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない
+	//std::atomic<std::size_t> m_allocCount[POOL_SIZE];//アロケート回数（デバッグ用）※必須の情報ではない
+	//std::atomic<std::size_t> m_freeCount[POOL_SIZE];//フリー回数（デバッグ用）※必須の情報ではない
 #ifdef USE_SAFE_CAS_LF_POOL_ALLOCATOR
 	spin_lock m_lock;//CAS操作保護用のスピンロック
 #endif//USE_SAFE_CAS_LF_POOL_ALLOCATOR

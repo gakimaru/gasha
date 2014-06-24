@@ -42,11 +42,11 @@ public:
 	//コピーコンストラクタ
 	lock_guard(const lock_guard&) = delete;
 	//コンストラクタ
-	inline explicit lock_guard(lock_type& lock, const int spin_count = DEFAULT_SPIN_COUNT) :
+	inline explicit lock_guard(lock_type& lock) :
 		m_lock(lock),
 		m_isLocked(true)
 	{
-		m_lock.lock(spin_count);
+		m_lock.lock();
 	}
 	//デストラクタ
 	inline ~lock_guard()

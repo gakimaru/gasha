@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // shared_queue.h
-// マルチスレッド同期型キュー
+// マルチスレッド共有キュー
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -13,23 +13,24 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/spin_lock.h>//スピンロック
 #include <gasha/dummy_lock.h>//ダミーロック
-#include <gasha/sync_pool_allocator.h>//同期
+#include <gasha/shared_pool_allocator.h>//マルチスレッド共有プールアロケータ
+
+#include <cstddef>//std::size_t
+#include <stdio.h>//printf()
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//共有キュークラス
-#ifdef USE_POOL_ALLOCATOR
-template<class T, std::size_t POOL_SIZE>
-#else//USE_POOL_ALLOCATOR
-template<class T>
-#endif//USE_POOL_ALLOCATOR
+//マルチスレッド共有キュークラス
+template<class T, std::size_t POOL_SIZE, class LOCK_TYPE = GASHA_ spinLock>
 class sharedQueue
 {
 public:
 	//型
 	typedef T value_type;//値型
+	typedef LOCK_TYPE lock_type;//ロック型
 
 	//キュー型
 	struct queue_t
@@ -51,16 +52,12 @@ public:
 	//エンキュー
 	bool enqueue(value_type&& value)
 	{
-	#ifdef USE_POOL_ALLOCATOR
+		GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 		void* p = m_allocator.alloc();//新規ノードのメモリを確保
-	#else//USE_POOL_ALLOCATOR
-		void* p = _aligned_malloc(sizeof(queue_t), 16);//新規ノードのメモリを確保
-	#endif//USE_POOL_ALLOCATOR
 		if (!p)//メモリ確保失敗
 			return false;//エンキュー失敗
 		queue_t* new_node = new(p)queue_t(std::move(value));//新規ノードのコンストラクタ呼び出し
 		new_node->m_next = nullptr;//新規ノードの次ノードを初期化
-		std::lock_guard<normal_lock> lock(m_lock);//ロック（スコープロック）
 		m_tail->m_next = new_node;//末尾ノードの次ノードを新規ノードにする
 		m_tail = new_node;//末尾ノードを新規ノードにする
 		return true;//エンキュー成功
@@ -73,15 +70,11 @@ public:
 	//デキュー
 	bool dequeue(value_type& value)
 	{
-		std::lock_guard<normal_lock> lock(m_lock);//ロック（スコープロック）
+		GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 		if (m_head != m_tail)
 		{
 			queue_t* top = m_head->m_next;//次ノード（有効なキューの先頭）を取得
-		#ifdef USE_POOL_ALLOCATOR
 			m_allocator.deleteObj(m_head);//先頭ノード（ダミーノード）を削除
-		#else//USE_POOL_ALLOCATOR
-			delete m_head;//先頭ノード（ダミーノード）を削除
-		#endif//USE_POOL_ALLOCATOR
 			m_head = top;//先頭ノードを次ノードに変更（これより次ノードがダミーノード扱いになる）
 			value = std::move(top->m_value);//値を取得
 			return true;//デキュー成功
@@ -107,24 +100,18 @@ public:
 		print_node(m_tail->m_value);
 		printf("\n");
 		printf("----------\n");
-	#ifdef USE_POOL_ALLOCATOR
 		auto print_allocator_node = [&print_node](const queue_t& info)
 		{
 			print_node(info.m_value);
 		};
 		m_allocator.printDebugInfo(print_allocator_node);
-	#endif//USE_POOL_ALLOCATOR
 	}
 
 private:
 	//初期化
 	void initialize()
 	{
-	#ifdef USE_POOL_ALLOCATOR
 		queue_t* dummy_node = m_allocator.newObj();//ダミーノードを生成
-	#else//USE_POOL_ALLOCATOR
-		queue_t* dummy_node = new queue_t;//ダミーノードを生成
-	#endif//USE_POOL_ALLOCATOR
 		dummy_node->m_next = nullptr;//ダミーノードの次ノードを初期化
 		m_head = dummy_node;//先頭ノードにダミーノードをセット
 		m_tail = dummy_node;//末尾ノードにダミーノードをセット
@@ -136,11 +123,7 @@ private:
 		value_type value;
 		while (dequeue(value));
 		//ダミーノードを削除
-	#ifdef USE_POOL_ALLOCATOR
 		m_allocator.deleteObj(m_head);
-	#else//USE_POOL_ALLOCATOR
-		delete m_head;
-	#endif//USE_POOL_ALLOCATOR
 	}
 
 public:
@@ -156,12 +139,10 @@ public:
 	}
 private:
 	//フィールド
-#ifdef USE_POOL_ALLOCATOR
-	pool_allocator<queue_t, POOL_SIZE> m_allocator;//プールアロケータ
-#endif//USE_POOL_ALLOCATOR
+	sharedPoolAllocator<queue_t, POOL_SIZE, GASHA_ dummyLock> m_allocator;//プールアロケータ（プールアロケータ自体はロック制御しない）
 	queue_t* m_head;//キューの先頭
 	queue_t* m_tail;//キューの末尾
-	normal_lock m_lock;//ロックオブジェクト（ミューテックスorスピンロック）
+	lock_type m_lock;//ロックオブジェクト
 };
 
 NAMESPACE_GASHA_END;//ネームスペース：終了

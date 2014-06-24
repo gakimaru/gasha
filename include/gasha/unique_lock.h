@@ -37,11 +37,11 @@ public:
 	//メソッド
 
 	//ロック取得
-	inline void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline void lock()
 	{
 		if (!m_lock || m_isLocked)
 			return;
-		m_lock->lock(spin_count);
+		m_lock->lock();
 		m_isLocked = true;
 	}
 	//ロック取得を試行
@@ -103,17 +103,17 @@ public:
 	//コピーコンストラクタ
 	unique_lock(const unique_lock&) = delete;
 	//コンストラクタ
-	inline explicit unique_lock(lock_type& obj, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline explicit unique_lock(lock_type& obj) :
 		m_lock(&obj),
 		m_isLocked(false)
 	{
-		lock(spin_count);
+		lock();
 	}
-	inline unique_lock(lock_type& obj, const with_lock_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline unique_lock(lock_type& obj, const with_lock_t) :
 		m_lock(&obj),
 		m_isLocked(false)
 	{
-		lock(spin_count);
+		lock();
 	}
 	inline unique_lock(lock_type& obj, const try_lock_t) :
 		m_lock(&obj),
@@ -126,10 +126,6 @@ public:
 		m_isLocked(true)
 	{}
 	inline unique_lock(lock_type& obj, const defer_lock_t) :
-		m_lock(&obj),
-		m_isLocked(false)
-	{}
-	inline explicit unique_lock(lock_type& obj) :
 		m_lock(&obj),
 		m_isLocked(false)
 	{}

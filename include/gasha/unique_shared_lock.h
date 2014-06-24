@@ -44,11 +44,11 @@ public:
 	//メソッド
 
 	//排他ロック（ライトロック）取得
-	inline void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline void lock()
 	{
 		if (!m_lock || m_status != UNLOCKED)
 			return;
-		m_lock->lock(spin_count);
+		m_lock->lock();
 		m_status = LOCKING_EXCLUSIVELY;
 	}
 	//排他ロック（ライトロック）取得を試行
@@ -75,11 +75,11 @@ public:
 	}
 
 	//共有ロック（リードロック）取得
-	inline void lock_shared(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline void lock_shared()
 	{
 		if (!m_lock || m_status != UNLOCKED)
 			return;
-		m_lock->lock_shared(spin_count);
+		m_lock->lock_shared();
 		m_status = LOCKING_SHARED;
 	}
 	//共有ロック（リードロック）取得を試行
@@ -146,23 +146,23 @@ public:
 	//コピーコンストラクタ
 	unique_shared_lock(const unique_shared_lock&) = delete;
 	//コンストラクタ
-	inline explicit unique_shared_lock(lock_type& obj, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline explicit unique_shared_lock(lock_type& obj) :
 		m_lock(&obj),
 		m_status(UNLOCKED)
 	{
-		lock_shared(spin_count);
+		lock_shared();
 	}
-	inline unique_shared_lock(lock_type& obj, const with_lock_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline unique_shared_lock(lock_type& obj, const with_lock_t) :
 		m_lock(&obj),
 		m_status(UNLOCKED)
 	{
-		lock(spin_count);
+		lock();
 	}
-	inline unique_shared_lock(lock_type& obj, const with_lock_shared_t, const int spin_count = GASHA_ DEFAULT_SPIN_COUNT) :
+	inline unique_shared_lock(lock_type& obj, const with_lock_shared_t) :
 		m_lock(&obj),
 		m_status(UNLOCKED)
 	{
-		lock_shared(spin_count);
+		lock_shared();
 	}
 	inline unique_shared_lock(lock_type& obj, const try_lock_t) :
 		m_lock(&obj),

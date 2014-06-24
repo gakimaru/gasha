@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // shared_allocator.h
-// 共有プールアロケータ
+// マルチスレッド共有プールアロケータ
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -13,20 +13,27 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/dummy_lock.h>//ダミーロック
+#include <gasha/spin_lock.h>//スピンロック
+
+//例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
 
 #include <cstddef>//std::size_t
 #include <new>//new(void*), delete(void*, void*)
 #include <bitset>//std::bitset
+#include <assert.h>//assert()
+#include <functional>//std::function
+#include <stdio.h>//printf()
 
 NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//共有プールアロケータクラス
+//マルチスレッド共有プールアロケータクラス
 //※デフォルトでは排他制御しないので、必要に応じてテンプレートパラメータに
 //　spinLock や std::mutex などの適切な同期オブジェクト型の指定が必要。
 //※排他制御が不要か滅多に必要がない場合は、ロックフリー版よりも速い。
-template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE = GASHA_ spinLock>
 class alignas(4) sharedPoolAllocator
 {
 	static_assert(sizeof(T) >= 4, "sizeof(T) is too small.");
@@ -44,7 +51,7 @@ public:
 
 public:
 	//定数
-	static const std::size_t POOL_SIZE = _POOL_SIZE;//プールサイズ
+	static const std::size_t POOL_SIZE = _POOL_SIZE;//プールサイズ（プールする個数）
 	static const std::size_t VALUE_SIZE = sizeof(value_type);//値のサイズ
 	static const std::size_t INVALID_INDEX = 0xffffffff;//無効なインデックス
 	static const std::size_t DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
@@ -53,7 +60,7 @@ public:
 	//メソッド
 
 	//メモリ確保
-	void* allocate()
+	void* alloc()
 	{
 		GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 		//空きプールを確保
@@ -61,7 +68,7 @@ public:
 		{
 			const std::size_t vacant_index = m_vacantHead++;//空きプールの先頭インでックスを取得＆インクリメント
 			m_using[vacant_index] = true;//インデックスを使用中にする
-		//	++m_usingCount;//使用中の数を増やす（デバッグ用）
+			//++m_usingCount;//使用中の数を増やす（デバッグ用）
 			return  m_pool[vacant_index];//メモリ確保成功
 		}
 		//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
@@ -74,7 +81,7 @@ public:
 			m_recyclableHead = recyclable_pool->m_next_index;//再利用プールの先頭インデックスを次の再利用プールに変更
 			recyclable_pool->m_next_index = DIRTY_INDEX;//再利用プールの連結インデックスを削除
 			m_using[recyclable_index] = true;//インデックスを使用中にする
-		//	++m_usingCount;//使用中の数を増やす（デバッグ用）
+			//++m_usingCount;//使用中の数を増やす（デバッグ用）
 			return recyclable_pool;//メモリ確保成功
 		}
 	}
@@ -88,7 +95,7 @@ private:
 		deleted_pool->m_next_index = m_recyclableHead;//次の再利用プールのインデックスを保存
 		m_recyclableHead = index;//再利用プールの先頭インデックスを変更
 		m_using[index] = false;//インデックスを未使用状態にする
-	//	--m_usingCount;//使用中の数を減らす（デバッグ用）
+		//--m_usingCount;//使用中の数を減らす（デバッグ用）
 		return true;
 	}
 	
@@ -98,14 +105,18 @@ private:
 		const std::size_t index = (reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE;
 		if (index >= POOL_SIZE)//範囲外のインデックスなら終了
 		{
+		#ifdef _DEBUG
 			static const bool IS_INVALID_POINTER_OF_POOL = false;
 			assert(IS_INVALID_POINTER_OF_POOL);
+		#endif//_DEBUG
 			return INVALID_INDEX;
 		}
 		if (!m_using[index])//インデックスが既に未使用状態なら終了
 		{
+		#ifdef _DEBUG
 			static const bool IS_ALREADY_DELETE_POINTER = false;
 			assert(IS_ALREADY_DELETE_POINTER);
+		#endif//_DEBUG
 			return INVALID_INDEX;
 		}
 		return index;
@@ -172,7 +183,7 @@ public:
 	void printDebugInfo(std::function<void(const value_type& value)> print_node)
 	{
 		printf("----- Debug Info for simplePoolAllocator -----\n");
-	//	printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d, usingCount=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead, m_usingCount);
+		//printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d, usingCount=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead, m_usingCount);
 		printf("POOL_SIZE=%d, VALUE_SIZE=%d, emptyHead=%d\n", POOL_SIZE, VALUE_SIZE, m_vacantHead);
 		printf("Using:\n");
 		for (int index = 0; index < POOL_SIZE; ++index)
@@ -180,7 +191,8 @@ public:
 			if (m_using[index])
 			{
 				printf("[%d] ", index);
-				print_node(*reinterpret_cast<const value_type*>(m_pool[index]));
+				value_type* value = reinterpret_cast<value_type*>(m_pool[index]);
+				print_node(*value);
 				printf("\n");
 			}
 		}
@@ -212,7 +224,7 @@ private:
 	std::size_t m_vacantHead;//空きプールの先頭インデックス
 	std::size_t m_recyclableHead;//再利用プールの先頭インデックス
 	std::bitset<POOL_SIZE> m_using;//使用中インデックス（二重解放判定用）
-//	std::size_t m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない
+	//std::size_t m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない
 	lock_type m_lock;//ロックオブジェクト
 };
 
