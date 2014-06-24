@@ -20,7 +20,7 @@
 #include <cstddef>//std::size_t
 #include <stdio.h>//printf()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //マルチスレッド共有キュークラス
@@ -145,7 +145,7 @@ private:
 	lock_type m_lock;//ロックオブジェクト
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SHARED_QUEUE_H_
 

@@ -13,7 +13,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -194,7 +194,7 @@ inline std::size_t iteratorCalcUnordered(ITERATOR begin, ITERATOR end, PREDICATE
 }
 iteratorSortFuncSet(iteratorCalcUnordered);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SORT_BASIC_H_
 

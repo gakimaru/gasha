@@ -17,7 +17,7 @@
 #include <gasha/unique_lock.h>//単一ロック
 #include <gasha/lock_guard.h>//ロックガード
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //ダミーロッククラス
@@ -81,7 +81,7 @@ public:
 	}
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__DUMMY_LOCK_H_
 

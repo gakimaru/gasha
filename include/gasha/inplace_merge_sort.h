@@ -16,7 +16,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -54,7 +54,7 @@ NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 template<class T, class PREDICATE>
 std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predicate)
 {
-#ifndef INPLACE_MERGE_SORT_USE_OPENMP
+#ifndef GASHA_INPLACE_MERGE_SORT_USE_OPENMP
 	//通常版
 	if (!array || size <= 1)
 		return 0;
@@ -120,7 +120,7 @@ std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predica
 		}
 	}
 	return swapped_count;
-#else//INPLACE_MERGE_SORT_USE_OPENMP
+#else//GASHA_INPLACE_MERGE_SORT_USE_OPENMP
 	//OpenMP版
 	if (!array || size <= 1)
 		return 0;
@@ -201,11 +201,11 @@ std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predica
 		}
 	}
 	return swapped_count;
-#endif//INPLACE_MERGE_SORT_USE_OPENMP
+#endif//GASHA_INPLACE_MERGE_SORT_USE_OPENMP
 }
 sortFuncSet(inplaceMergeSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__INPLACE_MERGE_SORT_H_
 

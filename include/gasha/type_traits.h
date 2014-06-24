@@ -13,7 +13,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //多くの型情報は #include <type_traits> で扱えます
@@ -86,7 +86,7 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t
 template<typename T> inline std::size_t sizeofvalueof(T val){ return sizeof(T); }
 template<typename T> inline std::size_t sizeofvalueof(T* val){ return sizeof(T); }
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__TYPE_TRAITS_H_
 

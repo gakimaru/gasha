@@ -20,14 +20,14 @@
 
 #include <gasha/build_settings/project/last_settings.h>//プロジェクト固有のビルド設定 リポジトリ：gasha_settings
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------
 //ビルド設定が実行環境に適合するかチェック
 //※ダメな要素があった場合、即abort
 void checkBuildSettings();
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__BUIILD_SETTINGS_H_
 

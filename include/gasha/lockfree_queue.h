@@ -22,7 +22,7 @@
 #include <atomic>//C++11 std::atomic
 #include <stdio.h>//printf()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //ロックフリーキュークラス
@@ -301,7 +301,7 @@ private:
 	std::atomic<typename queue_ptr_t::tag_type> m_tag;//ABA問題対策用のタグ
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__LOCKFREE_QUEUE_H_
 

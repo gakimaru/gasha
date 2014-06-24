@@ -22,7 +22,7 @@
 #include <atomic>//C++11 std::atomic
 #include <stdio.h>//printf()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //ロックフリープールアロケータクラス
@@ -285,7 +285,7 @@ private:
 #endif//USE_SAFE_CAS_LF_POOL_ALLOCATOR
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__LOCKFREE_POOL_ALLOCATOR_H_
 

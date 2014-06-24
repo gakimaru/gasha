@@ -17,7 +17,7 @@
 
 //#include <gasha/iterator.h>//イテレータ用アルゴリズム
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //探索アルゴリズムの説明
@@ -76,7 +76,7 @@ ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 }
 iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__LINERAR_SEARCH_H_
 

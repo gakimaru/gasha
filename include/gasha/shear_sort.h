@@ -17,11 +17,11 @@
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
 #include <math.h>//sqrt()
-#ifdef SHEAR_SORT_USE_OPENMP_NEST
+#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 #include <omp.h>//omp_set_nested()
-#endif//SHEAR_SORT_USE_OPENMP_NEST
+#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -63,10 +63,10 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 {
 	if (!array || size <= 1)
 		return 0;
-#ifdef SHEAR_SORT_USE_OPENMP_NEST
+#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 	const int omp_nested_before = omp_get_nested();
 	omp_set_nested(1);//並列化のネストを許可
-#endif//SHEAR_SORT_USE_OPENMP_NEST
+#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 	std::size_t swapped_count = 0;
 	int row;//本来は std::size_t
 	int col;//本来は std::size_t
@@ -100,11 +100,11 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 	{
 		//各行ごとに、列方向にソート
 		//※偶数行は小さい順、奇数行は大きい順にソート
-#if defined(SHEAR_SORT_USE_OPENMP_NEST)
+#if defined(GASHA_SHEAR_SORT_USE_OPENMP_NEST)
 	#pragma omp parallel for reduction(+:swapped_count) private(cols_row, cols_1_row, is_swapped, col_odd_even, is_odd)
-#elif defined(SHEAR_SORT_USE_OPENMP)
+#elif defined(GASHA_SHEAR_SORT_USE_OPENMP)
 	#pragma omp parallel for reduction(+:swapped_count) private(cols_row, cols_1_row, is_swapped, col_odd_even, is_odd, col, now, next)
-#endif//SHEAR_SORT_USE_OPENMP
+#endif//GASHA_SHEAR_SORT_USE_OPENMP
 		for (row = 0; row <= static_cast<int>(rows); ++row)
 		{
 			cols_row = row == static_cast<int>(rows) ? over : cols;
@@ -119,9 +119,9 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 					is_swapped = false;
 					for (col_odd_even = 0; col_odd_even < 2; ++col_odd_even)
 					{
-				#ifdef SHEAR_SORT_USE_OPENMP_NEST
+				#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 					#pragma omp parallel for reduction(+:swapped_count) reduction(||:is_swapped) private(now, next)
-				#endif//SHEAR_SORT_USE_OPENMP_NEST
+				#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 						for (col = static_cast<int>(col_odd_even); col < static_cast<int>(cols_1_row); col += 2)
 						{
 							now = array + row * cols + col;
@@ -140,11 +140,11 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 		}
 		//各列ごとに、行方向にソート
 		//※小さい順にソート
-#if defined(SHEAR_SORT_USE_OPENMP_NEST)
+#if defined(GASHA_SHEAR_SORT_USE_OPENMP_NEST)
 	#pragma omp parallel for reduction(+:swapped_count) private(rows_col, rows_1_col, row_odd_even, is_swapped)
-#elif defined(SHEAR_SORT_USE_OPENMP)
+#elif defined(GASHA_SHEAR_SORT_USE_OPENMP)
 	#pragma omp parallel for reduction(+:swapped_count) private(rows_col, rows_1_col, row_odd_even, is_swapped, row, now, next)
-#endif//SHEAR_SORT_USE_OPENMP
+#endif//GASHA_SHEAR_SORT_USE_OPENMP
 		for (col = 0; col < static_cast<int>(cols); ++col)
 		{
 			rows_col = rows + (col < static_cast<int>(over) ? 1 : 0);
@@ -156,9 +156,9 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 				is_swapped = false;
 				for (row_odd_even = 0; row_odd_even < 2; ++row_odd_even)
 				{
-			#ifdef SHEAR_SORT_USE_OPENMP_NEST
+			#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 				#pragma omp parallel for reduction(+:swapped_count) reduction(||:is_swapped) private(now, next)
-			#endif//SHEAR_SORT_USE_OPENMP_NEST
+			#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 					for (row = static_cast<int>(row_odd_even); row < static_cast<int>(rows_1_col); row += 2)
 					{
 						now = array + row * cols + col;
@@ -177,11 +177,11 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 	{
 		//各行ごとに、列方向にソート
 		//※小さい順にソート
-#if defined(SHEAR_SORT_USE_OPENMP_NEST)
+#if defined(GASHA_SHEAR_SORT_USE_OPENMP_NEST)
 	#pragma omp parallel for reduction(+:swapped_count) private(cols_row, cols_1_row, col_odd_even, is_swapped)
-#elif defined(SHEAR_SORT_USE_OPENMP)
+#elif defined(GASHA_SHEAR_SORT_USE_OPENMP)
 	#pragma omp parallel for reduction(+:swapped_count) private(cols_row, cols_1_row, col_odd_even, is_swapped, col, now, next)
-#endif//SHEAR_SORT_USE_OPENMP
+#endif//GASHA_SHEAR_SORT_USE_OPENMP
 		for (row = 0; row <= static_cast<int>(rows); ++row)
 		{
 			cols_row = row == static_cast<int>(rows) ? over : cols;
@@ -195,9 +195,9 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 					is_swapped = false;
 					for (col_odd_even = 0; col_odd_even < 2; ++col_odd_even)
 					{
-					#ifdef SHEAR_SORT_USE_OPENMP_NEST
+					#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 						#pragma omp parallel for reduction(+:swapped_count) reduction(||:is_swapped) private(now, next)
-					#endif//SHEAR_SORT_USE_OPENMP_NEST
+					#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 						for (col = static_cast<int>(col_odd_even); col < static_cast<int>(cols_1_row); col += 2)
 						{
 							now = array + row * cols + col;
@@ -214,14 +214,14 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 			}
 		}
 	}
-#ifdef SHEAR_SORT_USE_OPENMP_NEST
+#ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 	omp_set_nested(omp_nested_before);
-#endif//SHEAR_SORT_USE_OPENMP_NEST
+#endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 	return swapped_count;
 }
 sortFuncSet(shearSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SHEAR_SORT_H_
 

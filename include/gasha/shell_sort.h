@@ -18,7 +18,7 @@
 
 #include <gasha/iterator.h>//イテレータ用アルゴリズム
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -145,7 +145,7 @@ std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 }
 iteratorSortFuncSet(iteratorShellSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SHELL_SORT_H_
 

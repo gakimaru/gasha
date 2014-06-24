@@ -20,7 +20,7 @@
 
 #include <atomic>//C++11 std::atomic
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //単純共有スピンロッククラス
@@ -101,7 +101,7 @@ private:
 	std::atomic<int> m_lockCounter;//ロックカウンタ
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SIMPLE_SHARED_SPIN_LOCK_H_
 

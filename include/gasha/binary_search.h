@@ -17,7 +17,7 @@
 
 #include <gasha/iterator.h>//イテレータ用アルゴリズム
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //探索アルゴリズムの説明
@@ -117,7 +117,7 @@ ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON compariso
 }
 iteratorSearchFuncSetByComparison(iteratorBinarySearch);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//_BINARY_SEARCH_H_
 

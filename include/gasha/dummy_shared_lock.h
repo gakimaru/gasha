@@ -17,7 +17,7 @@
 #include <gasha/unique_shared_lock.h>//単一共有ロック制御
 #include <gasha/lock_guard.h>//ロックガード
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //ダミー共有ロッククラス
@@ -110,7 +110,7 @@ public:
 	}
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__DUMMY_SHARED_LOCK_H_
 

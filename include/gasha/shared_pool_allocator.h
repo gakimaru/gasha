@@ -26,7 +26,7 @@
 #include <functional>//std::function
 #include <stdio.h>//printf()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //マルチスレッド共有プールアロケータクラス
@@ -228,7 +228,7 @@ private:
 	lock_type m_lock;//ロックオブジェクト
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SHARED_POOL_ALLOCATOR_H_
 

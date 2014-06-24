@@ -15,11 +15,11 @@
 
 #include <algorithm>//C++11 std::move()
 
-#ifdef SWAP_VALUES_USE_MEMCPY
+#ifdef GASHA_SWAP_VALUES_USE_MEMCPY
 #include <memory.h>//memcpy()
-#endif//SWAP_VALUES_USE_MEMCPY
+#endif//GASHA_SWAP_VALUES_USE_MEMCPY
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //最大値／最小値
@@ -84,16 +84,16 @@ template<class T>
 struct _swapObjects{
 	inline static void exec(T& val1, T& val2)
 	{
-	#ifdef SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
+	#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 		char tmp[sizeof(T)];
 		memcpy(tmp, &val2, sizeof(T));
 		memcpy(&val2, &val1, sizeof(T));
 		memcpy(&val1, tmp, sizeof(T));
-	#else//SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
+	#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
 		T tmp = std::move(val2);
 		val2 = std::move(val1);
 		val1 = std::move(tmp);
-	#endif//SWAP_VALUES_USE_MEMCPY
+	#endif//GASHA_SWAP_VALUES_USE_MEMCPY
 	}
 };
 template<class T>
@@ -128,16 +128,16 @@ template<class ITERATOR>
 inline void iteratorSwapValues(ITERATOR val1, ITERATOR val2)
 {
 	typedef typename ITERATOR::value_type value_type;
-#ifdef SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
+#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 	char tmp[sizeof(value_type)];
 	memcpy(tmp, &*val2, sizeof(value_type));
 	memcpy(&*val2, &*val1, sizeof(value_type));
 	memcpy(&*val1, tmp, sizeof(value_type));
-#else//SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
+#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
 	value_type tmp = std::move(*val2);
 	*val2 = std::move(*val1);
 	*val1 = std::move(tmp);
-#endif//SWAP_VALUES_USE_MEMCPY
+#endif//GASHA_SWAP_VALUES_USE_MEMCPY
 }
 
 //--------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ template<class T>
 struct _rotateObjects{
 	inline static void exec(T* val1, T* val2, int step)
 	{
-	#ifdef SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
+	#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 		char tmp[sizeof(T)];
 		memcpy(tmp, val2, sizeof(T));
 		while (val1 != val2)
@@ -193,7 +193,7 @@ struct _rotateObjects{
 			val2 = val2_prev;
 		}
 		memcpy(val1, tmp, sizeof(T));
-	#else//SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
+	#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
 		T tmp = std::move(*val2);
 		while (val1 != val2)
 		{
@@ -202,7 +202,7 @@ struct _rotateObjects{
 			val2 = val2_prev;
 		}
 		*val1 = std::move(tmp);
-	#endif//SWAP_VALUES_USE_MEMCPY
+	#endif//GASHA_SWAP_VALUES_USE_MEMCPY
 	}
 };
 template<class T>
@@ -238,7 +238,7 @@ template<class ITERATOR>
 inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, int step)
 {
 	typedef typename ITERATOR::value_type value_type;
-#ifdef SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
+#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 	char tmp[sizeof(value_type)];
 	memcpy(tmp, &*val2, sizeof(value_type));
 	while (val1 != val2)
@@ -248,7 +248,7 @@ inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, int step)
 		val2 = val2_prev;
 	}
 	memcpy(&*val1, tmp, sizeof(value_type));
-#else//SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
+#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
 	value_type tmp = std::move(*val2);
 	while (val1 != val2)
 	{
@@ -257,10 +257,10 @@ inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, int step)
 		val2 = val2_prev;
 	}
 	*val1 = std::move(tmp);
-#endif//SWAP_VALUES_USE_MEMCPY
+#endif//GASHA_SWAP_VALUES_USE_MEMCPY
 }
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__UTILITY_H_
 

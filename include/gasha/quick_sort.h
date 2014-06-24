@@ -18,7 +18,7 @@
 
 #include <assert.h>//assert()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -57,7 +57,7 @@ NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
 template<class T, class PREDICATE>
 std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 {
-#ifndef QUICK_SORT_NO_USE_RECURSIVE_CALL
+#ifndef GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
 	//--------------------
 	//再帰処理版
 	if (size <= 1)
@@ -100,8 +100,8 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 	swapped_count += _quickSort(array, begin - array, predicate);//軸未満の配列
 	swapped_count += _quickSort(end + 1, term - end - 1, predicate);//軸以上の配列
 	return swapped_count;
-#else//QUICK_SORT_NO_USE_RECURSIVE_CALL
-#ifndef QUICK_SORT_USE_OPENMP
+#else//GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
+#ifndef GASHA_QUICK_SORT_USE_OPENMP
 	//--------------------
 	//スタック処理版
 	std::size_t swapped_count = 0;
@@ -172,7 +172,7 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 		}
 	}
 	return swapped_count;
-#else//QUICK_SORT_USE_OPENMP
+#else//GASHA_QUICK_SORT_USE_OPENMP
 	//--------------------
 	//OpenMP＆キュー処理版
 	//※並列化のためにスタックではなくキューを使用。
@@ -273,8 +273,8 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	delete[] queue;
 	return swapped_count;
-#endif//QUICK_SORT_USE_OPENMP
-#endif//QUICK_SORT_NO_USE_RECURSIVE_CALL
+#endif//GASHA_QUICK_SORT_USE_OPENMP
+#endif//GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
 }
 template<class T, class PREDICATE>
 inline std::size_t quickSort(T* array, const std::size_t size, PREDICATE predicate)
@@ -285,7 +285,7 @@ inline std::size_t quickSort(T* array, const std::size_t size, PREDICATE predica
 }
 sortFuncSet(quickSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__QUICK_SORT_H_
 

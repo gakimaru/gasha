@@ -16,7 +16,7 @@
 #include <cstddef>//std::size_t, std::uintptr_t
 #include <cstdint>//std::uint32_t, std::uint64_t
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //タグ付きポインタ型
@@ -140,7 +140,7 @@ struct taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>
 	value_type m_value;//値（タグ＋ポインタ）
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__TAGGED_PTR_H_
 

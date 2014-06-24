@@ -16,7 +16,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -67,9 +67,9 @@ std::size_t oddEvenSort(T* array, const std::size_t size, PREDICATE predicate)
 			int i;//本来は std::size_t
 			T* now;
 			T* next;
-	#ifdef ODD_EVEN_SORT_USE_OPENMP
+	#ifdef GASHA_ODD_EVEN_SORT_USE_OPENMP
 		#pragma omp parallel for reduction(+:swapped_count) reduction(||:is_swapped) private(now, next)
-	#endif//ODD_EVEN_SORT_USE_OPENMP
+	#endif//GASHA_ODD_EVEN_SORT_USE_OPENMP
 			for (i = static_cast<int>(odd_even); i < static_cast<int>(end); i += 2)
 			{
 				now = array + i;
@@ -87,7 +87,7 @@ std::size_t oddEvenSort(T* array, const std::size_t size, PREDICATE predicate)
 }
 sortFuncSet(oddEvenSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__ODD_EVENT_SORT_H_
 

@@ -15,7 +15,7 @@
 
 #include <type_traits>//C++11 std::conditional, std:integral_constant
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //べき乗
@@ -325,18 +325,18 @@ struct makeStaticPrimeGE{
 
 //----------------------------------------
 //【ランタイム版】ビット数を数える
-#ifdef IS_VC
-#ifdef USE_POPCNT
+#ifdef GASHA_IS_VC
+#ifdef GASHA_USE_POPCNT
 #define ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
-#endif//USE_POPCNT
-#endif//IS_VC
-#ifdef IS_GCC
+#endif//GASHA_USE_POPCNT
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
 #define ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
-#endif//IS_GCC
+#endif//GASHA_IS_GCC
 
-#ifdef USE_SSE4_2
+#ifdef GASHA_USE_SSE4_2
 #define ENABLE_SSE_POPCNT//SSE命令版ビット数計測が有効
-#endif//USE_SSE4_2
+#endif//GASHA_USE_SSE4_2
 
 //※独自実装版
 int countBits_custom(const unsigned int value);
@@ -466,7 +466,7 @@ template<unsigned int VAL, unsigned int ALIGN> struct adjustStaticAlign{ static 
 template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 1>{ static const unsigned int value = VAL; };
 template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 0>{ static const unsigned int value = VAL; };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__BASIC_MATH_H_
 

@@ -19,7 +19,7 @@
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
 #include <malloc.h>//_aligned_malloc(), _aligned_free()
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -575,7 +575,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 }
 distributedSortFuncSet(radixSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__RADIX_SORT_H_
 

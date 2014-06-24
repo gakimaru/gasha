@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //ロック制御共通設定
@@ -44,7 +44,7 @@ const adopt_shared_lock_t adopt_shared_lock;
 struct defer_lock_t {};//遅延ロック ※コンストラクタでロックを取得しない
 const defer_lock_t defer_lock;
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__LOCK_COMMON_H_
 

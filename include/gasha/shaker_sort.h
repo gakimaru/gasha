@@ -16,7 +16,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //ソートアルゴリズムの説明
@@ -96,7 +96,7 @@ std::size_t shakerSort(T* array, const std::size_t size, PREDICATE predicate)
 }
 sortFuncSet(shakerSort);
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__SHAKER_SORT_H_
 

@@ -15,7 +15,7 @@
 
 #include <gasha/lock_common.h>//ロック共通設定
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //単一共有ロッククラス
@@ -205,7 +205,7 @@ private:
 	status_t m_status;//ロック取得状態
 };
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__UNIQUE_SHARED_LOCK_H_
 

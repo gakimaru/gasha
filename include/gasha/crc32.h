@@ -15,11 +15,11 @@
 #include <cstddef>//std::size_t
 #include <cstdint>//std::int**_t
 
-#if defined(USE_SSE4_2) && defined(CRC32_IS_CRC32C)
+#if defined(GASHA_USE_SSE4_2) && defined(GASHA_CRC32_IS_CRC32C)
 #define CALC_RUNTIME_CRC32_BY_SSE//ランタイムCRC32の算出にSSE命令を使用する（CRC-32Cを算出する）
 #endif
 
-NAMESPACE_GASHA_BEGIN;//ネームスペース：開始
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------
 //型
@@ -32,15 +32,15 @@ namespace __crc32//直接使用しない処理を隠ぺいするためのネー�
 	//--------------------
 	//CRC3232生成多項式マクロと定数を定義
 	//※constexpr関数内では変数/定数が使えないため、定数にマクロを使用
-#ifndef CRC32_IS_CRC32C
+#ifndef GASHA_CRC32_IS_CRC32C
 	//IEEE勧告の標準的なCRC32の生成多項式
 	//#define _POLYNOMIAL 0x04c11db7u//（標準）
 	#define _POLYNOMIAL 0xedb88320u//（反転）
-#else//CRC32_IS_CRC32C
+#else//GASHA_CRC32_IS_CRC32C
 	//CRC-32C(Castagnoli)の生成多項式
 	//#define _POLYNOMIAL 0x1edc6f41u//（標準）
 	#define _POLYNOMIAL 0x82f63b78u//（反転）
-#endif//CRC32_IS_CRC32C
+#endif//GASHA_CRC32_IS_CRC32C
 	static const crc32_t POLYNOMIAL = _POLYNOMIAL;//CRC32生成多項式定数
 
 	//--------------------
@@ -103,7 +103,7 @@ constexpr inline crc32_t calcConstCRC32(const char* data, const std::size_t len)
 {
 	return ~__crc32::calcData(~0u, data, len);
 }
-#ifdef HAS_USER_DEFINED_LITERAL
+#ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------
 //【ユーザー定義リテラル版】文字列と文字列長を指定してCRC算出
 //※operator "" の後に空白が必要なことに注意
@@ -111,7 +111,7 @@ constexpr inline crc32_t operator "" _crc32(const char* str, const std::size_t l
 {
 	return calcConstCRC32(str, len);
 }
-#endif//HAS_USER_DEFINED_LITERAL
+#endif//GASHA_HAS_USER_DEFINED_LITERAL
 
 //--------------------
 //【ランタイム関数版】各種CRC32計算
@@ -120,14 +120,14 @@ crc32_t calcCRC32_recursive(const char* str);//再帰処理版
 crc32_t calcCRC32_recursive(const char* data, const std::size_t len);//再帰処理版
 crc32_t calcCRC32_loop(const char* str);//ループ処理版
 crc32_t calcCRC32_loop(const char* data, const std::size_t len);//ループ処理版
-#ifdef CRC32_USE_STATIC_TABLE
+#ifdef GASHA_CRC32_USE_STATIC_TABLE
 crc32_t calcCRC32_table(const char* str);//事前計算済み多項式テーブル処理版
 crc32_t calcCRC32_table(const char* data, const std::size_t len);//事前計算済み多項式テーブル処理版
-#endif//CRC32_USE_STATIC_TABLE
-#ifdef USE_SSE4_2
+#endif//GASHA_CRC32_USE_STATIC_TABLE
+#ifdef GASHA_USE_SSE4_2
 crc32_t calcCRC32_sse(const char* str);//SSE命令版
 crc32_t calcCRC32_sse(const char* data, const std::size_t len);//SSE命令版
-#endif//USE_SSE4_2
+#endif//GASHA_USE_SSE4_2
 
 //--------------------
 //【ランタイム関数版】文字列のCRC32計算
@@ -136,11 +136,11 @@ inline crc32_t calcCRC32(const char* str)
 #ifdef CALC_RUNTIME_CRC32_BY_SSE
 	return calcCRC32_sse(str);
 #else//CALC_RUNTIME_CRC32_BY_SSE
-#ifdef CRC32_USE_STATIC_TABLE
+#ifdef GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_table(str);
-#else//CRC32_USE_STATIC_TABLE
+#else//GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_loop(str);
-#endif//CRC32_USE_STATIC_TABLE
+#endif//GASHA_CRC32_USE_STATIC_TABLE
 #endif//CALC_RUNTIME_CRC32_BY_SSE
 }
 //--------------------
@@ -150,11 +150,11 @@ inline crc32_t calcCRC32(const char* data, const std::size_t len)
 #ifdef CALC_RUNTIME_CRC32_BY_SSE
 	return calcCRC32_sse(data, len);
 #else//CALC_RUNTIME_CRC32_BY_SSE
-#ifdef CRC32_USE_STATIC_TABLE
+#ifdef GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_table(data, len);
-#else//CRC32_USE_STATIC_TABLE
+#else//GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_loop(data, len);
-#endif//CRC32_USE_STATIC_TABLE
+#endif//GASHA_CRC32_USE_STATIC_TABLE
 #endif//CALC_RUNTIME_CRC32_BY_SSE
 }
 
@@ -163,7 +163,7 @@ inline crc32_t calcCRC32(const char* data, const std::size_t len)
 //※ソースコードを生成して標準出力に出力する。
 void makeAndPrintPolyTable();
 
-NAMESPACE_GASHA_END;//ネームスペース：終了
+GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__CRC32_H_
 
