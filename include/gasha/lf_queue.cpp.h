@@ -29,33 +29,27 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //※論文に基づいていて実装: http://www.cs.rochester.edu/u/scott/papers/1996_PODC_queues.pdf
 //　論文から変更している点多し。
-//    ⇒ 変更点①：enqueu:E9:   if CAS(&tail.ptr->next, next, <node, ...>)                     ←【NG】他のスレッドの処理が進んで一気に削除されるとtailがキューの連結から外れていることに気がつかず、キューが消失する
+//    ⇒ 変更点①：enqueu:E9:   if CAS(&tail.ptr->next, next, <node, ...>)                     ←【NG】他のスレッドの処理が進んで、一気に tail まで削除されてしまうと、tailがキューの連結から外れていることに気がつかず、キューが消失する
 //                        E10:      break;
 //                                      ↓
-//                              if CAS(tail == Q->Tail && &tail.ptr->next, next, <node, ...>)  ←【NG】「&&」の時に他のスレッドの処理が進んで一気に削除されると結局キューが消失する...
-//                                  break;
+//                        E9:   if tail == Q->Tail && CAS(&tail.ptr->next, next, <node, ...>)  ←【NG】これでもまだ「&&」の処理中に上記の問題が起こり得る
+//                        E10:      break;
 //                                      ↓
-//                        E4+:  next = NULL                                                    ←【OK】「Q->Next」を追加して対処。Q->next は常にNULL。新規ノード追加の最中のみ値が入る。
-//                              if CAS(&Q->Next, next, <node, ...>)
-//                                  break;
-//       変更点②：enqueu:E5:   tail = Q->Tail
-//                                ～
-//                        E15:  endif
+//                        E8+:  if CAS(&Q->Next, next, <node, ...>)                            ←【OK】「Q->Next」を追加して対処。Q->next は常にNULL。新規ノード追加の最中のみ値が入る。（実質的なロック制御...）
+//                        E9:       if tail == Q->Tail && CAS(&tail.ptr->next, next, <node, ...>)
+//                        E9+:          Q->next = NULL
+//                        E10:          break;
+//                        E11:      endif
+//                        E11+:     Q->next = NULL
+//       変更点②：enqueu:E7:   if tail == Q->Tail
+//                        D15:  endif
 //                                ↓
-//                               まるごと削除
-//       変更点③：enqueu:E17:  CAS(&Q->Tail, tail, <node, ...>)
-//                                     ↓
-//                              Q->Tail.ptr->next = Q->Next
-//                              Q->Tail = Q->Next
-//                              Q->Next = NULL
-//       変更点④：dequeu:D5:   if head == Q->Head
+//                               削除
+//       変更点③：dequeu:D5:   if head == Q->Head
 //                        D17:  endif
 //                                ↓
 //                               削除
-//       変更点⑤：enqueu:D10:  CAS(&Q->Tail, tail, <next.ptr, tail, <next.ptr, ...>)
-//                                ↓
-//                               削除 ※（変更点①）の影響により、つじつま合わせ処理が不要になる
-//       変更点⑥：（全般的なCAS操作）ポインタへのタグ付けは新規ノード生成時のみ適用
+//       変更点③：（全般的なCAS操作）ポインタへのタグ付けは新規ノード生成時のみ適用
 
 //エンキュー
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
@@ -69,7 +63,6 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 	queue_ptr_t tail_tag_ptr = null_tag_ptr;
 	while (true)
 	{
-#if 0//【大幅修正】上記の説明にあるとおり、処理に問題があるので、m_next を追加してもっとシンプルに対処
 		tail_tag_ptr = m_tail.load();//末尾ノードを取得
 		queue_t* tail = tail_tag_ptr;
 		std::atomic<queue_ptr_t>& next = tail->m_next;
@@ -78,20 +71,38 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 		{
 			if (next_tag_ptr.isNull())//末尾ノードの次ノードが末端（nullptr）か？
 			{
-				//CAS操作①
-				//※この処理には問題あり
-				if (tail_tag_ptr == m_tail.load() && next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
+				//CAS操作(0)
+				//※問題解消のための追加処理
+				//※本質的にロック操作と同等なのが残念...
+				//　このような形にするのであれば、m_next のCAS操作を処理の起点にして、
+				//　単純なnextとtailの更新処理に変更しても良いのだが、少しでもロック状態を
+				//　短縮するために、論文の構造を踏襲し、つじつま合わせ処理（CAS操作③&④）を
+				//　生かす方針にする。
+				if (m_next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
 				//【CAS操作の内容】
-				//    if(tail_tag_ptr->m_next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
-				//        tail_tag_ptr->m_next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
+				//    if(m_next == next_tag_ptr)//末尾ノードの次ノード（予約）を他のスレッドが書き換えていないか？
+				//        m_next = new_node_tag_ptr;//末尾ノードの次ノード（予約）に新規ノードをセット（エンキュー準備成功）
 				{
-					//CAS操作②
-					m_tail.compare_exchange_strong(tail_tag_ptr, new_node_tag_ptr);//CAS操作
+					//CAS操作①
+					//※論文通りのこの処理だけだとアトミック性を保証できない問題があったので、前後に対策処理を追加
+					const bool cas_result = tail_tag_ptr == m_tail.load() && next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr);//CAS操作
 					//【CAS操作の内容】
-					//    if(m_tail == tail_tag_ptr)//末尾ノードを他のスレッドが書き換えていないか？
-					//        m_tail = new_node_tag_ptr;//末尾ノードを新規ノードに変更
+					//    if(tail_tag_ptr->m_next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
+					//        tail_tag_ptr->m_next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
+					if(cas_result)
+					{
+						m_next.store(next_tag_ptr);//※問題解消のための追加処理（本質的にロック解除操作と同等）
 
-					return true;//エンキュー成功
+						//CAS操作②
+						m_tail.compare_exchange_weak(tail_tag_ptr, new_node_tag_ptr);//CAS操作
+						//【CAS操作の内容】
+						//    if(m_tail == tail_tag_ptr)//末尾ノードを他のスレッドが書き換えていないか？
+						//        m_tail = new_node_tag_ptr;//末尾ノードを新規ノードに変更
+
+						return true;//エンキュー成功
+					}
+					
+					m_next.store(null_tag_ptr);//※問題解消のための追加処理（本質的にロック解除操作と同等）
 				}
 			}
 			else//if(next_tag_ptr.isNotNull())//末尾ノードの次ノードが末端ではない（他のスレッドの処理が割り込んでいた場合）
@@ -103,20 +114,6 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 				//        m_tail = next_tag_ptr;//末尾ノードを次ノードに変更
 			}
 		}
-#else//【大幅修正】
-		//CAS操作①
-		queue_ptr_t next_tag_ptr = null_tag_ptr;
-		if (m_next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
-		//【CAS操作の内容】
-		//    if(m_next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
-		//        m_next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
-		{
-			m_tail.load().ptr()->m_next.store(new_node_tag_ptr);
-			m_tail.store(new_node_tag_ptr);
-			m_next.store(null_tag_ptr);
-			return true;//エンキュー成功
-		}
-#endif//【大幅修正】
 	}
 	return false;//ダミー
 }
@@ -160,13 +157,11 @@ bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 			{
 				if (next_tag_ptr.isNull())//本当にキューがないか？（tail取得とnext取得の間に、他のスレッドがキューイングしている可能性がある）
 					return false;//デキュー失敗
-#if 0//【大幅修正】
 				//CAS操作④：つじつま合わせ処理 ※エンキューのCAS操作②が失敗する可能性があるため、この処理が必要
 				m_tail.compare_exchange_weak(tail_tag_ptr, next_tag_ptr);//CAS操作
 				//【CAS操作の内容】
 				//    if(m_tail == tail_tag_ptr)//末尾ノードを他のスレッドが書き換えていないか？
 				//        m_tail = next_tag_ptr;//末尾ノードを次ノードに変更
-#endif//【大幅修正】
 			}
 			else
 			{
