@@ -3,7 +3,7 @@
 #define __LW_SPIN_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// lwSpinLock.h
+// lw_spin_lock.h
 // サイズ軽量スピンロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -32,17 +32,17 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<lwSpinLock> get_unique_lock(){ GASHA_ unique_lock<lwSpinLock> lock(*this); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(){ GASHA_ unique_lock<lwSpinLock> lock(*this); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//ロック取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
 	//※ロック取得を伴う
-	inline GASHA_ lock_guard<lwSpinLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<lwSpinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ lock_guard<lwSpinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

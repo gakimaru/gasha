@@ -3,7 +3,7 @@
 #define __DUMMY_SHARED_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// dummySharedLock.h
+// dummy_shared_lock.h
 // ダミー共有ロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -16,6 +16,7 @@
 
 #include <gasha/unique_shared_lock.h>//単一共有ロック制御
 #include <gasha/lock_guard.h>//ロックガード
+#include <gasha/shared_lock_guard.h>//共有ロックガード
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -30,14 +31,14 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock_shared); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
-	inline GASHA_ unique_shared_lock<dummySharedLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock_shared); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock_shared); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
+	inline GASHA_ unique_shared_lock<dummySharedLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//排他ロック（ライトロック）取得
 	inline void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
@@ -46,7 +47,7 @@ public:
 	}
 	//排他ロック（ライトロック）用のロックガード取得
 	//※排他ロック（ライトロック）取得を伴う
-	inline lock_guard<dummySharedLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline lock_guard<dummySharedLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ lock_guard<dummySharedLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -71,7 +72,7 @@ public:
 	}
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
-	inline shared_lock_guard<dummySharedLock> lock_shared_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ shared_lock_guard<dummySharedLock> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ shared_lock_guard<dummySharedLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

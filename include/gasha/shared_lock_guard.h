@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef __SHARED_shared_lock_guard_H_
-#define __SHARED_shared_lock_guard_H_
+#ifndef __SHARED_LOCK_GUARD_H_
+#define __SHARED_LOCK_GUARD_H_
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// shared_shared_lock_guard.h
+// shared_lock_guard.h
 // 共有ロックガード（スコープロック）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -62,6 +62,6 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHARED_shared_lock_guard_H_
+#endif//__SHARED_LOCK_GUARD_H_
 
 // End of file

@@ -3,7 +3,7 @@
 #define __SHARED_SPIN_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// sharedSpinLock.h
+// shared_spin_lock.h
 // 共有スピンロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -41,20 +41,20 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ try_lock_shared); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
-	inline GASHA_ unique_shared_lock<sharedSpinLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ try_lock_shared); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//排他ロック（ライトロック）取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//排他ロック（ライトロック）用のロックガード取得
 	//※排他ロック（ライトロック）取得を伴う
-	inline GASHA_ lock_guard<sharedSpinLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<sharedSpinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ lock_guard<sharedSpinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -72,7 +72,7 @@ public:
 	void lock_shared(const int spin_count = DEFAULT_SPIN_COUNT);
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
-	inline GASHA_ shared_lock_guard<sharedSpinLock> lock_shared_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ shared_lock_guard<sharedSpinLock> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ shared_lock_guard<sharedSpinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

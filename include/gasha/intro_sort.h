@@ -14,6 +14,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
+#include <gasha/is_ordered.h>//整列状態確認
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
 #include <gasha/insertion_sort.h>//挿入ソート
@@ -172,7 +173,7 @@ inline std::size_t introSort(T* array, const std::size_t size, PREDICATE predica
 {
 	if (!array || size <= 1)
 		return 0;
-	if (calcUnordered(array, size, predicate) == 0)
+	if (isOrdered(array, size, predicate))
 		return 0;
 	return _introSort(array, size, predicate);
 }

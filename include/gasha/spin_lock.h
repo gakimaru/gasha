@@ -3,7 +3,7 @@
 #define __SPIN_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// spinLock.h
+// spin_lock.h
 // スピンロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -31,17 +31,17 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<spinLock> get_unique_lock(){ GASHA_ unique_lock<spinLock> lock(*this); return lock; }
-	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_lock<spinLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> lockUnique(){ GASHA_ unique_lock<spinLock> lock(*this); return lock; }
+	inline GASHA_ unique_lock<spinLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_lock<spinLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<spinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//ロック取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
 	//※ロック取得を伴う
-	inline GASHA_ lock_guard<spinLock> lock_scoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<spinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ lock_guard<spinLock> lock(*this);
 		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

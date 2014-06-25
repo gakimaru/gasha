@@ -3,7 +3,7 @@
 #define __DUMMY_LOCK_H_
 
 //--------------------------------------------------------------------------------
-// dummyLock.h
+// dummy_lock.h
 // ダミーロック
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -30,11 +30,11 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(){ GASHA_ unique_lock<dummyLock> lock(*this); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ with_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ try_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> get_unique_lock(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique(){ GASHA_ unique_lock<dummyLock> lock(*this); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 	//ロック取得
 	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
@@ -42,7 +42,7 @@ public:
 		//何もしない
 	}
 	//ロックガード取得
-	inline GASHA_ lock_guard<dummyLock> lock_scoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
+	inline GASHA_ lock_guard<dummyLock> lockScoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
 	{
 		GASHA_ lock_guard<dummyLock> lock(*this);
 		return lock;

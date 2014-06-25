@@ -76,7 +76,7 @@ struct less{
 	template<class CONTAINER, class PREDICATE> \
 	inline std::size_t func_name(CONTAINER& con, PREDICATE predicate) \
 	{ \
-		std::size_t size = con.size(); \
+		const std::size_t size = con.size(); \
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, predicate); \
 	}
 //※標準プレディケート関数使用版
@@ -148,51 +148,11 @@ struct less{
 	template<class CONTAINER, class GET_KEY_FUNCTOR> \
 	inline std::size_t func_name(CONTAINER& con, GET_KEY_FUNCTOR get_key_functor) \
 	{ \
-		std::size_t size = con.size(); \
+		const std::size_t size = con.size(); \
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, get_key_functor); \
 	}
 #define distributedSortFuncSet(func_name) \
 	distributedSortFuncSetByUserFunctor(func_name)
-
-//========================================
-//整列状態確認
-//========================================
-
-//----------------------------------------
-//整列状態確認
-template<class T, class PREDICATE>
-inline std::size_t calcUnordered(const T* array, const std::size_t size, PREDICATE predicate)
-{
-	std::size_t unordered = 0;
-	const T* prev = array;
-	const T* now = prev + 1;
-	for (std::size_t i = 1; i < size; ++i, ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			++unordered;
-	}
-	return unordered;
-}
-sortFuncSet(calcUnordered);
-
-//----------------------------------------
-//整列状態確認
-//※イテレータ対応版
-template<class ITERATOR, class PREDICATE>
-inline std::size_t iteratorCalcUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
-{
-	std::size_t unordered = 0;
-	ITERATOR prev = begin;
-	ITERATOR now = begin;
-	++now;
-	for (;now != end; ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			++unordered;
-	}
-	return unordered;
-}
-iteratorSortFuncSet(iteratorCalcUnordered);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

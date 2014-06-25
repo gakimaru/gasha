@@ -76,7 +76,7 @@ void forEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
 	}
 }
 template<class CONTAINER, class FUNCTOR>
-void forEach(CONTAINER container, FUNCTOR functor)
+void forEach(CONTAINER& container, FUNCTOR functor)
 {
 	typename CONTAINER::iterator begin = container.begin();
 	typename CONTAINER::iterator end = container.end();
@@ -122,7 +122,7 @@ void reverseForEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
 	}
 }
 template<class CONTAINER, class FUNCTOR>
-void reverseForEach(CONTAINER container, FUNCTOR functor)
+void reverseForEach(CONTAINER& container, FUNCTOR functor)
 {
 	typename CONTAINER::reverse_iterator rbegin = container.rbegin();
 	typename CONTAINER::reverse_iterator rend = container.rend();
