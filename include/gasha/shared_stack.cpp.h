@@ -18,6 +18,8 @@
 
 #include <gasha/shared_stack.inl>//共有スタック【インライン関数／テンプレート関数実装部】
 
+#include <gasha/shared_pool_allocator.cpp.h>//マルチスレッド共有プールアロケータ【関数実装部】
+
 #include <stdio.h>//printf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

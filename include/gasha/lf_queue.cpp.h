@@ -18,6 +18,8 @@
 
 #include <gasha/lf_queue.inl>//ロックフリーキュー【インライン関数／テンプレート関数実装部】
 
+#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数実装部】
+
 #include <stdio.h>//printf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
