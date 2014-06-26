@@ -72,23 +72,27 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 			if (next_tag_ptr.isNull())//末尾ノードの次ノードが末端（nullptr）か？
 			{
 				//CAS操作(0)
-				//※問題解消のための追加処理
-				//※本質的にロック操作と同等なのが残念...
-				//　このような形にするのであれば、m_next のCAS操作を処理の起点にして、
-				//　単純なnextとtailの更新処理に変更しても良いのだが、少しでもロック状態を
-				//　短縮するために、論文の構造を踏襲し、つじつま合わせ処理（CAS操作③&④）を
-				//　生かす方針にする。
+				//※問題解消のための追加処理。m_nextを設けて、先着処理を保証する。
+				//※本質的にロック操作（try_lock）と同等なのが残念...
+				//※このような形にするのであれば、m_next のCAS操作をエンキュー処理の起点にして、
+				//　単純なnextとtailの更新処理に変更しても良いのだが（実際その方がシンプルで
+				//　高速になるが）、少しでもロック状態を短縮するために、論文の構造を踏襲し、
+				//　つじつま合わせ処理（CAS操作③&④）を生かす方針にする。
 				if (m_next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
 				//【CAS操作の内容】
-				//    if(m_next == next_tag_ptr)//末尾ノードの次ノード（予約）を他のスレッドが書き換えていないか？
+				//    if(m_next == next_ready_tag_ptr)//末尾ノードの次ノード（予約）を他のスレッドが書き換えていないか？
 				//        m_next = new_node_tag_ptr;//末尾ノードの次ノード（予約）に新規ノードをセット（エンキュー準備成功）
+				//    else
+				//        next_tag_ptr = m_next;//他のスレッドが処理中のノード（予約）を取得
 				{
 					//CAS操作①
 					//※論文通りのこの処理だけだとアトミック性を保証できない問題があったので、前後に対策処理を追加
 					if(tail_tag_ptr == m_tail.load() && next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
 					//【CAS操作の内容】
-					//    if(tail_tag_ptr->m_next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
-					//        tail_tag_ptr->m_next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
+					//    if(next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
+					//        next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
+					//    else
+					//        next_tag_ptr = next;//他のスレッドが書き換えた末尾ノードの次ノードを取得
 					{
 						m_next.store(next_tag_ptr);//※問題解消のための追加処理（本質的にロック解除操作と同等）
 

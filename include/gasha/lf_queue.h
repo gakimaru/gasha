@@ -127,7 +127,7 @@ private:
 	allocator_type m_allocator;//アロケータ
 	std::atomic<queue_ptr_t> m_head;//キューの先頭
 	std::atomic<queue_ptr_t> m_tail;//キューの末尾
-	std::atomic<queue_ptr_t> m_next;//キューの末尾の次
+	std::atomic<queue_ptr_t> m_next;//キューの末尾の次（連結予約）
 	std::atomic<typename queue_ptr_t::tag_type> m_tag;//ABA問題対策用のタグ
 };
 

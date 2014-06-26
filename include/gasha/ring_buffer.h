@@ -157,21 +157,21 @@ namespace ring_buffer
 		//ソート用プレディケート関数オブジェクト
 		//※trueでlhsの方が小さい（並び順が正しい）
 		struct predicateForSort{
-			inline bool operator()(const value_type& lhs, const value_type& rhs) const { return less<value_type>()(lhs, rhs); }
+			inline bool operator()(const value_type& lhs, const value_type& rhs) const { return GASHA_ less<value_type>()(lhs, rhs); }
 		};
 
 		//探索用プレディケート関数オブジェクト
 		//※trueで一致（探索成功）
 		struct predicateForFind{
 			template<typename V>
-			inline bool operator()(const value_type& lhs, const V& rhs) const { return equal_to<value_type>()(lhs, rhs); }
+			inline bool operator()(const value_type& lhs, const V& rhs) const { return GASHA_ equal_to<value_type>()(lhs, rhs); }
 		};
 
 		//探索用比較関数オブジェクト
 		//※0で一致（探索成功）、1以上でlhsの方が大きい、-1以下でrhsの方が大きい
 		struct comparisonForSearch{
 			template<typename V>
-			inline int operator()(const value_type& lhs, const V& rhs) const { return compare_to<value_type>()(lhs, rhs); }
+			inline int operator()(const value_type& lhs, const V& rhs) const { return GASHA_ compare_to<value_type>()(lhs, rhs); }
 		};
 	};
 	//--------------------
