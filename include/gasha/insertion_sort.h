@@ -51,6 +51,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・メモリ使用量：O(1)
 //・安定性：　　　○
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t insertionSort(T* array, const std::size_t size, PREDICATE predicate)
 {
@@ -94,6 +96,8 @@ sortingFuncSet(insertionSort);
 //・メモリ使用量：O(1)
 //・安定性：　　　○
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 std::size_t iteratorInsertionSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
@@ -138,43 +142,101 @@ iteratorSortingFuncSet(iteratorInsertionSort);
 //・メモリ使用量：O(1)
 //・安定性：　　　○
 //----------------------------------------
-template<class NODE_TYPE, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
-std::size_t linkedListInsertionSort(NODE_TYPE*& first, NODE_TYPE*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate)
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
+//・T* GET_NEXT_FUNC(T& node)//次のノードを返す
+//・T* GET_PREV_FUNC(T& node)//前のノードを返す
+//・void INSERT_NODE_BEFORE_FUNC(T& new_node, T& target_node, T*& first_ref, T*& last_ref)//target_nodeの前にnew_nodeを連結する
+//・void REMOVE_NODE_FUNC(T& target_node, T*& first_ref, T*& last_ref)//target_nodeを連結から解除する
+template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
+std::size_t linkedListInsertionSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate)
 {
-	typedef NODE_TYPE node_type;
 	if (!first || !get_next_func(*first))
 		return 0;
 	std::size_t swapped_count = 0;
-	node_type* now = first;
-	node_type* next = const_cast<node_type*>(get_next_func(*now));
+	T* now = first;
+	T* next = const_cast<T*>(get_next_func(*now));
 	while (next)
 	{
 		if (predicate(*next, *now))
 		{
-			node_type* min = now;
-			node_type* prev = const_cast<node_type*>(get_prev_func(*now));
+			T* min = now;
+			T* prev = const_cast<T*>(get_prev_func(*now));
 			while (prev)
 			{
 				if (predicate(*next, *prev))
 					min = prev;
 				else
 					break;
-				prev = const_cast<node_type*>(get_prev_func(*prev));
+				prev = const_cast<T*>(get_prev_func(*prev));
 			}
 			remove_node_func(*next, first, last);
 			insert_node_before_func(*next, *min, first, last);
 			++swapped_count;
-			next = const_cast<node_type*>(get_next_func(*now));
+			next = const_cast<T*>(get_next_func(*now));
 		}
 		else
 		{
 			now = next;
-			next = const_cast<node_type*>(get_next_func(*next));
+			next = const_cast<T*>(get_next_func(*next));
 		}
 	}
 	return swapped_count;
 }
 linkedListSortingFuncSet(linkedListInsertionSort);
+
+//----------------------------------------
+//アルゴリズム：変形挿入ソート
+//※片方向連結リスト対応版
+//----------------------------------------
+//・最良計算時間：O(n)
+//・平均計算時間：O(n^2)
+//・最悪計算時間：O(n^2)
+//・メモリ使用量：O(1)
+//・安定性：　　　○
+//----------------------------------------
+//挿入先の探索を先頭から行う方式
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
+//・T* GET_NEXT_FUNC(T& node)//次のノードを返す
+//・void INSERT_NODE_AFTER_FUNC(T& new_node, T& target_node, T*& first_ref, T*& last_ref)//target_nodeの後にnew_nodeを連結する
+//・void REMOVE_NODE_AFTER_FUNC(T& prev_target_node, T*& first_ref, T*& last_ref)//prev_target_nodeの次のノードを連結から解除する
+template<class T, class GET_NEXT_FUNC, class INSERT_NODE_AFTER_FUNC, class REMOVE_NODE_AFTER_FUNC, class PREDICATE>
+std::size_t singlyLinkedListInsertionSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func, INSERT_NODE_AFTER_FUNC insert_node_after_func, REMOVE_NODE_AFTER_FUNC remove_node_after_func, PREDICATE predicate)
+{
+	if (!first || !get_next_func(*first))
+		return 0;
+	std::size_t swapped_count = 0;
+	T* now = first;
+	T* next = const_cast<T*>(get_next_func(*now));
+	while (next)
+	{
+		if (predicate(*next, *now))
+		{
+			T* min_before = nullptr;
+			T* min = first;
+			while (min != now)
+			{
+				if (predicate(*next, *min))
+					break;
+				min_before = min;
+				min = const_cast<T*>(get_next_func(*min));
+			}
+			remove_node_after_func(now, first, last);//nextを連結から外す
+			insert_node_after_func(*next, min_before, first, last);
+			++swapped_count;
+			next = const_cast<T*>(get_func_fun(*now));
+		}
+		else
+		{
+			now = next;
+			next = const_cast<T*>(get_next_func(*next));
+		}
+	}
+	return swapped_count;
+}
+singlyLinkedListSortingFuncSet(singlyLinkedListInsertionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

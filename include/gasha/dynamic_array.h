@@ -214,6 +214,8 @@ namespace dynamic_array
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
@@ -266,13 +268,6 @@ namespace dynamic_array
 			inline iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
 			inline int operator-(const iterator& rhs) const;
 		public:
-			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
-			inline iterator& operator=(const reverse_iterator&& rhs);
-			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
-			inline iterator& operator=(const reverse_iterator& rhs);
-		public:
 			//アクセッサ
 			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
@@ -280,13 +275,20 @@ namespace dynamic_array
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
 			inline index_type getIndex() const;//インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
 			//メソッド
 			//参照を更新
 			void update(const index_type index) const;
 			inline void addIndexAndUpdate(const int add) const;
+		public:
+			//ムーブオペレータ
+			inline iterator& operator=(const iterator&& rhs);
+			inline iterator& operator=(const reverse_iterator&& rhs);
+			//コピーオペレータ
+			inline iterator& operator=(const iterator& rhs);
+			inline iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
 			inline iterator(const iterator&& obj);
@@ -294,6 +296,7 @@ namespace dynamic_array
 			//コピーコンストラクタ
 			inline iterator(const iterator& obj);
 			inline iterator(const reverse_iterator& obj);
+		public:
 			//コンストラクタ
 			inline iterator(const container& con, const bool is_end);
 			inline iterator(const container& con, const index_type index);
@@ -320,6 +323,8 @@ namespace dynamic_array
 			friend class container;
 			friend class iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -372,13 +377,6 @@ namespace dynamic_array
 			inline reverse_iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
 			inline int operator-(const reverse_iterator& rhs) const;
 		public:
-			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
-			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
-		public:
 			//アクセッサ
 			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
@@ -386,8 +384,8 @@ namespace dynamic_array
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
 			inline index_type getIndex() const;//インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
 			//メソッド
 			//参照を更新
@@ -398,12 +396,20 @@ namespace dynamic_array
 			inline const iterator base() const;
 			inline iterator base();
 		public:
+			//ムーブオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
+			inline reverse_iterator& operator=(const iterator&& rhs);
+			//コピーオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator& rhs);
+			inline reverse_iterator& operator=(const iterator& rhs);
+		public:
 			//ムーブコンストラクタ
 			inline reverse_iterator(const reverse_iterator&& obj);
 			inline reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
 			inline reverse_iterator(const reverse_iterator& obj);
 			inline reverse_iterator(const iterator& obj);
+		public:
 			//コンストラクタ
 			inline reverse_iterator(const container& con, const bool is_end);
 			inline reverse_iterator(const container& con, const index_type index);
@@ -424,6 +430,7 @@ namespace dynamic_array
 		};
 	public:
 		//アクセッサ
+		//※at(), []()は、std::vectorと異なり、値のポインタを返し、例外を発生させない点に注意
 		inline const value_type* at(const int index) const { return refElement(index); }
 		inline value_type* at(const int index){ return refElement(index); }
 		inline const value_type* operator[](const int index) const { return refElement(index); }
@@ -741,6 +748,16 @@ namespace dynamic_array
 }//namespace dynamic_array
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_INL
+#include <gasha/dynamic_array.inl>
+#endif//GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dynamic_array.cpp.h>
+#endif//GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__DYNAMIC_ARRAY_H_
 

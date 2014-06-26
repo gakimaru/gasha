@@ -224,6 +224,16 @@ namespace dynamic_array
 	{ 
 		return m_index;
 	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::iterator::getValue() const//現在の値
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::iterator::getValue()//現在の値
+	{
+		return m_value;
+	}
 	//メソッド
 	//参照を更新
 	template<class OPE_TYPE>
@@ -503,6 +513,16 @@ namespace dynamic_array
 	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::reverse_iterator::getIndex() const//インデックス
 	{
 		return m_index - 1;
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::reverse_iterator::getValue() const//現在の値
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::reverse_iterator::getValue()//現在の値
+	{
+		return m_value;
 	}
 
 	//メソッド

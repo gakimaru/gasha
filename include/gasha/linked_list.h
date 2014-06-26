@@ -42,7 +42,7 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//双方向連結リスト（double-linked list）
+//双方向連結リスト（doubly-linked list）
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -51,8 +51,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・要素（ノード）ごとに独立したデータ（メモリ）を連結して管理する。
 //・前後の連結を扱うため、リストの昇順アクセスと降順アクセスが行える。
 //【利点】
-//・リストの先頭・末端への要素の挿入がほぼO(1)で行える。
-//・リストの先頭・末端要素の削除がほぼO(1)で行える。
+//・リストの先頭・末端への要素の挿入がほぼO(1)で行える。（制約：末端の処理が早いのは、末端を管理している場合のみ）
+//・リストの先頭・末端要素の削除がほぼO(1)で行える。（制約：末端の処理が早いのは、末端を管理している場合のみ）
 //・リストの途中への要素の挿入がほぼO(1)で行える。
 //・リストの途中要素の削除がほぼO(1)で行える。
 //・リストの要素数の上限を決めずに扱える。
@@ -82,6 +82,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・順序変更や途中挿入・削除を多用するリスト。
 //・複数種のキュー／スタックを同一ノードが渡り歩く必要がある場合。
 //　　例：処理待ちリスト（キュー）に連結→処理中リストに再連結→削除待ちリストに再連結といった流れを扱う。
+//    ※リストの逆順走査要件がなければ、双方向連結リストよりも片方向連結リストの方が良い。
 //--------------------------------------------------------------------------------
 
 namespace linked_list
@@ -226,7 +227,6 @@ namespace linked_list
 	//双方向連結リスト操作関数：指定ノードの範囲を連結から外す
 	template<class OPE_TYPE>
 	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type& end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
-
 	//----------------------------------------
 	//双方向連結リスト操作関数：線形探索
 	template<class OPE_TYPE, typename V>
@@ -235,35 +235,38 @@ namespace linked_list
 	const typename OPE_TYPE::node_type* linearSearchValue(const typename OPE_TYPE::node_type* first, const V& value, PREDICATE predicate);
 	template<class OPE_TYPE, class PREDICATE>
 	const typename OPE_TYPE::node_type* linearSearch(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
-
+	//----------------------------------------
+	//双方向連結リスト操作関数：二分探索
+	template<class OPE_TYPE, typename V>
+	const typename OPE_TYPE::node_type* binarySearchValue(const typename OPE_TYPE::node_type* first, const V& value);
+	template<class OPE_TYPE, typename V, class COMPARISON>
+	const typename OPE_TYPE::node_type* binarySearchValue(const typename OPE_TYPE::node_type* first, const V& value, COMPARISON comparison);
+	template<class OPE_TYPE, class COMPARISON>
+	const typename OPE_TYPE::node_type* binarySearch(const typename OPE_TYPE::node_type* first, COMPARISON comparison);
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t isUnordered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
-
 	//----------------------------------------
 	//双方向連結リスト操作関数：整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t isOrdered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
-
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列要素数計上
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t sumupUnordered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t sumupUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
-
 	//----------------------------------------
 	//双方向連結リスト操作関数：挿入ソート
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t insertionSort(typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t insertionSort(typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, PREDICATE predicate);
-
 	//----------------------------------------
 	//双方向連結リスト操作関数：シェルソート
 	template<class OPE_TYPE, class PREDICATE>
@@ -295,24 +298,26 @@ namespace linked_list
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
-			inline operator const_reference() const { return *getNode(); }
-			inline operator reference(){ return *getNode(); }
-			inline operator const_pointer() const { return getNode(); }
-			inline operator pointer(){ return getNode(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 		public:
 			//基本オペレータ
-			inline const_reference operator*() const { return *getNode(); }
-			inline reference operator*(){ return *getNode(); }
-			inline const_pointer operator->() const { return getNode(); }
-			inline pointer operator->(){ return getNode(); }
-		#if 1//std::bidirectional_iterator_tag には本来必要ではない
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
+			inline const_pointer operator->() const { return getValue(); }
+			inline pointer operator->(){ return getValue(); }
+		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline const iterator operator[](const int index) const;
 			inline iterator operator[](const int index);
-		#endif
+		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//比較オペレータ
 			inline bool operator==(const iterator& rhs) const;
@@ -327,7 +332,7 @@ namespace linked_list
 			inline const iterator operator--(int) const;
 			inline iterator operator++(int);
 			inline iterator operator--(int);
-		#if 1//std::bidirectional_iterator_tag には本来必要ではない
+		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline const iterator& operator+=(const int rhs) const;
 			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
 			inline const iterator& operator-=(const int rhs) const;
@@ -345,14 +350,7 @@ namespace linked_list
 			inline iterator operator-(const int rhs);
 			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
 			//inline int operator-(const iterator& rhs) const;
-		#endif
-		public:
-			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
-			inline iterator& operator=(const reverse_iterator&& rhs);
-			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
-			inline iterator& operator=(const reverse_iterator& rhs);
+		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
 			inline bool isExist() const;
@@ -360,8 +358,8 @@ namespace linked_list
 			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
-			inline const node_type* getNode() const { return m_node; }//現在のノード
-			inline node_type* getNode(){ return m_node; }//現在のノード
+			inline const value_type* getValue() const;//現在の値（ノード）
+			inline value_type* getValue();//現在の値（ノード）
 		private:
 			//メソッド
 			//参照を更新
@@ -370,19 +368,27 @@ namespace linked_list
 			void updateForward(const std::size_t step) const;
 			void updateBackward(const std::size_t step) const;
 		public:
+			//ムーブオペレータ
+			inline iterator& operator=(const iterator&& rhs);
+			inline iterator& operator=(const reverse_iterator&& rhs);
+			//コピーオペレータ
+			inline iterator& operator=(const iterator& rhs);
+			inline iterator& operator=(const reverse_iterator& rhs);
+		public:
 			//ムーブコンストラクタ
 			inline iterator(const iterator&& obj);
 			inline iterator(const reverse_iterator&& obj);
 			//コピーコンストラクタ
 			inline iterator(const iterator& obj);
 			iterator(const reverse_iterator& obj);
+		public:
 			//コンストラクタ
 			inline iterator(const container& con, const bool is_end);
-			inline iterator(const container& con, node_type* node, const bool is_end);
+			inline iterator(const container& con, value_type* value , const bool is_end);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
-				m_node(nullptr),
+				m_value(nullptr),
 				m_isEnd(false)
 			{}
 			//デストラクタ
@@ -391,7 +397,7 @@ namespace linked_list
 		protected:
 			//フィールド
 			const container* m_con;//コンテナ
-			mutable node_type* m_node;//現在のノード
+			mutable value_type* m_value;//現在の値（ノード）
 			mutable bool m_isEnd;//終端か？
 		};
 		//--------------------
@@ -402,25 +408,27 @@ namespace linked_list
 			friend class container;
 			friend class iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::iterator iterator;
 		public:
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
-			inline operator const_reference() const { return *getNode(); }
-			inline operator reference(){ return *getNode(); }
-			inline operator const_pointer() const { return getNode(); }
-			inline operator pointer(){ return getNode(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 		public:
 			//基本オペレータ
-			inline const_reference operator*() const { return *getNode(); }
-			inline reference operator*(){ return *getNode(); }
-			inline const_pointer operator->() const { return getNode(); }
-			inline pointer operator->(){ return getNode(); }
-		#if 1//std::bidirectional_iterator_tag には本来必要ではない
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
+			inline const_pointer operator->() const { return getValue(); }
+			inline pointer operator->(){ return getValue(); }
+		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline const reverse_iterator operator[](const int index) const;
 			inline reverse_iterator operator[](const int index);
-		#endif
+		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//比較オペレータ
 			inline bool operator==(const reverse_iterator& rhs) const;
@@ -435,7 +443,7 @@ namespace linked_list
 			inline const reverse_iterator operator--(int) const;
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
-		#if 1//std::bidirectional_iterator_tag には本来必要ではない
+		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline const reverse_iterator& operator+=(const int rhs) const;
 			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
 			inline const reverse_iterator& operator-=(const int rhs) const;
@@ -453,14 +461,7 @@ namespace linked_list
 			inline reverse_iterator operator-(const int rhs);
 			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
 			//inline int operator-(const reverse_iterator& rhs) const;
-		#endif
-		public:
-			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
-			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
+		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
 			inline bool isExist() const;
@@ -468,8 +469,8 @@ namespace linked_list
 			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
-			inline const node_type* getNode() const { return m_node; }//現在のノード
-			inline node_type* getNode(){ return m_node; }//現在のノード
+			inline const value_type* getValue() const;//現在の値（ノード）
+			inline value_type* getValue();//現在の値（ノード）
 		public:
 			//メソッド
 			//参照を更新
@@ -482,19 +483,27 @@ namespace linked_list
 			inline const iterator base() const;
 			inline iterator base();
 		public:
+			//ムーブオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
+			inline reverse_iterator& operator=(const iterator&& rhs);
+			//コピーオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator& rhs);
+			inline reverse_iterator& operator=(const iterator& rhs);
+		public:
 			//ムーブコンストラクタ
 			inline reverse_iterator(const reverse_iterator&& obj);
 			inline reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
 			inline reverse_iterator(const reverse_iterator& obj);
 			inline reverse_iterator(const iterator& obj);
+		public:
 			//コンストラクタ
 			inline reverse_iterator(const container& con, const bool is_end);
-			inline reverse_iterator(const container& con, node_type* node, const bool is_end);
+			inline reverse_iterator(const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
-				m_node(nullptr),
+				m_value(nullptr),
 				m_isEnd(false)
 			{}
 			//デストラクタ
@@ -503,18 +512,21 @@ namespace linked_list
 		protected:
 			//フィールド
 			const container* m_con;//コンテナ
-			mutable node_type* m_node;//現在のノード
+			mutable value_type* m_value;//現在の値（ノード）
 			mutable bool m_isEnd;//終端か？
 		};
 	public:
 		//アクセッサ
-		inline const node_type* at(const index_type index) const//※std::listと異なり、ノードのポインタを返す
+	#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
+		//※at(), []()は、ノードのポインタを返し、例外を発生させない点に注意
+		inline const node_type* at(const index_type index) const
 		{
 			return getForwardNode<ope_type>(m_first, index);
 		}
 		inline node_type* at(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->at(index)); }
 		inline const node_type* operator[](const index_type index) const { return at(index); }
 		inline node_type* operator[](const index_type index){ return at(index); }
+	#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
@@ -561,10 +573,10 @@ namespace linked_list
 		//メソッド：要素アクセス系
 		inline node_type* front(){ return m_first; }//先頭ノードを参照
 		inline const node_type* front() const { return m_first; }//先頭ノードを参照
-		inline node_type*& first_ref(){ return m_first; }//先頭ノードの参照を取得
+		inline node_type*& firstRef(){ return m_first; }//先頭ノードの参照を取得
 		inline node_type* back(){ return m_last; }//末尾ノードを参照
 		inline const node_type* back() const { return m_last; }//末尾ノードを参照
-		inline node_type*& last_ref(){ return m_last; }//末尾ノードの参照を取得
+		inline node_type*& lastRef(){ return m_last; }//末尾ノードの参照を取得
 	public:
 		//追加／削除系
 		//※std::listと異なり、追加／削除対象のノードを直接指定し、結果をポインタで受け取る（成功したら、追加／削除したポインタを返す）
@@ -710,7 +722,7 @@ namespace linked_list
 		template<typename V>
 		iterator findValue(const V& value)
 		{
-			const node_type* found_node = linearSearchValue(m_first, getNextNode<OPE_TYPE>, value, typename ope_type::predicateForFind());
+			const node_type* found_node = linearSearchValue(m_first, value, typename ope_type::predicateForFind());
 			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
@@ -718,7 +730,7 @@ namespace linked_list
 		template<typename V, class PREDICATE>
 		iterator findValue(const V& value, PREDICATE predicate)
 		{
-			const node_type* found_node = linearSearchValue(m_first, getNextNode<OPE_TYPE>, value, predicate);
+			const node_type* found_node = linearSearchValue(m_first, value, predicate);
 			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
@@ -727,7 +739,7 @@ namespace linked_list
 		template<class PREDICATE>
 		iterator find(PREDICATE predicate)
 		{
-			const node_type* found_node = linearSearch(m_first, getNextNode<OPE_TYPE>, predicate);
+			const node_type* found_node = linearSearch(m_first, predicate);
 			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
@@ -740,14 +752,16 @@ namespace linked_list
 		template<typename V>
 		iterator binarySearchValue(const V& value)
 		{
-			iterator found = iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
+			const node_type* found_node = binarySearchValue(m_first, value, typename ope_type::comparisonForSearch());
+			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
 		iterator binarySearchValue(const V& value, COMPARISON comparison)
 		{
-			iterator found = iteratorBinarySearchValue(begin(), end(), value, comparison);
+			const node_type* found_node = binarySearchValue(m_first, value, comparison);
+			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
 		//※比較関数指定版
@@ -755,13 +769,14 @@ namespace linked_list
 		template<class COMPARISON>
 		iterator binary_search(COMPARISON comparison)
 		{
-			iterator found = iteratorBinarySearch(begin(), end(), comparison);
+			const node_type* found_node = binarySearch(m_first, comparison);
+			iterator found(*this, found_node, found_node == nullptr);
 			return found;
 		}
 	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド
-		//※merge(), splice(), reverse(), unique()には非対応
+		//※merge(), splice(), reverse(), unique(), emplace_front(), emplace_back() には非対応
 
 	public:
 		//ムーブコンストラクタ
@@ -795,6 +810,16 @@ namespace linked_list
 }//namespace linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_LINKED_LIST_ALLWAYS_TOGETHER_INL
+#include <gasha/linked_list.inl>
+#endif//GASHA_LINKED_LIST_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_LINKED_LIST_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/linked_list.cpp.h>
+#endif//GASHA_LINKED_LIST_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__LINKED_LIST_H_
 

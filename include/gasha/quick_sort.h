@@ -54,10 +54,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※再帰処理を使用せず、スタックを使用したループ処理にして最適化する。
 //　（最大件数を log2(4294967296) = 32 とする）
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 {
-#ifndef GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
+#ifdef GASHA_QUICK_SORT_USE_RECURSIVE_CALL
 	//--------------------
 	//再帰処理版
 	if (size <= 1)
@@ -100,17 +102,19 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 	swapped_count += _quickSort(array, begin - array, predicate);//軸未満の配列
 	swapped_count += _quickSort(end + 1, term - end - 1, predicate);//軸以上の配列
 	return swapped_count;
-#else//GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
+#else//GASHA_QUICK_SORT_USE_RECURSIVE_CALL
 #ifndef GASHA_QUICK_SORT_USE_OPENMP
 	//--------------------
 	//スタック処理版
+	//※再帰処理より速いが、並びの状態によってはスタックオーバーフローの危険性がある。
+	//※イントロソートなら、一定の再帰レベルでクイックソートを打ち切るので、スタックオーバーフローの危険性がない。
 	std::size_t swapped_count = 0;
 	struct stack_t
 	{
 		T* array;
 		std::size_t size;
 	};
-	static const int STACK_DEPTH_MAX = 32 * 2;
+	static const int STACK_DEPTH_MAX = 64 * 2;//最大再帰レベル※多めに設定
 	stack_t stack[STACK_DEPTH_MAX];
 	//最初の配列をスタックにプッシュ
 	stack_t* stack_p = &stack[0];
@@ -274,7 +278,7 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 	delete[] queue;
 	return swapped_count;
 #endif//GASHA_QUICK_SORT_USE_OPENMP
-#endif//GASHA_QUICK_SORT_NO_USE_RECURSIVE_CALL
+#endif//GASHA_QUICK_SORT_USE_RECURSIVE_CALL
 }
 template<class T, class PREDICATE>
 inline std::size_t quickSort(T* array, const std::size_t size, PREDICATE predicate)

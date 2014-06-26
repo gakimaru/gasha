@@ -254,6 +254,24 @@ namespace linked_list
 	}
 
 	//----------------------------------------
+	//双方向連結リスト操作関数：二分探索
+	template<class OPE_TYPE, typename V>
+	const typename OPE_TYPE::node_type* binarySearchValue(const typename OPE_TYPE::node_type* first, const V& value)
+	{
+		return GASHA_ linkedListBinarySearchValue(first, OPE_TYPE::getNext, OPE_TYPE::getPrev, value);
+	}
+	template<class OPE_TYPE, typename V, class COMPARISON>
+	const typename OPE_TYPE::node_type* binarySearchValue(const typename OPE_TYPE::node_type* first, const V& value, COMPARISON comparison)
+	{
+		return GASHA_ linkedListBinarySearchValue(first, OPE_TYPE::getNext, OPE_TYPE::getPrev, value, comparison);
+	}
+	template<class OPE_TYPE, class COMPARISON>
+	const typename OPE_TYPE::node_type* binarySearch(const typename OPE_TYPE::node_type* first, COMPARISON comparison)
+	{
+		return GASHA_ linkedListBinarySearch(first, OPE_TYPE::getNext, OPE_TYPE::getPrev, comparison);
+	}
+
+	//----------------------------------------
 	//双方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
 	std::size_t isUnordered(const typename OPE_TYPE::node_type* first)
@@ -322,7 +340,7 @@ namespace linked_list
 	//イテレータのインライン関数
 	
 	//基本オペレータ
-#if 1//std::bidirectional_iterator_tag には本来必要ではない
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index) const
 	{
@@ -337,7 +355,7 @@ namespace linked_list
 		ite += index;
 		return ite;
 	}
-#endif
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//比較オペレータ
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::operator==(const typename container<OPE_TYPE>::iterator& rhs) const
@@ -345,7 +363,7 @@ namespace linked_list
 		return !isEnabled() || !rhs.isEnabled() ? false :
 			m_isEnd && rhs.m_isEnd ? true :
 			m_isEnd || rhs.m_isEnd ? false :
-			m_node == rhs.m_node;
+			m_value == rhs.m_value;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::operator!=(const typename container<OPE_TYPE>::iterator& rhs) const
@@ -353,7 +371,7 @@ namespace linked_list
 		return !isEnabled() || !rhs.isEnabled() ? false :
 			m_isEnd && rhs.m_isEnd ? false :
 			m_isEnd || rhs.m_isEnd ? true :
-			m_node != rhs.m_node;
+			m_value != rhs.m_value;
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
@@ -408,7 +426,7 @@ namespace linked_list
 		--(*this);
 		return ite;
 	}
-#if 1//std::bidirectional_iterator_tag には本来必要ではない
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs) const
 	{
@@ -464,31 +482,41 @@ namespace linked_list
 	//template<class OPE_TYPE>
 	//inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	//{
-	//	...
+	//	return ...;
 	//}
-#endif
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isExist() const
 	{
-		return m_node != nullptr;
+		return m_value != nullptr;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isEnabled() const
 	{
-		return m_node != nullptr || m_isEnd;
+		return m_value != nullptr || m_isEnd;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isEnd() const//終端か？
 	{
 		return m_isEnd;
 	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::iterator::getValue() const//現在のノード
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::value_type*  container<OPE_TYPE>::iterator::getValue()//現在のノード
+	{
+		return m_value;
+	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
-		m_node = rhs.m_node;
+		m_value = rhs.m_value;
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
@@ -496,16 +524,16 @@ namespace linked_list
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
-		m_node = rhs.m_node;
+		m_value = rhs.m_value;
 		m_isEnd = false;
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (rhs.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_first);
+				m_value = const_cast<value_type*>(m_con->m_first);
 		}
 		return *this;
 	}
@@ -514,7 +542,7 @@ namespace linked_list
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
-		m_node = rhs.m_node;
+		m_value = rhs.m_value;
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
@@ -522,16 +550,16 @@ namespace linked_list
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
-		m_node = rhs.m_node;
+		m_value = rhs.m_value;
 		m_isEnd = false;
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (rhs.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_first);
+				m_value = const_cast<value_type*>(m_con->m_first);
 		}
 		return *this;
 	}
@@ -539,73 +567,73 @@ namespace linked_list
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(false)
 	{
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (obj.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_first);
+				m_value = const_cast<value_type*>(m_con->m_first);
 		}
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(false)
 	{
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (obj.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_first);
+				m_value = const_cast<value_type *>(m_con->m_first);
 		}
 	}
 	//コンストラクタ
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::iterator::iterator(const container& con, const bool is_end) :
 		m_con(&con),
-		m_node(nullptr),
+		m_value(nullptr),
 		m_isEnd(is_end)
 	{
 		if (!is_end)
 		{
-			m_node = const_cast<node_type*>(con.m_first);
-			if (!m_node)
+			m_value = const_cast<value_type*>(con.m_first);
+			if (!m_value)
 				m_isEnd = true;
 		}
 	}
 	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const container& con, node_type* node, const bool is_end) :
+	inline container<OPE_TYPE>::iterator::iterator(const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
 		m_con(&con),
-		m_node(node),
+		m_value(value),
 		m_isEnd(is_end)
 	{}
 
 	//--------------------
 	//リバースイテレータのインライン関数
 	//基本オペレータ
-#if 1//std::bidirectional_iterator_tag には本来必要ではない
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index) const
 	{
@@ -620,7 +648,7 @@ namespace linked_list
 		ite += index;
 		return ite;
 	}
-#endif
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//比較オペレータ
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::operator==(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
@@ -628,7 +656,7 @@ namespace linked_list
 		return !rhs.isEnabled() || !isEnabled() ? false :
 			rhs.m_isEnd && m_isEnd ? true :
 			rhs.m_isEnd || m_isEnd ? false :
-			m_node == rhs.m_node;
+			m_value == rhs.m_value;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::operator!=(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
@@ -636,7 +664,7 @@ namespace linked_list
 		return !rhs.isEnabled() || !isEnabled() ? false :
 			rhs.m_isEnd && m_isEnd ? false :
 			rhs.m_isEnd || m_isEnd ? true :
-			m_node != rhs.m_node;
+			m_value != rhs.m_value;
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
@@ -691,7 +719,7 @@ namespace linked_list
 		--(*this);
 		return ite;
 	}
-#if 1//std::bidirectional_iterator_tag には本来必要ではない
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs) const
 	{
@@ -747,76 +775,34 @@ namespace linked_list
 	//template<class OPE_TYPE>
 	//inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	//{
-	//	...
+	//	return ...;
 	//}
-#endif
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_node = rhs.m_node;
-		m_isEnd = rhs.m_isEnd;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_node = rhs.m_node;
-		m_isEnd = false;
-		if (m_node)
-		{
-			++(*this);
-		}
-		else
-		{
-			if (rhs.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_last);
-		}
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_node = rhs.m_node;
-		m_isEnd = rhs.m_isEnd;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_node = rhs.m_node;
-		m_isEnd = false;
-		if (m_node)
-		{
-			++(*this);
-		}
-		else
-		{
-			if (rhs.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_last);
-		}
-		return *this;
-	}
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::isExist() const
 	{
-		return m_node != nullptr;
+		return m_value != nullptr;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::isEnabled() const
 	{
-		return m_node != nullptr || m_isEnd;
+		return m_value != nullptr || m_isEnd;
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::isEnd() const//終端か？
 	{
 		return m_isEnd;
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::reverse_iterator::getValue() const//現在の値（ノード）
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::value_type*  container<OPE_TYPE>::reverse_iterator::getValue()//現在の値（ノード）
+	{
+		return m_value;
 	}
 	//ベースを取得
 	template<class OPE_TYPE>
@@ -831,70 +817,122 @@ namespace linked_list
 		iterator ite(*this);
 		return ite;
 	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			++(*this);
+		}
+		else
+		{
+			if (rhs.m_isEnd)
+				m_value = const_cast<value_type*>(m_con->m_last);
+		}
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			++(*this);
+		}
+		else
+		{
+			if (rhs.m_isEnd)
+				m_value = const_cast<value_type*>(m_con->m_last);
+		}
+		return *this;
+	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(false)
 	{
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (obj.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_last);
+				m_value = const_cast<value_type*>(m_con->m_last);
 		}
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
-		m_node(obj.m_node),
+		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{
-		if (m_node)
+		if (m_value)
 		{
 			++(*this);
 		}
 		else
 		{
 			if (obj.m_isEnd)
-				m_node = const_cast<node_type*>(m_con->m_last);
+				m_value = const_cast<value_type*>(m_con->m_last);
 		}
 	}
 	//コンストラクタ
 	template<class OPE_TYPE>
 	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
 		m_con(&con),
-		m_node(nullptr),
+		m_value(nullptr),
 		m_isEnd(is_end)
 	{
 		if (!is_end)
 		{
-			m_node = const_cast<node_type*>(m_con->m_last);
-			if (!m_node)
+			m_value = const_cast<value_type*>(m_con->m_last);
+			if (!m_value)
 				m_isEnd = true;
 		}
 	}
 	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, node_type* node, const bool is_end) :
+	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
 		m_con(con),
-		m_node(node),
+		m_value(value),
 		m_isEnd(is_end)
 	{}
 

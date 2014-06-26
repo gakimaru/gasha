@@ -221,6 +221,8 @@ namespace ring_buffer
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
@@ -272,13 +274,6 @@ namespace ring_buffer
 			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
 			inline int operator-(const iterator& rhs) const;
 		public:
-			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
-			inline iterator& operator=(const reverse_iterator&& rhs);
-			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
-			inline iterator& operator=(const reverse_iterator& rhs);
-		public:
 			//アクセッサ
 			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
@@ -287,13 +282,20 @@ namespace ring_buffer
 			inline bool isEnd() const;//終端か？
 			inline index_type getRealIndex() const;//物理インデックス
 			inline index_type getIndex() const;//論理インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
 			inline void addIndexAndUpdate(const int add) const;
+		public:
+			//ムーブオペレータ
+			inline iterator& operator=(const iterator&& rhs);
+			inline iterator& operator=(const reverse_iterator&& rhs);
+			//コピーオペレータ
+			inline iterator& operator=(const iterator& rhs);
+			inline iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
 			inline iterator(const iterator&& obj);
@@ -301,6 +303,7 @@ namespace ring_buffer
 			//コピーコンストラクタ
 			inline iterator(const iterator& obj);
 			inline iterator(const reverse_iterator& obj);
+		public:
 			//コンストラクタ
 			inline iterator(const container& con, const bool is_end);
 			inline iterator(const container& con, const index_type logical_index);
@@ -327,6 +330,8 @@ namespace ring_buffer
 			friend class container;
 			friend class iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -378,13 +383,6 @@ namespace ring_buffer
 			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
 			inline int operator-(const reverse_iterator& rhs) const;
 		public:
-			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
-			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
-		public:
 			//アクセッサ
 			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
@@ -393,8 +391,8 @@ namespace ring_buffer
 			inline bool isEnd() const;//終端か？
 			inline index_type getRealIndex() const;//物理インデックス
 			inline index_type getIndex() const;//論理インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
 			//メソッド
 			//参照を更新
@@ -405,12 +403,20 @@ namespace ring_buffer
 			inline const iterator base() const;
 			inline iterator base();
 		public:
+			//ムーブオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
+			inline reverse_iterator& operator=(const iterator&& rhs);
+			//コピーオペレータ
+			inline reverse_iterator& operator=(const reverse_iterator& rhs);
+			inline reverse_iterator& operator=(const iterator& rhs);
+		public:
 			//ムーブコンストラクタ
 			inline reverse_iterator(const reverse_iterator&& obj);
 			inline reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
 			inline reverse_iterator(const reverse_iterator& obj);
 			inline reverse_iterator(const iterator& obj);
+		public:
 			//コンストラクタ
 			inline reverse_iterator(const container& con, const bool is_end);
 			inline reverse_iterator(const container& con, const index_type logical_index);
@@ -431,6 +437,7 @@ namespace ring_buffer
 		};
 	public:
 		//アクセッサ
+		//※at(), []()は、std::dequeと異なり、値のポインタを返し、例外を発生させない点に注意
 		inline const value_type* at(const int logical_index) const { return refElement(logical_index); }
 		inline value_type* at(const int logical_index){ return refElement(logical_index); }
 		inline const value_type* operator[](const int logical_index) const { return refElement(logical_index); }
@@ -1139,6 +1146,16 @@ namespace ring_buffer
 }//namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_RING_BUFFER_ALLWAYS_TOGETHER_INL
+#include <gasha/ring_buffer.inl>
+#endif//GASHA_RING__BUFFER_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_RING_BUFFER_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/ring_buffer.cpp.h>
+#endif//GASHA_RING_BUFFER_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__RING_BUFFER_H_
 

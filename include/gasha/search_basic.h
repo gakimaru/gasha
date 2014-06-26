@@ -445,23 +445,44 @@ struct compare_to{
 
 //----------------------------------------
 //探索処理オーバーロード関数用マクロ
+//※双方向連結リスト対応版
+//※探索値指定版：比較関数と値で比較
+#define linkedListSearchFuncSetByComparisonAndValue(func_name) \
+	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, typename V, class COMPARISON> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, const V& value, COMPARISON comparison) \
+	{ \
+		auto _comparison = [&value, &comparison](T& val1) -> int { return comparison(val1, value); }; \
+		return func_name(first, get_next_func, get_prev_func, _comparison); \
+	}
+//※探索値指定版：標準比較関数と値で比較
+#define linkedListSearchFuncSetByDefaultComparisonAndValue(func_name) \
+	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, typename V> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, const V& value) \
+	{ \
+		auto _comparison = [&value](T& val1) -> int { return compare_to<T>()(val1, value); }; \
+		return func_name(first, get_next_func, get_prev_func, _comparison); \
+	}
+#define linkedListSearchFuncSetByComparison(func_name) \
+	linkedListSearchFuncSetByComparisonAndValue(func_name) \
+	linkedListSearchFuncSetByDefaultComparisonAndValue(func_name)
+
+//----------------------------------------
+//探索処理オーバーロード関数用マクロ
 //※片方向連結リスト対応版
 //※探索値指定版：プレディケート関数と値で比較
 #define singlyLinkedListSearchFuncSetPredicateAndValue(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V, class PREDICATE> \
-	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value, PREDICATE predicate) \
+	template<class T, class GET_NEXT_FUNC, typename V, class PREDICATE> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value, PREDICATE predicate) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		auto _equal = [&value, &predicate](node_type& val1) -> bool { return predicate(val1, value); }; \
+		auto _equal = [&value, &predicate](T& val1) -> bool { return predicate(val1, value); }; \
 		return func_name(first, get_next_func, _equal); \
 	}
 //※探索値指定版：標準のプレディケート関数と値で比較
 #define singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V> \
-	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value) \
+	template<class T, class GET_NEXT_FUNC, typename V> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		auto _equal = [&value](node_type& val1) -> bool { return equal_to<node_type>()(val1, value); }; \
+		auto _equal = [&value](T& val1) -> bool { return equal_to<T>()(val1, value); }; \
 		return func_name(first, get_next_func, _equal); \
 	}
 #define singlyLinkedListSearchFuncSetByPredicate(func_name) \
@@ -469,20 +490,18 @@ struct compare_to{
 	singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name)
 //※探索値指定版：比較関数と値で比較
 #define singlyLinkedListSearchFuncSetByComparisonAndValue(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V, class COMPARISON> \
-	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value, COMPARISON comparison) \
+	template<class T, class GET_NEXT_FUNC, typename V, class COMPARISON> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value, COMPARISON comparison) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		auto _comparison = [&value, &comparison](node_type& val1) -> int { return comparison(val1, value); }; \
+		auto _comparison = [&value, &comparison](T& val1) -> int { return comparison(val1, value); }; \
 		return func_name(first, get_next_func, _comparison); \
 	}
 //※探索値指定版：標準比較関数と値で比較
 #define singlyLinkedListSearchFuncSetByDefaultComparisonAndValue(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V> \
-	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value) \
+	template<class T, class GET_NEXT_FUNC, typename V> \
+	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		auto _comparison = [&value](node_type& val1) -> int { return compare_to<node_type>()(val1, value); }; \
+		auto _comparison = [&value](T& val1) -> int { return compare_to<T>()(val1, value); }; \
 		return func_name(first, get_next_func, _comparison); \
 	}
 #define singlyLinkedListSearchFuncSetByComparison(func_name) \

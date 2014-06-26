@@ -72,15 +72,18 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //　本来のヒープソートではなく、シェルソートを使用するスタイルに改良。
 //※整列済み判定を最初に一度行うことで最適化する。
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t _introSort(T* array, const std::size_t size, PREDICATE predicate)
 {
-	int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ
+	int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ※log2(全体サイズ)で計算
 	for (std::size_t size_tmp = size; size_tmp > 1; size_tmp >>= 1, ++depth_max);
 	//--------------------
 	//クイックソート：スタック処理版
-	//※再帰処理版は省略
-	static const std::size_t SIZE_THRESHOLD = 16;//32;//挿入ソートに切り替える件数
+	//※再帰処理版は省略。
+	//※純粋なクイックソートと異なり、一定の再帰レベルでクイックソートを打ち切るので、スタックオーバーフローの危険性がない。
+	static const std::size_t SIZE_THRESHOLD = 16;//32;//挿入ソートに切り替える残り件数
 	std::size_t swapped_count = 0;
 	struct stack_t
 	{
@@ -88,7 +91,7 @@ std::size_t _introSort(T* array, const std::size_t size, PREDICATE predicate)
 		std::size_t size;
 		int depth;
 	};
-	static const int STACK_DEPTH_MAX = 32 * 2;
+	static const int STACK_DEPTH_MAX = 32 * 2;//最大再帰レベル※多めに設定
 	stack_t stack[STACK_DEPTH_MAX];
 	//最初の配列をスタックにプッシュ
 	stack_t* stack_p = &stack[0];
@@ -193,10 +196,12 @@ sortingFuncSet(introSort);
 //・メモリ使用量：O(n log n) ※ループ処理版は O(32*2)
 //・安定性：　　　×
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 std::size_t _iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
-	int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ
+	int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ※log2(全体サイズ)で計算
 	typename ITERATOR::difference_type size = iteratorDifference(begin, end);
 	for (std::size_t size_tmp = size; size_tmp > 1; size_tmp >>= 1, ++depth_max);
 	//--------------------
@@ -210,7 +215,7 @@ std::size_t _iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate
 		ITERATOR end;
 		int depth;
 	};
-	static const int STACK_DEPTH_MAX = 32 * 2;
+	static const int STACK_DEPTH_MAX = 32 * 2;//最大再帰レベル※多めに設定
 	stack_t stack[STACK_DEPTH_MAX];
 	//最初の配列をスタックにプッシュ
 	stack_t* stack_p = &stack[0];

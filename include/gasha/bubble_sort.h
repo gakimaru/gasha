@@ -51,6 +51,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //※交換発生有無のチェックを行い、最適化する。
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t bubbleSort(T* array, const std::size_t size, PREDICATE predicate)
 {

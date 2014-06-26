@@ -58,6 +58,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※内部で奇遇転地ソートを使用し、二重に並列化するが、
 //　他のソートアルゴリズムを使用した方が効率的かもしれない。
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 {

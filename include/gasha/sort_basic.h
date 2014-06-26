@@ -131,15 +131,28 @@ struct less{
 //※双方向連結リスト対応版
 //※標準プレディケート関数使用版
 #define linkedListSortingFuncSetByDefaultPredicate(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC> \
-	inline std::size_t func_name(NODE_TYPE*& first, NODE_TYPE*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func) \
+	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC> \
+	inline std::size_t func_name(T*& first, T*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		return func_name<NODE_TYPE, GET_NEXT_FUNC, GET_PREV_FUNC, INSERT_NODE_BEFORE_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, get_prev_func, insert_node_before_func, remove_node_func, less<node_type>()); \
+		return func_name<T, GET_NEXT_FUNC, GET_PREV_FUNC, INSERT_NODE_BEFORE_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, get_prev_func, insert_node_before_func, remove_node_func, less<T>()); \
 	}
 //※全種
 #define linkedListSortingFuncSet(func_name) \
 	linkedListSortingFuncSetByDefaultPredicate(func_name)
+
+//----------------------------------------
+//比較ソート処理オーバーロード関数用マクロ
+//※片方向連結リスト対応版
+//※標準プレディケート関数使用版
+#define singlyLinkedListSortingFuncSetByDefaultPredicate(func_name) \
+	template<class T, class GET_NEXT_FUNC, class INSERT_NODE_AFTER_FUNC, class REMOVE_NODE_FUNC> \
+	inline std::size_t func_name(T*& first, T*& last, GET_NEXT_FUNC get_next_func, INSERT_NODE_AFTER_FUNC insert_node_after_func, REMOVE_NODE_FUNC remove_node_func) \
+	{ \
+		return func_name<T, GET_NEXT_FUNC, INSERT_NODE_AFTER_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, insert_node_after_func, remove_node_func, less<T>()); \
+	}
+//※全種
+#define singlyLinkedListSortingFuncSet(func_name) \
+	singlyLinkedListSortingFuncSetByDefaultPredicate(func_name)
 
 //----------------------------------------
 //非比較ソート処理オーバーロード関数用マクロ

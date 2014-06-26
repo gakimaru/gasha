@@ -119,6 +119,16 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_SHARED_POOL_ALLOCATOR_ALLWAYS_TOGETHER_INL
+#include <gasha/shared_pool_allocator.inl>
+#endif//GASHA_SHARED_POOL_ALLOCATOR_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_SHARED_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/shared_pool_allocator.cpp.h>
+#endif//GASHA_SHARED_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+
 #endif//__SHARED_POOL_ALLOCATOR_H_
 
 // End of file

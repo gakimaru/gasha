@@ -101,11 +101,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※片方向連結リスト対応版
 //※標準プレディケート関数使用版
 #define singlyLinkedListIsOrderedFuncSetByDefaultPredicate(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC> \
-	inline bool func_name(NODE_TYPE* first, GET_NEXT_FUNC get_next_func) \
+	template<class T, class GET_NEXT_FUNC> \
+	inline bool func_name(T* first, GET_NEXT_FUNC get_next_func) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		return func_name<NODE_TYPE, GET_NEXT_FUNC>(first, get_next_func, less<node_type>()); \
+		return func_name<T, GET_NEXT_FUNC>(first, get_next_func, less<T>()); \
 	}
 //※全種
 #define singlyLinkedListIsOrderedFuncSet(func_name) \
@@ -129,11 +128,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※片方向連結リスト対応版
 //※標準プレディケート関数使用版
 #define singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name) \
-	template<class NODE_TYPE, class GET_NEXT_FUNC> \
-	inline std::size_t func_name(NODE_TYPE* first, GET_NEXT_FUNC get_next_func) \
+	template<class T, class GET_NEXT_FUNC> \
+	inline std::size_t func_name(T* first, GET_NEXT_FUNC get_next_func) \
 	{ \
-		typedef NODE_TYPE node_type; \
-		return func_name<NODE_TYPE, GET_NEXT_FUNC>(first, get_next_func, less<node_type>()); \
+		return func_name<T, GET_NEXT_FUNC>(first, get_next_func, less<T>()); \
 	}
 #define singlyLinkedListSumupUnorderedFuncSet(func_name) \
 	singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name)
@@ -144,6 +142,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //非整列状態確認
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 bool isUnordered(const T* array, const std::size_t size, PREDICATE predicate)
 {
@@ -161,6 +162,9 @@ isOrderedFuncSet(isUnordered);
 //----------------------------------------
 //非整列状態確認
 //※イテレータ対応版
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 bool iteratorIsUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
@@ -179,12 +183,14 @@ iteratorIsOrderedFuncSet(iteratorIsUnordered);
 //----------------------------------------
 //非整列状態確認
 //※片方向連結リスト対応版
-template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
-bool singlyLinkedListIsUnordered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
+template<class T, class GET_NEXT_FUNC, class PREDICATE>
+bool singlyLinkedListIsUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
 {
-	typedef NODE_TYPE node_type;
-	const node_type* prev = first;
-	const node_type* now = get_next_func(*prev);
+	const T* prev = first;
+	const T* now = get_next_func(*prev);
 	while (now)
 	{
 		if (predicate(*now, *prev))
@@ -197,6 +203,9 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
 
 //----------------------------------------
 //整列状態確認
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 inline bool isOrdered(const T* array, const std::size_t size, PREDICATE predicate)
 {
@@ -207,6 +216,9 @@ isOrderedFuncSet(isOrdered);
 //----------------------------------------
 //整列状態確認
 //※イテレータ対応版
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 bool iteratorIsOrdered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
@@ -217,8 +229,11 @@ iteratorIsOrderedFuncSet(iteratorIsOrdered);
 //----------------------------------------
 //整列状態確認
 //※片方向連結リスト対応版
-template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
-bool singlyLinkedListIsOrdered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
+template<class T, class GET_NEXT_FUNC, class PREDICATE>
+bool singlyLinkedListIsOrdered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
 {
 	return !singlyLinkedListIsUnordered(first, get_next_func, predicate);
 }
@@ -226,6 +241,9 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
 
 //----------------------------------------
 //非整列要素数計上
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE predicate)
 {
@@ -244,6 +262,9 @@ sumupUnorderedFuncSet(sumupUnordered);
 //----------------------------------------
 //非整列要素数計上
 //※イテレータ対応版
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 std::size_t iteratorSumupUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
@@ -263,13 +284,15 @@ iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
 //----------------------------------------
 //非整列要素数計上
 //※片方向連結リスト対応版
-template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
-std::size_t singlyLinkedListSumupUnordered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+//----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
+template<class T, class GET_NEXT_FUNC, class PREDICATE>
+std::size_t singlyLinkedListSumupUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
 {
-	typedef NODE_TYPE node_type;
 	std::size_t unordered = 0;
-	const node_type* prev = first;
-	const node_type* now = get_next_func(*prev);
+	const T* prev = first;
+	const T* now = get_next_func(*prev);
 	while (now)
 	{
 		if (predicate(*now, *prev))

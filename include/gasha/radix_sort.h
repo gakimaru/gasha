@@ -54,6 +54,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //※内部で_aligned_malloc()を使用し、一時的にメモリ確保するので注意！
 //----------------------------------------
+//プロトタイプ：
+//・KEY_TYPE GET_KEY_FUNCTOR(const T& value)//オブジェクトを受け取りキーを返す
+
 //キーの最大値取得
 template<typename KEY_TYPE>
 struct _radix_key{
@@ -146,7 +149,9 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 	if (!array || size <= 1)
 		return 0;
 
-#if 0//再帰処理版
+#ifdef GASHA_RADIX_SORT_USE_RECURSIVE_CALL
+	//--------------------
+	//再帰処理版
 	std::size_t swapped_count = 0;
 
 	typedef typename GET_KEY_FUNCTOR::key_type KEY_TYPE;//キー型
@@ -301,7 +306,9 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 	}
 	delete key_tbl;//メモリ破棄
 	_aligned_free(sorted_array);//メモリ破棄
-#else//ループ処理版
+#else//GASHA_RADIX_SORT_USE_RECURSIVE_CALL
+	//--------------------
+	//スタック処理版
 	std::size_t swapped_count = 0;
 
 	//#define RADIX_IS_16//基数を16にする場合は、このマクロを有効化する（無効化時の基数は256)
@@ -570,7 +577,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 	delete[] sorted_key_tbl;//メモリ破棄
 	delete[] bucket_tbl_set;//メモリ破棄
 	delete[] stack;//メモリ破棄
-#endif
+#endif//GASHA_RADIX_SORT_USE_RECURSIVE_CALL
 	return swapped_count;
 }
 distributedSortingFuncSet(radixSort);

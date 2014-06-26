@@ -49,6 +49,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・メモリ使用量：O(1)
 //・安定性：　　　×
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t combSort(T* array, const std::size_t size, PREDICATE predicate)
 {

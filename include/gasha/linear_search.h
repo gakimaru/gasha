@@ -15,8 +15,6 @@
 
 #include <gasha/search_basic.h>//探索処理基本
 
-//#include <gasha/iterator.h>//イテレータ用アルゴリズム
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
@@ -37,6 +35,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・最悪計算時間：O(n)
 //・探索失敗時：  O(n)
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const T& value)//value == 探索値ならtrueを返す
 template<class T, class PREDICATE>
 T* linearSearch(T* array, const std::size_t size, PREDICATE predicate)
 {
@@ -45,7 +45,7 @@ T* linearSearch(T* array, const std::size_t size, PREDICATE predicate)
 	T* now = array;
 	for (std::size_t i = 0; i < size; ++i, ++now)//順次探索
 	{
-		if (predicate(*now))//探索キーと一致したら終了
+		if (predicate(*now))//探索値と一致したら終了
 			return now;
 	}
 	return nullptr;//探索失敗
@@ -61,6 +61,8 @@ searchFuncSetByPredicate(linearSearch);
 //・最悪計算時間：O(n)
 //・探索失敗時：  O(n)
 //----------------------------------------
+//プロトタイプ：
+//・bool PREDICATE(const typename ITERATOR::value_type& value)//value == 探索値ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
@@ -69,7 +71,7 @@ ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 	ITERATOR now = begin;
 	for (; now != end; ++now)//順次探索
 	{
-		if (predicate(*now))//探索キーと一致したら終了
+		if (predicate(*now))//探索値と一致したら終了
 			return now;
 	}
 	return end;//探索失敗
@@ -85,13 +87,15 @@ iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
 //・最悪計算時間：O(n)
 //・探索失敗時：  O(n)
 //----------------------------------------
-template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
-const NODE_TYPE* singlyLinkedListLinearSearch(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+//プロトタイプ：
+//・bool PREDICATE(const T& value)//value == 探索値ならtrueを返す
+//・T* GET_NEXT_FUNC(T& node)//次のノードを返す
+template<class T, class GET_NEXT_FUNC, class PREDICATE>
+const T* singlyLinkedListLinearSearch(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
 {
-	typedef NODE_TYPE node_type;
-	for (const node_type* now = first; now; now = get_next_func(*now))//順次探索
+	for (const T* now = first; now; now = get_next_func(*now))//順次探索
 	{
-		if (predicate(*now))//探索キーと一致したら終了
+		if (predicate(*now))//探索値と一致したら終了
 			return now;
 	}
 	return nullptr;//探索失敗
