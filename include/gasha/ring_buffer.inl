@@ -18,6 +18,8 @@
 
 #include <gasha/ring_buffer.h>//リングバッファコンテナ【宣言部】
 
+#include <gasha/is_ordered.h>//整列状態確認
+
 #include <gasha/intro_sort.h>//イントロソート
 #include <gasha/insertion_sort.h>//挿入ソート
 
@@ -195,7 +197,7 @@ namespace ring_buffer
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs)
+	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || m_logicalIndex < rhs.m_logicalIndex)
 			return 0;
@@ -228,6 +230,7 @@ namespace ring_buffer
 		return m_logicalIndex;
 	}
 	//メソッド
+	//参照を更新
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::iterator::addIndexAndUpdate(const int add) const
 	{
@@ -479,7 +482,7 @@ namespace ring_buffer
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
+	inline int container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs) const
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex < m_logicalIndex)
 			return 0;
@@ -512,6 +515,7 @@ namespace ring_buffer
 		return m_logicalIndex - 1;
 	}
 	//メソッド
+	//参照を更新
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const int add) const
 	{

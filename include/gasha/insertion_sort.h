@@ -82,7 +82,7 @@ std::size_t insertionSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(insertionSort);
+sortingFuncSet(insertionSort);
 
 //----------------------------------------
 //アルゴリズム：挿入ソート
@@ -126,7 +126,55 @@ std::size_t iteratorInsertionSort(ITERATOR begin, ITERATOR end, PREDICATE predic
 	}
 	return swapped_count;
 }
-iteratorSortFuncSet(iteratorInsertionSort);
+iteratorSortingFuncSet(iteratorInsertionSort);
+
+//----------------------------------------
+//アルゴリズム：挿入ソート
+//※双方向連結リスト対応版
+//----------------------------------------
+//・最良計算時間：O(n)
+//・平均計算時間：O(n^2)
+//・最悪計算時間：O(n^2)
+//・メモリ使用量：O(1)
+//・安定性：　　　○
+//----------------------------------------
+template<class NODE_TYPE, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
+std::size_t linkedListInsertionSort(NODE_TYPE*& first, NODE_TYPE*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate)
+{
+	typedef NODE_TYPE node_type;
+	if (!first || !get_next_func(*first))
+		return 0;
+	std::size_t swapped_count = 0;
+	node_type* now = first;
+	node_type* next = const_cast<node_type*>(get_next_func(*now));
+	while (next)
+	{
+		if (predicate(*next, *now))
+		{
+			node_type* min = now;
+			node_type* prev = const_cast<node_type*>(get_prev_func(*now));
+			while (prev)
+			{
+				if (predicate(*next, *prev))
+					min = prev;
+				else
+					break;
+				prev = const_cast<node_type*>(get_prev_func(*prev));
+			}
+			remove_node_func(*next, first, last);
+			insert_node_before_func(*next, *min, first, last);
+			++swapped_count;
+			next = const_cast<node_type*>(get_next_func(*now));
+		}
+		else
+		{
+			now = next;
+			next = const_cast<node_type*>(get_next_func(*next));
+		}
+	}
+	return swapped_count;
+}
+linkedListSortingFuncSet(linkedListInsertionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

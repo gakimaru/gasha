@@ -79,7 +79,7 @@ std::size_t bubbleSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(bubbleSort);
+sortingFuncSet(bubbleSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

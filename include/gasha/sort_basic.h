@@ -55,7 +55,7 @@ struct less{
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※プレディケート関数指定版
-#define sortFuncSetByUserPredicate(func_name) \
+#define sortingFuncSetByUserPredicate(func_name) \
 	template<class T, std::size_t N, class PREDICATE> \
 	inline std::size_t func_name(T(&array)[N], PREDICATE predicate) \
 	{ \
@@ -80,7 +80,7 @@ struct less{
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, predicate); \
 	}
 //※標準プレディケート関数使用版
-#define sortFuncSetByDefaultPredicate(func_name) \
+#define sortingFuncSetByDefaultPredicate(func_name) \
 	template<class T> \
 	inline std::size_t func_name(T* array, const std::size_t size) \
 	{ \
@@ -106,28 +106,45 @@ struct less{
 	{ \
 		return func_name(con, less<typename CONTAINER::value_type>()); \
 	}
-#define sortFuncSet(func_name) \
-	sortFuncSetByUserPredicate(func_name) \
-	sortFuncSetByDefaultPredicate(func_name)
+//※全種
+#define sortingFuncSet(func_name) \
+	sortingFuncSetByUserPredicate(func_name) \
+	sortingFuncSetByDefaultPredicate(func_name)
 
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※イテレータ対応版
 //※標準プレディケート関数使用版
-#define iteratorSortFuncSetByDefaultPredicate(func_name) \
+#define iteratorSortingFuncSetByDefaultPredicate(func_name) \
 	template<class ITERATOR> \
 	inline std::size_t func_name(ITERATOR begin, ITERATOR end) \
-{ \
-	typedef typename ITERATOR::value_type value_type; \
-	return func_name(begin, end, less<value_type>()); \
-}
-#define iteratorSortFuncSet(func_name) \
-	iteratorSortFuncSetByDefaultPredicate(func_name)
+	{ \
+		typedef typename ITERATOR::value_type value_type; \
+		return func_name(begin, end, less<value_type>()); \
+	}
+//※全種
+#define iteratorSortingFuncSet(func_name) \
+	iteratorSortingFuncSetByDefaultPredicate(func_name)
+
+//----------------------------------------
+//比較ソート処理オーバーロード関数用マクロ
+//※双方向連結リスト対応版
+//※標準プレディケート関数使用版
+#define linkedListSortingFuncSetByDefaultPredicate(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC> \
+	inline std::size_t func_name(NODE_TYPE*& first, NODE_TYPE*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		return func_name<NODE_TYPE, GET_NEXT_FUNC, GET_PREV_FUNC, INSERT_NODE_BEFORE_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, get_prev_func, insert_node_before_func, remove_node_func, less<node_type>()); \
+	}
+//※全種
+#define linkedListSortingFuncSet(func_name) \
+	linkedListSortingFuncSetByDefaultPredicate(func_name)
 
 //----------------------------------------
 //非比較ソート処理オーバーロード関数用マクロ
 //※キー取得用関数オブジェクト指定版
-#define distributedSortFuncSetByUserFunctor(func_name) \
+#define distributedSortingFuncSetByUserFunctor(func_name) \
 	template<class T, std::size_t N, class GET_KEY_FUNCTOR> \
 	inline std::size_t func_name(T(&array)[N], GET_KEY_FUNCTOR get_key_functor) \
 	{ \
@@ -151,8 +168,9 @@ struct less{
 		const std::size_t size = con.size(); \
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, get_key_functor); \
 	}
-#define distributedSortFuncSet(func_name) \
-	distributedSortFuncSetByUserFunctor(func_name)
+//※全種
+#define distributedSortingFuncSet(func_name) \
+	distributedSortingFuncSetByUserFunctor(func_name)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

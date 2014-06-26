@@ -75,7 +75,7 @@ std::size_t selectionSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(selectionSort);
+sortingFuncSet(selectionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

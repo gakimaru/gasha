@@ -177,7 +177,7 @@ inline std::size_t introSort(T* array, const std::size_t size, PREDICATE predica
 		return 0;
 	return _introSort(array, size, predicate);
 }
-sortFuncSet(introSort);
+sortingFuncSet(introSort);
 
 //========================================
 //ソートアルゴリズム分類：混成ソート
@@ -302,7 +302,7 @@ inline std::size_t iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE pre
 		return 0;
 	return _iteratorIntroSort(begin, end, predicate);
 }
-iteratorSortFuncSet(iteratorIntroSort);
+iteratorSortingFuncSet(iteratorIntroSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -167,6 +167,7 @@ namespace dynamic_array
 			inline int operator()(const value_type& lhs, const V& rhs) const { return GASHA_ compare_to<value_type>()(lhs, rhs); }
 		};
 	};
+	
 	//--------------------
 	//基本型定義マクロ
 	#define DECLARE_OPE_TYPES(OPE_TYPE) \
@@ -180,6 +181,7 @@ namespace dynamic_array
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
+	
 	//----------------------------------------
 	//コンテナ破棄時の要素の自動クリア属性
 	enum autoClearAttr_t
@@ -216,14 +218,14 @@ namespace dynamic_array
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
-			inline operator const value_type&() const { return *getValue(); }
-			inline operator value_type&(){ return *getValue(); }
-			inline operator const value_type*() const { return getValue(); }
-			inline operator value_type*(){ return getValue(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 		public:
 			//基本オペレータ
-			inline const value_type& operator*() const { return *getValue(); }
-			inline value_type& operator*(){ return *getValue(); }
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
 			inline const iterator operator[](const int index) const;
@@ -262,7 +264,7 @@ namespace dynamic_array
 			inline iterator operator+(const unsigned int rhs) { return operator+(static_cast<int>(rhs)); }
 			inline iterator operator-(const int rhs);
 			inline iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const iterator& rhs);
+			inline int operator-(const iterator& rhs) const;
 		public:
 			//ムーブオペレータ
 			inline iterator& operator=(const iterator&& rhs);
@@ -322,14 +324,14 @@ namespace dynamic_array
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
-			inline operator const value_type&() const { return *getValue(); }
-			inline operator value_type&(){ return *getValue(); }
-			inline operator const value_type*() const { return getValue(); }
-			inline operator value_type*(){ return getValue(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 		public:
 			//基本オペレータ
-			inline const value_type& operator*() const { return *getValue(); }
-			inline value_type& operator*(){ return *getValue(); }
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
 			inline const reverse_iterator operator[](const int index) const;
@@ -368,7 +370,7 @@ namespace dynamic_array
 			inline reverse_iterator operator+(const unsigned int rhs) { return operator+(static_cast<int>(rhs)); }
 			inline reverse_iterator operator-(const int rhs);
 			inline reverse_iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const reverse_iterator& rhs);
+			inline int operator-(const reverse_iterator& rhs) const;
 		public:
 			//ムーブオペレータ
 			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
@@ -451,15 +453,15 @@ namespace dynamic_array
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		//イテレータ取得
-		inline const_iterator cbegin() const { iterator ite(*this, false); return ite; }
-		inline const_iterator cend() const { iterator ite(*this, true); return ite; }
+		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
+		inline const iterator cend() const { iterator ite(*this, true); return ite; }
 		inline const iterator begin() const { iterator ite(*this, false); return ite; }
 		inline const iterator end() const { iterator ite(*this, true); return ite; }
 		inline iterator begin() { iterator ite(*this, false); return ite; }
 		inline iterator end() { iterator ite(*this, true); return ite; }
 		//リバースイテレータを取得
-		inline const_reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
-		inline const_reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
+		inline const reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
 		inline const reverse_iterator rbegin() const { reverse_iterator ite(*this, false); return ite; }
 		inline const reverse_iterator rend() const { reverse_iterator ite(*this, true); return ite; }
 		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
@@ -732,6 +734,7 @@ namespace dynamic_array
 		autoClearAttr_t m_autoClearAttr;//コンテナ破棄時に残っている要素の自動クリア属性
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
+	
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES

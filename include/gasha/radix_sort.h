@@ -573,7 +573,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 #endif
 	return swapped_count;
 }
-distributedSortFuncSet(radixSort);
+distributedSortingFuncSet(radixSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -81,7 +81,7 @@ searchFuncSetByComparison(binarySearch);
 //・最悪計算時間：O(log n)
 //・探索失敗時：  O(log n)
 //----------------------------------------
-template<class  ITERATOR, class COMPARISON>
+template<class ITERATOR, class COMPARISON>
 ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON comparison)
 {
 	if (begin == end)

@@ -94,7 +94,7 @@ std::size_t shakerSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(shakerSort);
+sortingFuncSet(shakerSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -219,7 +219,7 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 #endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
 	return swapped_count;
 }
-sortFuncSet(shearSort);
+sortingFuncSet(shearSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

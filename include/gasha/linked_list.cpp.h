@@ -26,17 +26,97 @@ namespace linked_list
 	//イテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type index) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateNext() const
+	{
+		node_type* prev = m_node;
+		if (m_node)
+			m_node = const_cast<node_type*>(getNextNode<ope_type>(*m_node));
+		m_isEnd = (prev && !m_node);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updatePrev() const
+	{
+		if (m_isEnd)
+		{
+			m_node = const_cast<node_type*>(m_con->m_last);
+			m_isEnd = false;
+			return;
+		}
+		if (m_node)
+			m_node = const_cast<node_type*>(getPrevNode<ope_type>(*m_node));
+		m_isEnd = false;
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateForward(const std::size_t step) const
+	{
+		std::size_t _step = step;
+		node_type* prev = m_node;
+		if (m_node)
+			m_node = const_cast<node_type*>(getForwardNode<ope_type>(*m_node, _step));
+		m_isEnd = (prev && !m_node && _step == 0);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateBackward(const std::size_t step) const
+	{
+		std::size_t _step = step;
+		if (_step > 0 && m_isEnd)
+		{
+			m_node = const_cast<node_type*>(m_con->m_last);
+			--_step;
+		}
+		if (m_node)
+			m_node = const_cast<node_type*>(getBackwardNode<ope_type>(*m_node, _step));
+		m_isEnd = false;
+	}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::reverse_iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateNext() const
+	{
+		node_type* prev = m_node;
+		if (m_node)
+			m_node = const_cast<node_type*>(getPrevNode<ope_type>(*m_node));
+		m_isEnd = (prev && !m_node);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updatePrev() const
+	{
+		if (m_isEnd)
+		{
+			m_node = const_cast<node_type*>(m_con->m_first);
+			m_isEnd = false;
+			return;
+		}
+		if (m_node)
+			m_node = const_cast<node_type*>(getNextNode<ope_type>(*m_node));
+		m_isEnd = false;
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateForward(const std::size_t step) const
+	{
+		std::size_t _step = step;
+		node_type* prev = m_node;
+		if (m_node)
+			m_node = const_cast<node_type*>(getBackwardNode<ope_type>(*m_node, _step));
+		m_isEnd = (prev && !m_node && _step == 0);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateBackward(const std::size_t step) const
+	{
+		std::size_t _step = step;
+		if (_step > 0 && m_isEnd)
+		{
+			m_node = const_cast<node_type*>(m_con->m_first);
+			--_step;
+		}
+		if (m_node)
+			m_node = const_cast<node_type*>(getForwardNode<ope_type>(*m_node, _step));
+		m_isEnd = false;
+	}
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

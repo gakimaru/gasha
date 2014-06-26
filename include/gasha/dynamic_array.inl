@@ -19,6 +19,7 @@
 #include <gasha/dynamic_array.h>//動的配列コンテナ【宣言部】
 
 #include <gasha/is_ordered.h>//整列状態確認
+
 #include <gasha/intro_sort.h>//イントロソート
 #include <gasha/insertion_sort.h>//挿入ソート
 
@@ -196,7 +197,7 @@ namespace dynamic_array
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs)
+	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
 			return 0;
@@ -476,7 +477,7 @@ namespace dynamic_array
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
 			return 0;

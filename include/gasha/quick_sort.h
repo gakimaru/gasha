@@ -283,7 +283,7 @@ inline std::size_t quickSort(T* array, const std::size_t size, PREDICATE predica
 		return 0;
 	return _quickSort(array, size, predicate);
 }
-sortFuncSet(quickSort);
+sortingFuncSet(quickSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

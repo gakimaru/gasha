@@ -407,7 +407,7 @@ struct compare_to{
 { \
 	typedef typename ITERATOR::value_type value_type; \
 	auto _equal = [&value, &predicate](value_type& val1) -> bool { return predicate(val1, value); }; \
-	return std::move(func_name(begin, end, _equal)); \
+	return func_name(begin, end, _equal); \
 }
 //※探索値指定版：標準のプレディケート関数と値で比較
 #define iteratorSearchFuncSetByDefaultPredicateAndValue(func_name) \
@@ -416,7 +416,7 @@ struct compare_to{
 { \
 	typedef typename ITERATOR::value_type value_type; \
 	auto _equal = [&value](value_type& val1) -> bool { return equal_to<value_type>()(val1, value); }; \
-	return std::move(func_name(begin, end, _equal)); \
+	return func_name(begin, end, _equal); \
 }
 #define iteratorSearchFuncSetByPredicate(func_name) \
 	iteratorSearchFuncSetPredicateAndValue(func_name) \
@@ -442,6 +442,52 @@ struct compare_to{
 #define iteratorSearchFuncSetByComparison(func_name) \
 	iteratorSearchFuncSetByComparisonAndValue(func_name) \
 	iteratorSearchFuncSetByDefaultComparisonAndValue(func_name)
+
+//----------------------------------------
+//探索処理オーバーロード関数用マクロ
+//※片方向連結リスト対応版
+//※探索値指定版：プレディケート関数と値で比較
+#define singlyLinkedListSearchFuncSetPredicateAndValue(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V, class PREDICATE> \
+	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value, PREDICATE predicate) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		auto _equal = [&value, &predicate](node_type& val1) -> bool { return predicate(val1, value); }; \
+		return func_name(first, get_next_func, _equal); \
+	}
+//※探索値指定版：標準のプレディケート関数と値で比較
+#define singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V> \
+	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		auto _equal = [&value](node_type& val1) -> bool { return equal_to<node_type>()(val1, value); }; \
+		return func_name(first, get_next_func, _equal); \
+	}
+#define singlyLinkedListSearchFuncSetByPredicate(func_name) \
+	singlyLinkedListSearchFuncSetPredicateAndValue(func_name) \
+	singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name)
+//※探索値指定版：比較関数と値で比較
+#define singlyLinkedListSearchFuncSetByComparisonAndValue(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V, class COMPARISON> \
+	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value, COMPARISON comparison) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		auto _comparison = [&value, &comparison](node_type& val1) -> int { return comparison(val1, value); }; \
+		return func_name(first, get_next_func, _comparison); \
+	}
+//※探索値指定版：標準比較関数と値で比較
+#define singlyLinkedListSearchFuncSetByDefaultComparisonAndValue(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC, typename V> \
+	inline NODE_TYPE* func_name##Value(NODE_TYPE* first, GET_NEXT_FUNC get_next_func, const V& value) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		auto _comparison = [&value](node_type& val1) -> int { return compare_to<node_type>()(val1, value); }; \
+		return func_name(first, get_next_func, _comparison); \
+	}
+#define singlyLinkedListSearchFuncSetByComparison(func_name) \
+	singlyLinkedListSearchFuncSetByComparisonAndValue(func_name) \
+	singlyLinkedListSearchFuncSetByDefaultComparisonAndValue(func_name)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

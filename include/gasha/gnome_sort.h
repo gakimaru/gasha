@@ -82,7 +82,7 @@ std::size_t gnomeSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(gnomeSort);
+sortingFuncSet(gnomeSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

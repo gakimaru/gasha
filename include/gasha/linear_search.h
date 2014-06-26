@@ -61,7 +61,7 @@ searchFuncSetByPredicate(linearSearch);
 //・最悪計算時間：O(n)
 //・探索失敗時：  O(n)
 //----------------------------------------
-template<class  ITERATOR, class PREDICATE>
+template<class ITERATOR, class PREDICATE>
 ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 {
 	if (begin == end)
@@ -75,6 +75,28 @@ ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 	return end;//探索失敗
 }
 iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
+
+//----------------------------------------
+//アルゴリズム：線形探索
+//※片方向連結リスト対応版
+//----------------------------------------
+//・最良計算時間：O(1)
+//・平均計算時間：O(n/2)
+//・最悪計算時間：O(n)
+//・探索失敗時：  O(n)
+//----------------------------------------
+template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
+const NODE_TYPE* singlyLinkedListLinearSearch(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+{
+	typedef NODE_TYPE node_type;
+	for (const node_type* now = first; now; now = get_next_func(*now))//順次探索
+	{
+		if (predicate(*now))//探索キーと一致したら終了
+			return now;
+	}
+	return nullptr;//探索失敗
+}
+singlyLinkedListSearchFuncSetByPredicate(singlyLinkedListLinearSearch);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

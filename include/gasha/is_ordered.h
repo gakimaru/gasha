@@ -19,6 +19,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //========================================
 //整列状態確認補助マクロ
+//※比較ソート用の比較関数を使用
 //========================================
 
 //----------------------------------------
@@ -75,6 +76,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	{ \
 		return func_name(con, less<typename CONTAINER::value_type>()); \
 	}
+//※全種
 #define isOrderedFuncSet(func_name) \
 	isOrderedFuncSetByUserPredicate(func_name) \
 	isOrderedFuncSetByDefaultPredicate(func_name)
@@ -90,8 +92,51 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	typedef typename ITERATOR::value_type value_type; \
 	return func_name(begin, end, less<value_type>()); \
 }
+//※全種
 #define iteratorIsOrderedFuncSet(func_name) \
 	iteratorIsOrderedFuncSetByDefaultPredicate(func_name)
+
+//----------------------------------------
+//整列状態確認処理オーバーロード関数用マクロ
+//※片方向連結リスト対応版
+//※標準プレディケート関数使用版
+#define singlyLinkedListIsOrderedFuncSetByDefaultPredicate(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC> \
+	inline bool func_name(NODE_TYPE* first, GET_NEXT_FUNC get_next_func) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		return func_name<NODE_TYPE, GET_NEXT_FUNC>(first, get_next_func, less<node_type>()); \
+	}
+//※全種
+#define singlyLinkedListIsOrderedFuncSet(func_name) \
+	singlyLinkedListIsOrderedFuncSetByDefaultPredicate(func_name)
+
+//----------------------------------------
+//非整列要素数計上処理オーバーロード関数用マクロ
+//※全種
+#define sumupUnorderedFuncSet(func_name) \
+	sortingFuncSet(func_name);
+
+//----------------------------------------
+//非整列要素数計上処理オーバーロード関数用マクロ
+//※イテレータ対応版
+//※全種
+#define iteratorSumupUnorderedFuncSet(func_name) \
+	iteratorSortingFuncSet(func_name);
+
+//----------------------------------------
+//非整列要素数計上処理オーバーロード関数用マクロ
+//※片方向連結リスト対応版
+//※標準プレディケート関数使用版
+#define singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name) \
+	template<class NODE_TYPE, class GET_NEXT_FUNC> \
+	inline std::size_t func_name(NODE_TYPE* first, GET_NEXT_FUNC get_next_func) \
+	{ \
+		typedef NODE_TYPE node_type; \
+		return func_name<NODE_TYPE, GET_NEXT_FUNC>(first, get_next_func, less<node_type>()); \
+	}
+#define singlyLinkedListSumupUnorderedFuncSet(func_name) \
+	singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name)
 
 //========================================
 //整列状態確認
@@ -132,6 +177,25 @@ bool iteratorIsUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 iteratorIsOrderedFuncSet(iteratorIsUnordered);
 
 //----------------------------------------
+//非整列状態確認
+//※片方向連結リスト対応版
+template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
+bool singlyLinkedListIsUnordered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+{
+	typedef NODE_TYPE node_type;
+	const node_type* prev = first;
+	const node_type* now = get_next_func(*prev);
+	while (now)
+	{
+		if (predicate(*now, *prev))
+			return true;
+		now = get_next_func(*now);
+	}
+	return false;
+}
+singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
+
+//----------------------------------------
 //整列状態確認
 template<class T, class PREDICATE>
 inline bool isOrdered(const T* array, const std::size_t size, PREDICATE predicate)
@@ -151,6 +215,16 @@ bool iteratorIsOrdered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 iteratorIsOrderedFuncSet(iteratorIsOrdered);
 
 //----------------------------------------
+//整列状態確認
+//※片方向連結リスト対応版
+template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
+bool singlyLinkedListIsOrdered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+{
+	return !singlyLinkedListIsUnordered(first, get_next_func, predicate);
+}
+singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
+
+//----------------------------------------
 //非整列要素数計上
 template<class T, class PREDICATE>
 std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE predicate)
@@ -165,7 +239,7 @@ std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE pre
 	}
 	return unordered;
 }
-sortFuncSet(sumupUnordered);
+sumupUnorderedFuncSet(sumupUnordered);
 
 //----------------------------------------
 //非整列要素数計上
@@ -184,7 +258,27 @@ std::size_t iteratorSumupUnordered(ITERATOR begin, ITERATOR end, PREDICATE predi
 	}
 	return unordered;
 }
-iteratorSortFuncSet(iteratorSumupUnordered);
+iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
+
+//----------------------------------------
+//非整列要素数計上
+//※片方向連結リスト対応版
+template<class NODE_TYPE, class GET_NEXT_FUNC, class PREDICATE>
+std::size_t singlyLinkedListSumupUnordered(const NODE_TYPE* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
+{
+	typedef NODE_TYPE node_type;
+	std::size_t unordered = 0;
+	const node_type* prev = first;
+	const node_type* now = get_next_func(*prev);
+	while (now)
+	{
+		if (predicate(*now, *prev))
+			++unordered;
+		now = get_next_func(*now);
+	}
+	return unordered;
+}
+singlyLinkedListSumupUnorderedFuncSet(singlyLinkedListSumupUnordered);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

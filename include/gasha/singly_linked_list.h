@@ -115,24 +115,24 @@ namespace singly_linked_list
 		//ソート用プレディケート関数オブジェクト
 		//※trueでlhsの方が小さい（並び順が正しい）
 		struct predicateForSort{
-			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return less<node_type>()(lhs, rhs); }
+			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return GASHA_ less<node_type>()(lhs, rhs); }
 		};
 
 		//探索用プレディケート関数オブジェクト
 		//※trueで一致（探索成功）
 		struct predicateForFind{
 			template<typename V>
-			inline bool operator()(const node_type& lhs, const V& rhs) const { return equal_to<node_type>()(lhs, rhs); }
+			inline bool operator()(const node_type& lhs, const V& rhs) const { return GASHA_ equal_to<node_type>()(lhs, rhs); }
 		};
 
-	#ifdef ENABLE_BINARY_SEARCH
+	#ifdef GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//探索用比較関数オブジェクト
 		//※0で一致（探索成功）、1以上でlhsの方が大きい、-1以下でrhsの方が大きい
 		struct comparisonForSearch{
 			template<typename V>
-			inline int operator()(const node_type& lhs, const V& rhs) const { return compare_to<node_type>()(lhs, rhs); }
+			inline int operator()(const node_type& lhs, const V& rhs) const { return GASHA_ compare_to<node_type>()(lhs, rhs); }
 		};
-	#endif//ENABLE_BINARY_SEARCH
+	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 	};
 	//--------------------
 	//基本型定義マクロ
@@ -368,15 +368,15 @@ namespace singly_linked_list
 	//比較ソート処理オーバーロード関数用マクロ
 	//※連結リスト対応版
 	//※標準プレディケート関数使用版
-	#define liskedListSortFuncSetByDefaultPredicate(func_name) \
+	#define linkedListSortingFuncSetByDefaultPredicate(func_name) \
 		template<class OPE_TYPE> \
 		inline std::size_t func_name(typename OPE_TYPE::node_type* first) \
 		{ \
 			typedef typename OPE_TYPE::node_type node_type; \
 			return func_name<OPE_TYPE>(first, less<node_type>()); \
 		}
-	#define linkedListSortFuncSet(func_name) \
-		liskedListSortFuncSetByDefaultPredicate(func_name)
+	#define linkedListSortingFuncSet(func_name) \
+		linkedListSortingFuncSetByDefaultPredicate(func_name)
 
 	//----------------------------------------
 	//整列状態確認 ※連結リスト対応版
@@ -395,7 +395,7 @@ namespace singly_linked_list
 		}
 		return unordered;
 	}
-	linkedListSortFuncSet(linkedListCalcUnordered);
+	linkedListSortingFuncSet(linkedListCalcUnordered);
 
 	//========================================
 	//ソートアルゴリズム分類：挿入ソート
@@ -447,7 +447,7 @@ namespace singly_linked_list
 		}
 		return swapped_count;
 	}
-	linkedListSortFuncSet(singlyLinkedListInsertionSort);
+	linkedListSortingFuncSet(singlyLinkedListInsertionSort);
 
 	//----------------------------------------
 	//片方向連結リストコンテナ
@@ -495,13 +495,13 @@ namespace singly_linked_list
 			{
 				iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator operator[](const int index)
 			{
 				iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 		#endif
 			//比較オペレータ
@@ -548,28 +548,28 @@ namespace singly_linked_list
 			{
 				iterator ite(*this);
 				++(*this);
-				return std::move(ite);
+				return ite;
 			}
 		#ifdef ENABLE_REVERSE_ITERATOR
 			inline const_iterator operator--(int) const
 			{
 				iterator ite(*this);
 				--(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 		#endif//ENABLE_REVERSE_ITERATOR
 			inline iterator operator++(int)
 			{
 				iterator ite(*this);
 				++(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 		#ifdef ENABLE_REVERSE_ITERATOR
 			inline iterator operator--(int)
 			{
 				iterator ite(*this);
 				--(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 		#endif//ENABLE_REVERSE_ITERATOR
 		#if 1//std::forward_iterator_tag には本来必要ではない
@@ -617,7 +617,7 @@ namespace singly_linked_list
 			{
 				iterator ite(*this);
 				ite += rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline const_iterator operator+(const std::size_t rhs) const
 			{
@@ -628,7 +628,7 @@ namespace singly_linked_list
 			{
 				iterator ite(*this);
 				ite -= rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline const_iterator operator-(const std::size_t rhs) const
 			{
@@ -639,7 +639,7 @@ namespace singly_linked_list
 			{
 				iterator ite(*this);
 				ite += rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline iterator operator+(const std::size_t rhs)
 			{
@@ -650,13 +650,13 @@ namespace singly_linked_list
 			{
 				iterator ite(*this);
 				ite -= rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline iterator operator-(const std::size_t rhs)
 			{
 				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
 			}
-			//inline typename iterator::difference_type operator-(const iterator rhs)
+			//inline typename iterator::difference_type operator-(const iterator rhs) const
 			//{
 			//	return ???;
 			//}
@@ -852,13 +852,13 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator[](const int index)
 			{
 				reverse_iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 		#endif
 		public:
@@ -902,25 +902,25 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*this);
 				++(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 			inline const_reverse_iterator operator--(int) const
 			{
 				reverse_iterator ite(*this);
 				--(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 			inline reverse_iterator operator++(int)
 			{
 				reverse_iterator ite(*this);
 				++(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 			inline reverse_iterator operator--(int)
 			{
 				reverse_iterator ite(*this);
 				--(*this);
-				return  std::move(ite);
+				return  ite;
 			}
 		#if 1//std::bidirectional_iterator_tag には本来必要ではない
 			inline const_reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs) const
@@ -963,7 +963,7 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*this);
 				ite += rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline const_reverse_iterator operator+(const std::size_t rhs) const
 			{
@@ -973,7 +973,7 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*this);
 				ite -= rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline const_reverse_iterator operator-(const std::size_t rhs) const
 			{
@@ -983,7 +983,7 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*this);
 				ite += rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline reverse_iterator operator+(const std::size_t rhs)
 			{
@@ -993,7 +993,7 @@ namespace singly_linked_list
 			{
 				reverse_iterator ite(*this);
 				ite -= rhs;
-				return  std::move(ite);
+				return  ite;
 			}
 			inline reverse_iterator operator-(const std::size_t rhs)
 			{
@@ -1122,12 +1122,12 @@ namespace singly_linked_list
 			inline const_iterator base() const
 			{
 				iterator ite(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator base()
 			{
 				iterator ite(*this);
-				return std::move(ite);
+				return ite;
 			}
 		public:
 			//ムーブコンストラクタ
@@ -1252,49 +1252,49 @@ namespace singly_linked_list
 		{
 			iterator ite(*this, false);
 			ite.updateBeforeBegin();
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator cbegin() const
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator cend() const
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator before_begin() const
 		{
 			iterator ite(*this, false);
 			ite.updateBeforeBegin();
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator begin() const
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator end() const
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline iterator before_begin()
 		{
 			iterator ite(*this, false);
 			ite.updateBeforeBegin();
-			return std::move(ite);
+			return ite;
 		}
 		inline iterator begin()
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline iterator end()
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 	#ifdef ENABLE_REVERSE_ITERATOR
 		//リバースイテレータを取得
@@ -1305,32 +1305,32 @@ namespace singly_linked_list
 		inline const_reverse_iterator crbegin() const
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator crend() const
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator rbegin() const
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator rend() const
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline reverse_iterator rbegin()
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline reverse_iterator rend()
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 	#endif//ENABLE_REVERSE_ITERATOR
 
@@ -1541,7 +1541,7 @@ namespace singly_linked_list
 			iterator found = iteratorLinearSearch(begin(), end(), predicate);
 			return std::move(found);
 		}
-	#ifdef ENABLE_BINARY_SEARCH
+	#ifdef GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//二分探索
 		//※探索値指定版
 		//※ope_type::comparisonForSearch() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
@@ -1569,7 +1569,7 @@ namespace singly_linked_list
 			iterator found = iteratorBinarySearch(begin(), end(), comparison);
 			return std::move(found);
 		}
-	#endif//ENABLE_BINARY_SEARCH
+	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド
 		//※merge(), splice_after(), reverse(), unique()には非対応

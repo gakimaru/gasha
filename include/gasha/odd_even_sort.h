@@ -85,7 +85,7 @@ std::size_t oddEvenSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(oddEvenSort);
+sortingFuncSet(oddEvenSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

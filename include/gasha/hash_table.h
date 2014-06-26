@@ -322,13 +322,13 @@ namespace hash_table
 			{
 				iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator operator[](const int index)
 			{
 				iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 		#endif
 			//比較オペレータ
@@ -408,28 +408,28 @@ namespace hash_table
 			{
 				iterator ite(*this);
 				++(*this);
-				return std::move(ite);
+				return ite;
 			}
 		#if 1//std::forward_iterator_tag には本来必要ではない
 			inline const_iterator operator--(int) const
 			{
 				iterator ite(*this);
 				--(*this);
-				return std::move(ite);
+				return ite;
 			}
 		#endif
 			inline iterator operator++(int)
 			{
 				iterator ite(*this);
 				++(*this);
-				return std::move(ite);
+				return ite;
 			}
 		#if 1//std::forward_iterator_tag には本来必要ではない
 			inline iterator operator--(int)
 			{
 				iterator ite(*this);
 				--(*this);
-				return std::move(ite);
+				return ite;
 			}
 		#endif
 		#if 1//std::forward_iterator_tag には本来必要ではない
@@ -473,7 +473,7 @@ namespace hash_table
 			{
 				iterator ite(*this);
 				ite += rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline const_iterator operator+(const std::size_t rhs) const
 			{
@@ -483,7 +483,7 @@ namespace hash_table
 			{
 				iterator ite(*this);
 				ite -= rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline const_iterator operator-(const std::size_t rhs) const
 			{
@@ -493,7 +493,7 @@ namespace hash_table
 			{
 				iterator ite(*this);
 				ite += rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator operator+(const std::size_t rhs)
 			{
@@ -503,13 +503,13 @@ namespace hash_table
 			{
 				iterator ite(*this);
 				ite -= rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator operator-(const std::size_t rhs)
 			{
 				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
 			}
-			//inline typename iterator::difference_type operator-(const iterator rhs)
+			//inline typename iterator::difference_type operator-(const iterator rhs) const
 			//{
 			//	return ???;
 			//}
@@ -685,13 +685,13 @@ namespace hash_table
 			{
 				reverse_iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator[](const int index)
 			{
 				reverse_iterator ite(*m_con, false);
 				ite += index;
-				return std::move(ite);
+				return ite;
 			}
 		public:
 			//比較オペレータ
@@ -764,25 +764,25 @@ namespace hash_table
 			{
 				reverse_iterator ite(*this);
 				++(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline const_reverse_iterator operator--(int) const
 			{
 				reverse_iterator ite(*this);
 				--(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator++(int)
 			{
 				reverse_iterator ite(*this);
 				++(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator--(int)
 			{
 				reverse_iterator ite(*this);
 				--(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline const_reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs) const
 			{
@@ -824,7 +824,7 @@ namespace hash_table
 			{
 				reverse_iterator ite(*this);
 				ite += rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline const_reverse_iterator operator+(const std::size_t rhs) const
 			{
@@ -834,7 +834,7 @@ namespace hash_table
 			{
 				reverse_iterator ite(*this);
 				ite -= rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline const_reverse_iterator operator-(const std::size_t rhs) const
 			{
@@ -844,7 +844,7 @@ namespace hash_table
 			{
 				reverse_iterator ite(*this);
 				ite += rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator+(const std::size_t rhs)
 			{
@@ -854,13 +854,13 @@ namespace hash_table
 			{
 				reverse_iterator ite(*this);
 				ite -= rhs;
-				return std::move(ite);
+				return ite;
 			}
 			inline reverse_iterator operator-(const std::size_t rhs)
 			{
 				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
 			}
-			//inline typename reverse_iterator::difference_type operator-(const reverse_iterator rhs)
+			//inline typename reverse_iterator::difference_type operator-(const reverse_iterator rhs) const
 			//{
 			//	return ???;
 			//}
@@ -988,12 +988,12 @@ namespace hash_table
 			inline const_iterator base() const
 			{
 				iterator ite(*this);
-				return std::move(ite);
+				return ite;
 			}
 			inline iterator base()
 			{
 				iterator ite(*this);
-				return std::move(ite);
+				return ite;
 			}
 		public:
 			//ムーブコンストラクタ
@@ -1188,32 +1188,32 @@ namespace hash_table
 		inline const_iterator cbegin() const
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator cend() const
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator begin() const
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_iterator end() const
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline iterator begin()
 		{
 			iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline iterator end()
 		{
 			iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 	#if 1//std::forward_iterator_tag には本来必要ではない
 		//リバースイテレータを取得
@@ -1222,32 +1222,32 @@ namespace hash_table
 		inline const_reverse_iterator crbegin() const
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator crend() const
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator rbegin() const
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline const_reverse_iterator rend() const
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 		inline reverse_iterator rbegin()
 		{
 			reverse_iterator ite(*this, false);
-			return std::move(ite);
+			return ite;
 		}
 		inline reverse_iterator rend()
 		{
 			reverse_iterator ite(*this, true);
-			return std::move(ite);
+			return ite;
 		}
 	#endif
 	private:

@@ -203,7 +203,7 @@ std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predica
 	return swapped_count;
 #endif//GASHA_INPLACE_MERGE_SORT_USE_OPENMP
 }
-sortFuncSet(inplaceMergeSort);
+sortingFuncSet(inplaceMergeSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

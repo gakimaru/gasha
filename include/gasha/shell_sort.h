@@ -90,7 +90,7 @@ std::size_t shellSort(T* array, const std::size_t size, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-sortFuncSet(shellSort);
+sortingFuncSet(shellSort);
 
 //----------------------------------------
 //アルゴリズム：シェルソート
@@ -143,7 +143,78 @@ std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 	}
 	return swapped_count;
 }
-iteratorSortFuncSet(iteratorShellSort);
+iteratorSortingFuncSet(iteratorShellSort);
+
+//----------------------------------------
+//アルゴリズム：シェルソート ※双方向連結リスト対応版
+//----------------------------------------
+//・最良計算時間：O(n)
+//・平均計算時間：O(n log^2 n) or O(n^3/2)
+//・最悪計算時間：O(n log^2 n)
+//・メモリ使用量：O(1)
+//・安定性：　　　×
+//----------------------------------------
+template<class NODE_TYPE, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
+std::size_t linkedListShellSort(NODE_TYPE*& first, NODE_TYPE*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate)
+{
+	typedef NODE_TYPE node_type;
+	if (!first || !get_next_func(*first))
+		return 0;
+	std::size_t swapped_count = 0;
+	std::size_t size = 0;
+	{
+		const node_type* node = first;
+		while (node)
+		{
+			++size;
+			node = get_next_func(*node);
+		}
+	}
+	const int h_max = size / 3;
+	int h = 1;
+	while (h <= h_max)
+		h = 3 * h + 1;
+	while (h > 0)
+	{
+		node_type* now = first;
+		node_type* next = now;
+		for (int i = 0; i < h && next; ++i)
+			next = const_cast<node_type*>(get_next_func(*next));
+		while (next)
+		{
+			if (predicate(*next, *now))
+			{
+				node_type* min = now;
+				node_type* prev = now;
+				for (int i = 0; i < h && prev; ++i)
+					prev = const_cast<node_type*>(get_prev_func(*prev));
+				while (prev)
+				{
+					if (predicate(*next, *prev))
+						min = prev;
+					else
+						break;
+					for (int i = 0; i < h && prev; ++i)
+						prev = const_cast<node_type*>(get_prev_func(*prev));
+				}
+				remove_node_func(*next, first, last);
+				insert_node_before_func(*next, *min, first, last);
+				++swapped_count;
+				next = now;
+				for (int i = 0; i < h && next; ++i)
+					next = const_cast<node_type*>(get_next_func(*next));
+			}
+			else
+			{
+				now = const_cast<node_type*>(get_next_func(*now));
+				next = const_cast<node_type*>(get_next_func(*next));
+			}
+		}
+		h = (h - 1) / 3;
+	}
+	return swapped_count;
+}
+linkedListSortingFuncSet(linkedListShellSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
