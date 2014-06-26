@@ -16,7 +16,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/ring_buffer.inl>//リングバッファコンテナ【インライン関数／テンプレート関数実装部】
+#include <gasha/ring_buffer.inl>//リングバッファコンテナ【インライン関数／テンプレート関数定義部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -26,20 +26,43 @@ namespace ring_buffer
 	//イテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type logical_index) const
+	{
+		//if (logical_index == INVALID_INDEX || logical_index < 0 || logical_index > static_cast<index_type>(m_con->m_size))
+		if (logical_index > static_cast<index_type>(m_con->m_size))
+		{
+			m_logicalIndex = INVALID_INDEX;
+			m_value = nullptr;
+		}
+		else
+		{
+			m_logicalIndex = logical_index;
+			const index_type real_index = m_con->_to_real_index(m_logicalIndex);
+			m_value = const_cast<value_type*>(m_con->_ref_real_element(real_index));
+		}
+	}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::reverse_iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
-
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::update(const typename container<OPE_TYPE>::index_type logical_index) const
+	{
+		//if (logical_index == INVALID_INDEX || logical_index < 0 || index > static_cast<index_type>(m_con->m_size))
+		if (logical_index > static_cast<index_type>(m_con->m_size))
+		{
+			m_logicalIndex = INVALID_INDEX;
+			m_value = nullptr;
+		}
+		else
+		{
+			m_logicalIndex = logical_index;
+			const index_type real_index = m_con->_to_real_index(m_logicalIndex);
+			m_value = real_index == 0 ? const_cast<value_type*>(m_con->_ref_real_element(m_con->m_maxSize - 1)) : const_cast<value_type*>(m_con->_ref_real_element(real_index - 1));
+		}
+	}
 	//----------------------------------------
 	//コンテナ本体のメソッド
 

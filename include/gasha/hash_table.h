@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・hash_table.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・hash_table.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・hash_table.cpp.h ... 【関数実装部】
+//   ・hash_table.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,7 +33,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
@@ -93,9 +93,9 @@ namespace hash_table
 	//ハッシュテーブルデータ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename KEY_TYPE, typename VALUE_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-	//  //struct base_ope_t;
-	//  //struct 派生構造体名 : public hash_table::base_ope_t<派生構造体, キー型, 値型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
-	//	struct ope_t : public hash_table::base_ope_t<ope_t, crc32_t, data_t, 500>
+	//  //struct baseOpe_t;
+	//  //struct 派生構造体名 : public hash_table::baseOpe_t<派生構造体, キー型, 値型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
+	//	struct ope_t : public hash_table::baseOpe_t<ope_t, crc32_t, data_t, 500>
 	//	{
 	//		//データ置換属性 ※必要に応じて定義
 	//		static const replace_attr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
@@ -109,7 +109,7 @@ namespace hash_table
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename KEY_TYPE, typename VALUE_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//定数
 		static const KEY_TYPE KEY_MIN = _KEY_MIN;//キーの最小値
@@ -133,7 +133,7 @@ namespace hash_table
 		typedef dummy_shared_lock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
 		//　lock_type 型として再定義する。
 		//【補足①】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -1391,7 +1391,7 @@ namespace hash_table
 		inline value_type* insert(const char* key, const value_type& value){ return insert(calcCRC32(key), value); }
 		inline value_type* insert(const std::string& key, const value_type& value){ return insert(key.c_str(), value); }
 		//値を挿入（コピー）し、キーは自動割り当て
-		//※操作用クラス base_ope_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
 		//※オブジェクトのコピーが発生する点に注意
 		inline value_type* insertAuto(const value_type& value){ return insert(ope_type::getKey(value), value); }
 	private:
@@ -1422,7 +1422,7 @@ namespace hash_table
 		inline value_type* emplace(const std::string& key, Tx... args){ return emplace(key.c_str(), args...); }
 		//値を初期化して自動的にキー割り当て
 		//※オブジェクトのコピーが発生する点に注意
-		//※操作用クラス base_ope_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
 		//※処理中、ライトロックを取得する
 		template<typename... Tx>
 		inline value_type* emplaceAuto(Tx... args)
@@ -1462,7 +1462,7 @@ namespace hash_table
 		inline bool erase(const char* key){ return erase(calcCRC32(key)); }
 		inline bool erase(const std::string& key){ return erase(key.c_str()); }
 		//キーを削除
-		//※操作用クラス base_ope_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
 		inline bool eraseAuto(const value_type& value){ return erase(ope_type::getKey(value)); }
 	private:
 		//リハッシュ（本体）

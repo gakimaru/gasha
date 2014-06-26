@@ -16,7 +16,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/dynamic_array.inl>//動的配列コンテナ【インライン関数／テンプレート関数実装部】
+#include <gasha/dynamic_array.inl>//動的配列コンテナ【インライン関数／テンプレート関数定義部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -147,7 +147,7 @@ namespace dynamic_array
 	
 	//使用中のサイズを変更（新しいサイズを返す）
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resizeSilent(const int size)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resizeSilently(const int size)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		m_size = _size;
@@ -244,7 +244,7 @@ namespace dynamic_array
 	
 	//要素の移動（昇順）
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::move_asc(const typename container<OPE_TYPE>::index_type dst_pos, const typename container<OPE_TYPE>::index_type src_pos, const typename container<OPE_TYPE>::size_type num)
+	void container<OPE_TYPE>::moveAsc(const typename container<OPE_TYPE>::index_type dst_pos, const typename container<OPE_TYPE>::index_type src_pos, const typename container<OPE_TYPE>::size_type num)
 	{
 		value_type* dst = _refElement(dst_pos);
 		value_type* src = _refElement(src_pos);
@@ -262,7 +262,7 @@ namespace dynamic_array
 	
 	//要素の移動（降順）
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::move_desc(const typename container<OPE_TYPE>::index_type dst_pos, const typename container<OPE_TYPE>::index_type src_pos, const typename container<OPE_TYPE>::size_type num)
+	void container<OPE_TYPE>::moveDesc(const typename container<OPE_TYPE>::index_type dst_pos, const typename container<OPE_TYPE>::index_type src_pos, const typename container<OPE_TYPE>::size_type num)
 	{
 		value_type* dst = _refElement(dst_pos + num - 1);
 		value_type* src = _refElement(src_pos + num - 1);
@@ -285,13 +285,13 @@ namespace dynamic_array
 		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 		{
 			iterator ite(*this, INVALID_INDEX);
-			return std::move(ite);
+			return ite;
 		}
 		index_type index = pos.getIndex();
 		const size_type remain = m_maxSize - m_size;
 		const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
 		//移動
-		move_desc(index + _num, index, _num);
+		moveDesc(index + _num, index, _num);
 		//要素数変更
 		m_size += _num;
 		//挿入
@@ -300,7 +300,7 @@ namespace dynamic_array
 			*new_value = value;
 		//終了
 		iterator now(*this, index);
-		return std::move(now);
+		return now;
 	}
 	
 	//要素の削除
@@ -318,7 +318,7 @@ namespace dynamic_array
 			operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
 		}
 		//移動
-		move_asc(index, index + _num, move_num);
+		moveAsc(index, index + _num, move_num);
 		//要素数変更
 		m_size -= _num;
 	}
@@ -330,14 +330,14 @@ namespace dynamic_array
 		if (pos.isNotExist() || num == 0 || m_size == 0)
 		{
 			iterator ite(*this, INVALID_INDEX);
-			return std::move(ite);
+			return ite;
 		}
 		const index_type index = pos.getIndex();
 		//削除
 		_erase(index, num);
 		//終了
 		iterator now(*this, index);
-		return std::move(now);
+		return now;
 	}
 	//※範囲指定版
 	template<class OPE_TYPE>
@@ -346,7 +346,7 @@ namespace dynamic_array
 		if (start.isNotExist() || end.isNotExist() || start >= end || m_size == 0)
 		{
 			iterator ite(*this, INVALID_INDEX);
-			return std::move(ite);
+			return ite;
 		}
 		index_type index = start.getIndex();
 		index_type end_index = end.getIndex();
@@ -355,13 +355,13 @@ namespace dynamic_array
 		_erase(index, num);
 		//終了
 		iterator now(*this, index);
-		return std::move(now);
+		return now;
 	}
 	
 	//コンストラクタ
 	//※ポインタと配列要素数指定版
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::container(typename container<OPE_TYPE>::value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size, const auto_clear_attr_t auto_clear_attr) :
+	container<OPE_TYPE>::container(typename container<OPE_TYPE>::value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size, const autoClearAttr_t auto_clear_attr) :
 		m_array(array),
 		m_maxSizeReal(max_size),
 		m_maxSize(max_size),
@@ -370,7 +370,7 @@ namespace dynamic_array
 	{}
 	//※voidポインタとバッファサイズ数指定版
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::container(void* buff_ptr, const typename container<OPE_TYPE>::size_type buff_size, const int size, const auto_clear_attr_t auto_clear_attr) :
+	container<OPE_TYPE>::container(void* buff_ptr, const typename container<OPE_TYPE>::size_type buff_size, const int size, const autoClearAttr_t auto_clear_attr) :
 		m_array(static_cast<value_type*>(buff_ptr)),
 		m_maxSizeReal(buff_size / sizeof(value_type)),
 		m_maxSize(m_maxSizeReal),

@@ -16,9 +16,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/lf_queue.inl>//ロックフリーキュー【インライン関数／テンプレート関数実装部】
+#include <gasha/lf_queue.inl>//ロックフリーキュー【インライン関数／テンプレート関数定義部】
 
-#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数実装部】
+#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数定義部】
 
 #include <stdio.h>//printf()
 
@@ -85,11 +85,10 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 				{
 					//CAS操作①
 					//※論文通りのこの処理だけだとアトミック性を保証できない問題があったので、前後に対策処理を追加
-					const bool cas_result = tail_tag_ptr == m_tail.load() && next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr);//CAS操作
+					if(tail_tag_ptr == m_tail.load() && next.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
 					//【CAS操作の内容】
 					//    if(tail_tag_ptr->m_next == next_tag_ptr)//末尾ノードの次ノードを他のスレッドが書き換えていないか？
 					//        tail_tag_ptr->m_next = new_node_tag_ptr;//末尾ノードの次ノードに新規ノードをセット（エンキュー成功）
-					if(cas_result)
 					{
 						m_next.store(next_tag_ptr);//※問題解消のための追加処理（本質的にロック解除操作と同等）
 
@@ -102,6 +101,7 @@ inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 						return true;//エンキュー成功
 					}
 					
+					//エンキューに失敗したので元の状態に戻す
 					m_next.store(null_tag_ptr);//※問題解消のための追加処理（本質的にロック解除操作と同等）
 				}
 			}

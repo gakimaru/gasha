@@ -16,7 +16,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/linked_list.inl>//双方向連結リストコンテナ【インライン関数／テンプレート関数実装部】
+#include <gasha/linked_list.inl>//双方向連結リストコンテナ【インライン関数／テンプレート関数定義部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -28,8 +28,6 @@ namespace linked_list
 	//参照を更新
 //	template<class OPE_TYPE>
 //	void container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド

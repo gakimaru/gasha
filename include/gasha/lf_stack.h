@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・lf_stack.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・lf_stack.inl   ... 【インライン関数／テンプレート関数定義部】
 //                        クラスの操作が必要な場所でインクルード。
-//   ・lf_stack.cpp.h ... 【関数実装部】
+//   ・lf_stack.cpp.h ... 【関数定義部】
 //                        クラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -31,7 +31,7 @@
 #include <cstdint>//std::uint32_t
 #include <atomic>//C++11 std::atomic
 
-//例外を無効化した状態で <functional> <bitset> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <functional> <bitset> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 

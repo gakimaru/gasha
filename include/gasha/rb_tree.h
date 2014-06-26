@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・rb_tree.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・rb_tree.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・rb_tree.cpp.h ... 【関数実装部】
+//   ・rb_tree.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,7 +33,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
@@ -113,8 +113,8 @@ namespace rb_tree
 	//--------------------
 	//赤黒木ノード操作用基底テンプレートクラス
 	//※下記のような派生クラス（CRTP）を定義して使用する
-	//  //struct クラス名 : public rb_tree::base_ope_t<クラス名, ノード型, キー型, スタックの最大の深さ = 32>
-	//	struct ope_t : public rb_tree::base_ope_t<ope_t, data_t, int>
+	//  //struct クラス名 : public rb_tree::baseOpe_t<クラス名, ノード型, キー型, スタックの最大の深さ = 32>
+	//	struct ope_t : public rb_tree::baseOpe_t<ope_t, data_t, int>
 	//	{
 	//		//子ノードを取得
 	//		inline static const node_type* getChildL(const node_type& node){ return ???; }//大（右）側
@@ -140,7 +140,7 @@ namespace rb_tree
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE, typename KEY_TYPE, int _STACK_DEPTH_MAX = 32>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//定数
 		static const int STACK_DEPTH_MAX = _STACK_DEPTH_MAX;//スタックの最大の深さ
@@ -159,7 +159,7 @@ namespace rb_tree
 		typedef dummy_shared_lock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
 		//　lock_type 型として再定義する。
 
 		//子ノードを取得 ※const外し(remove_const)

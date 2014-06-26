@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・linked_list.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・linked_list.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・linked_list.cpp.h ... 【関数実装部】
+//   ・linked_list.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,7 +33,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
@@ -46,23 +46,43 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
-//【本プログラムにおける実装要件】
-//・テンプレートにより、アルゴリズムを汎用化。
-//・リンクの方法に柔軟性を持たせ、かつ、virtualを必須としないように、
-//　データ構造は自由とする。
-//　（リンクの変数をポインタにしようがインデックスにしようが自由）
-//・代わりに、データ操作専用のクラスをユーザー定義することで、
-//　処理に汎用性を持たせる。
-//・一切メモリ操作は行わず、ノードのオブジェクトを受け取って操作する
-//　アルゴリズムのみを提供する。
-//・std::listを模したコンテナとイテレータを利用可能とする。
-//　ただし、メモリ管理を行わないため、複製を作るようなメソッドには対応しない。
-//・コンテナは、先頭ノードと末尾ノードのみを保持し、一切メモリ操作しないものとする。
+//データ構造とアルゴリズム
+//【特徴】
+//・要素（ノード）ごとに独立したデータ（メモリ）を連結して管理する。
+//・前後の連結を扱うため、リストの昇順アクセスと降順アクセスが行える。
+//【利点】
+//・リストの先頭・末端への要素の挿入がほぼO(1)で行える。
+//・リストの先頭・末端要素の削除がほぼO(1)で行える。
+//・リストの途中への要素の挿入がほぼO(1)で行える。
+//・リストの途中要素の削除がほぼO(1)で行える。
+//・リストの要素数の上限を決めずに扱える。
+//【欠点】
+//・ランダムアクセスができない。
+//・探索が遅い。
+//・各要素に前後二つの連結情報を追加する必要がある。（メモリオーバーヘッドがある）
 //--------------------------------------------------------------------------------
 
-//#include <cstddef>//srd::size_t用
-//#include <iterator>//std::iterator用
-//#include <algorithm>//C++11 std::move用
+//--------------------------------------------------------------------------------
+//【本プログラムにおける実装要件】
+//・アルゴリズムとデータを分離した擬似コンテナとする。
+//・ノードの連結情報をユーザー定義可能とする。
+//　コンテナ操作用のユーザー定義構造体に、連結情報へのアクセスメソッドを実装することを必要とする。
+//・コンテナを用いずとも、ノードの連結操作アルゴリズム（関数）のみの利用も可能とする。
+//・コンテナ自体はデータの実体（ノード）を持たず、メモリ確保／解放を行わない。
+//・データの実体（ノード）はコンテナの外部から受け取り、コンテナは先頭要素と末尾要素を管理する。
+//・コンテナは、STLの std::list をモデルとしたインターフェースを実装する。
+//・STL（std::list）との主な違いは下記のとおり。
+//    - ノードの生成／破棄を行わない。
+//    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
+//      構造体をユーザー定義して用いる。
+//--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+//【具体的な活用の想定】
+//・順序変更や途中挿入・削除を多用するリスト。
+//・複数種のキュー／スタックを同一ノードが渡り歩く必要がある場合。
+//　　例：処理待ちリスト（キュー）に連結→処理中リストに再連結→削除待ちリストに再連結といった流れを扱う。
+//--------------------------------------------------------------------------------
 
 namespace linked_list
 {
@@ -70,8 +90,8 @@ namespace linked_list
 	//--------------------
 	//双方向連結リストノード操作用基底テンプレートクラス
 	//※下記のような派生クラス（CRTP）を定義して使用する
-	//  //struct クラス名 : public linked_list::base_ope_t<クラス名, ノード型>
-	//	struct ope_t : public linked_list::base_ope_t<ope_t, data_t>
+	//  //struct クラス名 : public linked_list::baseOpe_t<クラス名, ノード型>
+	//	struct ope_t : public linked_list::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//前ノードを取得
 	//		inline static const node_type* getPrev(const node_type& node){ return ???; }
@@ -85,13 +105,13 @@ namespace linked_list
 	//		
 	//		//ソート用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
-	//		struct sort_predicate{
+	//		struct predicateForSort{
 	//			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return lhs.??? < rhs.???; }
 	//		};
 	//
 	//		//探索用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
-	//		struct find_predicate{
+	//		struct predicateForFind{
 	//			inline bool operator()(const node_type& lhs, const ???& rhs) const { return lhs.??? == rhs; }
 	//		};
 	//		
@@ -101,7 +121,7 @@ namespace linked_list
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
@@ -111,7 +131,7 @@ namespace linked_list
 		typedef dummy_shared_lock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
 		//　lock_type 型として再定義する。
 
 		//前ノードを取得 ※const外し(remove_const)
@@ -121,13 +141,13 @@ namespace linked_list
 
 		//ソート用プレディケート関数オブジェクト
 		//※trueでlhsの方が小さい（並び順が正しい）
-		struct sort_predicate{
+		struct predicateForSort{
 			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return less<node_type>()(lhs, rhs); }
 		};
 
 		//線形探索用プレディケート関数オブジェクト
 		//※trueで一致（探索成功）
-		struct find_predicate{
+		struct predicateForFind{
 			template<typename V>
 			inline bool operator()(const node_type& lhs, const V& rhs) const { return equal_to<node_type>()(lhs, rhs); }
 		};
@@ -135,7 +155,7 @@ namespace linked_list
 	#ifdef ENABLE_BINARY_SEARCH
 		//二分探索用比較関数オブジェクト
 		//※0で一致（探索成功）、1以上でlhsの方が大きい、-1以下でrhsの方が大きい
-		struct search_comparison{
+		struct comparisonForSearch{
 			template<typename V>
 			inline int operator()(const node_type& lhs, const V& rhs) const { return compare_to<node_type>()(lhs, rhs); }
 		};
@@ -1368,15 +1388,15 @@ namespace linked_list
 	public:
 		//ソート
 		//※挿入ソートを使用（シェルソートではあまり速度が上がらないため）
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		void sort()
 		{
 		#ifdef USE_SHELL_SORT
-			linkedListShellSort<OPE_TYPE>(m_first, m_last, typename ope_type::sort_predicate());
+			linkedListShellSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
 		#else//USE_SHELL_SORT
-			linkedListInsertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::sort_predicate());
+			linkedListInsertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
 		#endif//USE_SHELL_SORT
 		}
 		//※プレディケート関数指定版
@@ -1392,49 +1412,49 @@ namespace linked_list
 	#ifdef ENABLE_STABLE_SORT
 		//安定ソート
 		//※挿入ソートを使用
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stable_sort()
+		void stableSort()
 		{
-			linkedListInsertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::sort_predicate());
+			linkedListInsertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
 		}
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stable_sort(PREDICATE predicate)
+		void stableSort(PREDICATE predicate)
 		{
 			linkedListInsertionSort<OPE_TYPE>(m_first, m_last, predicate);
 		}
 	#endif//ENABLE_STABLE_SORT
 		//ソート済み状態チェック
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		bool is_ordered() const
+		bool isOrdered() const
 		{
-			return linkedListCalcUnordered<OPE_TYPE>(m_first, typename ope_type::sort_predicate()) == 0;
+			return linkedListCalcUnordered<OPE_TYPE>(m_first, typename ope_type::predicateForSort()) == 0;
 		}
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool is_ordered(PREDICATE predicate) const
+		bool isOrdered(PREDICATE predicate) const
 		{
 			return linkedListCalcUnordered<OPE_TYPE>(m_first, predicate) == 0;
 		}
 	public:
 		//線形探索
 		//※探索値指定版
-		//※ope_type::find_predicate() を使用して探索（標準では、データ型の operator==() に従って探索）
+		//※ope_type::predicateForFind() を使用して探索（標準では、データ型の operator==() に従って探索）
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator find_value(const V& value)
+		iterator findValue(const V& value)
 		{
-			iterator found = iteratorLinearSearchValue(begin(), end(), value, typename ope_type::find_predicate());
+			iterator found = iteratorLinearSearchValue(begin(), end(), value, typename ope_type::predicateForFind());
 			return std::move(found);
 		}
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator find_value(const V& value, PREDICATE predicate)
+		iterator findValue(const V& value, PREDICATE predicate)
 		{
 			iterator found = iteratorLinearSearchValue(begin(), end(), value, predicate);
 			return std::move(found);
@@ -1450,18 +1470,18 @@ namespace linked_list
 	#ifdef ENABLE_BINARY_SEARCH
 		//二分探索
 		//※探索値指定版
-		//※ope_type::search_comparison() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
+		//※ope_type::comparisonForSearch() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binary_search_value(const V& value)
+		iterator binarySearchValue(const V& value)
 		{
-			iterator found = iteratorBinarySearchValue(begin(), end(), value, typename ope_type::search_comparison());
+			iterator found = iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
 			return std::move(found);
 		}
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binary_search_value(const V& value, COMPARISON comparison)
+		iterator binarySearchValue(const V& value, COMPARISON comparison)
 		{
 			iterator found = iteratorBinarySearchValue(begin(), end(), value, comparison);
 			return std::move(found);

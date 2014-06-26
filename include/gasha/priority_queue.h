@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・priority_queue.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・priority_queue.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・priority_queue.cpp.h ... 【関数実装部】
+//   ・priority_queue.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,7 +33,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
@@ -55,9 +55,9 @@ namespace priority_queue
 	//プライオリティキュー操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename NODE_TYPE, int _NODES_MAX>
-	//  //struct base_ope_t;
-	//  //struct 派生構造体名 : public priority_queue::base_ope_t<派生構造体, ノード型, 優先度型, シーケンス番号型>
-	//	struct ope_t : public priority_queue::base_ope_t<ope_t, data_t, int, unsigned int>
+	//  //struct baseOpe_t;
+	//  //struct 派生構造体名 : public priority_queue::baseOpe_t<派生構造体, ノード型, 優先度型, シーケンス番号型>
+	//	struct ope_t : public priority_queue::baseOpe_t<ope_t, data_t, int, unsigned int>
 	//	{
 	//		//優先度を取得
 	//		inline static priority_type getPriority(const node_type& node){ return node.m_priority; }
@@ -78,7 +78,7 @@ namespace priority_queue
 	//		typedef spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE, typename PRIOR_TYPE = int, typename SEQ_TYPE = unsigned int>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
@@ -90,7 +90,7 @@ namespace priority_queue
 		typedef dummy_lock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効なロック型（spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効なロック型（spin_lock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。

@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・ring_buffer.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・ring_buffer.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・ring_buffer.cpp.h ... 【関数実装部】
+//   ・ring_buffer.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -28,77 +28,97 @@
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
-#include <cstddef>//std::size_t, std::ptrdiff_t用
-//#include <cstdint>//std::intptr_t用
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+#include <cstddef>//std::size_t, std::ptrdiff_t
+//#include <cstdint>//std::intptr_t
+
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
-#include <iterator>//std::iterator用
+#include <iterator>//std::iterator
+
+
+//移動予定
+#include <gasha/is_ordered.h>//整列状態確認
+#include <gasha/intro_sort.h>//イントロソート
+#include <gasha/insertion_sort.h>//挿入ソート
+
+#include <gasha/linear_search.h>//線形探索
+#include <gasha/binary_search.h>//二分探索
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//リングバッファ
+//リングバッファ（ring buffer）
+//--------------------------------------------------------------------------------
+
 //--------------------------------------------------------------------------------
 //データ構造とアルゴリズム
 //【特徴】
-//・単純な一次配列をリングバッファとして管理する。
-//・配列の要素数を超えない範囲で、有効要素数を動的に変化させて管理する。
-//・有効要素の増減に伴い、コンストラクタ／デストラクタの呼び出しを行う。
+//・単純な一次元配列をリングバッファとして扱う。
+//・配列の有効要素数を動的に変化させて扱う。
+//【利点】
+//・配列の先頭・末端へのの要素追加がO(1)で行える。
+//・配列の先頭・末端要素の削除がO(1)で行える。
+//・ランダムアクセスができる。※動的配列よりは遅い
+//・データ登録順の昇順アクセス、降順アクセスができる。※動的配列よりは遅い
+//・ソートが速い。※動的配列よりは遅い
+//・ソート済みを前提に、二分探索で高速な探索が行える。※動的配列よりは遅い
+//・各要素のメモリオーバーヘッドがない。※要素間の連結情報などを持つ必要がない
+//【欠点】
+//・途中への要素挿入が遅い。
+//・途中要素の削除が遅い。
+//・最大要素数を想定したメモリを用意する必要がある。
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
 //【本プログラムにおける実装要件】
-//・アルゴリズムとデータ本体を分離したコンテナとする。
-//・コンテナ自体は要素の実体を持たずメモリ確保も行わない。
-//・コンストラクタで受けとった配列の参照を扱う。
-//・STL（std::deque）との違いは下記の通り
-//    - 固定長配列である。
-//    - 赤黒木コンテナ（rb_tree）の実装と合わせた構造にしており、
-//　　  操作用テンプレート構造体を用いる。
+//・アルゴリズムとデータを分離した擬似コンテナとする。
+//・コンテナ自体はデータの実体（配列）を持たず、メモリ確保／解放を行わない。
+//・データの実体（配列）はコンテナの外部から受け取り、コンテナは有効要素数とデータの先頭位置を管理する。
+//・配列の最大要素数を超えない範囲で、有効要素数を動的に変化させて扱う。
+//・有効要素の増減に伴い、コンストラクタ／デストラクタの呼び出しを行う。
+//・コンテナは、STLの std::deque をモデルとしたインターフェースを実装する。
+//・STL（std::deque）との主な違いは下記のとおり。
+//    - 固定長配列であり、配列拡張に伴うメモリ再配置を行わない。
+//    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
+//      構造体をユーザー定義して用いる。
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
-//【具体的な活用の想定】
-//・コンテナクラスと無関係の配列を、一時的にコンテナクラス化して操作する。
+//【想定する活用法】
+//・ランダムアクセス可能なキュー／スタック。
+//・ストリーミング処理。
 //--------------------------------------------------------------------------------
-
-//#include <cstddef>//std::size_t, std::ptrdiff_t用
-////#include <cstdint>//std::intptr_t用
-//#include <iterator>//std::iterator用
-//#include <new>//配置new,配置delete用
-//#include <algorithm>//C++11 std::move用
 
 namespace ring_buffer
 {
-#if 0
 	//--------------------
 	//リングバッファ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename VALUE_TYPE>
-	//  //struct base_ope_t;
-	//  //struct 派生構造体名 : public ring_buffer::base_ope_t<派生構造体, 要素型>
-	//	struct ope_t : public ring_buffer::base_ope_t<ope_t, data_t>
+	//  //struct baseOpe_t;
+	//  //struct 派生構造体名 : public ring_buffer::baseOpe_t<派生構造体, 要素型>
+	//	struct ope_t : public ring_buffer::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//ソート用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
-	//		struct sort_predicate{
+	//		struct predicateForSort{
 	//			inline bool operator()(const value_type& lhs, const value_type& rhs) const { return lhs.??? < rhs.???; }
 	//		};
 	//
 	//		//探索用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
-	//		struct find_predicate{
+	//		struct predicateForFind{
 	//			inline bool operator()(const value_type& lhs, const ???& rhs) const { return lhs.??? == rhs; }
 	//		};
 	//		
 	//		//探索用比較関数オブジェクト
 	//		//※必要に応じて実装する
-	//		struct search_comparison{
+	//		struct comparisonForSearch{
 	//			inline int operator()(const value_type& lhs, const ???& rhs) const { return rhs - lhs.???; }
 	//		};
 	//		
@@ -115,41 +135,41 @@ namespace ring_buffer
 	//		}
 	//	};
 	template<class OPE_TYPE, typename VALUE_TYPE>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//型
 		typedef OPE_TYPE ope_type;//要素操作型
 		typedef VALUE_TYPE value_type;//要素型
 
 		//ロック型
-		typedef dummy_shared_lock lock_type;//ロックオブジェクト型
+		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効なロック型（shared_spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効なロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 
 		//デストラクタ呼び出し
 		inline static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
 		//※デストラクタの呼び出しを禁止したい場合、
-		//　base_ope_tの派生クラスにて、なにもしない
+		//　baseOpe_tの派生クラスにて、なにもしない
 		//　callDestructor メソッドを再定義する。
 
 		//ソート用プレディケート関数オブジェクト
 		//※trueでlhsの方が小さい（並び順が正しい）
-		struct sort_predicate{
+		struct predicateForSort{
 			inline bool operator()(const value_type& lhs, const value_type& rhs) const { return less<value_type>()(lhs, rhs); }
 		};
 
 		//探索用プレディケート関数オブジェクト
 		//※trueで一致（探索成功）
-		struct find_predicate{
+		struct predicateForFind{
 			template<typename V>
 			inline bool operator()(const value_type& lhs, const V& rhs) const { return equal_to<value_type>()(lhs, rhs); }
 		};
 
 		//探索用比較関数オブジェクト
 		//※0で一致（探索成功）、1以上でlhsの方が大きい、-1以下でrhsの方が大きい
-		struct search_comparison{
+		struct comparisonForSearch{
 			template<typename V>
 			inline int operator()(const value_type& lhs, const V& rhs) const { return compare_to<value_type>()(lhs, rhs); }
 		};
@@ -163,12 +183,13 @@ namespace ring_buffer
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
 		typedef const value_type* const_pointer; \
+		typedef std::ptrdiff_t difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
 	//----------------------------------------
 	//コンテナ破棄時の要素の自動クリア属性
-	enum auto_clear_attr_t
+	enum autoClearAttr_t
 	{
 		NEVER_CLEAR,//自動クリアしない（デフォルト）
 		AUTO_CLEAR,//自動クリアし、残っている要素のデストラクタを呼び出す
@@ -198,6 +219,8 @@ namespace ring_buffer
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			typedef typename container::reverse_iterator reverse_iterator;
+		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
 			inline operator const value_type&() const { return *getValue(); }
@@ -205,266 +228,80 @@ namespace ring_buffer
 			inline operator const value_type*() const { return getValue(); }
 			inline operator value_type*(){ return getValue(); }
 		public:
-			//オペレータ
+			//基本オペレータ
 			inline const value_type& operator*() const { return *getValue(); }
 			inline value_type& operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
-			inline const_iterator operator[](const int logical_index) const
-			{
-				iterator ite(*m_con, false);
-				ite.update(logical_index);
-				return std::move(ite);
-			}
-			inline iterator operator[](const int logical_index)
-			{
-				iterator ite(*m_con, false);
-				ite.update(logical_index);
-				return std::move(ite);
-			}
-	public:
+			inline const iterator operator[](const int logical_index) const;
+			inline iterator operator[](const int logical_index);
+		public:
 			//比較オペレータ
-			inline bool operator==(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex == rhs.m_logicalIndex;
-			}
-			inline bool operator!=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex != rhs.m_logicalIndex;
-			}
-			inline bool operator>(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex > rhs.m_logicalIndex;
-			}
-			inline bool operator>=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex >= rhs.m_logicalIndex;
-			}
-			inline bool operator<(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex < rhs.m_logicalIndex;
-			}
-			inline bool operator<=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_logicalIndex <= rhs.m_logicalIndex;
-			}
+			inline bool operator==(const iterator& rhs) const;
+			inline bool operator!=(const iterator& rhs) const;
+			inline bool operator>(const iterator& rhs) const;
+			inline bool operator>=(const iterator& rhs) const;
+			inline bool operator<(const iterator& rhs) const;
+			inline bool operator<=(const iterator& rhs) const;
 			//演算オペレータ
-			inline const_iterator& operator++() const
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline const_iterator& operator--() const
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline iterator& operator++()
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline iterator& operator--()
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline const_iterator operator++(int) const
-			{
-				iterator ite(*this);
-				++(*this);
-				return std::move(ite);
-			}
-			inline const_iterator operator--(int) const
-			{
-				iterator ite(*this);
-				--(*this);
-				return std::move(ite);
-			}
-			inline iterator operator++(int)
-			{
-				iterator ite(*this);
-				++(*this);
-				return std::move(ite);
-			}
-			inline iterator operator--(int)
-			{
-				iterator ite(*this);
-				--(*this);
-				return std::move(ite);
-			}
-			inline const_iterator& operator+=(const typename iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline const_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator& operator-=(const typename iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline const_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator+=(const typename iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator-=(const typename iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator operator+(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return std::move(ite);
-			}
-			inline const_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline const_iterator operator-(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return std::move(ite);
-			}
-			inline const_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator+(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return std::move(ite);
-			}
-			inline iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator-(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return std::move(ite);
-			}
-			inline iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline typename iterator::difference_type operator-(const iterator rhs)
-			{
-				if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || m_logicalIndex < rhs.m_logicalIndex)
-					return 0;
-				return m_logicalIndex - rhs.m_logicalIndex;
-			}
+			inline const iterator& operator++() const;
+			inline const iterator& operator--() const;
+			inline iterator& operator++();
+			inline iterator& operator--();
+			inline const iterator operator++(int) const;
+			inline const iterator operator--(int) const;
+			inline iterator operator++(int);
+			inline iterator operator--(int);
+			inline const iterator& operator+=(const int rhs) const;
+			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+			inline const iterator& operator-=(const int rhs) const;
+			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+			inline iterator& operator+=(const int rhs);
+			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+			inline iterator& operator-=(const int rhs);
+			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+			inline const iterator operator+(const int rhs) const;
+			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+			inline const iterator operator-(const int rhs) const;
+			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+			inline iterator operator+(const int rhs);
+			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+			inline iterator operator-(const int rhs);
+			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+			inline int operator-(const iterator& rhs);
 		public:
 			//ムーブオペレータ
-			inline iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			iterator& operator=(const_reverse_iterator&& rhs);
+			inline iterator& operator=(const iterator&& rhs);
+			inline iterator& operator=(const reverse_iterator&& rhs);
 			//コピーオペレータ
-			inline iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			iterator& operator=(const_reverse_iterator& rhs);
+			inline iterator& operator=(const iterator& rhs);
+			inline iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_logicalIndex != INVALID_INDEX && m_logicalIndex < m_con->m_size; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_logicalIndex != INVALID_INDEX; }
+			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_logicalIndex == m_con->m_size; }//終端か？
-			inline index_type getRealIndex() const { return m_logicalIndex == INVALID_INDEX ? INVALID_INDEX : m_con->_to_real_index(m_logicalIndex); }//物理インデックス
-			inline index_type getIndex() const { return m_logicalIndex; }//論理インデックス
+			inline bool isEnd() const;//終端か？
+			inline index_type getRealIndex() const;//物理インデックス
+			inline index_type getIndex() const;//論理インデックス
 			inline const value_type* getValue() const { return m_value; }//現在の値
 			inline value_type* getValue(){ return m_value; }//現在の値
 		private:
 			//メソッド
-			void update(const index_type logical_index) const
-			{
-				//if (logical_index == INVALID_INDEX || logical_index < 0 || logical_index > static_cast<index_type>(m_con->m_size))
-				if (logical_index > static_cast<index_type>(m_con->m_size))
-				{
-					m_logicalIndex = INVALID_INDEX;
-					m_value = nullptr;
-				}
-				else
-				{
-					m_logicalIndex = logical_index;
-					const index_type real_index = m_con->_to_real_index(m_logicalIndex);
-					m_value = const_cast<value_type*>(m_con->_ref_real_element(real_index));
-				}
-			}
-			inline void addIndexAndUpdate(const int add) const
-			{
-				update(m_logicalIndex + add);
-			}
+			void update(const index_type logical_index) const;
+			inline void addIndexAndUpdate(const int add) const;
 		public:
 			//ムーブコンストラクタ
-			iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(obj.m_value)
-			{}
-			iterator(const_reverse_iterator&& obj);
+			inline iterator(const iterator&& obj);
+			inline iterator(const reverse_iterator&& obj);
 			//コピーコンストラクタ
-			inline iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(obj.m_value)
-			{}
-			iterator(const_reverse_iterator& obj);
+			inline iterator(const iterator& obj);
+			inline iterator(const reverse_iterator& obj);
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_logicalIndex(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				if (!is_end)
-					update(0);//先頭データ
-				else
-					update(m_con->m_size);//末尾データ
-			}
-			inline iterator(const container& con, const index_type logical_index) :
-				m_con(&con),
-				m_logicalIndex(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				update(logical_index);
-			}
+			inline iterator(const container& con, const bool is_end);
+			inline iterator(const container& con, const index_type logical_index);
+			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
 				m_logicalIndex(INVALID_INDEX),
@@ -487,6 +324,8 @@ namespace ring_buffer
 			friend class container;
 			friend class iterator;
 		public:
+			typedef typename container::iterator iterator;
+		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
 			inline operator const value_type&() const { return *getValue(); }
@@ -494,302 +333,84 @@ namespace ring_buffer
 			inline operator const value_type*() const { return getValue(); }
 			inline operator value_type*(){ return getValue(); }
 		public:
-			//オペレータ
+			//基本オペレータ
 			inline const value_type& operator*() const { return *getValue(); }
 			inline value_type& operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
-			inline const_reverse_iterator operator[](const int logical_index) const
-			{
-				reverse_iterator ite(*m_con, false);
-				ite.update(m_con->m_size - logical_index);
-				return std::move(ite);
-			}
-			inline reverse_iterator operator[](const int logical_index)
-			{
-				reverse_iterator ite(*m_con, false);
-				ite.update(m_con->m_size - logical_index);
-				return std::move(ite);
-			}
+			inline const reverse_iterator operator[](const int logical_index) const;
+			inline reverse_iterator operator[](const int logical_index);
 		public:
 			//比較オペレータ
-			inline bool operator==(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex == m_logicalIndex;
-			}
-			inline bool operator!=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex != m_logicalIndex;
-			}
-			inline bool operator>(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex > m_logicalIndex;
-			}
-			inline bool operator>=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex >= m_logicalIndex;
-			}
-			inline bool operator<(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex < m_logicalIndex;
-			}
-			inline bool operator<=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_logicalIndex <= m_logicalIndex;
-			}
+			inline bool operator==(const reverse_iterator& rhs) const;
+			inline bool operator!=(const reverse_iterator& rhs) const;
+			inline bool operator>(const reverse_iterator& rhs) const;
+			inline bool operator>=(const reverse_iterator& rhs) const;
+			inline bool operator<(const reverse_iterator& rhs) const;
+			inline bool operator<=(const reverse_iterator& rhs) const;
 			//演算オペレータ
-			inline const_reverse_iterator& operator++() const
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline const_reverse_iterator& operator--() const
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline reverse_iterator& operator++()
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline reverse_iterator& operator--()
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline const_reverse_iterator operator++(int) const
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return std::move(ite);
-			}
-			inline const_reverse_iterator operator--(int) const
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return std::move(ite);
-			}
-			inline reverse_iterator operator++(int)
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return std::move(ite);
-			}
-			inline reverse_iterator operator--(int)
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return std::move(ite);
-			}
-			inline const_reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator operator+(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return std::move(ite);
-			}
-			inline const_reverse_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline const_reverse_iterator operator-(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return std::move(ite);
-			}
-			inline const_reverse_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator+(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return std::move(ite);
-			}
-			inline reverse_iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator-(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return std::move(ite);
-			}
-			inline reverse_iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline typename reverse_iterator::difference_type operator-(const reverse_iterator rhs)
-			{
-				if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex < m_logicalIndex)
-					return 0;
-				return rhs.m_logicalIndex - m_logicalIndex;
-			}
+			inline const reverse_iterator& operator++() const;
+			inline const reverse_iterator& operator--() const;
+			inline reverse_iterator& operator++();
+			inline reverse_iterator& operator--();
+			inline const reverse_iterator operator++(int) const;
+			inline const reverse_iterator operator--(int) const;
+			inline reverse_iterator operator++(int);
+			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator+=(const int rhs) const;
+			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+			inline const reverse_iterator& operator-=(const int rhs) const;
+			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator+=(const int rhs);
+			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator-=(const int rhs);
+			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator+(const int rhs) const;
+			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator-(const int rhs) const;
+			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+			inline reverse_iterator operator+(const int rhs);
+			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+			inline reverse_iterator operator-(const int rhs);
+			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+			inline int operator-(const reverse_iterator& rhs);
 		public:
 			//ムーブオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				update(m_logicalIndex);
-				return *this;
-			}
+			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
+			inline reverse_iterator& operator=(const iterator&& rhs);
 			//コピーオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_logicalIndex = rhs.m_logicalIndex;
-				update(m_logicalIndex);
-				return *this;
-			}
+			inline reverse_iterator& operator=(const reverse_iterator& rhs);
+			inline reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_logicalIndex != INVALID_INDEX && m_logicalIndex > 0; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_logicalIndex != INVALID_INDEX; }
+			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_logicalIndex == 0; }//終端か？
-			inline index_type getRealIndex() const { return m_logicalIndex == INVALID_INDEX ? INVALID_INDEX : m_con->_to_real_index(m_logicalIndex); }//物理インデックス
-			inline index_type getIndex() const { return m_logicalIndex - 1; }//論理インデックス
+			inline bool isEnd() const;//終端か？
+			inline index_type getRealIndex() const;//物理インデックス
+			inline index_type getIndex() const;//論理インデックス
 			inline const value_type* getValue() const { return m_value; }//現在の値
 			inline value_type* getValue(){ return m_value; }//現在の値
 		private:
 			//メソッド
-			void update(const index_type logical_index) const
-			{
-				//if (logical_index == INVALID_INDEX || logical_index < 0 || index > static_cast<index_type>(m_con->m_size))
-				if (logical_index > static_cast<index_type>(m_con->m_size))
-				{
-					m_logicalIndex = INVALID_INDEX;
-					m_value = nullptr;
-				}
-				else
-				{
-					m_logicalIndex = logical_index;
-					const index_type real_index = m_con->_to_real_index(m_logicalIndex);
-					m_value = real_index == 0 ? const_cast<value_type*>(m_con->_ref_real_element(m_con->m_maxSize - 1)) : const_cast<value_type*>(m_con->_ref_real_element(real_index - 1));
-				}
-			}
-			inline void addIndexAndUpdate(const int add) const
-			{
-				update(m_logicalIndex - add);
-			}
+			void update(const index_type logical_index) const;
+			inline void addIndexAndUpdate(const int add) const;
 		public:
 			//ベースを取得
-			inline const_iterator base() const
-			{
-				iterator ite(*this);
-				return std::move(ite);
-			}
-			inline iterator base()
-			{
-				iterator ite(*this);
-				return std::move(ite);
-			}
+			inline const iterator base() const;
+			inline iterator base();
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const_reverse_iterator&& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(obj.m_value)
-			{}
-			inline reverse_iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(nullptr)
-			{
-				update(m_logicalIndex);
-			}
+			inline reverse_iterator(const reverse_iterator&& obj);
+			inline reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const_reverse_iterator& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(obj.m_value)
-			{}
-			inline reverse_iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_logicalIndex(obj.m_logicalIndex),
-				m_value(nullptr)
-			{
-				update(m_logicalIndex);
-			}
+			inline reverse_iterator(const reverse_iterator& obj);
+			inline reverse_iterator(const iterator& obj);
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_logicalIndex(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				if (!is_end)
-					update(m_con->m_size);//末尾データ
-				else
-					update(0);//先頭データ
-			}
-			inline reverse_iterator(const container& con, const index_type logical_index) :
-				m_con(&con),
-				m_logicalIndex(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				update(logical_index);
-			}
+			inline reverse_iterator(const container& con, const bool is_end);
+			inline reverse_iterator(const container& con, const index_type logical_index);
+			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
 				m_logicalIndex(INVALID_INDEX),
@@ -806,18 +427,88 @@ namespace ring_buffer
 		};
 	public:
 		//アクセッサ
-		inline const value_type* at(const int logical_index) const { return ref_element(logical_index); }
-		inline value_type* at(const int logical_index){ return ref_element(logical_index); }
-		inline const value_type* operator[](const int logical_index) const { return ref_element(logical_index); }
-		inline value_type* operator[](const int logical_index){ return ref_element(logical_index); }
-		auto_clear_attr_t getAutoClearAttr() const { return m_autoClearAttr; }//コンテナ破棄時に残っている要素の自動クリア属性を取得
-		void setAutoClearAttr(const auto_clear_attr_t attr){ m_autoClearAttr = attr; }//コンテナ破棄時に残っている要素の自動クリア属性を変更
+		inline const value_type* at(const int logical_index) const { return refElement(logical_index); }
+		inline value_type* at(const int logical_index){ return refElement(logical_index); }
+		inline const value_type* operator[](const int logical_index) const { return refElement(logical_index); }
+		inline value_type* operator[](const int logical_index){ return refElement(logical_index); }
+		autoClearAttr_t getAutoClearAttr() const { return m_autoClearAttr; }//コンテナ破棄時に残っている要素の自動クリア属性を取得
+		void setAutoClearAttr(const autoClearAttr_t attr){ m_autoClearAttr = attr; }//コンテナ破棄時に残っている要素の自動クリア属性を変更
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
 		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
 	public:
-		//メソッド
+		//メソッド：ロック取得系
+		//単一ロック取得
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(){ GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		//スコープロック取得
+		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//メソッド：イテレータ取得系
+		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//イテレータを取得
+		inline const_iterator cbegin() const { iterator ite(*this, false); return ite; }
+		inline const_iterator cend() const { iterator ite(*this, true); return ite; }
+		inline const iterator begin() const { iterator ite(*this, false); return ite; }
+		inline const iterator end() const { iterator ite(*this, true); return ite; }
+		inline iterator begin() { iterator ite(*this, false); return ite; }
+		inline iterator end() { iterator ite(*this, true); return ite; }
+		//リバースイテレータを取得
+		inline const_reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const_reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
+		inline const reverse_iterator rbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator rend() const { reverse_iterator ite(*this, true); return ite; }
+		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
+		inline reverse_iterator rend() { reverse_iterator ite(*this, true); return ite; }
+	private:
+		//メソッド：要素アクセス系（独自拡張版）
+		//※範囲チェックなし（非公開）
+		inline index_type _toRealIndex(const index_type logical_index) const;//論理インデックスを物理インデックスに変換
+		inline index_type _toLogicalIndex(const index_type real_index) const;//物理インデックスを論理インデックスに変換
+		inline size_type _frontNewRealIndex() const;//先頭の新規インデックス
+		inline size_type _backNewRealIndex() const;//末尾の新規インデックス
+		inline const value_type* _refRealElement(const index_type real_index) const { return &m_array[real_index]; }//要素参照
+		inline const value_type* _refElement(const index_type logical_index) const { return &m_array[_toRealIndex(logical_index)]; }//要素参照
+		inline const value_type* _refFront() const { return _refElement(0); }//先頭要素参照
+		inline const value_type* _refBack() const { return _refElement(m_size - 1); }//末尾要素参照
+		inline const value_type* _refFrontNew() const { return _refRealElement(_frontNewRealIndex()); }//先頭の新規要素参照
+		inline const value_type* _refBackNew() const { return _refRealElement(_backNewRealIndex()); }//末尾の新規要素参照
+		inline value_type* _refRealElement(const index_type real_index){ return &m_array[real_index]; }//要素参照
+		inline value_type* _refElement(const index_type logical_index){ return &m_array[_toRealIndex(logical_index)]; }//要素参照
+		inline value_type* _refFront(){ return _refElement(0); }//先頭要素参照
+		inline value_type* _refBack(){ return _refElement(m_size - 1); }//末尾要素参照
+		inline value_type* _refFrontNew(){ return _refRealElement(_frontNewRealIndex()); }//先頭の新規要素参照
+		inline value_type* _refBackNew(){ return _refRealElement(_backNewRealIndex()); }//末尾の新規要素参照
+		inline int _adjLogicalIndex(const int logical_index) const { return logical_index >= 0 && logical_index < m_maxSize ? logical_index : INVALID_INDEX; }//論理インデックスを範囲内に補正
+		inline int _refRealIndex(const value_type* node) const{ return node - _refFront(); }//要素を物理インデックスに変換 ※範囲チェックなし
+		inline int _refLogicalIndex(const value_type* node) const{ return _toLogicalIndex(_refRealIndex(node)); }//要素を論理インデックスに変換 ※範囲チェックなし
+	public:
+		//メソッド：要素アクセス系（独自拡張版）
+		//※範囲チェックあり（公開）
+		//※取扱い注意（コンテナアダプタ以外からの利用は非推奨）
+		//inline const value_type* refElement(const index_type logical_index) const { return logical_index >= 0 && logical_index < m_size ? _refElement(logical_index) : nullptr; }//要素参照
+		inline const value_type* refElement(const index_type logical_index) const { return logical_index < m_size ? _refElement(logical_index) : nullptr; }//要素参照
+		inline const value_type* refFront() const { return m_size == 0 ? nullptr : _refFront(); }//先頭要素参照
+		inline const value_type* refBack() const { return m_size == 0 ? nullptr : _refBack(); }//末尾要素参照
+		inline const value_type* refFrontNew() const { return m_size == m_maxSize ? nullptr : _refFrontNew(); }//先頭の新規要素参照
+		inline const value_type* refBackNew() const { return m_size == m_maxSize ? nullptr : _refBackNew(); }//末尾の新規要素参照
+		inline value_type* refElement(const index_type logical_index){ return  const_cast<value_type*>(const_cast<const container*>(this)->refElement(logical_index)); }//要素参照
+		inline value_type* refFront(){ return const_cast<value_type*>(const_cast<const container*>(this)->refFront()); }//先頭要素参照
+		inline value_type* refBack(){ return const_cast<value_type*>(const_cast<const container*>(this)->refBack()); }//末尾要素参照
+		inline value_type* refFrontNew(){ return const_cast<value_type*>(const_cast<const container*>(this)->refFrontNew()); }//先頭の新規要素参照
+		inline value_type* refBackNew(){ return const_cast<value_type*>(const_cast<const container*>(this)->refBackNew()); }//末尾の新規要素参照
+		inline int refLogicalIndex(const value_type* node) const{ return _adjLogicalIndex(_refLogicalIndex(node)); }//要素を論理インデックスに変換
+	public:
+		//メソッド：基本情報系
 		inline size_type max_size() const { return m_maxSize; }//最大要素数を取得
 		inline size_type capacity() const { return m_maxSize; }//最大要素数を取得
 		inline size_type size() const { return m_size; }//使用中の要素数を取得
@@ -825,128 +516,12 @@ namespace ring_buffer
 		inline bool empty() const { return m_size == 0; }//空か？
 		inline bool full() const { return m_size == m_maxSize; }//満杯か？
 		inline index_type offset() const { return m_offset; }//有効要素の先頭インデックス（オフセット）
-	private:
-		//※範囲チェックなし
-		inline index_type _to_real_index(const index_type logical_index) const//論理インデックスを物理インデックスに変換
-		{
-			const index_type real_index = m_offset + logical_index;
-			return real_index < m_maxSize ? real_index : real_index - m_maxSize;
-		}
-		inline index_type _to_logical_index(const index_type real_index) const//物理インデックスを論理インデックスに変換
-		{
-			return real_index > m_offset ? real_index - m_offset : real_index + m_maxSize - m_offset;
-		}
-		inline size_type _front_new_real_index() const//先頭の新規インデックス
-		{
-			return m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
-		}
-		inline size_type _back_new_real_index() const//末尾の新規インデックス
-		{
-			const index_type new_real_index = m_offset + m_size;
-			return new_real_index < m_maxSize ? new_real_index : new_real_index - m_maxSize;
-		}
-		inline const value_type* _ref_real_element(const index_type real_index) const { return &m_array[real_index]; }//要素参照
-		inline const value_type* _ref_element(const index_type logical_index) const { return &m_array[_to_real_index(logical_index)]; }//要素参照
-		inline const value_type* _ref_front() const { return _ref_element(0); }//先頭要素参照
-		inline const value_type* _ref_back() const { return _ref_element(m_size - 1); }//末尾要素参照
-		inline const value_type* _ref_front_new() const { return _ref_real_element(_front_new_real_index()); }//先頭の新規要素参照
-		inline const value_type* _ref_back_new() const { return _ref_real_element(_back_new_real_index()); }//末尾の新規要素参照
-		inline value_type* _ref_real_element(const index_type real_index){ return &m_array[real_index]; }//要素参照
-		inline value_type* _ref_element(const index_type logical_index){ return &m_array[_to_real_index(logical_index)]; }//要素参照
-		inline value_type* _ref_front(){ return _ref_element(0); }//先頭要素参照
-		inline value_type* _ref_back(){ return _ref_element(m_size - 1); }//末尾要素参照
-		inline value_type* _ref_front_new(){ return _ref_real_element(_front_new_real_index()); }//先頭の新規要素参照
-		inline value_type* _ref_back_new(){ return _ref_real_element(_back_new_real_index()); }//末尾の新規要素参照
 	public:
-		//※範囲チェックあり
-		//inline const value_type* ref_element(const index_type logical_index) const { return logical_index >= 0 && logical_index < m_size ? _ref_element(logical_index) : nullptr; }//要素参照
-		inline const value_type* ref_element(const index_type logical_index) const { return logical_index < m_size ? _ref_element(logical_index) : nullptr; }//要素参照
-		inline const value_type* ref_front() const { return m_size == 0 ? nullptr : _ref_front(); }//先頭要素参照
-		inline const value_type* ref_back() const { return m_size == 0 ? nullptr : _ref_back(); }//末尾要素参照
-		inline const value_type* ref_front_new() const { return m_size == m_maxSize ? nullptr : _ref_front_new(); }//先頭の新規要素参照
-		inline const value_type* ref_back_new() const { return m_size == m_maxSize ? nullptr : _ref_back_new(); }//末尾の新規要素参照
-		inline value_type* ref_element(const index_type logical_index){ return  const_cast<value_type*>(const_cast<const container*>(this)->ref_element(logical_index)); }//要素参照
-		inline value_type* ref_front(){ return const_cast<value_type*>(const_cast<const container*>(this)->ref_front()); }//先頭要素参照
-		inline value_type* ref_back(){ return const_cast<value_type*>(const_cast<const container*>(this)->ref_back()); }//末尾要素参照
-		inline value_type* ref_front_new(){ return const_cast<value_type*>(const_cast<const container*>(this)->ref_front_new()); }//先頭の新規要素参照
-		inline value_type* ref_back_new(){ return const_cast<value_type*>(const_cast<const container*>(this)->ref_back_new()); }//末尾の新規要素参照
-	private:
-		inline int _adj_logical_index(const int logical_index) const { return logical_index >= 0 && logical_index < m_maxSize ? logical_index : INVALID_INDEX; }//論理インデックスを範囲内に補正
-		inline int _ref_real_index(const value_type* node) const{ return node - _ref_front(); }//要素を物理インデックスに変換 ※範囲チェックなし
-		inline int _ref_logical_index(const value_type* node) const{ return _to_logical_index(_ref_real_index(node)); }//要素を論理インデックスに変換 ※範囲チェックなし
-	public:
-		inline int ref_logical_index(const value_type* node) const{ return _adj_logical_index(_ref_logical_index(node)); }//要素を論理インデックスに変換
-	public:
-		inline const value_type* front() const { return ref_front(); }//先頭要素参照
-		inline value_type* front(){ return ref_front(); }//先頭要素参照
-		inline const value_type* back() const { return ref_back(); }//末尾要素参照
-		inline value_type* back(){ return ref_back(); }//末尾要素参照
-		//イテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_iterator cbegin() const
-		{
-			iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline const_iterator cend() const
-		{
-			iterator ite(*this, true);
-			return std::move(ite);
-		}
-		inline const_iterator begin() const
-		{
-			iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline const_iterator end() const
-		{
-			iterator ite(*this, true);
-			return std::move(ite);
-		}
-		inline iterator begin()
-		{
-			iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline iterator end()
-		{
-			iterator ite(*this, true);
-			return std::move(ite);
-		}
-		//リバースイテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_reverse_iterator crbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline const_reverse_iterator crend() const
-		{
-			reverse_iterator ite(*this, true);
-			return std::move(ite);
-		}
-		inline const_reverse_iterator rbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline const_reverse_iterator rend() const
-		{
-			reverse_iterator ite(*this, true);
-			return std::move(ite);
-		}
-		inline reverse_iterator rbegin()
-		{
-			reverse_iterator ite(*this, false);
-			return std::move(ite);
-		}
-		inline reverse_iterator rend()
-		{
-			reverse_iterator ite(*this, true);
-			return std::move(ite);
-		}
+		//メソッド：要素アクセス系
+		inline const value_type* front() const { return refFront(); }//先頭要素参照
+		inline value_type* front(){ return refFront(); }//先頭要素参照
+		inline const value_type* back() const { return refBack(); }//末尾要素参照
+		inline value_type* back(){ return refBack(); }//末尾要素参照
 	public:
 		//配列の再割り当て
 		//※コンテナ生成時のコンストラクタで配列を指定できなかった時に使用する。
@@ -955,12 +530,12 @@ namespace ring_buffer
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		template<size_type N>
-		inline void assign_array(value_type(&array)[N], const int size = 0)
+		inline void assignArray(value_type(&array)[N], const int size = 0)
 		{
-			assign_array(array, N, size);
+			assignArray(array, N, size);
 		}
 		//※ポインタと配列要素数指定版
-		void assign_array(value_type* array, const size_type max_size, const int size = 0)
+		void assignArray(value_type* array, const size_type max_size, const int size = 0)
 		{
 			if (m_array && m_autoClearAttr == AUTO_CLEAR)
 				clear();//クリア
@@ -970,9 +545,9 @@ namespace ring_buffer
 			m_offset = 0;
 		}
 		//※voidポインタとバッファサイズ数指定版
-		void assign_array(void* buff_ptr, const size_type buff_size, const int size = 0)
+		void assignArray(void* buff_ptr, const size_type buff_size, const int size = 0)
 		{
-			assign_array(static_cast<value_type*>(buff_ptr), buff_size / sizeof(value_type), size);
+			assignArray(static_cast<value_type*>(buff_ptr), buff_size / sizeof(value_type), size);
 		}
 		//使用中のサイズを変更（新しいサイズを返す）
 		//※新しい要素にはnew_valueをセットし、削除された要素はデストラクタを呼び出す
@@ -987,7 +562,7 @@ namespace ring_buffer
 			{
 				for (index_type index = m_size; index < _size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					*value = new_value;//新しい値を初期化
 				}
 			}
@@ -995,7 +570,7 @@ namespace ring_buffer
 			{
 				for (index_type index = _size; index < m_size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					ope_type::callDestructor(value);//デストラクタ呼び出し
 					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 				}
@@ -1012,7 +587,7 @@ namespace ring_buffer
 			{
 				for (index_type index = m_size; index < _size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					new(value)value_type(args...);//コンストラクタ呼び出し
 				}
 			}
@@ -1020,7 +595,7 @@ namespace ring_buffer
 			{
 				for (index_type index = size; index < m_size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					ope_type::callDestructor(value);//デストラクタ呼び出し
 					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 				}
@@ -1035,7 +610,7 @@ namespace ring_buffer
 		//※指定数が -1 なら最大要素数に変更
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		size_type resize_silent(const int size)
+		size_type resizeSilently(const int size)
 		{
 			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 			m_size = _size;
@@ -1054,7 +629,7 @@ namespace ring_buffer
 			//	const size_type used_size = _size < m_size ? _size : m_size;
 			//	for (index_type index = 0; index < used_size; ++index)
 			//	{
-			//		value_type* value = _ref_element(index);
+			//		value_type* value = _refElement(index);
 			//		ope_type::callDestructor(value);//デストラクタ呼び出し
 			//		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			//	}
@@ -1062,7 +637,7 @@ namespace ring_buffer
 			{
 				for (index_type index = 0; index < _size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					*value = new_value;//データを上書き
 				}
 			}
@@ -1080,7 +655,7 @@ namespace ring_buffer
 				const size_type used_size = _size < m_size ? _size : m_size;
 				for (index_type index = 0; index < used_size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					ope_type::callDestructor(value);//デストラクタ呼び出し
 					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 				}
@@ -1088,7 +663,7 @@ namespace ring_buffer
 			{
 				for (index_type index = 0; index < _size; ++index)
 				{
-					value_type* value = _ref_element(index);
+					value_type* value = _refElement(index);
 					new(value)value_type(args...);//コンストラクタ呼び出し
 				}
 			}
@@ -1103,7 +678,7 @@ namespace ring_buffer
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline value_type* push_front(const value_type&& src)//ムーブ版
 		{
-			value_type* obj = ref_front_new();//サイズチェック含む
+			value_type* obj = refFrontNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			*obj = std::move(src);
@@ -1113,7 +688,7 @@ namespace ring_buffer
 		}
 		inline value_type* push_front(const value_type& src)//コピー版
 		{
-			value_type* obj = ref_front_new();//サイズチェック含む
+			value_type* obj = refFrontNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			*obj = src;
@@ -1129,7 +704,7 @@ namespace ring_buffer
 		template<typename... Tx>
 		value_type* push_front(Tx... args)
 		{
-			value_type* obj = ref_front_new();//サイズチェック含む
+			value_type* obj = refFrontNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			new(obj)value_type(args...);//コンストラクタ呼び出し
@@ -1144,7 +719,7 @@ namespace ring_buffer
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline value_type* push_back(const value_type&& src)//ムーブ版
 		{
-			value_type* obj = ref_back_new();//サイズチェック含む
+			value_type* obj = refBackNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			*obj = std::move(src);
@@ -1153,7 +728,7 @@ namespace ring_buffer
 		}
 		inline value_type* push_back(const value_type& src)//コピー版
 		{
-			value_type* obj = ref_back_new();//サイズチェック含む
+			value_type* obj = refBackNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			*obj = src;
@@ -1168,7 +743,7 @@ namespace ring_buffer
 		template<typename... Tx>
 		value_type* push_back(Tx... args)
 		{
-			value_type* obj = ref_back_new();//サイズチェック含む
+			value_type* obj = refBackNew();//サイズチェック含む
 			if (!obj)
 				return nullptr;
 			new(obj)value_type(args...);//コンストラクタ呼び出し
@@ -1183,7 +758,7 @@ namespace ring_buffer
 		{
 			if (m_size == 0)
 				return false;
-			value_type* value = const_cast<value_type*>(ref_front());
+			value_type* value = const_cast<value_type*>(refFront());
 			ope_type::callDestructor(value);//デストラクタ呼び出し
 			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			--m_size;
@@ -1195,7 +770,7 @@ namespace ring_buffer
 		{
 			if (m_size == 0)
 				return false;
-			value_type* obj = const_cast<value_type*>(ref_front());
+			value_type* obj = const_cast<value_type*>(refFront());
 			value = std::move(*obj);//ムーブ
 			ope_type::callDestructor(obj);//デストラクタ呼び出し
 			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
@@ -1211,7 +786,7 @@ namespace ring_buffer
 		{
 			if (m_size == 0)
 				return false;
-			value_type* value = const_cast<value_type*>(ref_front());
+			value_type* value = const_cast<value_type*>(refFront());
 			ope_type::callDestructor(value);//デストラクタ呼び出し
 			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			--m_size;
@@ -1222,7 +797,7 @@ namespace ring_buffer
 		{
 			if (m_size == 0)
 				return false;
-			value_type* obj = const_cast<value_type*>(ref_back());
+			value_type* obj = const_cast<value_type*>(refBack());
 			value = std::move(*obj);//ムーブ
 			ope_type::callDestructor(obj);//デストラクタ呼び出し
 			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
@@ -1240,7 +815,7 @@ namespace ring_buffer
 				return;
 			for (size_type i = 0; i < m_size; ++i)
 			{
-				value_type* value = _ref_element(i);
+				value_type* value = _refElement(i);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
 				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
@@ -1249,14 +824,14 @@ namespace ring_buffer
 		}
 	private:
 		//要素の移動（昇順）
-		void move_asc(const index_type dst_pos, const index_type src_pos, const size_type num)
+		void moveAsc(const index_type dst_pos, const index_type src_pos, const size_type num)
 		{
 			index_type _dst_pos = dst_pos;
 			index_type _src_pos = src_pos;
 			for (size_type i = 0; i < num; ++i)
 			{
-				value_type* dst = _ref_element(_dst_pos);
-				value_type* src = _ref_element(_src_pos);
+				value_type* dst = _refElement(_dst_pos);
+				value_type* src = _refElement(_src_pos);
 				if (_dst_pos >= m_size)
 					new(dst)value_type(std::move(*src));//ムーブコンストラクタ
 				else
@@ -1266,14 +841,14 @@ namespace ring_buffer
 			}
 		}
 		//要素の移動（降順）
-		void move_desc(const index_type dst_pos, const index_type src_pos, const size_type num)
+		void moveDesc(const index_type dst_pos, const index_type src_pos, const size_type num)
 		{
 			index_type _dst_pos = dst_pos + num - 1;
 			index_type _src_pos = src_pos + num - 1;
 			for (size_type i = 0; i < num; ++i)
 			{
-				value_type* dst = _ref_element(_dst_pos);
-				value_type* src = _ref_element(_src_pos);
+				value_type* dst = _refElement(_dst_pos);
+				value_type* src = _refElement(_src_pos);
 				if (_dst_pos >= m_size)
 					new(dst)value_type(std::move(*src));//ムーブコンストラクタ
 				else
@@ -1294,26 +869,26 @@ namespace ring_buffer
 			if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 			{
 				iterator ite(*this, INVALID_INDEX);
-				return std::move(ite);
+				return ite;
 			}
 			index_type index = pos.getIndex();
 			const size_type remain = m_maxSize - m_size;
 			const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
 			//移動
-			move_desc(index + _num, index, _num);
+			moveDesc(index + _num, index, _num);
 			//要素数変更
 			m_size += _num;
 			//挿入
 			index_type _index = index;
 			for (size_type i = 0; i < _num; ++i)
 			{
-				value_type* new_value = _ref_element(_index);
+				value_type* new_value = _refElement(_index);
 				*new_value = value;
 				++_index;
 			}
 			//終了
 			iterator now(*this, index);
-			return std::move(now);
+			return now;
 		}
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
@@ -1322,27 +897,27 @@ namespace ring_buffer
 			if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 			{
 				iterator ite(*this, INVALID_INDEX);
-				return std::move(ite);
+				return ite;
 			}
 			index_type index = pos.getIndex();
 			const size_type remain = m_maxSize - m_size;
 			const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
 			const size_type move_num = m_size - index;
 			//移動
-			move_desc(index + _num, index, move_num);
+			moveDesc(index + _num, index, move_num);
 			//要素数変更
 			m_size += _num;
 			//挿入
 			index_type _index = index;
 			for (size_type i = 0; i < _num; ++i)
 			{
-				value_type* new_value = _ref_element(_index);
+				value_type* new_value = _refElement(_index);
 				new(new_value)value_type(args...);
 				++_index;
 			}
 			//終了
 			iterator now(*this, index);
-			return std::move(now);
+			return now;
 		}
 	private:
 		//要素の削除
@@ -1355,13 +930,13 @@ namespace ring_buffer
 			index_type _index = index;
 			for (size_type i = 0; i < _num; ++i)
 			{
-				value_type* delete_value = _ref_element(_index);
+				value_type* delete_value = _refElement(_index);
 				ope_type::callDestructor(delete_value);//デストラクタ呼び出し
 				operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
 				++_index;
 			}
 			//移動
-			move_asc(index, index + _num, move_num);
+			moveAsc(index, index + _num, move_num);
 			//要素数変更
 			m_size -= _num;
 		}
@@ -1377,14 +952,14 @@ namespace ring_buffer
 			if (pos.isNotExist() || num == 0 || m_size == 0)
 			{
 				iterator ite(*this, INVALID_INDEX);
-				return std::move(ite);
+				return ite;
 			}
 			const index_type index = pos.getIndex();
 			//削除
 			_erase(index, num);
 			//終了
 			iterator now(*this, index);
-			return std::move(now);
+			return now;
 		}
 		//※範囲指定版
 		iterator erase(iterator start, iterator end)
@@ -1392,7 +967,7 @@ namespace ring_buffer
 			if (start.isNotExist() || end.isNotExist() || start >= end || m_size == 0)
 			{
 				iterator ite(*this, INVALID_INDEX);
-				return std::move(ite);
+				return ite;
 			}
 			index_type index = start.getIndex();
 			index_type end_index = end.getIndex();
@@ -1401,112 +976,112 @@ namespace ring_buffer
 			_erase(index, num);
 			//終了
 			iterator now(*this, index);
-			return std::move(now);
+			return now;
 		}
 	public:
 		//ソート
 		//※シェルソートを使用
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		void sort()
 		{
-			iteratorIntroSort(begin(), end(), typename ope_type::sort_predicate());
+			GASHA_ iteratorIntroSort(begin(), end(), typename ope_type::predicateForSort());
 		}
 		//※プレディケート関数指定版
 		template<class PREDICATE>
 		void sort(PREDICATE predicate)
 		{
-			iteratorIntroSort(begin(), end(), predicate);
+			GASHA_ iteratorIntroSort(begin(), end(), predicate);
 		}
 		//安定ソート
 		//※挿入ソートを使用
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stable_sort()
+		void stableSort()
 		{
-			iteratorInsertionSort(begin(), end(), typename ope_type::sort_predicate());
+			GASHA_ iteratorInsertionSort(begin(), end(), typename ope_type::predicateForSort());
 		}
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stable_sort(PREDICATE predicate)
+		void stableSort(PREDICATE predicate)
 		{
-			iteratorInsertionSort(begin(), end(), predicate);
+			GASHA_ iteratorInsertionSort(begin(), end(), predicate);
 		}
 		//ソート済み状態チェック
-		//※ope_type::sort_predicate() を使用して探索（標準では、データ型の operator<() に従って探索）
+		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		bool is_ordered() const
+		bool isOrdered() const
 		{
-			return iteratorCalcUnordered(begin(), end(), typename ope_type::sort_predicate()) == 0;
+			return GASHA_ iteratorIsOrdered(begin(), end(), typename ope_type::predicateForSort());
 		}
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool is_ordered(PREDICATE predicate) const
+		bool isOrdered(PREDICATE predicate) const
 		{
-			return iteratorCalcUnordered(begin(), end(), predicate) == 0;
+			return GASHA_ iteratorIsOrdered(begin(), end(), predicate);
 		}
 	public:
 		//線形探索
 		//※探索値指定版
-		//※ope_type::find_predicate() を使用して探索（標準では、データ型の operator==() に従って探索）
+		//※ope_type::predicateForFind() を使用して探索（標準では、データ型の operator==() に従って探索）
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator find_value(const V& value)
+		iterator findValue(const V& value)
 		{
-			iterator found = iteratorLinearSearchValue(begin(), end(), value, typename ope_type::find_predicate());
-			return std::move(found);
+			iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, typename ope_type::predicateForFind());
+			return found;
 		}
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator find_value(const V& value, PREDICATE predicate)
+		iterator findValue(const V& value, PREDICATE predicate)
 		{
-			iterator found = iteratorLinearSearchValue(begin(), end(), value, predicate);
-			return std::move(found);
+			iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, predicate);
+			return found;
 		}
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class PREDICATE>
 		iterator find(PREDICATE predicate)
 		{
-			iterator found = iteratorLinearSearch(begin(), end(), predicate);
-			return std::move(found);
+			iterator found = GASHA_ iteratorLinearSearch(begin(), end(), predicate);
+			return found;
 		}
 		//二分探索
 		//※探索値指定版
-		//※ope_type::search_comparison() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
+		//※ope_type::comparisonForSearch() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binary_search_value(const V& value)
+		iterator binarySearchValue(const V& value)
 		{
-			iterator found = iteratorBinarySearchValue(begin(), end(), value, typename ope_type::search_comparison());
-			return std::move(found);
+			iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
+			return found;
 		}
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binary_search_value(const V& value, COMPARISON comparison)
+		iterator binarySearchValue(const V& value, COMPARISON comparison)
 		{
-			iterator found = iteratorBinarySearchValue(begin(), end(), value, comparison);
-			return std::move(found);
+			iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, comparison);
+			return found;
 		}
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
 		iterator binary_search(COMPARISON comparison)
 		{
-			iterator found = iteratorBinarySearch(begin(), end(), comparison);
-			return std::move(found);
+			iterator found = GASHA_ iteratorBinarySearch(begin(), end(), comparison);
+			return found;
 		}
 	public:
 		//コンストラクタ
 		//※初期状態で使用中の要素数を指定する（-1で全要素を使用中にする）
 		//※要素の初期化は行わない（必要なら size に 0 を指定して、後で resize() を呼び出す）
 		template<size_type N>
-		container(value_type(&array)[N], const int size = 0, const auto_clear_attr_t auto_clear_attr = NEVER_CLEAR) :
+		container(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
 			m_array(array),
 			m_maxSize(N),
 			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
@@ -1514,7 +1089,7 @@ namespace ring_buffer
 			m_autoClearAttr(auto_clear_attr)
 		{}
 		//※ポインタと配列要素数指定版
-		container(value_type* array, const size_type max_size, const int size = 0, const auto_clear_attr_t auto_clear_attr = NEVER_CLEAR) :
+		container(value_type* array, const size_type max_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
 			m_array(array),
 			m_maxSize(max_size),
 			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
@@ -1522,7 +1097,7 @@ namespace ring_buffer
 			m_autoClearAttr(auto_clear_attr)
 		{}
 		//※voidポインタとバッファサイズ数指定版
-		container(void* buff_ptr, const size_type buff_size, const int size = 0, const auto_clear_attr_t auto_clear_attr = NEVER_CLEAR) :
+		container(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
 			m_array(static_cast<value_type*>(buff_ptr)),
 			m_maxSize(buff_size / sizeof(value_type)),
 			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
@@ -1550,53 +1125,12 @@ namespace ring_buffer
 		size_type m_maxSize;//最大要素数（後から変更可能なサイズ）
 		size_type m_size;//使用中の要素数
 		index_type m_offset;//有効要素の先頭インデックス（オフセット）
-		auto_clear_attr_t m_autoClearAttr;//コンテナ破棄時に残っている要素の自動クリア属性
+		autoClearAttr_t m_autoClearAttr;//コンテナ破棄時に残っている要素の自動クリア属性
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	//イテレータのムーブオペレータ
-	template<class OPE_TYPE>
-	//typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::const_reverse_iterator&& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//イテレータのコピーオペレータ
-	template<class OPE_TYPE>
-	//typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::const_reverse_iterator& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//イテレータのムーブコンストラクタ
-	template<class OPE_TYPE>
-	//container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::const_reverse_iterator&& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
-	//イテレータのコピーコンストラクタ
-	template<class OPE_TYPE>
-	//container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::const_reverse_iterator& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
-#endif
 }//namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

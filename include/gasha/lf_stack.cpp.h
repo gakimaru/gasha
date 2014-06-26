@@ -16,9 +16,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/lf_stack.inl>//ロックフリースタック【インライン関数／テンプレート関数実装部】
+#include <gasha/lf_stack.inl>//ロックフリースタック【インライン関数／テンプレート関数定義部】
 
-#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数実装部】
+#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数定義部】
 
 #include <stdio.h>//printf()
 

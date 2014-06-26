@@ -16,7 +16,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/hash_table.inl>//ハッシュテーブルコンテナ【インライン関数／テンプレート関数実装部】
+#include <gasha/hash_table.inl>//ハッシュテーブルコンテナ【インライン関数／テンプレート関数定義部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

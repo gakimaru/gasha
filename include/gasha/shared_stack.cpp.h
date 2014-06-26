@@ -16,9 +16,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/shared_stack.inl>//共有スタック【インライン関数／テンプレート関数実装部】
+#include <gasha/shared_stack.inl>//共有スタック【インライン関数／テンプレート関数定義部】
 
-#include <gasha/shared_pool_allocator.cpp.h>//マルチスレッド共有プールアロケータ【関数実装部】
+#include <gasha/shared_pool_allocator.cpp.h>//マルチスレッド共有プールアロケータ【関数定義部】
 
 #include <stdio.h>//printf()
 

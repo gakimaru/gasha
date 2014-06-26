@@ -9,13 +9,13 @@
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
-//   ・binary_heap.inl   ... 【インライン関数／テンプレート関数実装部】
+//   ・binary_heap.inl   ... 【インライン関数／テンプレート関数定義部】
 //                            コンテナクラスの操作が必要な場所でインクルード。
-//   ・binary_heap.cpp.h ... 【関数実装部】
+//   ・binary_heap.cpp.h ... 【関数定義部】
 //                            コンテナクラスの実体化が必要な場所でインクルード。
 //
 // ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイルへの影響やコンパイル速度を抑えることができる。
+// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,7 +33,7 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 
-//例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
@@ -92,9 +92,9 @@ namespace binary_heap
 	//二分ヒープ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename NODE_TYPE>
-	//  //struct base_ope_t;
-	//  //struct 派生構造体名 : public binary_heap::base_ope_t<派生構造体, ノード型>
-	//	struct ope_t : public binary_heap::base_ope_t<ope_t, data_t>
+	//  //struct baseOpe_t;
+	//  //struct 派生構造体名 : public binary_heap::baseOpe_t<派生構造体, ノード型>
+	//	struct ope_t : public binary_heap::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//キーを比較
 	//		//※lhsの方が小さいければ true を返す
@@ -109,7 +109,7 @@ namespace binary_heap
 	//		typedef spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
-	struct base_ope_t
+	struct baseOpe_t
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
@@ -119,7 +119,7 @@ namespace binary_heap
 		typedef dummy_lock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　base_ope_tの派生クラスにて、有効なロック型（spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効なロック型（spin_lock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
