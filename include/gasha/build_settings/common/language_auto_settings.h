@@ -44,23 +44,6 @@
 #define GASHA_FILE_LINE_TIME() __FILE__ "(" GASHA_TO_STRING_EX(__LINE__) ")[" __TIMESTAMP__ "]"
 
 //----------------------------------------
-//非言語仕様対応　※方言吸収
-
-//noinline / always_inline
-#ifdef GASHA_IS_VC
-	#define no_inline __declspec(noinline)
-	#define always_inline __forceinline
-	#define GASHA_HAS_NO_INLINE_SUBSTITUTION
-	#define GASHA_HAS_ALWAYS_INLINE_SUBSTITUTION
-#endif//GASHA_IS_VC
-#ifdef GASHA_IS_GCC
-	#define no_inline __attribute__ ((noinline))
-	#define always_inline __attribute__ ((always_inline)) inline
-	#define GASHA_HAS_NO_INLINE_SUBSTITUTION
-	#define GASHA_HAS_ALWAYS_INLINE_SUBSTITUTION
-#endif//GASHA_IS_GCC
-
-//----------------------------------------
 //C++11仕様対応
 //参考：https://sites.google.com/site/cpprefjp/implementation-status
 //参考(VC++)：http://msdn.microsoft.com/ja-jp/library/hh567368.aspx
@@ -80,7 +63,7 @@
 	#else//_MSC_VER
 		//static const void* nullptr = 0;
 		#define nullptr 0
-		#define GASHA_HAS_NULLPTR_SUBSTITUTION
+		#define GASHA_HAS_NULLPTR_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -89,7 +72,7 @@
 	#else//GASHA_HAS_CPP11
 		//static const void* nullptr = 0;
 		#define nullptr 0
-		#define GASHA_HAS_NULLPTR_SUBSTITUTION
+		#define GASHA_HAS_NULLPTR_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -156,12 +139,12 @@
 //【C++11仕様】default/detete宣言
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以後
-		#define GASHA_HAS_DEFAULT_DELETE_MEMBER
+		#define GASHA_HAS_DEFAULT_AND_DELETE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
 	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
-		#define GASHA_HAS_DEFAULT_DELETE_MEMBER
+		#define GASHA_HAS_DEFAULT_AND_DELETE
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -263,7 +246,7 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
 		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
-		#define GASHA_HAS_STATIC_ASSERT_SUBSTITUTION
+		#define GASHA_HAS_STATIC_ASSERT_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -271,7 +254,7 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//GASHA_HAS_CPP11
 		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
-		#define GASHA_HAS_STATIC_ASSERT_SUBSTITUTION
+		#define GASHA_HAS_STATIC_ASSERT_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -281,7 +264,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//_MSC_VER
 		#define thread_local __declspec(thread)
-		#define GASHA_HAS_THREAD_LOCAL_SUBSTITUTION
+		#define GASHA_HAS_THREAD_LOCAL_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -289,7 +272,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//GASHA_HAS_CPP11
 		#define thread_local __thread
-		#define GASHA_HAS_THREAD_LOCAL_SUBSTITUTION
+		#define GASHA_HAS_THREAD_LOCAL_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -310,7 +293,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//_MSC_VER
 		#define alignas(n) __declspec(align(n))
-		#define GASHA_HAS_ALIGNAS_SUBSTITUTION
+		#define GASHA_HAS_ALIGNAS_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -318,7 +301,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//GASHA_HAS_CPP11
 		#define alignas(n) __attribute__((aligned(n)))
-		#define GASHA_HAS_ALIGNAS_SUBSTITUTION
+		#define GASHA_HAS_ALIGNAS_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -328,7 +311,7 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//_MSC_VER
 		#define alignof(T) __alignof(T)
-		#define GASHA_HAS_ALIGNOF_SUBSTITUTION
+		#define GASHA_HAS_ALIGNOF_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -336,36 +319,53 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//GASHA_HAS_CPP11
 		#define alignof(T) __alignof__(T)
-		#define GASHA_HAS_ALIGNOF_SUBSTITUTION
+		#define GASHA_HAS_ALIGNOF_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+
+//----------------------------------------
+//非言語仕様対応　※方言吸収
 
 //アラインメント指定付きメモリ確保関数
 //※VC++仕様に合わせて共通化
 #ifdef GASHA_IS_GCC
-#include <cstddef>//std::size_t
-#include <stdlib.h>//posix_memalign()
-#include <memory.h>//free()
-inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
-{
-	void *p;
-	int ret = posix_memalign(&p, alignment, size);
-	return (ret == 0) ? p : 0;
-}
-inline void _aligned_free(void* p)
-{
-	free(p);
-}
-#define GASHA_HAS_ALIGNED_MALLOC_SUBSTITUTION
-#define GASHA_HAS_ALIGNED_FREE_SUBSTITUTION
+	#include <cstddef>//std::size_t
+	#include <stdlib.h>//posix_memalign()
+	#include <memory.h>//free()
+	inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
+	{
+		void *p;
+		int ret = posix_memalign(&p, alignment, size);
+		return (ret == 0) ? p : 0;
+	}
+	inline void _aligned_free(void* p)
+	{
+		free(p);
+	}
+	#define GASHA_HAS_ALIGNED_MALLOC_PROXY
+	#define GASHA_HAS_ALIGNED_FREE_PROXY
 #endif//GASHA_IS_GCC
 #ifdef GASHA_IS_VC
-#include <malloc.h>//_aligned_malloc(), _aligned_free()
-//void* _aligned_malloc(size_t size, size_t alignment);
-//void _aligned_free(void* p);
-#define GASHA_HAS_ALIGNED_MALLOC
-#define GASHA_HAS_ALIGNED_FREE
+	#include <malloc.h>//_aligned_malloc(), _aligned_free()
+	//void* _aligned_malloc(size_t size, size_t alignment);
+	//void _aligned_free(void* p);
+	#define GASHA_HAS_ALIGNED_MALLOC
+	#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
+
+//noinline / always_inline
+#ifdef GASHA_IS_VC
+	#define no_inline __declspec(noinline)
+	#define always_inline __forceinline
+	#define GASHA_HAS_NO_INLINE_PROXY
+	#define GASHA_HAS_ALWAYS_INLINE_PROXY
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#define no_inline __attribute__ ((noinline))
+	#define always_inline __attribute__ ((always_inline)) inline
+	#define GASHA_HAS_NO_INLINE_PROXY
+	#define GASHA_HAS_ALWAYS_INLINE_PROXY
+#endif//GASHA_IS_GCC
 
 #endif//__LANGUAGE_AUTO_SETTINGS_H_
 
