@@ -30,8 +30,9 @@
 
 #include <cstddef>//std::size_t, std::ptrdiff_t用
 //#include <cstdint>//std::intptr_t用
-#include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/search_basic.h>//探索処理基本
+
+//#include <memory.h>//memcpy用
+//#include <assert.h>//assert用
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -44,7 +45,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //赤黒木（red-black tree）
 //--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
 //データ構造とアルゴリズム
+//--------------------------------------------------------------------------------
 //【特徴】
 //・二分探索木である。
 //	  - ノードの左側の子には、キーの値が小さいノードを連結。
@@ -52,7 +56,54 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・平衡木である。
 //	  - 常に左右の木のバランスを保つ。
 //・以上の特徴により、探索・追加・削除の時間が、常にO(log n)に保たれる。
-//【条件】
+//--------------------------------------------------------------------------------
+//【利点】
+//・木への要素の挿入がほぼO(log n)で行える。
+//・木の要素の削除がほぼO(long n)で行える。
+//・木の要素の探索がほぼO(long n)で行える。
+//・木の要素数の上限を決めずに扱える。
+//--------------------------------------------------------------------------------
+//【欠点】
+//・ランダムアクセスができない。
+//・要素の昇順・降順アクセスが遅い。
+//・各要素に二つの子の連結情報と色情報（赤or黒の1ビット）を追加する必要がある。
+//  （メモリオーバーヘッドがある。ただし、他の平衡木アルゴリズムよりもオーバー
+//  ヘッドが少ない）
+//・赤黒木は厳密な平衡木ではないため、要素の挿入・削除・探索は、最悪 O(2 log n) に
+//  なり得る。
+//・メモリ節約の都合から、イテレータ操作中に木への要素の追加・削除ができない。
+//　（イテレータが根からの経路をスタックで保持するため、途中で木構造が変わると
+//  処理できなくなる）
+//--------------------------------------------------------------------------------
+//【本プログラムにおける実装要件】
+//・アルゴリズムとデータを分離した擬似コンテナとする。
+//・ノードの連結情報をユーザー定義可能とする。
+//　コンテナ操作用のユーザー定義構造体に、連結情報へのアクセスメソッドを実装することを必要とする。
+//・コンテナを用いずとも、ノードの連結操作アルゴリズム（関数）のみの利用も可能とする。
+//・コンテナ自体はデータの実体（ノード）を持たず、メモリ確保／解放を行わない。
+//・データの実体（ノード）はコンテナの外部から受け取り、コンテナは根の要素を管理する。
+//・キーの重複を許容する。
+//・メモリ節約のために、親への連結情報を持たない。その代わり、スタックを用いて処理する。
+//  イテレータは、このスタック操作を隠蔽する。
+//  （注）これにより、イテレータ操作中に要素の追加・削除（木構造の変更）ができないことに注意。
+//・コンテナは、STLの std::multiset/multimap をモデルとしたインターフェースを実装する。
+//・STL（std::multiset/multimap）との主な違いは下記のとおり。
+//    - ノードの生成／破棄を行わない。
+//    - 例外を扱わない。そのため、イテレータへの isExist() メソッドの追加や、
+//      at()メソッドが返す情報がポインターなど、インターフェースの相違点がある。
+//    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
+//      構造体をユーザー定義して用いる。
+//--------------------------------------------------------------------------------
+//【想定する具的的な用途】
+//・常にソート済み状態で情報を管理したいリスト。探索性能と、追加・削除の性能が
+//  求められる場合に最適。
+//・複数種の木を同一ノードが渡り歩く必要がある場合。
+//　　例：ヒープメモリマネージャで利用。使用中のメモリブロックはメモリアドレス
+//        探索木に連結し、解放されたメモリブロックは空きサイズ探索木に連結する。
+//--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+//【赤黒木の成立条件】※平衡化を実現するためのデータ状態の条件
 //・条件①：各ノードは「赤」か「黒」の「色」を持つ。
 //・条件②：「根」（root）は必ず「黒」。
 //・条件③：「赤」の子は必ず「黒」。
@@ -64,48 +115,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //            - 「葉」（nullptr）の色は「黒」であるものとする。
 //              つまり、「赤」の子がnullptrであっても良い。
 //--------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------
-//【本プログラムにおける実装要件】
-//・メモリ節約のために、親ノードへのリンクを持たないデータ構造とする。
-//・代わりに、検索等の関数実行時に外部からスタックを渡す事で親を辿ることが可能。
-//・テンプレートにより、アルゴリズムを汎用化。
-//・キー重複（同キーのノードが複数ある状態）を許容するアルゴリズムとする。
-//・リンクの方法に柔軟性を持たせ、かつ、virtualを必須としないように、
-//　データ構造は自由とする。
-//　（リンクの変数をポインタにしようがインデックスにしようが自由）
-//・代わりに、データ操作専用のクラスをユーザー定義することで、
-//　処理に汎用性を持たせる。
-//・一切メモリ操作は行わず、ノードのオブジェクトを受け取って操作する
-//　アルゴリズムのみを提供する。
-//・std::mapを模したコンテナとイテレータを利用可能とする。
-//・コンテナは、根ノードのみを保持し、一切メモリ操作しないものとする。
-//・イテレータは、上述のスタック操作を隠ぺいする。
-//--------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------
-//【具体的な活用の想定】※以下、メモリ管理処理に適用することを想定した要件。
-//・メモリマネージャの管理情報の連結に使用することを想定。
-//・空きメモリサイズ順の連結を行うため、キー重複を許容する必要がある。
-//・また、連結リストが肥大化することを避けるため、親ノードへのリンク情報は
-//　持たない。
-//・必要量以上の空きメモリのノードを検索したのち、アラインメントを加味した
-//　上で利用可能なノードかを確認し、一つずつ大きなノードを辿って最適な
-//　ノードを探し出す。
-//・ノード間のリンク情報は、64bitポインタ変数による肥大化が起こらないように、
-//　メモリ空間の先頭からオフセットされた32bitの相対ポインタを扱う。
-//・一つのメモリ管理情報を、2種類の木に振り分けて使用する。
-//　削除済みメモリノードの二分探索木はサイズをキーにし、
-//　使用中メモリノードの二分探索木はポインタをキーにする。
-//・このような利用を可能とするために、データ構造とアルゴリズムを完全に
-//　切り離した構成にする。
-//--------------------------------------------------------------------------------
-
-//#include <memory.h>//memcpy用
-//#include <assert.h>//assert用
-//#include <cstddef>//srd::size_t用
-//#include <iterator>//std::iterator用
-//#include <algorithm>//C++11 std::move用
 
 namespace rb_tree
 {
@@ -253,24 +262,24 @@ namespace rb_tree
 		typedef typename ope_type::lock_type lock_type;
 	//----------------------------------------
 	//デバッグ用補助関数
-#ifdef DEBUG_PRINT_FOR_ADD
+#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 	template<typename... Tx>
 	inline int printf_dbg_add(const char* fmt, Tx... args)
 	{
 		return printf(fmt, args...);
 	}
-#else//DEBUG_PRINT_FOR_ADD
+#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 	inline int printf_dbg_add(const char* fmt, ...){ return 0; }
-#endif//DEBUG_PRINT_FOR_ADD
-#ifdef DEBUG_PRINT_FOR_REMOVE
+#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
+#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	template<typename... Tx>
 	inline int printf_dbg_remove(const char* fmt, Tx... args)
 	{
 		return printf(fmt, args...);
 	}
-#else//DEBUG_PRINT_FOR_REMOVE
+#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	inline int printf_dbg_remove(const char* fmt, ...){ return 0; }
-#endif//DEBUG_PRINT_FOR_REMOVE
+#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	//--------------------
 	//赤黒木処理用スタッククラス
 	//※赤黒木のノード情報を扱う
@@ -665,14 +674,14 @@ namespace rb_tree
 		if (!root)//根ノードが未登録の場合
 		{
 			root = new_node;//根ノードに登録
-		#ifndef DISABLE_COLOR_FOR_ADD
+		#ifndef GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 			ope_type::setBlack(*root);//根ノードは黒
-		#endif//DISABLE_COLOR_FOR_ADD
+		#endif//GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 			return new_node;//この時点で処理終了
 		}
-	#ifndef DISABLE_COLOR_FOR_ADD
+	#ifndef GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 		ope_type::setRed(*new_node);//新規ノードは暫定で赤
-	#endif//DISABLE_COLOR_FOR_ADD
+	#endif//GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 		key_type new_key = ope_type::getKey(*new_node);//新規ノードのキーを取得
 		stack_type stack;//スタックを用意
 		node_type* curr_node = root;//現在の探索ノード
@@ -689,10 +698,10 @@ namespace rb_tree
 			stack.push(curr_node, new_key_is_large);//親ノードをスタックに記録
 			curr_node = child_node;
 		}
-	#ifndef DISABLE_COLOR_FOR_ADD
+	#ifndef GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 		//赤黒バランス調整
 		_balanceForAdd<ope_type>(root, stack, curr_node, new_key_is_large, new_node);
-	#endif//DISABLE_COLOR_FOR_ADD
+	#endif//GASHA_RB_TREE_DISABLE_COLOR_FOR_ADD
 		return new_node;
 	}
 	//--------------------
@@ -827,10 +836,10 @@ namespace rb_tree
 		{
 			ope_type::setChild(*parent_node, curr_is_large, replacing_node);//親ノードの子ノードを置き換え
 		}
-	#ifndef DISABLE_COLOR_FOR_REMOVE
+	#ifndef GASHA_RB_TREE_DISABLE_COLOR_FOR_REMOVE
 		//赤黒バランス調整
 		_balanceForRemove<ope_type>(root, stack, removing_node, replacing_node);
-	#endif//DISABLE_COLOR_FOR_REMOVE
+	#endif//GASHA_RB_TREE_DISABLE_COLOR_FOR_REMOVE
 		return removing_node;
 	}
 	//--------------------
