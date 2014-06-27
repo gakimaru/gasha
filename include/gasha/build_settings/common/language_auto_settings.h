@@ -50,10 +50,14 @@
 #ifdef GASHA_IS_VC
 	#define no_inline __declspec(noinline)
 	#define always_inline __forceinline
+	#define GASHA_HAS_NO_INLINE_SUBSTITUTION
+	#define GASHA_HAS_ALWAYS_INLINE_SUBSTITUTION
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
 	#define no_inline __attribute__ ((noinline))
 	#define always_inline __attribute__ ((always_inline)) inline
+	#define GASHA_HAS_NO_INLINE_SUBSTITUTION
+	#define GASHA_HAS_ALWAYS_INLINE_SUBSTITUTION
 #endif//GASHA_IS_GCC
 
 //----------------------------------------
@@ -76,6 +80,7 @@
 	#else//_MSC_VER
 		//static const void* nullptr = 0;
 		#define nullptr 0
+		#define GASHA_HAS_NULLPTR_SUBSTITUTION
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -84,6 +89,7 @@
 	#else//GASHA_HAS_CPP11
 		//static const void* nullptr = 0;
 		#define nullptr 0
+		#define GASHA_HAS_NULLPTR_SUBSTITUTION
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -93,6 +99,7 @@
 		#define GASHA_HAS_OVERRIDE
 	#else//_MSC_VER
 		#define override//ダミー
+		#define GASHA_HAS_OVERRIDE_DUMMY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -100,6 +107,7 @@
 		#define GASHA_HAS_OVERRIDE
 	#else//GASHA_HAS_CPP11
 		#define override//ダミー
+		#define GASHA_HAS_OVERRIDE_DUMMY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -109,6 +117,7 @@
 		#define GASHA_HAS_FINAL
 	#else//_MSC_VER
 		#define final//ダミー
+		#define GASHA_HAS_FINAL_DUMMY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -116,6 +125,43 @@
 		#define GASHA_HAS_FINAL
 	#else//GASHA_HAS_CPP11
 		#define final//ダミー
+		#define GASHA_HAS_FINAL_DUMMY
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】auto型推論
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+		#define GASHA_HAS_AUTO
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
+		#define GASHA_HAS_AUTO
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】decltype型指定子
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+		#define GASHA_HAS_DECLTYPE
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 3)
+		#define GASHA_HAS_DECLTYPE
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】default/detete宣言
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+		#define GASHA_HAS_DEFAULT_DELETE_MEMBER
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
+		#define GASHA_HAS_DEFAULT_DELETE_MEMBER
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -125,7 +171,8 @@
 		#define GASHA_HAS_CONSTEXPR
 	#else//_MSC_VER
 		//#define constexpr const
-		#define constexpr
+		#define constexpr//ダミー
+		#define GASHA_HAS_CONSTEXPR_DUMMY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -133,7 +180,8 @@
 		#define GASHA_HAS_CONSTEXPR
 	#else//GASHA_HAS_CPP11
 		//#define constexpr const
-		#define constexpr
+		#define constexpr//ダミー
+		#define GASHA_HAS_CONSTEXPR_DUMMY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -149,19 +197,81 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//【C++11仕様】ラムダ式
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+		#define GASHA_HAS_LAMBDA_EXPRESSION
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 5)
+		#define GASHA_HAS_LAMBDA_EXPRESSION
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】列挙型の型付け
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++11.1(2012)以後 ※VC++12(2013)以後とする
+		#define GASHA_HAS_ENUM_CLASS
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
+		#define GASHA_HAS_ENUM_CLASS
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】可変長引数テンプレート
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.1(2013)以後 ※VC++12(2013)以後とする
+		#define GASHA_HAS_VARIADIC_TEMPLATE
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
+		#define GASHA_HAS_VARIADIC_TEMPLATE
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】エイリアステンプレート
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.1(2013)以後 ※VC++12(2013)以後とする
+		#define GASHA_HAS_TEMPLATE_ALIASES
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 7)
+		#define GASHA_HAS_TEMPLATE_ALIASES
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】右辺値参照とstd::move
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+		#define GASHA_HAS_RVALUE_REFERENCE
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 3)
+		#define GASHA_HAS_RVALUE_REFERENCE
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
 //【C++11仕様】static_assert
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以後
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
-		#define STATIC_ASSERT(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define GASHA_HAS_STATIC_ASSERT_SUBSTITUTION
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
 	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 3)
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//GASHA_HAS_CPP11
-		#define STATIC_ASSERT(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define GASHA_HAS_STATIC_ASSERT_SUBSTITUTION
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -171,6 +281,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//_MSC_VER
 		#define thread_local __declspec(thread)
+		#define GASHA_HAS_THREAD_LOCAL_SUBSTITUTION
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -178,6 +289,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//GASHA_HAS_CPP11
 		#define thread_local __thread
+		#define GASHA_HAS_THREAD_LOCAL_SUBSTITUTION
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -198,6 +310,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//_MSC_VER
 		#define alignas(n) __declspec(align(n))
+		#define GASHA_HAS_ALIGNAS_SUBSTITUTION
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -205,6 +318,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//GASHA_HAS_CPP11
 		#define alignas(n) __attribute__((aligned(n)))
+		#define GASHA_HAS_ALIGNAS_SUBSTITUTION
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -214,6 +328,7 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//_MSC_VER
 		#define alignof(T) __alignof(T)
+		#define GASHA_HAS_ALIGNOF_SUBSTITUTION
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -221,6 +336,7 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//GASHA_HAS_CPP11
 		#define alignof(T) __alignof__(T)
+		#define GASHA_HAS_ALIGNOF_SUBSTITUTION
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -240,11 +356,15 @@ inline void _aligned_free(void* p)
 {
 	free(p);
 }
+#define GASHA_HAS_ALIGNED_MALLOC_SUBSTITUTION
+#define GASHA_HAS_ALIGNED_FREE_SUBSTITUTION
 #endif//GASHA_IS_GCC
 #ifdef GASHA_IS_VC
 #include <malloc.h>//_aligned_malloc(), _aligned_free()
 //void* _aligned_malloc(size_t size, size_t alignment);
 //void _aligned_free(void* p);
+#define GASHA_HAS_ALIGNED_MALLOC
+#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
 
 #endif//__LANGUAGE_AUTO_SETTINGS_H_
