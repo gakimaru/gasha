@@ -97,8 +97,7 @@ namespace dynamic_array
 	//動的配列操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename VALUE_TYPE>
-	//  //struct baseOpe_t;
-	//  //struct 派生構造体名 : public dynamic_array::baseOpe_t<派生構造体, 要素型>
+	//  //struct 派生構造体名 : public dynamic_array::baseOpe_t<派生構造体名, 要素の型>
 	//	struct ope_t : public dynamic_array::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//ソート用プレディケート関数オブジェクト

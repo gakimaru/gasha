@@ -52,11 +52,9 @@ namespace priority_queue
 {
 #if 0
 	//--------------------
-	//プライオリティキュー操作用テンプレート構造体
+	//優先度付きキュー操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //template<class OPE_TYPE, typename NODE_TYPE, int _NODES_MAX>
-	//  //struct baseOpe_t;
-	//  //struct 派生構造体名 : public priority_queue::baseOpe_t<派生構造体, ノード型, 優先度型, シーケンス番号型>
+	//  //struct 派生構造体名 : public priority_queue::baseOpe_t<派生構造体名, 要素の型, 優先度の型, シーケンス番号の型>
 	//	struct ope_t : public priority_queue::baseOpe_t<ope_t, data_t, int, unsigned int>
 	//	{
 	//		//優先度を取得

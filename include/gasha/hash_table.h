@@ -28,77 +28,100 @@
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
-#include <cstddef>//std::size_t, std::ptrdiff_t用
-//#include <cstdint>//std::intptr_t用
-#include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/search_basic.h>//探索処理基本
+#include <gasha/basic_math.h>//基本算術（素数計算）
+#include <gasha/crc32.h>//CRC32
 
-//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+#include <cstddef>//std::size_t, std::ptrdiff_t
+
+//【VC++】例外を無効化した状態で <iterator> <bitset> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
 #include <iterator>//std::iterator用
+#include <bitset>//std::bitset
+#include <string>//std::string
+
+
+//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
+#include <new>//配置new,配置delete用
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//ハッシュテーブル
+//開番地法ハッシュテーブル
+//--------------------------------------------------------------------------------
+
 //--------------------------------------------------------------------------------
 //データ構造とアルゴリズム
-//【特徴】
-//・ダブルハッシュアルゴリズムを採用。
-//　  - ハッシュ① ... 最初のインデックス。キーに応じて生成。
-//　  - ハッシュ② ... 衝突の際のインデックスの歩幅。キーに応じて生成。
 //--------------------------------------------------------------------------------
-
+//【特徴】
+//・キーからハッシュキーを算出して配列要素にアクセスするアルゴリズムにより、
+//  O(1) に近い探索性能が得られる。
+//・データ登録時にハッシュキーが衝突した際、ダブルハッシュアルゴリズムによる
+//  二次キーの算出により、再衝突の頻度を抑え、良好な探索性能を極力維持する。
+//--------------------------------------------------------------------------------
+//【利点】
+//・テーブルの要素の探索がほぼO(1)で行える。
+//・テーブルへの要素の追加がほぼO(1)で行える。
+//・テーブルの要素の削除がほぼO(1)で行える。
+//--------------------------------------------------------------------------------
+//【欠点】
+//・要素の昇順・降順アクセスができない。（最小値・最大値探索もできない）
+//・要素ごとのメモリオーバーヘッドはないが、十分なパフォーマンスを得るために、
+//  余分な未使用要素を多数必要とする。
+//・未使用要素が少なくなると、探索時間がO(n)まで悪化する可能性がある。
+//・要素の追加と削除を繰り返すと、削除済みデータがテーブルを圧迫し、探索性能の
+//  劣化を招く。（それを防ぐために、リハッシュの機能を用意している。）
+//・イテレータは用意しているが、ハッシュキー順の配列であるため、見た目には
+//  ランダムな順序となる。
 //--------------------------------------------------------------------------------
 //【本プログラムにおける実装要件】
-//・固定配列で実装し、一切メモリ確保・削除をしない。
-//・キー重複を許容しないアルゴリズムとする。
-//・文字列（std::string/char*）のキーをサポートしない。
-//・代わりに、文字列キーは自動的にcrc32変換を行う。（文字列は保持しない）
-//・処理効率化のために、データの削除時は実際に削除せず、
-//　削除済みフラグを用いるものとする。
-//　※検索処理は、削除済みのデータを検出しても打ち切らないことで効率化する。
-//　※このため、頻繁に登録／削除を繰り返すと、未登録データ検索時の
-//　　速度が劣化する可能性がある。
-//・STL（std::unodered_map）との違いは下記の通り
-//    - 固定長配列である。（STLは自動拡張する）
-//    - 衝突時は開番地方を用いて処理し、メモリ操作を行わない。
-//        ※STLは（おそらく）連鎖法。STLの方が速いが、より多くのメモリを必要とする。
-//    - リハッシュは削除済みデータを掃除するのみ。
-//    - キーと値のペア（std::pair）で扱わず、基本的にキーと値を直接扱う。
-//      その代わり、イテレータにはインデックスやキーなどの情報を含む。
-//　　- insert/erase時のイテレータ指定に対応しない。
-//    - 赤黒木コンテナ（rb_tree）の実装と合わせた構造にしており、
-//　　  操作用テンプレート構造体を用いる。
+//・固定配列のコンテナとし、最大要素数の自動拡張を行わない。
+//・ノードのキーと型をユーザー定義可能とする。
+//　コンテナ操作用のユーザー定義構造体に、両方の型を定義して扱うものとする。
+//・キーの重複を許容しない。
+//・文字列キー（std::string/char*）をサポートしない。
+//  文字列キーの代わりに、文字列のcrc32値を扱う。（文字列は保持しない）
+//・コンテナは、STLの std::unordered_map (C++11)をモデルとしたインターフェースを実装する。
+//・STL（std::unordered_map）との主な違いは下記のとおり。
+//    - 固定長のため、自動拡張を行わない。
+//    - リハッシュは実装するが、配列の拡張は行わず、削除済み要素のパージのみを行う。
+//    - 開番地法ハッシュテーブルのため、十分に空きがある時の処理性能がSTLよりも良い。
+//      STLは連鎖法ハッシュテーブルであり、空きがない状況では圧倒的に処理性能が良い。
+//    - 重複キーを許容しない。（std::unordered_multimapのようには使えない。）
+//      補足：開番地法では重複キーを（効率的に）処理できない。
+//    - 必ずキーと値を扱う。（std::unordered_set/unordered_multisetのようには使えない。）
+//    - 例外を扱わない。そのため、イテレータへの isExist() メソッドの追加や、
+//      at()メソッドが返す情報がポインターなど、インターフェースの相違点がある。
+//    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
+//      構造体をユーザー定義して用いる。
 //--------------------------------------------------------------------------------
-
-//#include <bitset>//std::bitset用
-//#include <cstddef>//srd::size_t用
-//#include <iterator>//std::iterator用
-//#include <utility>//std::move用
-//#include <string>//std::string用
-
-#ifdef USE_GCC
-//#include "../StaticCRC32_unix/constexpr.h"
-#else//USE_GCC
-//#include "../../StaticCRC32/StaticCRC32/src/constexpr/constexpr.h"
-#endif//USE_GCC
+//【想定する具的的な用途】
+//・あまり追加・削除を頻繁に行わず、高速な探索性能が求められるデータ。
+//・スクリプト用のコールバック関数。
+//--------------------------------------------------------------------------------
 
 namespace hash_table
 {
-#if 0
+	//データ置換属性
+	enum replaceAttr_t
+	{
+		NEVER_REPLACE,//キーが重複するデータは登録できない（置換しない）
+		REPLACE,//キーが重複するデータは置換して登録する
+	};
+	
 	//--------------------
-	//ハッシュテーブルデータ操作用テンプレート構造体
+	//開番地法ハッシュテーブル操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //template<class OPE_TYPE, typename KEY_TYPE, typename VALUE_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-	//  //struct baseOpe_t;
-	//  //struct 派生構造体名 : public hash_table::baseOpe_t<派生構造体, キー型, 値型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
-	//	struct ope_t : public hash_table::baseOpe_t<ope_t, crc32_t, data_t, 500>
+	//  //struct 派生構造体名 : public hash_table::baseOpe_t<派生構造体名, 要素の型, キーの型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
+	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
+	//	struct ope_t : public hash_table::baseOpe_t<ope_t, data_t, crc32_t, 500>
 	//	{
 	//		//データ置換属性 ※必要に応じて定義
-	//		static const replace_attr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
+	//		static const replaceAttr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
 	//
 	//		//キーを取得 ※必要に応じて定義
 	//		inline static key_type getKey(const value_type& value){ return ???; }
@@ -108,21 +131,18 @@ namespace hash_table
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename KEY_TYPE, typename VALUE_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
+	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
 	struct baseOpe_t
 	{
 		//定数
 		static const KEY_TYPE KEY_MIN = _KEY_MIN;//キーの最小値
 		static const KEY_TYPE KEY_MAX = _KEY_MAX;//キーの最大値
 		static const KEY_TYPE INVALID_KEY = _INVALID_KEY;//不正なキー
-		
-		//データ置換属性
-		enum replace_attr_t
-		{
-			NEVER_REPLACE,//キーが重複するデータは登録できない（置換しない）
-			REPLACE,//キーが重複するデータは置換して登録する
-		};
-		static const replace_attr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
+		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
+		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限
+		static const std::size_t INDEX_STEP_BASE = 5;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
+
+		static const replaceAttr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
 
 		//型
 		typedef OPE_TYPE ope_type;//データ操作型
@@ -130,10 +150,10 @@ namespace hash_table
 		typedef KEY_TYPE key_type;//キー型
 
 		//ロック型
-		typedef dummy_shared_lock lock_type;//ロックオブジェクト型
+		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効な共有ロック型（shared_spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足①】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -142,9 +162,7 @@ namespace hash_table
 		//　　　　　済まないため、ユーザーが任意に対応しなければならない。
 		//　　　　　（例）
 		//　　　　　    {
-		//　　　　　        shared_lock_guard lock(container);//コンテナオブジェクトを渡して共有ロック
-		//　　　　　                                          //※コンテナオブジェクトはロック
-		//　　　　　                                          //　オブジェクト（lock_type）として振る舞える
+		//　　　　　        auto lock = container.lockSharedScoped();//コンテナの共有ロック取得（スコープロック）
 		//　　　　　        //...
 		//　　　　　        //一連のイテレータ操作など
 		//　　　　　        //...
@@ -153,6 +171,7 @@ namespace hash_table
 		//デストラクタ呼び出し
 		static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
 	};
+	
 	//--------------------
 	//基本型定義マクロ
 	#define DECLARE_OPE_TYPES(OPE_TYPE) \
@@ -163,12 +182,14 @@ namespace hash_table
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
 		typedef const value_type* const_pointer; \
+		typedef std::ptrdiff_t difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
+	
 	//----------------------------------------
 	//ハッシュテーブルコンテナ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, std::size_t _AUTO_REHASH_RATIO = 25, int _FINDING_CYCLE_LIMIT = 0, std::size_t _INDEX_STEP_BASE = 5>
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	class container
 	{
 	public:
@@ -177,14 +198,14 @@ namespace hash_table
 	public:
 		//定数
 		static const size_type ORIGINAL_TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ（元々指定されたサイズ）
-		static const size_type TABLE_SIZE = makeStaticPrimeGE<ORIGINAL_TABLE_SIZE>::value;//テーブルサイズ（指定サイズと同じか、それより大きい素数）
+		static const size_type TABLE_SIZE = GASHA_ makeStaticPrimeGE<ORIGINAL_TABLE_SIZE>::value;//テーブルサイズ（指定サイズと同じか、それより大きい素数）
 		static const size_type TABLE_SIZE_EXTENDED = TABLE_SIZE - ORIGINAL_TABLE_SIZE;//指定サイズから拡張したサイズ
-		static const size_type  AUTO_REHASH_RATIO = _AUTO_REHASH_RATIO;//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
+		static const size_type  AUTO_REHASH_RATIO = static_cast<size_type>(ope_type::AUTO_REHASH_RATIO);//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
 		static const size_type  AUTO_REHASH_SIZE = AUTO_REHASH_RATIO == 0 ? 0 : TABLE_SIZE * AUTO_REHASH_RATIO / 100;//自動リハッシュ実行の基準サイズ ※割合とテーブルサイズから計算
-		static const int FINDING_CYCLE_LIMIT = _FINDING_CYCLE_LIMIT;//検索時の巡回回数の制限 ※0で無制限
+		static const size_type FINDING_CYCLE_LIMIT = static_cast<size_type>(ope_type::FINDING_CYCLE_LIMIT);//検索時の巡回回数の制限 ※0で無制限
 		static const key_type KEY_MIN = ope_type::KEY_MIN;//キーの最小値
 		static const key_type KEY_MAX = ope_type::KEY_MAX;//キーの最大値
-		static const index_type INDEX_STEP_BASE = _INDEX_STEP_BASE;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
+		static const index_type INDEX_STEP_BASE = static_cast<index_type>(ope_type::INDEX_STEP_BASE);//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
 		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
 	public:
 		//メタ関数
@@ -211,7 +232,7 @@ namespace hash_table
 		static const key_type KEY_RANGE = calcKeyRangeImpl<((KEY_MIN == 0u && KEY_MAX == 0xffffffffu) || KEY_MIN >= KEY_MAX), size_type, key_type, KEY_MIN, KEY_MAX>::value;//キーの範囲
 		//静的アサーション
 		static_assert(TABLE_SIZE > INDEX_STEP_BASE, "hash_table::container: TABLE_SIZE is required larger than INDEX_STEP_BASE.");
-		static_assert(isStaticPrime<INDEX_STEP_BASE>::value == true, "hash_table::container: INDEX_STEP_BASE is required prime.");
+		static_assert(GASHA_ isStaticPrime<INDEX_STEP_BASE>::value == true, "hash_table::container: INDEX_STEP_BASE is required prime.");
 	public:
 		//--------------------
 		//イテレータ用の型
@@ -225,67 +246,30 @@ namespace hash_table
 			bool m_isDeleted;//削除済み
 
 			//オペレータ
-			inline const value_type& operator*() const { return m_value; }
-			inline value_type& operator*(){ return m_value; }
-			inline const value_type* operator->() const { return m_value; }
-			inline value_type* operator->(){ return m_value; }
+			inline const_reference operator*() const { return m_value; }
+			inline reference operator*(){ return m_value; }
+			inline const_pointer operator->() const { return m_value; }
+			inline pointer operator->(){ return m_value; }
+
+			//実際のインデックスは、本来のインデックスと一致するか？
+			inline bool isPrimaryIndex() const { return m_index == m_primaryIndex; }
+			//参照を更新
+			void update(const index_type index, const index_type primary_index, const key_type key, const value_type* value, const bool is_deleted);
 
 			//ムーブオペレータ
-			inline set& operator=(const set&& rhs)
-			{
-				m_index = rhs.m_index;
-				m_primaryIndex = rhs.m_primaryIndex;
-				m_key = rhs.m_key;
-				m_value = rhs.m_value;
-				m_isDeleted = rhs.m_isDeleted;
-				return *this;
-			}
+			set& operator=(const set&& rhs);
 			//コピーオペレータ
-			inline set& operator=(const set& rhs)
-			{
-				//return operator=(std::move(rhs));
-				m_index = rhs.m_index;
-				m_primaryIndex = rhs.m_primaryIndex;
-				m_key = rhs.m_key;
-				m_value = rhs.m_value;
-				m_isDeleted = rhs.m_isDeleted;
-				return *this;
-			}
-			
-			//メソッド
-			inline bool isPrimaryIndex() const { return m_index == m_primaryIndex; }//実際のインデックスは、本来のインデックスと一致するか？
-			inline void update(const index_type index, const index_type primary_index, const key_type key, const value_type* value, const bool is_deleted)
-			{
-				m_index = index;
-				m_primaryIndex = primary_index;
-				m_key = key;
-				m_value = const_cast<value_type*>(value);
-				m_isDeleted = is_deleted;
-			}
-
+			set& operator=(const set& rhs);;
 			//ムーブコンストラクタ
-			inline set(const set&& obj) :
-				m_index(obj.m_index),
-				m_primaryIndex(obj.m_primaryIndex),
-				m_key(obj.m_key),
-				m_value(obj.m_value),
-				m_isDeleted(obj.m_isDeleted)
-			{}
+			set(const set&& obj);
 			//コピーコンストラクタ
-			inline set(const set& obj) :
-				m_index(obj.m_index),
-				m_primaryIndex(obj.m_primaryIndex),
-				m_key(obj.m_key),
-				m_value(obj.m_value),
-				m_isDeleted(obj.m_isDeleted)
-			{}
+			set(const set& obj);
 			//コストラクタ
-			inline set(const index_type index, const index_type primary_index, const key_type key, const value_type* value, const bool is_deleted) :
-				m_index(index),
-				m_primaryIndex(primary_index),
-				m_key(key),
-				m_value(const_cast<value_type*>(value)),
-				m_isDeleted(is_deleted)
+			set(const index_type index, const index_type primary_index, const key_type key, const value_type* value, const bool is_deleted);
+			//デフォルトコンストラクタ
+			set() = delete;
+			//デストラクタ
+			inline ~set()
 			{}
 		};
 	public:
@@ -302,347 +286,131 @@ namespace hash_table
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
+			typedef typename container::reverse_iterator reverse_iterator;
+		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
 			inline operator const set&() const { return getSet(); }
 			inline operator set&(){ return getSet(); }
-			inline operator const value_type&() const { return *getValue(); }
-			inline operator value_type&(){ return *getValue(); }
-			inline operator const value_type*() const { return getValue(); }
-			inline operator value_type*(){ return getValue(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 			inline operator key_type() const { return getKey(); }
 		public:
-			//オペレータ
+			//基本オペレータ
 			inline const set& operator*() const { return getSet(); }
 			inline set& operator*(){ return getSet(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline const_iterator operator[](const int index) const
-			{
-				iterator ite(*m_con, false);
-				ite += index;
-				return ite;
-			}
-			inline iterator operator[](const int index)
-			{
-				iterator ite(*m_con, false);
-				ite += index;
-				return ite;
-			}
-		#endif
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+			inline const iterator operator[](const int index) const;
+			inline iterator operator[](const int index);
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 			//比較オペレータ
-			inline bool operator==(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_isEnd && rhs.m_isEnd ? true :
-				       m_isEnd || rhs.m_isEnd ? false :
-				       m_set.m_index == rhs.index;
-			}
-			inline bool operator!=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_isEnd && rhs.m_isEnd ? false :
-				       m_isEnd || rhs.m_isEnd ? true :
-				       m_set.m_index != rhs.m_set.m_index;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline bool operator>(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_isEnd && !rhs.m_isEnd ? true :
-				       m_isEnd || rhs.m_isEnd ? false :
-				       m_set.m_index > rhs.m_set.m_index;
-			}
-			inline bool operator>=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_isEnd && rhs.m_isEnd ? true :
-				       m_isEnd && !rhs.m_isEnd ? true :
-				       m_isEnd || rhs.m_isEnd ? false :
-				       m_set.m_index >= rhs.m_set.m_index;
-			}
-			inline bool operator<(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       !m_isEnd && rhs.m_isEnd ? true :
-				       m_isEnd || rhs.m_isEnd ? false :
-				       m_set.m_index < rhs.m_set.m_index;
-			}
-			inline bool operator<=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_isEnd && rhs.m_isEnd ? true :
-				       !m_isEnd && rhs.m_isEnd ? true :
-				       m_isEnd || rhs.m_isEnd ? false :
-				       m_set.m_index <= rhs.m_set.m_index;
-			}
-		#endif
-			//演算オペレータ
-			inline const_iterator& operator++() const
-			{
-				updateNext();
-				return *this;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-
-			inline const_iterator& operator--() const
-			{
-				updatePrev();
-				return *this;
-			}
-		#endif
-			inline iterator& operator++()
-			{
-				updateNext();
-				return *this;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline iterator& operator--()
-			{
-				updatePrev();
-				return *this;
-			}
-		#endif
-			inline const_iterator operator++(int) const
-			{
-				iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline const_iterator operator--(int) const
-			{
-				iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-		#endif
-			inline iterator operator++(int)
-			{
-				iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline iterator operator--(int)
-			{
-				iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-		#endif
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			inline const_iterator& operator+=(const typename iterator::difference_type rhs) const
-			{
-				updateForward(rhs);
-				return *this;
-			}
-			inline const_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator& operator-=(const typename iterator::difference_type rhs) const
-			{
-				updateBackward(rhs);
-				return *this;
-			}
-			inline const_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator+=(const typename iterator::difference_type rhs)
-			{
-				updateForward(rhs);
-				return *this;
-			}
-			inline iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator-=(const typename iterator::difference_type rhs)
-			{
-				updateBackward(rhs);
-				return *this;
-			}
-			inline iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator operator+(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline const_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline const_iterator operator-(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline const_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator+(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator-(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			//inline typename iterator::difference_type operator-(const iterator rhs) const
-			//{
-			//	return ???;
-			//}
-		#endif
+			inline bool operator==(const iterator& rhs) const;
+			inline bool operator!=(const iterator& rhs) const;
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+			inline bool operator>(const iterator& rhs) const;
+			inline bool operator>=(const iterator& rhs) const;
+			inline bool operator<(const iterator& rhs) const;
+			inline bool operator<=(const iterator& rhs) const;
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
-			//ムーブオペレータ
-			inline iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = std::move(rhs.m_set);
-				m_isEnd = rhs.m_isEnd;
-				return *this;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			iterator& operator=(const_reverse_iterator&& rhs);
-		#endif
-			//コピーオペレータ
-			inline iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = rhs.m_set;
-				m_isEnd = rhs.m_isEnd;
-				return *this;
-			}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			iterator& operator=(const_reverse_iterator& rhs);
-		#endif
+			//演算オペレータ
+			inline const iterator& operator++() const;
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator& operator--() const;
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline iterator& operator++();
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline iterator& operator--();
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline const iterator operator++(int) const;
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator operator--(int) const;
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline iterator operator++(int);
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline iterator operator--(int);
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+			inline const iterator& operator+=(const int rhs) const;
+			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator& operator-=(const int rhs) const;
+			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline iterator& operator+=(const int rhs);
+			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline iterator& operator-=(const int rhs);
+			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline const iterator operator+(const int rhs) const;
+			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator operator-(const int rhs) const;
+			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline iterator operator+(const int rhs);
+			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline iterator operator-(const int rhs);
+			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			//inline int operator-(const iterator& rhs) const;
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_set.m_index != INVALID_INDEX; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_set.m_index != INVALID_INDEX || m_isEnd; }
+			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_isEnd; }//終端か？
-			inline const set& getSet() const { return m_set; }//現在のセット
-			inline set& getSet(){ return m_set; }//現在のセット
-			inline index_type getIndex() const { return m_set.m_index; }//（実際の）インデックス
-			inline index_type getPrimaryIndex() const { return m_set.m_primaryIndex; }//本来のインデックス
-			inline key_type getKey() const { return m_set.m_key; }//現在のキー
-			inline const value_type* getValue() const { return m_set.m_value; }//現在の値
-			inline value_type* getValue(){ return m_set.m_value; }//現在の値
-			inline bool isDeleted() const { return m_set.m_isDeleted; }//削除済み
-			inline bool isPrimaryIndex() const { return m_set.isPrimaryIndex(); }//本来のインデックスか？
+			inline bool isEnd() const;//終端か？
+			inline const set& getSet() const;//現在のセット
+			inline set& getSet();// 現在のセット
+			inline index_type getIndex() const;//（実際の）インデックス
+			inline index_type getPrimaryIndex() const;//本来のインデックス
+			inline key_type getKey() const;//現在のキー
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
+			inline bool isDeleted() const;//削除済み
+			inline bool isPrimaryIndex() const;//本来のインデックスか？
 		private:
-			//メソッド
-			index_type update(const index_type index) const
-			{
-				//if (index == INVALID_INDEX || index < 0 || index >= static_cast<index_type>(m_con->m_size))
-				if (index >= static_cast<index_type>(TABLE_SIZE))
-					m_set.update(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false);
-				else
-					m_set.update(index, m_con->calcIndex(m_con->m_keyTable[index]), m_con->m_keyTable[index], reinterpret_cast<const value_type*>(m_con->m_table[index]), m_con->m_deleted[index]);
-				return m_set.m_index;
-			}
-			inline void updateNext() const
-			{
-				const index_type prev_index = m_set.m_index;
-				const index_type index = update(m_con->getNextIndex(prev_index));
-				m_isEnd = (prev_index != INVALID_INDEX && index == INVALID_INDEX);
-			}
-			inline void updatePrev() const
-			{
-				if (m_isEnd)
-				{
-					update(m_con->getLastIndex());
-					m_isEnd = false;
-					return;
-				}
-				update(m_con->getPrevIndex(m_set.m_index));
-				m_isEnd = false;
-			}
-			void updateForward(const int step) const
-			{
-				int _step = step;
-				const index_type prev_index = m_set.m_index;
-				index_type index = prev_index;
-				while (_step > 0 && index != INVALID_INDEX)
-				{
-					index = m_con->getNextIndex(index);
-					--_step;
-				}
-				update(index);
-				m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
-			}
-			void updateBackward(const int step) const
-			{
-				int _step = step;
-				index_type index = m_set.m_index;
-				if (_step > 0 && m_isEnd)
-				{
-					index = m_con->getLastIndex();
-					--_step;
-				}
-				while (_step > 0 && index != INVALID_INDEX)
-				{
-					index = m_con->getPrevIndex(index);
-					--_step;
-				}
-				update(index);
-				m_isEnd = false;
-			}
+			//参照を更新
+			index_type update(const index_type index) const;
+			void updateNext() const;
+			void updatePrev() const;
+			void updateForward(const int step) const;
+			void updateBackward(const int step) const;
+		public:
+			//ムーブオペレータ
+			iterator& operator=(const iterator&& rhs);
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			iterator& operator=(const reverse_iterator&& rhs);
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			//コピーオペレータ
+			iterator& operator=(const iterator& rhs);
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			iterator& operator=(const reverse_iterator& rhs);
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
-			iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_set(std::move(obj.m_set)),
-				m_isEnd(obj.m_isEnd)
-			{}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			iterator(const_reverse_iterator&& obj);
-		#endif
+			iterator(const iterator&& obj);
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			iterator(const reverse_iterator&& obj);
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
-			inline iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_set(obj.m_set),
-				m_isEnd(obj.m_isEnd)
-			{}
-		#if 1//std::forward_iterator_tag には本来必要ではない
-			iterator(const_reverse_iterator& obj);
-		#endif
+			inline iterator(const iterator& obj);
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			iterator(const reverse_iterator& obj);
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
-				m_isEnd(is_end)
-			{
-				if (!is_end)
-				{
-					update(m_con->getFirstIndex());//先頭インデックス
-					if (!m_set.m_value)
-						m_isEnd = true;
-				}
-			}
+			inline iterator(const container& con, const bool is_end);
+			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
 				m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
@@ -657,7 +425,7 @@ namespace hash_table
 			mutable set m_set;//現在のキー/値/削除済みフラグ
 			mutable bool m_isEnd;//終端か？
 		};
-	#if 1//std::forward_iterator_tag には本来必要ではない
+	#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
@@ -666,387 +434,112 @@ namespace hash_table
 			friend class container;
 			friend class iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
+			typedef typename container::iterator iterator;
+		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
 			inline operator const set&() const { return getSet(); }
 			inline operator set&(){ return getSet(); }
-			inline operator const value_type&() const { return *getValue(); }
-			inline operator value_type&(){ return *getValue(); }
-			inline operator const value_type*() const { return getValue(); }
-			inline operator value_type*(){ return getValue(); }
+			inline operator const_reference() const { return *getValue(); }
+			inline operator reference(){ return *getValue(); }
+			inline operator const_pointer() const { return getValue(); }
+			inline operator pointer(){ return getValue(); }
 			inline operator key_type() const { return getKey(); }
 		public:
-			//オペレータ
+			//基本オペレータ
 			inline const set& operator*() const { return getSet(); }
 			inline set& operator*(){ return getSet(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
-			inline const_reverse_iterator operator[](const int index) const
-			{
-				reverse_iterator ite(*m_con, false);
-				ite += index;
-				return ite;
-			}
-			inline reverse_iterator operator[](const int index)
-			{
-				reverse_iterator ite(*m_con, false);
-				ite += index;
-				return ite;
-			}
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline const reverse_iterator operator[](const int index) const;
+			inline reverse_iterator operator[](const int index);
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//比較オペレータ
-			inline bool operator==(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_isEnd && m_isEnd ? true :
-				       rhs.m_isEnd || m_isEnd ? false :
-				       rhs.m_set.m_index == m_set.m_index;
-			}
-			inline bool operator!=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_isEnd && m_isEnd ? false :
-				       rhs.m_isEnd || m_isEnd ? true :
-				       rhs.m_set.m_index != m_set.m_index;
-			}
-			inline bool operator>(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_isEnd && !m_isEnd ? true :
-				       rhs.m_isEnd || m_isEnd ? false :
-				       rhs.m_set.m_index > m_set.m_index;
-			}
-			inline bool operator>=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_isEnd && m_isEnd ? true :
-				       rhs.m_isEnd && !m_isEnd ? true :
-				       rhs.m_isEnd || m_isEnd ? false :
-				       rhs.m_set.m_index >= m_set.m_index;
-			}
-			inline bool operator<(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       !rhs.m_isEnd && m_isEnd ? true :
-				       rhs.m_isEnd || m_isEnd ? false :
-				       rhs.m_set.m_index < m_set.m_index;
-			}
-			inline bool operator<=(const_reverse_iterator& rhs) const
-			{
-				return !isEnabled() || !isEnabled() ? false :
-				       rhs.m_isEnd && m_isEnd ? true :
-				       !rhs.m_isEnd && m_isEnd ? true :
-				       rhs.m_isEnd || m_isEnd ? false :
-				       rhs.m_set.m_index <= m_set.m_index;
-			}
-			//演算オペレータ
-			inline const_reverse_iterator& operator++() const
-			{
-				updateNext();
-				return *this;
-			}
-			inline const_reverse_iterator& operator--() const
-			{
-				updatePrev();
-				return *this;
-			}
-			inline reverse_iterator& operator++()
-			{
-				updateNext();
-				return *this;
-			}
-			inline reverse_iterator& operator--()
-			{
-				updatePrev();
-				return *this;
-			}
-			inline const_reverse_iterator operator++(int) const
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-			inline const_reverse_iterator operator--(int) const
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-			inline reverse_iterator operator++(int)
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-			inline reverse_iterator operator--(int)
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-			inline const_reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs) const
-			{
-				updateForward(rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs) const
-			{
-				updateBackward(rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs)
-			{
-				updateForward(rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs)
-			{
-				updateBackward(rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator operator+(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline const_reverse_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline const_reverse_iterator operator-(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline const_reverse_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator+(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline reverse_iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator-(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline reverse_iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			//inline typename reverse_iterator::difference_type operator-(const reverse_iterator rhs) const
-			//{
-			//	return ???;
-			//}
+			inline bool operator==(const reverse_iterator& rhs) const;
+			inline bool operator!=(const reverse_iterator& rhs) const;
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline bool operator>(const reverse_iterator& rhs) const;
+			inline bool operator>=(const reverse_iterator& rhs) const;
+			inline bool operator<(const reverse_iterator& rhs) const;
+			inline bool operator<=(const reverse_iterator& rhs) const;
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
-			//ムーブオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = std::move(rhs.m_set);
-				m_isEnd = rhs.m_isEnd;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = std::move(rhs.m_set);
-				m_isEnd = false;
-				if (m_set.m_index != INVALID_INDEX)
-					++(*this);
-				else
-				{
-					if (rhs.m_isEnd)
-						update(m_con->getLastIndex());//末尾インデックス
-				}
-				return *this;
-			}
-			//コピーオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = rhs.m_set;
-				m_isEnd = rhs.m_isEnd;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_set = rhs.m_set;
-				m_isEnd = false;
-				if (m_set.m_index != INVALID_INDEX)
-					++(*this);
-				else
-				{
-					if (rhs.m_isEnd)
-						update(m_con->getLastIndex());//末尾インデックス
-				}
-				return *this;
-			}
+			//演算オペレータ
+			inline const reverse_iterator& operator++() const;
+			inline const reverse_iterator& operator--() const;
+			inline reverse_iterator& operator++();
+			inline reverse_iterator& operator--();
+			inline const reverse_iterator operator++(int) const;
+			inline const reverse_iterator operator--(int) const;
+			inline reverse_iterator operator++(int);
+			inline reverse_iterator operator--(int);
+		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline const reverse_iterator& operator+=(const int rhs) const;
+			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+			inline const reverse_iterator& operator-=(const int rhs) const;
+			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator+=(const int rhs);
+			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator-=(const int rhs);
+			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator+(const int rhs) const;
+			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator-(const int rhs) const;
+			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+			inline reverse_iterator operator+(const int rhs);
+			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+			inline reverse_iterator operator-(const int rhs);
+			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+			//inline int operator-(const reverse_iterator& rhs) const;
+		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_set.m_index != INVALID_INDEX; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_set.m_index != INVALID_INDEX || m_isEnd; }
+			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_isEnd; }//終端か？
-			inline const set& getSet() const { return m_set; }//現在のセット
-			inline set& getSet(){ return m_set; }//現在のセット
-			inline index_type getIndex() const { return m_set.m_index; }//（実際の）インデックス
-			inline index_type getPrimaryIndex() const { return m_set.m_primaryIndex; }//本来のインデックス
-			inline key_type getKey() const { return m_set.m_key; }//現在のキー
-			inline const value_type* getValue() const { return m_set.m_value; }//現在の値
-			inline value_type* getValue(){ return m_set.m_value; }//現在の値
-			inline bool isDeleted() const { return m_set.m_isDeleted; }//削除済み
-			inline bool isPrimaryIndex() const { return m_set.isPrimaryIndex(); }//本来のインデックスか？
+			inline bool isEnd() const;//終端か？
+			inline const set& getSet() const;//現在のセット
+			inline set& getSet();//現在のセット
+			inline index_type getIndex() const;//（実際の）インデックス
+			inline index_type getPrimaryIndex() const;//本来のインデックス
+			inline key_type getKey() const;//現在のキー
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
+			inline bool isDeleted() const;//削除済み
+			inline bool isPrimaryIndex() const;//本来のインデックスか？
 		private:
-			//メソッド
-			index_type update(const index_type index) const
-			{
-				//if (index == INVALID_INDEX || index < 0 || index >= static_cast<index_type>(m_con->m_size))
-				if (index >= static_cast<index_type>(TABLE_SIZE))
-					m_set.update(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false);
-				else
-					m_set.update(index, m_con->calcIndex(m_con->m_keyTable[index]), m_con->m_keyTable[index], reinterpret_cast<const value_type*>(m_con->m_table[index]), m_con->m_deleted[index]);
-				return m_set.m_index;
-			}
-			inline void updateNext() const
-			{
-				const index_type prev_index = m_set.m_index;
-				const index_type index = update(m_con->getPrevIndex(prev_index));
-				m_isEnd = (prev_index != INVALID_INDEX && index == INVALID_INDEX);
-			}
-			inline void updatePrev() const
-			{
-				if (m_isEnd)
-				{
-					update(m_con->getFirstIndex());
-					m_isEnd = false;
-					return;
-				}
-				update(m_con->getNextIndex(m_set.m_index));
-				m_isEnd = false;
-			}
-			void updateForward(const int step) const
-			{
-				int _step = step;
-				const index_type prev_index = m_set.m_index;
-				index_type index = prev_index;
-				while (_step > 0 && index != INVALID_INDEX)
-				{
-					index = m_con->getPrevIndex(index);
-					--_step;
-				}
-				update(index);
-				m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
-			}
-			void updateBackward(const int step) const
-			{
-				int _step = step;
-				index_type index = m_set.m_index;
-				if (_step > 0 && m_isEnd)
-				{
-					index = m_con->getFirstIndex();
-					--_step;
-				}
-				while (_step > 0 && index != INVALID_INDEX)
-				{
-					index = m_con->getNextIndex(index);
-					--_step;
-				}
-				update(index);
-				m_isEnd = false;
-			}
+			//参照を更新
+			index_type update(const index_type index) const;
+			void updateNext() const;
+			void updatePrev() const;
+			void updateForward(const int step) const;
+			void updateBackward(const int step) const;
 		public:
 			//ベースを取得
-			inline const_iterator base() const
-			{
-				iterator ite(*this);
-				return ite;
-			}
-			inline iterator base()
-			{
-				iterator ite(*this);
-				return ite;
-			}
+			inline const iterator base() const;
+			inline iterator base();
+		public:
+			//ムーブオペレータ
+			reverse_iterator& operator=(const reverse_iterator&& rhs);
+			reverse_iterator& operator=(const iterator&& rhs);
+			//コピーオペレータ
+			reverse_iterator& operator=(const reverse_iterator& rhs);
+			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const_reverse_iterator&& obj) :
-				m_con(obj.m_con),
-				m_set(std::move(obj.m_set)),
-				m_isEnd(obj.m_isEnd)
-			{}
-			inline reverse_iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_set(std::move(obj.m_set)),
-				m_isEnd(false)
-			{
-				if (m_set.m_index != INVALID_INDEX)
-					++(*this);
-				else
-				{
-					if (obj.m_isEnd)
-						update(m_con->getLastIndex());//末尾インデックス
-				}
-			}
+			reverse_iterator(const reverse_iterator&& obj);
+			reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const_reverse_iterator& obj) :
-				m_con(obj.m_con),
-				m_set(obj.m_set),
-				m_isEnd(obj.m_isEnd)
-			{}
-			inline reverse_iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_set(obj.m_set),
-				m_isEnd(false)
-			{
-				if (m_set.m_index != INVALID_INDEX)
-					++(*this);
-				else
-				{
-					if (obj.m_isEnd)
-						update(m_con->getLastIndex());//末尾インデックス
-				}
-			}
+			reverse_iterator(const reverse_iterator& obj);
+			reverse_iterator(const iterator& obj);
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
-				m_isEnd(is_end)
-			{
-				if (!is_end)
-				{
-					update(m_con->getLastIndex());//末尾インデックス
-					if (!m_set.m_value)
-						m_isEnd = true;
-				}
-			}
+			reverse_iterator(const container& con, const bool is_end);
+			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
 				m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
@@ -1061,9 +554,85 @@ namespace hash_table
 			mutable set m_set;//現在のキー/値/削除済みフラグ
 			mutable bool m_isEnd;//終端か？
 		};
-	#endif
+	#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	public:
 		//アクセッサ
+		//※マルチスレッドで処理する際は、一連の処理ブロック全体の前後で
+		//　リードロックの取得を行うようにすること。
+		value_type* at(const key_type key){ return findValue(key); }
+		const value_type* at(const key_type key) const { return findValue(key); }
+		value_type* operator[](const key_type key){ return findValue(key); }
+		const value_type* operator[](const key_type key) const { return findValue(key); }
+		//※文字列キーはCRC32に変換して扱う
+		value_type* at(const char* key){ return findValue(key); }
+		const value_type* at(const char* key) const { return findValue(key); }
+		value_type* operator[](const char* key){ return findValue(key); }
+		const value_type* operator[](const char* key) const { return findValue(key); }
+		//※std::stringの場合も同様
+		value_type* at(const std::string& key){ return findValue(key); }
+		const value_type* at(const std::string& key) const { return findValue(key); }
+		value_type* operator[](const std::string& key){ return findValue(key); }
+		const value_type* operator[](const std::string& key) const { return findValue(key); }
+		//※ノード型からキーを取得して探索することにも対応
+		value_type* at(const value_type& value){ return findValue(value); }
+		const value_type* at(const value_type& value) const { return findValue(value); }
+		value_type* operator[](const value_type& value){ return findValue(value); }
+		const value_type* operator[](const value_type& value) const { return findValue(value); }
+	public:
+		//キャストオペレータ
+		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
+		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
+	public:
+		//メソッド：ロック取得系
+		//単一ロック取得
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(){ GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		//スコープロック取得
+		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//メソッド：イテレータ取得系
+		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//イテレータ取得
+		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
+		inline const iterator cend() const { iterator ite(*this, true); return ite; }
+		inline const iterator begin() const { iterator ite(*this, false); return ite; }
+		inline const iterator end() const { iterator ite(*this, true); return ite; }
+		inline iterator begin() { iterator ite(*this, false); return ite; }
+		inline iterator end() { iterator ite(*this, true); return ite; }
+	#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+		//リバースイテレータを取得
+		inline const reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
+		inline const reverse_iterator rbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator rend() const { reverse_iterator ite(*this, true); return ite; }
+		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
+		inline reverse_iterator rend() { reverse_iterator ite(*this, true); return ite; }
+	#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+	public:
+		//メソッド：基本情報系
+		inline size_type max_size() const { return TABLE_SIZE; }//最大要素数を取得
+		inline size_type capacity() const { return TABLE_SIZE; }//最大要素数を取得
+		inline size_type size() const { return m_usingCount - m_deletedCount; }//使用中の要素数を取得
+		inline size_type remain() const { return TABLE_SIZE - size(); }//残りの要素数を取得
+		inline bool empty() const { return size() == 0; }//空か？
+		inline bool full() const { return size() == TABLE_SIZE; }//満杯か？
+		inline size_type bucket_count() const { return TABLE_SIZE; }//最大要素数を取得
+		inline size_type max_bucket_count() const { return TABLE_SIZE; }//最大要素数を取得
+		inline size_type bucket(const key_type key) const { return _findIndex(key); }//キーに対応するインデックスを取得
+		inline size_type bucket(const char* key) const { return _findIndex(key); }//キーに対応するインデックスを取得
+		inline size_type bucket(const std::string key) const { return _findIndex(key); }//キーに対応するインデックスを取得
+		inline size_type bucket(const value_type& value) const { return _findIndex(value); }//キーに対応するインデックスを取得
+		inline size_type bucket_size(const index_type index) const { return m_using[index] && !m_deleted[index] ? 1 : 0; }//特定バケット内の要素数を取得
+	public:
+		//メソッド：基本情報系（拡張）
 		inline size_type getOriginalTableSize() const { return ORIGINAL_TABLE_SIZE; }//指定されたテーブルサイズを取得
 		inline size_type getTableSize() const { return TABLE_SIZE; }//（実際の）テーブルサイズを取得
 		inline size_type getTableSizeExtended() const { return TABLE_SIZE_EXTENDED; }//指定のテーブルサイズからの増分を取得
@@ -1090,50 +659,12 @@ namespace hash_table
 			return count;
 		}
 	public:
-		inline size_type max_size() const { return TABLE_SIZE; }//最大要素数を取得
-		inline size_type capacity() const { return TABLE_SIZE; }//最大要素数を取得
-		inline size_type size() const { return m_usingCount - m_deletedCount; }//使用中の要素数を取得
-		inline size_type remain() const { return TABLE_SIZE - size(); }//残りの要素数を取得
-		inline bool empty() const { return size() == 0; }//空か？
-		inline bool full() const { return size() == TABLE_SIZE; }//満杯か？
-		inline size_type bucket_count() const { return TABLE_SIZE; }//最大要素数を取得
-		inline size_type max_bucket_count() const { return TABLE_SIZE; }//最大要素数を取得
-		inline size_type bucket(const key_type key) const { return _findIndex(key); }//キーに対応するインデックスを取得
-		inline size_type bucket(const char* key) const { return _findIndex(key); }//キーに対応するインデックスを取得
-		inline size_type bucket(const std::string key) const { return _findIndex(key); }//キーに対応するインデックスを取得
-		inline size_type bucket(const value_type& value) const { return _findIndex(value); }//キーに対応するインデックスを取得
-		inline size_type bucket_size(const index_type index) const { return m_using[index] && !m_deleted[index] ? 1 : 0; }//特定バケット内の要素数を取得
-	public:
-		//検索系アクセッサ：キーで検索して値を返す
-		//※マルチスレッドで処理する際は、一連の処理ブロック全体の前後で
-		//　リードロックの取得を行うようにすること。
-		value_type* at(const key_type key){ return findValue(key); }
-		value_type* at(const char* key){ return findValue(key); }
-		value_type* at(const std::string& key){ return findValue(key); }
-		value_type* at(const value_type& value){ return findValue(value); }
-		const value_type* at(const key_type key) const { return findValue(key); }
-		const value_type* at(const char* key) const { return findValue(key); }
-		const value_type* at(const std::string& key) const { return findValue(key); }
-		const value_type* at(const value_type& value) const { return findValue(value); }
-		value_type* operator[](const key_type key){ return findValue(key); }
-		value_type* operator[](const char* key){ return findValue(key); }
-		value_type* operator[](const std::string& key){ return findValue(key); }
-		value_type* operator[](const value_type& value){ return findValue(value); }
-		const value_type* operator[](const key_type key) const { return findValue(key); }
-		const value_type* operator[](const char* key) const { return findValue(key); }
-		const value_type* operator[](const std::string& key) const { return findValue(key); }
-		const value_type* operator[](const value_type& value) const { return findValue(value); }
-	public:
-		//キャストオペレータ
-		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
-		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
-	public:
-		//メソッド
+		//メソッド：インデックス計算
 		inline index_type calcIndexStep(const key_type key) const { return INDEX_STEP_BASE - key % INDEX_STEP_BASE; }//キーからインデックスの歩幅（第二ハッシュ）を計算
 		inline index_type calcIndex(const key_type key) const { return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key); }//キーからインデックス（第一ハッシュ）を計算
 		inline index_type calcNextIndex(const key_type key, const index_type index) const { return (index + calcIndexStep(key)) % TABLE_SIZE; }//次のインデックスを計算（指定のインデックスに歩幅を加算）
 	public:
-		//インデックスを取得
+		//メソッド：インデックスを取得
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		index_type getFirstIndex() const
@@ -1182,74 +713,6 @@ namespace hash_table
 			}
 			return INVALID_INDEX;
 		}
-		//イテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_iterator cbegin() const
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline const_iterator cend() const
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-		inline const_iterator begin() const
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline const_iterator end() const
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-		inline iterator begin()
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline iterator end()
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-	#if 1//std::forward_iterator_tag には本来必要ではない
-		//リバースイテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_reverse_iterator crbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline const_reverse_iterator crend() const
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-		inline const_reverse_iterator rbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline const_reverse_iterator rend() const
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-		inline reverse_iterator rbegin()
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline reverse_iterator rend()
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-	#endif
 	private:
 		//キーで検索してインデックスを取得（共通）
 		index_type _findIndexCommon(const key_type key) const
@@ -1294,19 +757,20 @@ namespace hash_table
 		inline value_type* findValue(const char* key){ return const_cast<value_type*>(_findValue(calcCRC32(key))); }
 		inline value_type* findValue(const std::string& key){ return const_cast<value_type*>(_findValue(key.c_str())); }
 		inline value_type* findValue(const value_type& value){ return const_cast<value_type*>(_findValue(ope_type::getKey(value))); }
+	public:
 		//キーで検索してイテレータを取得
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		const_iterator find(const key_type key) const
+		const iterator find(const key_type key) const
 		{
 			const index_type index = _findIndex(key);
 			if (index == INVALID_INDEX)
 				return iterator(*this, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false);
 			return iterator(*this, index, m_keyTable[index], reinterpret_cast<const value_type*>(m_table[index]), m_deleted[index]);
 		}
-		inline const_iterator find(const char* key) const { return find(calcCRC32(key)); }
-		inline const_iterator find(const std::string& key) const { return find(key.c_str()); }
-		inline const_iterator find(const value_type& value) const { return find(ope_type::getKey(value)); }
+		inline const iterator find(const char* key) const { return find(calcCRC32(key)); }
+		inline const iterator find(const std::string& key) const { return find(key.c_str()); }
+		inline const iterator find(const value_type& value) const { return find(ope_type::getKey(value)); }
 		inline iterator find(const key_type key){ return const_cast<const container*>(this)->find(key); }
 		inline iterator find(const char* key){ return const_cast<const container*>(this)->find(key); }
 		inline iterator find(const std::string& key){ return const_cast<const container*>(this)->find(key); }
@@ -1564,78 +1028,10 @@ namespace hash_table
 		int m_maxFindingCycle;//検索時の最大巡回回数 ※登録を削除しても減らない（リハッシュ時には調整される）
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-#if 1//std::forward_iterator_tag には本来必要ではない
-	//イテレータのムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, std::size_t _AUTO_REHASH_RATIO, int _FINDING_CYCLE_LIMIT, std::size_t _INDEX_STEP_BASE>
-	//typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator& container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::const_reverse_iterator&& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator& container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::reverse_iterator&& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_set = std::move(rhs.m_set);
-		m_isEnd = false;
-		if (m_set.m_index != INVALID_INDEX)
-			++(*this);
-		else
-		{
-			if (rhs.m_isEnd)
-				update(m_con->getFirstIndex());//先頭インデックス
-		}
-		return *this;
-	}
-	//イテレータのコピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, std::size_t _AUTO_REHASH_RATIO, int _FINDING_CYCLE_LIMIT, std::size_t _INDEX_STEP_BASE>
-	//typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator& container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::const_reverse_iterator& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator& container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::reverse_iterator& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_set = rhs.m_set;
-		m_isEnd = false;
-		if (m_set.m_index != INVALID_INDEX)
-			++(*this);
-		else
-		{
-			if (rhs.m_isEnd)
-				update(m_con->getFirstIndex());//先頭インデックス
-		}
-		return *this;
-	}
-	//イテレータのムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, std::size_t _AUTO_REHASH_RATIO, int _FINDING_CYCLE_LIMIT, std::size_t _INDEX_STEP_BASE>
-	//container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::const_reverse_iterator&& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::reverse_iterator&& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_set(std::move(obj.m_set)),
-		m_isEnd(false)
-	{
-		if (m_set.m_index != INVALID_INDEX)
-			++(*this);
-		else
-		{
-			if (obj.m_isEnd)
-				update(m_con->getFirstIndex());//先頭インデックス
-		}
-	}
-	//イテレータのコピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, std::size_t _AUTO_REHASH_RATIO, int _FINDING_CYCLE_LIMIT, std::size_t _INDEX_STEP_BASE>
-	//container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::const_reverse_iterator& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE, _AUTO_REHASH_RATIO, _FINDING_CYCLE_LIMIT, _INDEX_STEP_BASE>::reverse_iterator& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_set(obj.m_set),
-		m_isEnd(false)
-	{
-		if (m_set.m_index != INVALID_INDEX)
-			++(*this);
-		else
-		{
-			if (obj.m_isEnd)
-				update(m_con->getFirstIndex());//先頭インデックス
-		}
-	}
-#endif
+	
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
-#endif
 }//namespace hash_table
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

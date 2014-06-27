@@ -33,11 +33,12 @@
 #include <cstddef>//std::size_t, std::ptrdiff_t
 #include <cstdint>//std::intptr_t, std::int64_t
 
-//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
+//【VC++】例外を無効化した状態で <iterator> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
 #include <iterator>//std::iterator用
+#include <string>//std::string
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -49,17 +50,20 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //データ構造とアルゴリズム
 //--------------------------------------------------------------------------------
 //【特徴】
-//・二分探索木である。
+//・二分探索木により、明示的なソートを行わずとも、二分探索の性能 O(log n) を
+//  得ることができる。
+//　＜二分木のデータ構造＞
 //	  - ノードの左側の子には、キーの値が小さいノードを連結。
 //	  - ノードの右側の子には、キーの値が大きいか等しいノードを連結。
-//・平衡木である。
-//	  - 常に左右の木のバランスを保つ。
-//・以上の特徴により、探索・追加・削除の時間が、常にO(log n)に保たれる。
+//・平衡木を保つアルゴリズムにより、常に十分な二分探索性能が得られることを保証する。
+//    - 通常の二分探索木は、木の状態によっては O(n) まで探索性能が劣化するが、
+//      平衡木は木の左右のバランスを保つことにより、O(log n) に近い探索性能を
+//	    維持する。
 //--------------------------------------------------------------------------------
 //【利点】
+//・木の要素の探索がほぼO(long n)で行える。
 //・木への要素の挿入がほぼO(log n)で行える。
 //・木の要素の削除がほぼO(long n)で行える。
-//・木の要素の探索がほぼO(long n)で行える。
 //・木の要素数の上限を決めずに扱える。
 //--------------------------------------------------------------------------------
 //【欠点】
@@ -85,11 +89,19 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・メモリ節約のために、親への連結情報を持たない。その代わり、スタックを用いて処理する。
 //  イテレータは、このスタック操作を隠蔽する。
 //  （注）これにより、イテレータ操作中に要素の追加・削除（木構造の変更）ができないことに注意。
-//・コンテナは、STLの std::multiset/multimap をモデルとしたインターフェースを実装する。
-//・STL（std::multiset/multimap）との主な違いは下記のとおり。
+//・文字列キー（std::string/char*）をサポートしない。
+//  文字列キーの代わりに、文字列のcrc32値を扱う。（文字列は保持しない）
+//・コンテナは、STLの std::map/set をモデルとしたインターフェースを実装する。
+//・STL（std::set/map）との主な違いは下記のとおり。
 //    - ノードの生成／破棄を行わない。
 //    - 例外を扱わない。そのため、イテレータへの isExist() メソッドの追加や、
 //      at()メソッドが返す情報がポインターなど、インターフェースの相違点がある。
+//    - キーの重複を許容する。（std::multimap/multisetと同様）
+//    - 必ずキーと値を扱い、キーは値に含まれるものとする。
+//      （std::mapよりはstd::setに近く、キー以外の情報を付加して扱うイメージ。
+//      結果としてstd::mapと同等の情報を扱う。）
+//    - 下記「想定する具体的な用途」にあるヒープメモリマネージャでの利用を想定し、
+//      空きサイズ探索などで活用できるように、「最も近い値の探索」に対応。
 //    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
 //      構造体をユーザー定義して用いる。
 //--------------------------------------------------------------------------------
@@ -118,9 +130,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace rb_tree
 {
 	//--------------------
-	//赤黒木ノード操作用基底テンプレートクラス
-	//※下記のような派生クラス（CRTP）を定義して使用する
-	//  //struct クラス名 : public rb_tree::baseOpe_t<クラス名, ノード型, キー型, スタックの最大の深さ = 32>
+	//赤黒木操作用テンプレート構造体
+	//※CRTPを活用し、下記のような派生構造体を作成して使用する
+	//  //struct 派生構造体名 : public rb_tree::baseOpe_t<派生構造体名, ノードの型, キーの型, スタックの最大の深さ = 32>
+	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
 	//	struct ope_t : public rb_tree::baseOpe_t<ope_t, data_t, int>
 	//	{
 	//		//子ノードを取得
@@ -672,6 +685,16 @@ namespace rb_tree
 		inline node_type* at(const char* key){ return at(calcCRC32(key)); }
 		inline const node_type* operator[](const char* key) const { return at(calcCRC32(key)); }
 		inline node_type* operator[](const char* key){ return at(calcCRC32(key)); }
+		//※std::stringの場合も同様
+		inline const node_type* at(const std::string& key) const { return at(calcCRC32(key.c_str())); }
+		inline node_type* at(const std::string& key){ return at(calcCRC32(key.c_str())); }
+		inline const node_type* operator[](const std::string& key) const { return at(calcCRC32(key.c_str())); }
+		inline node_type* operator[](const std::string& key){ return at(calcCRC32(key.c_str())); }
+		//※ノード型からキーを取得して探索することにも対応
+		inline const node_type* at(const node_type& node) const { return at(ope_type::getKey(node)); }
+		inline node_type* at(const node_type& node){ return at(ope_type::getKey(node)); }
+		inline const node_type* operator[](const node_type& node) const { return at(ope_type::getKey(node)); }
+		inline node_type* operator[](const node_type& node){ return at(ope_type::getKey(node)); }
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
@@ -742,6 +765,18 @@ namespace rb_tree
 		{
 			return removeNode<ope_type>(at(key), m_root);
 		}
+		inline node_type* erase(const char* key)
+		{
+			return removeNode<ope_type>(at(key), m_root);
+		}
+		inline node_type* erase(const std::string& key)
+		{
+			return removeNode<ope_type>(at(key), m_root);
+		}
+		//inline node_type* erase(const node_type& node)
+		//{
+		//	return removeNode<ope_type>(at(node), m_root);
+		//}
 		//全ノードをクリア
 		//※根ノードを返す
 		inline node_type* clear()
@@ -758,9 +793,9 @@ namespace rb_tree
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 
 	private:
-		//キーを探索
+		//キーを探索（共通）
 		//※キーが一致する範囲の先頭のイテレータを返す
-		inline const iterator& _find(const iterator& ite, const key_type key, const match_type_t type = FOR_MATCH) const
+		inline const iterator& _find(const iterator& ite, const key_type key, const match_type_t type) const
 		{
 			ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
 			return ite;
@@ -773,13 +808,46 @@ namespace rb_tree
 			const iterator ite;
 			return _find(ite, key, type);
 		}
+		inline const iterator find(const char* key, const match_type_t type = FOR_MATCH) const
+		{
+			const iterator ite;
+			return _find(ite, calcCRC32(key), type);
+		}
+		inline const iterator find(const std::string& key, const match_type_t type = FOR_MATCH) const
+		{
+			const iterator ite;
+			return _find(ite, calcCRC32(key.c_str()), type);
+		}
+		inline const iterator find(const node_type& node, const match_type_t type = FOR_MATCH) const
+		{
+			const iterator ite;
+			return _find(ite, node_type::getKey(node), type);
+		}
 		inline iterator find(const key_type key, const match_type_t type = FOR_MATCH)
 		{
 			iterator ite;
 			return _find(ite, key, type);
 		}
+		inline iterator find(const char* key, const match_type_t type = FOR_MATCH)
+		{
+			iterator ite;
+			return _find(ite, key, type);
+		}
+		inline iterator find(const std::string& key, const match_type_t type = FOR_MATCH)
+		{
+			iterator ite;
+			return _find(ite, key, type);
+		}
+		inline iterator find(const node_type& node, const match_type_t type = FOR_MATCH)
+		{
+			iterator ite;
+			return _find(ite, node, type);
+		}
 		//キーが一致するノードの数を返す
 		inline std::size_t count(const key_type key) const { return countNodes<ope_type>(m_root, key); }
+		inline std::size_t count(const char* key) const { return countNodes<ope_type>(m_root, calcCRC32(key)); }
+		inline std::size_t count(const std::string& key) const { return countNodes<ope_type>(m_root, calcCRC32(key.c_str())); }
+		inline std::size_t count(const node_type& node) const { return countNodes<ope_type>(m_root, ope_type::getKey(node)); }
 	private:
 		//キーが一致する範囲を返す
 		//※キーが一致する範囲の末尾（の次）のイテレータを返す
@@ -798,10 +866,40 @@ namespace rb_tree
 			const iterator ite;
 			return _equal_range(ite, key);
 		}
+		inline const iterator equal_range(const char* key) const
+		{
+			const iterator ite;
+			return _equal_range(ite, calcCRC32(key));
+		}
+		inline const iterator equal_range(const std::string& key) const
+		{
+			const iterator ite;
+			return _equal_range(ite, calcCRC32(key.c_str()));
+		}
+		inline const iterator equal_range(const node_type& node) const
+		{
+			const iterator ite;
+			return _equal_range(ite, ope_type::getKey(node));
+		}
 		inline iterator equal_range(const key_type key)
 		{
 			iterator ite;
 			return _equal_range(ite, key);
+		}
+		inline iterator equal_range(const char* key)
+		{
+			iterator ite;
+			return _equal_range(ite, calcCRC32(key));
+		}
+		inline iterator equal_range(const std::string& key)
+		{
+			iterator ite;
+			return _equal_range(ite, calcCRC32(key.c_str()));
+		}
+		inline iterator equal_range(const node_type&node)
+		{
+			iterator ite;
+			return _equal_range(ite, ope_type::getKey(node));
 		}
 	public:
 		//ムーブコンストラクタ

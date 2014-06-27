@@ -233,6 +233,7 @@ namespace singly_linked_list
 		m_isEnd(is_end)
 	{}
 
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
@@ -426,6 +427,7 @@ namespace singly_linked_list
 		m_value(value),
 		m_isEnd(is_end)
 	{}
+#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

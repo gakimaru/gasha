@@ -533,6 +533,7 @@ namespace singly_linked_list
 		return m_value == reinterpret_cast<value_type*>(BEFORE_BEGIN) ? nullptr : m_value;
 	}
 
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	//--------------------
 	//リバースイテレータのインライン関数
 
@@ -721,6 +722,7 @@ namespace singly_linked_list
 		iterator ite(*this);
 		return ite;
 	}
+#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

@@ -92,8 +92,7 @@ namespace binary_heap
 	//二分ヒープ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename NODE_TYPE>
-	//  //struct baseOpe_t;
-	//  //struct 派生構造体名 : public binary_heap::baseOpe_t<派生構造体, ノード型>
+	//  //struct 派生構造体名 : public binary_heap::baseOpe_t<派生構造体名, ノードの型>
 	//	struct ope_t : public binary_heap::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//キーを比較

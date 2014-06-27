@@ -106,9 +106,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace singly_linked_list
 {
 	//--------------------
-	//片方向連結リストノード操作用基底テンプレートクラス
-	//※下記のような派生クラス（CRTP）を定義して使用する
-	//  //struct クラス名 : public singly_linked_list::baseOpe_t<クラス名, ノード型>
+	//片方向連結リスト操作用テンプレート構造体
+	//※CRTPを活用し、下記のような派生構造体を作成して使用する
+	//  //struct 派生構造体名 : public singly_linked_list::baseOpe_t<派生構造体名, ノードの型>
 	//	struct ope_t : public singly_linked_list::baseOpe_t<ope_t, data_t>
 	//	{
 	//		//次ノードを取得
