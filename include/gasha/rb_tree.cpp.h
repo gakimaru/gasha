@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // rb_tree.cpp.h
-// 赤黒木コンテナ【関実装部】
+// 赤黒木コンテナ【関数定義部】
 //
 // ※コンテナクラスの実体化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
@@ -22,6 +22,107 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace rb_tree
 {
+	//--------------------
+	//赤黒木処理用スタッククラス
+
+	//スタックにノード情報を記録
+	template<class OPE_TYPE>
+	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type* node, const bool is_large)
+	{
+		assert(m_depth < DEPTH_MAX);
+		info_t* stack_node = &m_array[m_depth++];
+		stack_node->m_nodeRef = node;
+		stack_node->m_isLarge = is_large;
+		return stack_node;
+	}
+	//スタックからノード情報を取得
+	template<class OPE_TYPE>
+	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::pop()
+	{
+		if (m_depth == 0)
+			return nullptr;
+		return &m_array[--m_depth];
+	}
+	//スタックの先頭のノード情報を参照
+	//※要素が減らない
+	template<class OPE_TYPE>
+	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::top()
+	{
+		if (m_depth == 0)
+			return nullptr;
+		return &m_array[m_depth - 1];
+	}
+	//スタックの現在の深さを取得
+	template<class OPE_TYPE>
+	int stack_t<OPE_TYPE>::getDepth() const
+	{
+		return m_depth;
+	}
+	//スタックの現在の深さを更新
+	template<class OPE_TYPE>
+	void stack_t<OPE_TYPE>::setDepth(const int depth)
+	{
+		if (depth < 0)
+			m_depth = 0;
+		else if (depth < m_depth)
+			m_depth = depth;
+	}
+	//スタックの現在の深さをリセット
+	template<class OPE_TYPE>
+	void stack_t<OPE_TYPE>::reset()
+	{
+		m_depth = 0;
+	}
+	//スタックの現在の幅を算出
+	//※「幅」＝スタックの現在の深さまでの大小連結の合計値を算出
+	//※小側を-1、大側を+1として計算
+	template<class OPE_TYPE>
+	std::int64_t stack_t<OPE_TYPE>::calcBreadth()
+	{
+		std::int64_t breadth = 0;
+		for (int depth = 0; depth < m_depth; ++depth)
+		{
+			breadth *= 2ll;
+			breadth += (m_array[depth].m_isLarge ? 1ll : 0ll);
+		}
+		return breadth;
+	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	stack_t<OPE_TYPE>& stack_t<OPE_TYPE>::operator=(const stack_t<OPE_TYPE>&& rhs)
+	{
+		m_depth = rhs.m_depth;
+		if (m_depth > 0)
+			memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	stack_t<OPE_TYPE>& stack_t<OPE_TYPE>::operator=(const stack_t<OPE_TYPE>& rhs)
+	{
+		//return operator=(std::move(rhs));
+		m_depth = rhs.m_depth;
+		if (m_depth > 0)
+			memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
+		return *this;
+	}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	stack_t<OPE_TYPE>::stack_t(const stack_t<OPE_TYPE>&& obj) :
+		m_depth(obj.m_depth)
+	{
+		if (m_depth > 0)
+			memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
+	}
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	stack_t<OPE_TYPE>::stack_t(const stack_t<OPE_TYPE>& obj) :
+		m_depth(obj.m_depth)
+	{
+		if (m_depth > 0)
+			memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
+	}
+	
 	//----------------------------------------
 	//イテレータのメソッド
 	
@@ -75,6 +176,147 @@ namespace rb_tree
 		}
 		m_isEnd = false;
 	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	{
+		m_stack = std::move(rhs.m_stack);
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			m_stack = std::move(rhs.m_stack);
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (rhs.m_isEnd)
+				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+		}
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	{
+		m_stack = rhs.m_stack;
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			m_stack = rhs.m_stack;
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (rhs.m_isEnd)
+				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+		}
+		return *this;
+	}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+		m_stack(std::move(obj.m_stack)),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(obj.m_isEnd)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+		m_stack(),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(false)
+	{
+		if (m_value)
+		{
+			m_stack = std::move(obj.m_stack);
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (obj.m_isEnd)
+				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+		}
+	}
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
+		m_stack(obj.m_stack),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(obj.m_isEnd)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
+		m_stack(),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(false)
+	{
+		if (m_value)
+		{
+			m_stack = obj.m_stack;
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (obj.m_isEnd)
+				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+		}
+	}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container& con, const bool is_end) :
+		m_stack(),
+		m_con(&con),
+		m_value(nullptr),
+		m_isEnd(is_end)
+	{
+		if (!is_end)
+		{
+			m_value = const_cast<value_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+			if (!m_value)
+				m_isEnd = true;
+		}
+	}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(stack_type&& stack, const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
+		m_stack(std::move(stack)),
+		m_con(&con),
+		m_value(value),
+		m_isEnd(is_end)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(stack_type& stack, const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
+		m_stack(stack),
+		m_con(con),
+		m_value(value),
+		m_isEnd(is_end)
+	{}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド
@@ -129,6 +371,147 @@ namespace rb_tree
 		}
 		m_isEnd = false;
 	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	{
+		m_stack = std::move(rhs.m_stack);
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			m_stack = std::move(rhs.m_stack);
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (rhs.m_isEnd)
+				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+		}
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		m_stack = rhs.m_stack;
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = rhs.m_isEnd;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_value = rhs.m_value;
+		m_isEnd = false;
+		if (m_value)
+		{
+			m_stack = rhs.m_stack;
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (rhs.m_isEnd)
+				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+		}
+		return *this;
+	}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+		m_stack(std::move(obj.m_stack)),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(obj.m_isEnd)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+		m_stack(),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(false)
+	{
+		if (m_value)
+		{
+			m_stack = std::move(obj.m_stack);
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (obj.m_isEnd)
+				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+		}
+	}
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
+		m_stack(obj.m_stack),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(obj.m_isEnd)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
+		m_stack(),
+		m_con(obj.m_con),
+		m_value(obj.m_value),
+		m_isEnd(obj.m_isEnd)
+	{
+		if (m_value)
+		{
+			m_stack = obj.m_stack;
+			++(*this);
+		}
+		else
+		{
+			m_stack.reset();
+			if (obj.m_isEnd)
+				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+		}
+	}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
+		m_stack(),
+		m_con(&con),
+		m_value(nullptr),
+		m_isEnd(is_end)
+	{
+		if (!is_end)
+		{
+			m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+			if (!m_value)
+				m_isEnd = true;
+		}
+	}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(stack_type&& stack, const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
+		m_stack(std::move(stack)),
+		m_con(&con),
+		m_value(value),
+		m_isEnd(is_end)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(stack_type& stack, const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
+		m_stack(stack),
+		m_con(&con),
+		m_value(value),
+		m_isEnd(is_end)
+	{}
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

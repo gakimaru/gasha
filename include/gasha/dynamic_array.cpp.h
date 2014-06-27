@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // dynamic_array.cpp.h
-// 動的配列コンテナ【関実装部】
+// 動的配列コンテナ【関数定義部】
 //
 // ※コンテナクラスの実体化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
@@ -41,6 +41,95 @@ namespace dynamic_array
 			m_value = const_cast<value_type*>(m_con->_refElement(m_index));
 		}
 	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const int add) const
+	{
+		update(m_index + add);
+	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		m_value = rhs.m_value;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		update(m_index);
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		m_value = rhs.m_value;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		update(m_index);
+		return *this;
+	}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(obj.m_value)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(nullptr)
+	{
+		update(m_index);
+	}
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(obj.m_value)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(nullptr)
+	{
+		update(m_index);
+	}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const bool is_end) :
+		m_con(&con),
+		m_index(INVALID_INDEX),
+		m_value(nullptr)
+	{
+		if (!is_end)
+			update(0);//先頭データ
+		else
+			update(m_con->m_size);//末尾データ
+	}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const typename container<OPE_TYPE>::index_type index) :
+		m_con(&con),
+		m_index(INVALID_INDEX),
+		m_value(nullptr)
+	{
+		update(index);
+	}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド
@@ -60,6 +149,95 @@ namespace dynamic_array
 			m_index = index;
 			m_value = const_cast<value_type*>(m_con->_refElement(m_index)) - 1;
 		}
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const int add) const
+	{
+		update(m_index - add);
+	}
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		m_value = rhs.m_value;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		update(m_index);
+		return *this;
+	}
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		m_value = rhs.m_value;
+		return *this;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	{
+		m_con = rhs.m_con;
+		m_index = rhs.m_index;
+		update(m_index);
+		return *this;
+	}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(obj.m_value)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(nullptr)
+	{
+		update(obj.m_index);
+	}
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(obj.m_value)
+	{}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
+		m_con(obj.m_con),
+		m_index(obj.m_index),
+		m_value(nullptr)
+	{
+		update(m_index);
+	}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container<OPE_TYPE>& con, const bool is_end) :
+		m_con(&con),
+		m_index(INVALID_INDEX),
+		m_value(nullptr)
+	{
+		if (!is_end)
+			update(m_con->m_size);//末尾データ
+		else
+			update(0);//先頭データ
+	}
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const  container<OPE_TYPE>& con, const typename  container<OPE_TYPE>::index_type index) :
+		m_con(&con),
+		m_index(INVALID_INDEX),
+		m_value(nullptr)
+	{
+		update(index);
 	}
 
 	//----------------------------------------

@@ -283,32 +283,34 @@ namespace rb_tree
 		};
 	public:
 		//スタックにノード情報を記録
-		inline info_t* push(const node_type* node, const bool is_large);
+		info_t* push(const node_type* node, const bool is_large);
 		//スタックからノード情報を取得
-		inline info_t* pop();
+		info_t* pop();
 		//スタックの先頭のノード情報を参照
 		//※要素が減らない
-		inline info_t* top();
+		info_t* top();
 		//スタックの現在の深さを取得
-		inline int getDepth() const;
+		int getDepth() const;
 		//スタックの現在の深さを更新
-		inline void setDepth(const int depth);
+		void setDepth(const int depth);
 		//スタックの現在の深さをリセット
-		inline void reset();
+		void reset();
 		//スタックの現在の幅を算出
 		//※「幅」＝スタックの現在の深さまでの大小連結の合計値を算出
 		//※小側を-1、大側を+1として計算
-		inline std::int64_t calcBreadth();
+		std::int64_t calcBreadth();
 		//ムーブオペレータ
-		inline stack_t& operator=(const stack_t&& rhs);
+		stack_t& operator=(const stack_t&& rhs);
 		//コピーオペレータ
-		inline stack_t& operator=(const stack_t& rhs);
+		stack_t& operator=(const stack_t& rhs);
 		//ムーブコンストラクタ
-		inline stack_t(const stack_t&& obj);
+		stack_t(const stack_t&& obj);
 		//コピーコンストラクタ
-		inline stack_t(const stack_t& obj);
+		stack_t(const stack_t& obj);
 		//デフォルトコンストラクタ
-		inline stack_t();
+		inline stack_t() :
+			m_depth(0)
+		{}
 		//デストラクタ
 		inline ~stack_t()
 		{}
@@ -500,22 +502,22 @@ namespace rb_tree
 			void updateBackward(const int step) const;
 		public:
 			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
-			inline iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(const iterator&& rhs);
+			iterator& operator=(const reverse_iterator&& rhs);
 			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
-			inline iterator& operator=(const reverse_iterator& rhs);
+			iterator& operator=(const iterator& rhs);
+			iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline iterator(const iterator&& obj);
-			inline iterator(const reverse_iterator&& obj);
+			iterator(const iterator&& obj);
+			iterator(const reverse_iterator&& obj);
 			//コピーコンストラクタ
-			inline iterator(const iterator& obj);
-			inline iterator(const reverse_iterator& obj);
+			iterator(const iterator& obj);
+			iterator(const reverse_iterator& obj);
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end);
-			inline iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
-			inline iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
+			iterator(const container& con, const bool is_end);
+			iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
+			iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_stack(),
@@ -610,33 +612,33 @@ namespace rb_tree
 			inline const value_type* getValue() const;//現在の値（ノード）
 			inline value_type* getValue();//現在の値（ノード）
 		public:
+			//ベースを取得
+			inline const iterator base() const;
+			inline iterator base();
+		public:
 			//メソッド
 			void updateNext() const;
 			void updatePrev() const;
 			void updateForward(const int step) const;
 			void updateBackward(const int step) const;
 		public:
-			//ベースを取得
-			inline const iterator base() const;
-			inline iterator base();
-		public:
 			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(const reverse_iterator&& rhs);
+			reverse_iterator& operator=(const iterator&& rhs);
 			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
+			reverse_iterator& operator=(const reverse_iterator& rhs);
+			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const reverse_iterator&& obj);
-			inline reverse_iterator(const iterator&& obj);
+			reverse_iterator(const reverse_iterator&& obj);
+			reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const reverse_iterator& obj);
-			inline reverse_iterator(const iterator& obj);
+			reverse_iterator(const reverse_iterator& obj);
+			reverse_iterator(const iterator& obj);
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end);
-			inline reverse_iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
-			inline reverse_iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
+			reverse_iterator(const container& con, const bool is_end);
+			reverse_iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
+			reverse_iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_stack(),

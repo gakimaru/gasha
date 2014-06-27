@@ -292,25 +292,25 @@ namespace ring_buffer
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
-			inline void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const int add) const;
 		public:
 			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
-			inline iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(const iterator&& rhs);
+			iterator& operator=(const reverse_iterator&& rhs);
 			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
-			inline iterator& operator=(const reverse_iterator& rhs);
+			iterator& operator=(const iterator& rhs);
+			iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline iterator(const iterator&& obj);
-			inline iterator(const reverse_iterator&& obj);
+			iterator(const iterator&& obj);
+			iterator(const reverse_iterator&& obj);
 			//コピーコンストラクタ
-			inline iterator(const iterator& obj);
-			inline iterator(const reverse_iterator& obj);
+			iterator(const iterator& obj);
+			iterator(const reverse_iterator& obj);
 		public:
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end);
-			inline iterator(const container& con, const index_type logical_index);
+			iterator(const container& con, const bool is_end);
+			iterator(const container& con, const index_type logical_index);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
@@ -397,33 +397,33 @@ namespace ring_buffer
 			inline index_type getIndex() const;//論理インデックス
 			inline const value_type* getValue() const;//現在の値
 			inline value_type* getValue();//現在の値
-		private:
-			//メソッド
-			//参照を更新
-			void update(const index_type logical_index) const;
-			inline void addIndexAndUpdate(const int add) const;
 		public:
 			//ベースを取得
 			inline const iterator base() const;
 			inline iterator base();
+		private:
+			//メソッド
+			//参照を更新
+			void update(const index_type logical_index) const;
+			void addIndexAndUpdate(const int add) const;
 		public:
 			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(const reverse_iterator&& rhs);
+			reverse_iterator& operator=(const iterator&& rhs);
 			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
+			reverse_iterator& operator=(const reverse_iterator& rhs);
+			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const reverse_iterator&& obj);
-			inline reverse_iterator(const iterator&& obj);
+			reverse_iterator(const reverse_iterator&& obj);
+			reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const reverse_iterator& obj);
-			inline reverse_iterator(const iterator& obj);
+			reverse_iterator(const reverse_iterator& obj);
+			reverse_iterator(const iterator& obj);
 		public:
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end);
-			inline reverse_iterator(const container& con, const index_type logical_index);
+			reverse_iterator(const container& con, const bool is_end);
+			reverse_iterator(const container& con, const index_type logical_index);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),

@@ -239,97 +239,6 @@ namespace ring_buffer
 	{
 		return m_value;
 	}
-	//メソッド
-	//参照を更新
-	template<class OPE_TYPE>
-	inline void container<OPE_TYPE>::iterator::addIndexAndUpdate(const int add) const
-	{
-		update(m_logicalIndex + add);
-	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(obj.m_value)
-	{}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(obj.m_value)
-	{}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_logicalIndex(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		if (!is_end)
-			update(0);//先頭データ
-		else
-			update(m_con->m_size);//末尾データ
-	}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const typename container<OPE_TYPE>::index_type logical_index) :
-		m_con(&con),
-		m_logicalIndex(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		update(logical_index);
-	}
 	
 	//--------------------
 	//リバースイテレータのインライン関数
@@ -534,13 +443,6 @@ namespace ring_buffer
 	{
 		return m_value;
 	}
-	//メソッド
-	//参照を更新
-	template<class OPE_TYPE>
-	inline void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const int add) const
-	{
-		update(m_logicalIndex - add);
-	}
 	//ベースを取得
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::reverse_iterator::base() const
@@ -553,91 +455,6 @@ namespace ring_buffer
 	{
 		iterator ite(*this);
 		return ite;
-	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_logicalIndex = rhs.m_logicalIndex;
-		update(m_logicalIndex);
-		return *this;
-	}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(obj.m_value)
-	{}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(obj.m_value)
-	{}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_logicalIndex(obj.m_logicalIndex),
-		m_value(nullptr)
-	{
-		update(m_logicalIndex);
-	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_logicalIndex(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		if (!is_end)
-			update(m_con->m_size);//末尾データ
-		else
-			update(0);//先頭データ
-	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const  container<OPE_TYPE>& con, const typename  container<OPE_TYPE>::index_type logical_index) :
-		m_con(&con),
-		m_logicalIndex(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		update(logical_index);
 	}
 	
 	//----------------------------------------

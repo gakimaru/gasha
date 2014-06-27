@@ -413,6 +413,7 @@ namespace singly_linked_list
 			inline value_type* getValue();//現在値の（ノード）
 		private:
 			//メソッド
+			//参照を更新
 			void updateNext() const;
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			void updatePrev() const;
@@ -424,30 +425,30 @@ namespace singly_linked_list
 			void updateBeforeBegin() const;
 		public:
 			//ムーブオペレータ
-			inline iterator& operator=(const iterator&& rhs);
+			iterator& operator=(const iterator&& rhs);
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-			inline iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(const reverse_iterator&& rhs);
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			//コピーオペレータ
-			inline iterator& operator=(const iterator& rhs);
+			iterator& operator=(const iterator& rhs);
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-			inline iterator& operator=(const reverse_iterator& rhs);
+			iterator& operator=(const reverse_iterator& rhs);
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
-			inline iterator(const iterator&& obj);
+			iterator(const iterator&& obj);
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-			inline iterator(const reverse_iterator&& obj);
+			iterator(const reverse_iterator&& obj);
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
-			inline iterator(const iterator& obj);
+			iterator(const iterator& obj);
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-			inline iterator(const reverse_iterator& obj);
+			iterator(const reverse_iterator& obj);
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 		public:
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end);
-			inline iterator(const container& con, value_type* value, const bool is_end);
+			iterator(const container& con, const bool is_end);
+			iterator(const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
@@ -535,33 +536,34 @@ namespace singly_linked_list
 			inline const value_type* getValue() const;//現在の値（ノード）
 			inline value_type* getValue();//現在の値（ノード）
 		public:
+			//ベースを取得
+			inline const iterator base() const;
+			inline iterator base();
+		public:
 			//メソッド
+			//参照を更新
 			void updateNext() const;
 			void updatePrev() const;
 			void updateForward(const std::size_t step) const;
 			void updateBackward(const std::size_t step) const;
 		public:
-			//ベースを取得
-			inline const iterator base() const;
-			inline iterator base();
-		public:
 			//ムーブオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator&& rhs);
-			inline reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(const reverse_iterator&& rhs);
+			reverse_iterator& operator=(const iterator&& rhs);
 			//コピーオペレータ
-			inline reverse_iterator& operator=(const reverse_iterator& rhs);
-			inline reverse_iterator& operator=(const iterator& rhs);
+			reverse_iterator& operator=(const reverse_iterator& rhs);
+			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const reverse_iterator&& obj);
-			inline reverse_iterator(const iterator&& obj);
+			reverse_iterator(const reverse_iterator&& obj);
+			reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const reverse_iterator& obj);
-			inline reverse_iterator(const iterator& obj);
+			reverse_iterator(const reverse_iterator& obj);
+			reverse_iterator(const iterator& obj);
 		public:
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end);
-			inline reverse_iterator(const container& con, value_type* value, const bool is_end);
+			reverse_iterator(const container& con, const bool is_end);
+			reverse_iterator(const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
