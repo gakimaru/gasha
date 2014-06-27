@@ -24,12 +24,6 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new,配置delete用
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace singly_linked_list
@@ -502,12 +496,12 @@ namespace singly_linked_list
 		return ite;
 	}
 #endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//template<class OPE_TYPE>
 	//inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	//{
 	//	return ...;
 	//}
+#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//ムーブオペレータ
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const iterator&& rhs)
@@ -809,12 +803,12 @@ namespace singly_linked_list
 		ite -= rhs;
 		return ite;
 	}
-#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//template<class OPE_TYPE>
 	//inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	//{
 	//	return ???;
 	//}
+#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::reverse_iterator::isExist() const

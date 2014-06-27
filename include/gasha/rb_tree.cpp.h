@@ -26,19 +26,109 @@ namespace rb_tree
 	//イテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateNext() const
+	{
+		value_type* prev = m_value;
+		m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+		m_isEnd = (prev && !m_value);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updatePrev() const
+	{
+		if (m_isEnd)
+		{
+			m_stack.reset();
+			m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
+			m_isEnd = false;
+			return;
+		}
+		m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+		m_isEnd = false;
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateForward(const int step) const
+	{
+		int _step = step;
+		value_type* prev = m_value;
+		while (_step > 0 && m_value)
+		{
+			m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+			--_step;
+		}
+		m_isEnd = (prev && !m_value && _step == 0);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateBackward(const int step) const
+	{
+		int _step = step;
+		if (_step > 0 && m_isEnd)
+		{
+			m_stack.reset();
+			m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_root->m_root, m_stack));
+			--_step;
+		}
+		while (_step > 0 && m_value)
+		{
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+			--_step;
+		}
+		m_isEnd = false;
+	}
 
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
 	//参照を更新
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::reverse_iterator::update(const typename container<OPE_TYPE>::index_type index) const
-//	{
-//	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateNext() const
+	{
+		value_type* prev = m_value;
+		m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+		m_isEnd = (prev && !m_value);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updatePrev() const
+	{
+		if (m_isEnd)
+		{
+			m_stack.reset();
+			m_value = const_cast<value_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+			m_isEnd = false;
+			return;
+		}
+		m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+		m_isEnd = false;
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateForward(const int step) const
+	{
+		int _step = step;
+		value_type* prev = m_value;
+		while (_step > 0 && m_value)
+		{
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+			--_step;
+		}
+		m_isEnd = (prev && !m_value && _step == 0);
+	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateBackward(const int step) const
+	{
+		int _step = step;
+		if (_step > 0 && m_isEnd)
+		{
+			m_stack.reset();
+			m_value = const_cast<value_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
+			--_step;
+		}
+		while (_step > 0 && m_value)
+		{
+			m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+			--_step;
+		}
+		m_isEnd = false;
+	}
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

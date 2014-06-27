@@ -523,8 +523,8 @@ namespace singly_linked_list
 			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
 			inline reverse_iterator operator-(const int rhs);
 			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 			//inline int operator-(const reverse_iterator& rhs);
+		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
 			inline bool isExist() const;

@@ -169,6 +169,7 @@ namespace linked_list
 		};
 	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 	};
+
 	//--------------------
 	//基本型定義マクロ
 	#define DECLARE_OPE_TYPES(OPE_TYPE) \
@@ -419,7 +420,6 @@ namespace linked_list
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
 			typedef typename container::iterator iterator;
-		public:
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }

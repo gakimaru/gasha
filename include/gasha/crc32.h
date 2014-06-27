@@ -27,7 +27,7 @@ typedef std::uint32_t crc32_t;//CRC32型
 
 //--------------------
 //メタプログラミング用（コンパイル時計算用）
-namespace __crc32//直接使用しない処理を隠ぺいするためのネームスペース
+namespace _private//直接使用しない処理を隠ぺいするためのネームスペース
 {
 	//--------------------
 	//CRC3232生成多項式マクロと定数を定義
@@ -89,19 +89,19 @@ namespace __crc32//直接使用しない処理を隠ぺいするためのネー�
 	{
 		return len == 0 ? crc : calcData(calcPoly(static_cast<crc32_t>((crc ^ *data) & 0xffu)) ^ (crc >> 8), data + 1, len - 1);//CRC多項式(生成多項式から計算)を合成
 	}
-}//namespace __crc32
+}//namespace _private
 
 //--------------------
 //【constexpr版】文字列からCRC算出
 constexpr inline crc32_t calcConstCRC32(const char* str)
 {
-	return ~__crc32::calcStr(~0u, str);
+	return ~_private::calcStr(~0u, str);
 }
 //--------------------
 //【constexpr版】データ長を指定してCRC算出
 constexpr inline crc32_t calcConstCRC32(const char* data, const std::size_t len)
 {
-	return ~__crc32::calcData(~0u, data, len);
+	return ~_private::calcData(~0u, data, len);
 }
 #ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------
