@@ -39,7 +39,7 @@ void* lfPoolAllocator<T, _POOL_SIZE>::alloc()
 	//空きプールを確保
 	if (m_vacantHead.load() < POOL_SIZE)//空きプールの先頭インデックスがプールサイズ未満なら空きプールを利用
 	{
-		const std::size_t vacant_index = m_vacantHead.fetch_add(1);//空きプールの先頭インデックスを取得してインクリメント
+		const index_type vacant_index = m_vacantHead.fetch_add(1);//空きプールの先頭インデックスを取得してインクリメント
 		if (vacant_index < POOL_SIZE)//プールサイズ未満なら確保成功
 		{
 			m_using[vacant_index].fetch_add(1);//インデックスを使用中状態にする
@@ -52,19 +52,19 @@ void* lfPoolAllocator<T, _POOL_SIZE>::alloc()
 	}
 	//再利用プールを確保
 	{
-		std::size_t recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
+		index_type recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
 		while (true)
 		{
 			if (recycable_index_and_tag == INVALID_INDEX)//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
 				return nullptr;//メモリ確保失敗
-			const std::size_t recyclable_index = recycable_index_and_tag & 0x00ffffff;//タグ削除
+			const index_type recyclable_index = recycable_index_and_tag & 0x00ffffff;//タグ削除
 			if (recyclable_index >= POOL_SIZE)//再利用プールの先頭インデックス範囲外ならリトライ
 			{
 				recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを再取得
 				continue;//リトライ
 			}
 			recycable_t* recyclable_pool = reinterpret_cast<recycable_t*>(m_pool[recyclable_index]);//再利用プールの先頭を割り当て
-			const std::size_t next_index_and_tag = recyclable_pool->m_next_index.load();//次の再利用プールのインデックスを取得
+			const index_type next_index_and_tag = recyclable_pool->m_next_index.load();//次の再利用プールのインデックスを取得
 
 			//CAS操作①
 			if (m_recyclableHead.compare_exchange_weak(recycable_index_and_tag, next_index_and_tag))//CAS操作
@@ -87,11 +87,11 @@ void* lfPoolAllocator<T, _POOL_SIZE>::alloc()
 
 //メモリ解放（共通処理）
 template<class T, std::size_t _POOL_SIZE>
-bool lfPoolAllocator<T, _POOL_SIZE>::free(void* p, const std::size_t index)
+bool lfPoolAllocator<T, _POOL_SIZE>::free(void* p, const typename lfPoolAllocator<T, _POOL_SIZE>::index_type index)
 {
-	const std::size_t tag = static_cast<std::size_t>(m_tag.fetch_add(1));//タグ取得
-	const std::size_t index_and_tag = index | (tag << 24);//タグ付きインデックス作成
-	std::size_t recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
+	const index_type tag = static_cast<index_type>(m_tag.fetch_add(1));//タグ取得
+	const index_type index_and_tag = index | (tag << 24);//タグ付きインデックス作成
+	index_type recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
 	while (true)
 	{
 		recycable_t* deleted_pool = reinterpret_cast<recycable_t*>(m_pool[index]);//解放されたメモリを参照
@@ -116,9 +116,9 @@ bool lfPoolAllocator<T, _POOL_SIZE>::free(void* p, const std::size_t index)
 
 //ポインタをインデックスに変換
 template<class T, std::size_t _POOL_SIZE>
-std::size_t lfPoolAllocator<T, _POOL_SIZE>::ptrToIndex(void* p)
+typename lfPoolAllocator<T, _POOL_SIZE>::index_type lfPoolAllocator<T, _POOL_SIZE>::ptrToIndex(void* p)
 {
-	const std::size_t index = (reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE;
+	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE);
 	if (index >= POOL_SIZE)//範囲外のインデックスなら終了
 	{
 	#ifdef _DEBUG
@@ -142,7 +142,7 @@ std::size_t lfPoolAllocator<T, _POOL_SIZE>::ptrToIndex(void* p)
 template<class T, std::size_t _POOL_SIZE>
 bool lfPoolAllocator<T, _POOL_SIZE>::free(void* p)
 {
-	const std::size_t index = ptrToIndex(p);//ポインタをインデックスに変換
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;
 	return free(p, index);
@@ -193,11 +193,11 @@ void lfPoolAllocator<T, _POOL_SIZE>::printDebugInfo(std::function<void(const typ
 		//}
 	}
 	printf("Recycable pool:\n");
-	std::size_t recycable_index_and_tag = m_recyclableHead;
+	index_type recycable_index_and_tag = m_recyclableHead;
 	while (recycable_index_and_tag != INVALID_INDEX)
 	{
-		const std::size_t recycable_index = recycable_index_and_tag & 0x00ffffff;
-		const std::size_t tag = recycable_index_and_tag >> 24;
+		index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
+		index_type tag = recycable_index_and_tag >> 24;
 		printf(" [%d(tag=%d)]", recycable_index, tag);
 		recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(m_pool[recycable_index]);
 		recycable_index_and_tag = recycable_pool->m_next_index.load();

@@ -149,6 +149,14 @@ namespace hash_table
 		typedef VALUE_TYPE value_type;//値型
 		typedef KEY_TYPE key_type;//キー型
 
+		//キーを取得
+		//※ダミー関数
+		//※派生クラスで必要に応じて定義して使用する（必須ではない）
+		inline static key_type getKey(const value_type& value)
+		{
+			return 0;//ダミー
+		}
+
 		//ロック型
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
@@ -557,8 +565,10 @@ namespace hash_table
 	#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	public:
 		//アクセッサ
-		//※マルチスレッドで処理する際は、一連の処理ブロック全体の前後で
-		//　リードロックの取得を行うようにすること。
+		//※at(), []()は、値のポインタを返し、例外を発生させない点に注意
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		value_type* at(const key_type key){ return findValue(key); }
 		const value_type* at(const key_type key) const { return findValue(key); }
 		value_type* operator[](const key_type key){ return findValue(key); }
@@ -594,12 +604,13 @@ namespace hash_table
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
-		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
 	public:
 		//メソッド：イテレータ取得系
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		//イテレータ取得
 		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
 		inline const iterator cend() const { iterator ite(*this, true); return ite; }
@@ -747,8 +758,9 @@ namespace hash_table
 		}
 	public:
 		//キーで検索して値を取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const value_type* findValue(const key_type key) const { return _findValue(key); }
 		inline const value_type* findValue(const char* key) const { return _findValue(calcCRC32(key)); }
 		inline const value_type* findValue(const std::string& key) const { return _findValue(key.c_str()); }
@@ -759,8 +771,9 @@ namespace hash_table
 		inline value_type* findValue(const value_type& value){ return const_cast<value_type*>(_findValue(ope_type::getKey(value))); }
 	public:
 		//キーで検索してイテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		const iterator find(const key_type key) const
 		{
 			const index_type index = _findIndex(key);

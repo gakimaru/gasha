@@ -29,7 +29,6 @@
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
 #include <cstddef>//std::size_t, std::ptrdiff_t用
-//#include <cstdint>//std::intptr_t用
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
 

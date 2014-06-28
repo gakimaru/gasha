@@ -31,7 +31,7 @@
 #include <gasha/crc32.h>//CRC32
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
-#include <cstdint>//std::intptr_t, std::int64_t
+#include <cstdint>//C++11 std::int64_t
 
 //【VC++】例外を無効化した状態で <iterator> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -672,6 +672,9 @@ namespace rb_tree
 	public:
 		//アクセッサ
 		//※at(), []()は、std::set/mapと異なり、値のポインタを返し、例外を発生させない点に注意
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		const node_type* at(const key_type key) const
 		{
 			stack_type stack;
@@ -711,12 +714,13 @@ namespace rb_tree
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
-		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
 	public:
 		//メソッド：イテレータ取得系
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		//イテレータ取得
 		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
 		inline const iterator cend() const { iterator ite(*this, true); return ite; }
@@ -738,6 +742,11 @@ namespace rb_tree
 		inline std::size_t size() const { return countNodes<ope_type>(m_root); }//ノード数を取得
 		inline bool empty() const { return m_root == nullptr; }//木が空か？
 		inline int depth_max() const { return getDepthMax<ope_type>(m_root); }//木の深さを取得
+	public:
+		//メソッド：要素アクセス系
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const node_type* root() const { return m_root; }//根ノードを参照
 		inline node_type* root(){ return m_root; }//根ノードを参照
 		inline node_type*& root_ref(){ return m_root; }//根ノードの参照を取得

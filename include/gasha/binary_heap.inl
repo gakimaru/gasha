@@ -37,191 +37,441 @@ namespace binary_heap
 	//--------------------
 	//イテレータのインライン関数
 	
-#if 0
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	//基本オペレータ
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename const container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index) const
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
+		iterator ite(*m_con, false);
+		ite.update(index);
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index)
+	{
+		iterator ite(*m_con, false);
+		ite.update(index);
+		return ite;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//比較オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator==(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index == rhs.index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator!=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index != rhs.m_index;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator>(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index > rhs.m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator>=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index >= rhs.m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator<(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index < rhs.m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator<=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		return !isEnabled() || !rhs.isEnabled() ? false :
+			m_index <= rhs.m_index;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//演算オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++() const
+	{
+		addIndexAndUpdate(1);
 		return *this;
 	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--() const
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
+		addIndexAndUpdate(-1);
 		return *this;
 	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++()
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
+		addIndexAndUpdate(1);
 		return *this;
 	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--()
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
+		addIndexAndUpdate(-1);
 		return *this;
 	}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++(int) const
 	{
-		update(m_index);
+		iterator ite(*this);
+		++(*this);
+		return ite;
 	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--(int) const
 	{
-		update(m_index);
+		iterator ite(*this);
+		--(*this);
+		return ite;
 	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++(int)
 	{
-		if (!is_end)
-			update(0);//先頭データ
-		else
-			update(m_con->m_size);//末尾データ
+		iterator ite(*this);
+		++(*this);
+		return ite;
 	}
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::iterator::iterator(const container<OPE_TYPE>& con, const typename container<OPE_TYPE>::index_type index) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--(int)
 	{
-		update(index);
+		iterator ite(*this);
+		--(*this);
+		return ite;
 	}
-#endif
-	
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+=(const int rhs) const
+	{
+		addIndexAndUpdate(rhs);
+		return *this;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-=(const int rhs) const
+	{
+		addIndexAndUpdate(-rhs);
+		return *this;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+=(const int rhs)
+	{
+		addIndexAndUpdate(rhs);
+		return *this;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-=(const int rhs)
+	{
+		addIndexAndUpdate(-rhs);
+		return *this;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+(const int rhs) const
+	{
+		iterator ite(*this);
+		ite += rhs;
+		return ite;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const int rhs) const
+	{
+		iterator ite(*this);
+		ite -= rhs;
+		return ite;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+(const int rhs)
+	{
+		iterator ite(*this);
+		ite += rhs;
+		return ite;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const int rhs)
+	{
+		iterator ite(*this);
+		ite -= rhs;
+		return ite;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline inr container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
+			return 0;
+		return m_index - rhs.m_index;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//アクセッサ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::isExist() const
+	{
+		return m_index != INVALID_INDEX && m_index < m_con->m_used;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::isEnabled() const
+	{
+		return m_index != INVALID_INDEX;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::isEnd() const//終端か？
+	{
+		return m_index == m_con->m_size;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::iterator::getIndex() const//インデックス
+	{
+		return m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename const container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::iterator::getValue() const//現在の値
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::iterator::getValue()//現在の値
+	{
+		return m_value;
+	}
+
 	//--------------------
 	//リバースイテレータのインライン関数
-	
-#if 0
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+
+	//基本オペレータ
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename const container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index) const
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
+		reverse_iterator ite(*m_con, false);
+		ite.update(m_con->m_used - index);
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index)
+	{
+		reverse_iterator ite(*m_con, false);
+		ite.update(m_con->m_used - index);
+		return ite;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//比較オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator==(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index == m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator!=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index != m_index;
+	}
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator>(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index > m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator>=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index >= m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator<(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index < m_index;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator<=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		return !rhs.isEnabled() || !isEnabled() ? false :
+			rhs.m_index <= m_index;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//演算オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename const container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++() const
+	{
+		addIndexAndUpdate(1);
 		return *this;
 	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename const container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--() const
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
+		addIndexAndUpdate(-1);
 		return *this;
 	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++()
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
+		addIndexAndUpdate(1);
 		return *this;
 	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--()
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
+		addIndexAndUpdate(-1);
 		return *this;
 	}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++(int) const
 	{
-		update(obj.m_index);
+		reverse_iterator ite(*this);
+		++(*this);
+		return ite;
 	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--(int) const
 	{
-		update(m_index);
+		reverse_iterator ite(*this);
+		--(*this);
+		return ite;
 	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++(int)
 	{
-		if (!is_end)
-			update(m_con->m_size);//末尾データ
-		else
-			update(0);//先頭データ
+		reverse_iterator ite(*this);
+		++(*this);
+		return ite;
 	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::reverse_iterator::reverse_iterator(const  container<OPE_TYPE>& con, const typename  container<OPE_TYPE>::index_type index):
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--(int)
 	{
-		update(index);
+		reverse_iterator ite(*this);
+		--(*this);
+		return ite;
 	}
-#endif
+#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+=(const int rhs) const
+	{
+		addIndexAndUpdate(rhs);
+		return *this;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-=(const int rhs) const
+	{
+		addIndexAndUpdate(-rhs);
+		return *this;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+=(const int rhs)
+	{
+		addIndexAndUpdate(rhs);
+		return *this;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-=(const int rhs)
+	{
+		addIndexAndUpdate(-rhs);
+		return *this;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+(const int rhs) const
+	{
+		reverse_iterator ite(*this);
+		ite += rhs;
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const int rhs) const
+	{
+		reverse_iterator ite(*this);
+		ite -= rhs;
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+(const int rhs)
+	{
+		reverse_iterator ite(*this);
+		ite += rhs;
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const int rhs)
+	{
+		reverse_iterator ite(*this);
+		ite -= rhs;
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline int container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
+			return 0;
+		return rhs.m_index - m_index;
+	}
+#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+	//アクセッサ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::isExist() const
+	{
+		return m_index != INVALID_INDEX && m_index > 0;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::isEnabled() const
+	{
+		return m_index != INVALID_INDEX;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::isEnd() const//終端か？
+	{
+		return m_index == 0;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::getIndex() const//インデックス
+	{
+		return m_index - 1;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::getValue() const//現在の値
+	{
+		return m_value;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::getValue()//現在の値
+	{
+		return m_value;
+	}
+	//ベースを取得
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::iterator base() const
+	{
+		iterator ite(*this);
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::base()
+	{
+		iterator ite(*this);
+		return ite;
+	}
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

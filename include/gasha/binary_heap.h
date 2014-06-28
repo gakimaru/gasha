@@ -23,21 +23,24 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/dummy_shared_lock.h>//ダミー共有ロック
+#include <gasha/dummy_lock.h>//ダミーロック
 #include <gasha/lock_guard.h>//スコープロック
-#include <gasha/shared_lock_guard.h>//スコープ共有ロック
-#include <gasha/unique_shared_lock.h>//単一共有ロック
+#include <gasha/unique_lock.h>//単一ロック
 
 #include <cstddef>//std::size_t, std::ptrdiff_t用
-//#include <cstdint>//std::intptr_t用
-#include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/search_basic.h>//探索処理基本
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
 #include <iterator>//std::iterator用
+
+
+//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
+#include <new>//配置new,配置delete用
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -49,111 +52,42 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //データ構造とアルゴリズム
 //--------------------------------------------------------------------------------
 //【特徴】
-//・二分探索木により、明示的なソートを行わずとも、二分探索の性能 O(log n) を
-//  得ることができる。
-//　＜二分木のデータ構造＞
-//	  - ノードの左側の子には、キーの値が小さいノードを連結。
-//	  - ノードの右側の子には、キーの値が大きいか等しいノードを連結。
-//・平衡木を保つアルゴリズムにより、常に十分な二分探索性能が得られることを保証する。
-//    - 通常の二分探索木は、木の状態によっては O(n) まで探索性能が劣化するが、
-//      平衡木は木の左右のバランスを保つことにより、O(log n) に近い探索性能を
-//	    維持する。
+//・二分ヒープの木構造とアルゴリズムにより、常に根が最大となることを保証する。
+//  これにより、最大値の取得が常に O(1) で行える。
+//　＜二分ヒープのデータ構造＞
+//	  - 平衡二分木。
+//	  - 配列を二分木に見立てて扱う。先頭要素が根となり、順番に子ノードして扱う。
+//      配列の順列で木の配置が決定するため、連結情報が不要。
+//	  - ノードの子（左右両方）には、自身よりキーが小さいノードを連結。
+//	  - 兄弟ノード間のキーの大小は不定。
 //--------------------------------------------------------------------------------
 //【利点】
-//・木の要素の探索がほぼO(long n)で行える。
-//・木への要素の挿入がほぼO(log n)で行える。
-//・木の要素の削除がほぼO(long n)で行える。
-//・木の要素数の上限を決めずに扱える。
+//・最大値の探索がほぼO(1)で行える。
+//・各要素のメモリオーバーヘッドがない。※要素間の連結情報などを持つ必要がない
 //--------------------------------------------------------------------------------
 //【欠点】
 //・ランダムアクセスができない。
-//・要素の昇順・降順アクセスが遅い。
-//・各要素に二つの子の連結情報と色情報（赤or黒の1ビット）を追加する必要がある。
-//  （メモリオーバーヘッドがある。ただし、他の平衡木アルゴリズムよりもオーバー
-//  ヘッドが少ない）
-//・赤黒木は厳密な平衡木ではないため、要素の挿入・削除・探索は、最悪 O(2 log n) に
-//  なり得る。
-//・メモリ節約の都合から、イテレータ操作中に木への要素の追加・削除ができない。
-//　（イテレータが根からの経路をスタックで保持するため、途中で木構造が変わると
-//  処理できなくなる）
+//・要素の昇順・降順アクセスができない。
+//・同一キーのデータの取得順序が不定。（登録順に取得できることを保証しない）
 //--------------------------------------------------------------------------------
 //【本プログラムにおける実装要件】
-//・アルゴリズムとデータを分離した擬似コンテナとする。
-//・ノードの連結情報をユーザー定義可能とする。
-//　コンテナ操作用のユーザー定義構造体に、連結情報へのアクセスメソッドを実装することを必要とする。
-//・コンテナを用いずとも、ノードの連結操作アルゴリズム（関数）のみの利用も可能とする。
-//・コンテナ自体はデータの実体（ノード）を持たず、メモリ確保／解放を行わない。
-//・データの実体（ノード）はコンテナの外部から受け取り、コンテナは根の要素を管理する。
-//・キーの重複を許容する。
-//・メモリ節約のために、親への連結情報を持たない。その代わり、スタックを用いて処理する。
-//  イテレータは、このスタック操作を隠蔽する。
-//  （注）これにより、イテレータ操作中に要素の追加・削除（木構造の変更）ができないことに注意。
-//・文字列キー（std::string/char*）をサポートしない。
-//  文字列キーの代わりに、文字列のcrc32値を扱う。（文字列は保持しない）
-//・コンテナは、STLの std::map/set をモデルとしたインターフェースを実装する。
-//・STL（std::set/map）との主な違いは下記のとおり。
-//    - ノードの生成／破棄を行わない。
+//・固定配列のコンテナとし、最大要素数の自動拡張を行わない。
+//・ノードの型をユーザー定義可能とする。
+//・コンテナを用いずとも、配列のヒープ操作アルゴリズム（関数）のみの利用も可能とする。
+//・コンテナは、STLの std::priority_qeueu をモデルとしたインターフェースを実装する。
+//・STL（std::priority_qeueu）との主な違いは下記のとおり。
+//    - 固定長のため、自動拡張を行わない。
 //    - 例外を扱わない。そのため、イテレータへの isExist() メソッドの追加や、
 //      at()メソッドが返す情報がポインターなど、インターフェースの相違点がある。
-//    - キーの重複を許容する。（std::multimap/multisetと同様）
-//    - 必ずキーと値を扱い、キーは値に含まれるものとする。
-//      （std::mapよりはstd::setに近く、キー以外の情報を付加して扱うイメージ。
-//      結果としてstd::mapと同等の情報を扱う。）
-//    - 下記「想定する具体的な用途」にあるヒープメモリマネージャでの利用を想定し、
-//      空きサイズ探索などで活用できるように、「最も近い値の探索」に対応。
 //    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
 //      構造体をユーザー定義して用いる。
 //--------------------------------------------------------------------------------
 //【想定する具的的な用途】
-//・常にソート済み状態で情報を管理したいリスト。探索性能と、追加・削除の性能が
-//  求められる場合に最適。
-//・複数種の木を同一ノードが渡り歩く必要がある場合。
-//　　例：ヒープメモリマネージャで利用。使用中のメモリブロックはメモリアドレス
-//        探索木に連結し、解放されたメモリブロックは空きサイズ探索木に連結する。
+//・優先度付きキュー。ただし、キューイングの順序性を保証しない。
 //--------------------------------------------------------------------------------
-
-
-
-//--------------------------------------------------------------------------------
-//【特徴】
-//・二分木である。
-//	  - ノードの子（左右両方）には、自身よりキーが小さいノードを連結。
-//	  - 兄弟ノード間のキーの大小は不定。
-//・平衡木である。
-//	  - 木のバランスは常に保たれる。
-//・以上の特徴により、最もキーが大きいノードの探索時間が、常にO(1)に保たれる。
-//--------------------------------------------------------------------------------
-//【本プログラムにおける実装要件】
-//・固定配列で実装し、一切メモリ確保・削除をしない。
-//・ノード連結のポインタを使用しない。
-//　一般的な二分ヒープと同じく、配列の順序に基づいて連結する。
-//・この二分ヒープをプライオリティキューに利用した場合、
-//　デキュー（pop）時に、エンキュー（push）の順序性は保証されない。
-//　※この挙動はSTLと同じ。
-//・ただし、（二分ヒープを内包する）プライオリティキューでは、キーの比較に
-//　プライオリティとシーケンス番号を併用することで、順序性を保証する。
-//・STL（std::priority_queue）との違いは下記の通り
-//    - 固定長配列である。（STLは内部にstd::vectorを使用しており、自動拡張する）
-//    - 赤黒木コンテナ（rb_tree）の実装と合わせた構造にしており、
-//　　  操作用テンプレート構造体を用いる。
-//　　  ※STLで使用する比較用の関数オブジェクトクラス(less)は用いない。
-//　　- C++11の「範囲に基づくforループ」と、STLの「std::for_each()」が使用可能。
-//　　  単純に配列の内容を列挙する。
-//    - 効率化のために、オブジェクトのコピーを伴う操作を、
-//      明示的なメソッド（pushCoping/ popCoping）にしている。
-//--------------------------------------------------------------------------------
-//【具体的な活用の想定】
-//・任意の構造のプライオリティキューに適用。
-//--------------------------------------------------------------------------------
-
-//#include <cstddef>//std::size_t, std::ptrdiff_t用
-////#include <cstdint>//std::intptr_t用
-//#include <iterator>//std::iterator用
-//#include <new>//配置new,配置delete用
 
 namespace binary_heap
 {
-#if 0
 	//--------------------
 	//二分ヒープ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
@@ -161,12 +95,11 @@ namespace binary_heap
 	//  //struct 派生構造体名 : public binary_heap::baseOpe_t<派生構造体名, ノードの型>
 	//	struct ope_t : public binary_heap::baseOpe_t<ope_t, data_t>
 	//	{
-	//		//キーを比較
-	//		//※lhsの方が小さいければ true を返す
-	//		inline static bool less(const node_type& lhs, const node_type& rhs)
-	//		{
-	//			return lhs.m_key < rhs.m_key;
-	//		}
+	//		//ノード比較用プレディケート関数オブジェクト
+	//		//※必要に応じて実装する
+	//		struct predicateForSort{
+	//			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return lhs.??? < rhs.???; }
+	//		};
 	//		
 	//		//ロック型 ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
@@ -189,17 +122,16 @@ namespace binary_heap
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
 
-		//キーを比較
-		//※lhsの方が小さいければ true を返す
-		//※派生クラスでの実装が必要
-		//inline static bool less(const node_type& lhs, const node_type& rhs)
-
-		//STLのstd::priority_queueと共用するための関数オブジェクト
-		inline bool operator()(const node_type& lhs, const node_type& rhs) const{ return ope_type::less(lhs, rhs); }
+		//ノード比較用プレディケート関数オブジェクト
+		//※trueでlhsの方が小さい（並び順が正しい）
+		struct less{
+			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return GASHA_ less<node_type>()(lhs, rhs); }
+		};
 
 		//デストラクタ呼び出し
 		inline static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
 	};
+
 	//--------------------
 	//基本型定義マクロ
 	#define DECLARE_OPE_TYPES(OPE_TYPE) \
@@ -213,80 +145,24 @@ namespace binary_heap
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
+	
 	//--------------------
 	//二分ヒープ操作関数：親のインデックス計算
-	inline static std::size_t calcParent(const std::size_t index){ return (index - 1) >> 1; }
+	inline static std::size_t calcParent(const std::size_t index);
 	//--------------------
 	//二分ヒープ操作関数：子のインデックス計算
-	inline static std::size_t calcChildL(const std::size_t index){ return (index << 1) + 1; }
-	inline static std::size_t calcChildR(const std::size_t index){ return calcChildL(index) + 1; }
+	inline static std::size_t calcChildL(const std::size_t index);
+	inline static std::size_t calcChildR(const std::size_t index);
 	//--------------------
 	//二分ヒープ操作関数：アップヒープ
 	//※ノードを上方に移動
 	template<class OPE_TYPE, class PREDICATE>
-	static typename OPE_TYPE::node_type* upHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less)
-	{
-		DECLARE_OPE_TYPES(OPE_TYPE);
-		index_type index = now - top;
-		//if (index < 0 || index >= size)
-		if (index >= size)
-			return nullptr;
-		while (index != 0)
-		{
-			index = calcParent(index);
-			node_type* parent = top + index;
-			if (!less(*parent, *now))
-				break;
-			swapValues(*parent, *now);
-			now = parent;
-		}
-		return now;
-	}
+	static typename OPE_TYPE::node_type* upHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
 	//--------------------
 	//二分ヒープ操作関数：ダウンヒープ
 	//※ノードを下方に移動
 	template<class OPE_TYPE, class PREDICATE>
-	static typename OPE_TYPE::node_type* downHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less)
-	{
-		DECLARE_OPE_TYPES(OPE_TYPE);
-		index_type index = now - top;
-		//if (index < 0 || index > size)
-		if (index >= size)
-			return nullptr;
-		const size_type size_1 = size - 1;
-		while (true)
-		{
-			index = calcChildL(index);
-			if (index > size_1)
-				break;
-			node_type* child = top + index;
-			const bool l_is_less = less(*child, *now);
-			bool is_swap = false;
-			if (index == size_1)
-			{
-				if (!l_is_less)
-					is_swap = true;
-			}
-			else//if (index < size_1)
-			{
-				node_type* child_r = child + 1;
-				const bool r_is_less = less(*child_r, *now);
-				if (!r_is_less && (l_is_less || !less(*child_r, *child)))
-				{
-					is_swap = true;
-					child = child_r;
-					++index;
-				}
-				else if (!l_is_less)
-					is_swap = true;
-			}
-			if (!is_swap)
-				break;
-			swapValues(*child, *now);
-			now = child;
-		}
-		return now;
-	}
+	static typename OPE_TYPE::node_type* downHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
 	
 	//----------------------------------------
 	//二分ヒープコンテナ
@@ -331,286 +207,124 @@ namespace binary_heap
 			friend class container;
 			friend class reverse_iterator;
 		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
+			typedef typename container::reverse_iterator reverse_iterator;
+		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
-			inline operator const value_type&() const { return *getValue(); }
-			//inline operator value_type&(){ return *getValue(); }//std::input_iterator_tag には不要
-			inline operator const value_type*() const { return getValue(); }
-			//inline operator value_type*(){ return getValue(); }//std::input_iterator_tag には不要
+			inline operator const_reference() const { return *getValue(); }
+			//inline operator reference(){ return *getValue(); }//std::input_iterator_tag には不要
+			inline operator const_pointer() const { return getValue(); }
+			//inline operator poiner*(){ return getValue(); }//std::input_iterator_tag には不要
 		public:
-			//オペレータ
-			inline const value_type& operator*() const { return *getValue(); }
-			//inline value_type& operator*(){ return *getValue(); }//std::input_iterator_tag には不要
+			//基本オペレータ
+			inline const_reference operator*() const { return *getValue(); }
+			//inline reference operator*(){ return *getValue(); }//std::input_iterator_tag には不要
 			inline const_pointer operator->() const { return getValue(); }
 			//inline pointer operator->(){ return getValue(); }//std::input_iterator_tag には不要
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline const_iterator operator[](const int index) const
-			{
-				iterator ite(*m_con, false);
-				ite.update(index);
-				return ite;
-			}
-			inline iterator operator[](const int index)
-			{
-				iterator ite(*m_con, false);
-				ite.update(index);
-				return ite;
-			}
-		#endif
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+			inline const iterator operator[](const int index) const;
+			inline iterator operator[](const int index);
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//比較オペレータ
-			inline bool operator==(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index == rhs.index;
-			}
-			inline bool operator!=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index != rhs.m_index;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline bool operator>(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index > rhs.m_index;
-			}
-			inline bool operator>=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index >= rhs.m_index;
-			}
-			inline bool operator<(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index < rhs.m_index;
-			}
-			inline bool operator<=(const_iterator& rhs) const
-			{
-				return !isEnabled() || !rhs.isEnabled() ? false :
-				       m_index <= rhs.m_index;
-			}
-		#endif
-			//演算オペレータ
-			inline const_iterator& operator++() const
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline const_iterator& operator--() const
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-		#endif
-			inline iterator& operator++()
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline iterator& operator--()
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-		#endif
-			inline const_iterator operator++(int) const
-			{
-				iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline const_iterator operator--(int) const
-			{
-				iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-		#endif
-			inline iterator operator++(int)
-			{
-				iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline iterator operator--(int)
-			{
-				iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-		#endif
-		#if 1//std::input_iterator_tag には本来必要ではない
-			inline const_iterator& operator+=(const typename iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline const_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator& operator-=(const typename iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline const_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator+=(const typename iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline iterator& operator-=(const typename iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename iterator::difference_type>(rhs));
-			}
-			inline const_iterator operator+(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline const_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline const_iterator operator-(const typename iterator::difference_type rhs) const
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline const_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator+(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline iterator operator-(const typename iterator::difference_type rhs)
-			{
-				iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename iterator::difference_type>(rhs)));
-			}
-			inline typename iterator::difference_type operator-(const iterator rhs) const
-			{
-				if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
-					return 0;
-				return m_index - rhs.m_index;
-			}
-		#endif
+			inline bool operator==(const iterator& rhs) const;
+			inline bool operator!=(const iterator& rhs) const;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+			inline bool operator>(const iterator& rhs) const;
+			inline bool operator>=(const iterator& rhs) const;
+			inline bool operator<(const iterator& rhs) const;
+			inline bool operator<=(const iterator& rhs) const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
-			//ムーブオペレータ
-			inline iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				m_value = rhs.m_value;
-				return *this;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			iterator& operator=(const_reverse_iterator&& rhs);
-		#endif
-			//コピーオペレータ
-			inline iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				m_value = rhs.m_value;
-				return *this;
-			}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			iterator& operator=(const_reverse_iterator& rhs);
-		#endif
+			//演算オペレータ
+			inline const iterator& operator++() const;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator--() const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			inline iterator& operator++();
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator& operator--();
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			inline const iterator operator++(int) const;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator operator--(int) const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			inline iterator operator++(int);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator operator--(int);
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator+=(const int rhs) const;
+			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator-=(const int rhs) const;
+			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator& operator+=(const int rhs);
+			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator& operator-=(const int rhs);
+			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator operator+(const int rhs) const;
+			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator operator-(const int rhs) const;
+			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator operator+(const int rhs);
+			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline iterator operator-(const int rhs);
+			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline int operator-(const iterator& rhs) const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_index != INVALID_INDEX && m_index < m_con->m_used; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_index != INVALID_INDEX; }
-			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_index == m_con->m_size; }//終端か？
-			inline index_type getIndex() const { return m_index; }//インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline bool isEnabled() const;
+			inline bool isNotEnabled() const;
+			inline bool isEnd() const;//終端か？
+			inline index_type getIndex() const;//インデックス
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
 			//メソッド
-			void update(const index_type index) const
-			{
-				//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
-				if (index > static_cast<index_type>(m_con->m_used))
-				{
-					m_index = INVALID_INDEX;
-					m_value = nullptr;
-				}
-				else
-				{
-					m_index = index;
-					m_value = const_cast<value_type*>(m_con->_ref_node(m_index));
-				}
-			}
-			inline void addIndexAndUpdate(const int add) const
-			{
-				update(m_index + add);
-			}
+			void update(const index_type index) const;
+			void addIndexAndUpdate(const int add) const;
+		public:
+			//ムーブオペレータ
+			iterator& operator=(const iterator&& rhs);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+			typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs);
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			//コピーオペレータ
+			iterator& operator=(const iterator& rhs);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+			typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs);
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
-			iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(obj.m_value)
-			{}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			iterator(const_reverse_iterator&& obj);
-		#endif
+			iterator(const iterator&& obj);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+			container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj);
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
-			inline iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(obj.m_value)
-			{}
-		#if 1//std::input_iterator_tag には本来必要ではない
-			iterator(const_reverse_iterator& obj);
-		#endif
+			inline iterator(const iterator& obj);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+			container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj);
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_index(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				if (!is_end)
-					update(0);//先頭データ
-				else
-					update(m_con->m_used);//末尾データ
-			}
+			iterator(const container& con, const bool is_end);
+			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
 				m_index(INVALID_INDEX),
@@ -625,14 +339,18 @@ namespace binary_heap
 			mutable index_type m_index;//現在のインデックス
 			mutable value_type* m_value;//現在の値
 		};
-	#if 1//std::input_iterator_tag には本来必要ではない
+	#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
-		class reverse_iterator : public std::iterator<std::random_access_iterator_tag, value_type>
+		class reverse_iterator : public std::iterator<std::input_iterator_tag, value_type>
 		{
 			friend class container;
 			friend class iterator;
+		public:
+			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
+			typedef typename container::value_type value_type;
+			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
@@ -641,293 +359,89 @@ namespace binary_heap
 			inline operator const value_type*() const { return getValue(); }
 			//inline operator value_type*(){ return getValue(); }//std::input_iterator_tag には不要
 		public:
-			//オペレータ
+			//基本オペレータ
 			inline const value_type& operator*() const { return *getValue(); }
 			//inline value_type& operator*(){ return *getValue(); }//std::input_iterator_tag には不要
 			inline const_pointer operator->() const { return getValue(); }
 			//inline pointer operator->(){ return getValue(); }//std::input_iterator_tag には不要
-			inline const_reverse_iterator operator[](const int index) const
-			{
-				reverse_iterator ite(*m_con, false);
-				ite.update(m_con->m_used - index);
-				return ite;
-			}
-			inline reverse_iterator operator[](const int index)
-			{
-				reverse_iterator ite(*m_con, false);
-				ite.update(m_con->m_used - index);
-				return ite;
-			}
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline const reverse_iterator operator[](const int index) const;
+			inline reverse_iterator operator[](const int index);
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//比較オペレータ
-			inline bool operator==(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index == m_index;
-			}
-			inline bool operator!=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index != m_index;
-			}
-			inline bool operator>(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index > m_index;
-			}
-			inline bool operator>=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index >= m_index;
-			}
-			inline bool operator<(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index < m_index;
-			}
-			inline bool operator<=(const_reverse_iterator& rhs) const
-			{
-				return !rhs.isEnabled() || !isEnabled() ? false :
-				       rhs.m_index <= m_index;
-			}
-			//演算オペレータ
-			inline const_reverse_iterator& operator++() const
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline const_reverse_iterator& operator--() const
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline reverse_iterator& operator++()
-			{
-				addIndexAndUpdate(1);
-				return *this;
-			}
-			inline reverse_iterator& operator--()
-			{
-				addIndexAndUpdate(-1);
-				return *this;
-			}
-			inline const_reverse_iterator operator++(int) const
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-			inline const_reverse_iterator operator--(int) const
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-			inline reverse_iterator operator++(int)
-			{
-				reverse_iterator ite(*this);
-				++(*this);
-				return ite;
-			}
-			inline reverse_iterator operator--(int)
-			{
-				reverse_iterator ite(*this);
-				--(*this);
-				return ite;
-			}
-			inline const_reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator+=(const std::size_t rhs) const
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs) const
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline const_reverse_iterator& operator-=(const std::size_t rhs) const
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator+=(const typename reverse_iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator+=(const std::size_t rhs)
-			{
-				return operator+=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline reverse_iterator& operator-=(const typename reverse_iterator::difference_type rhs)
-			{
-				addIndexAndUpdate(-rhs);
-				return *this;
-			}
-			inline reverse_iterator& operator-=(const std::size_t rhs)
-			{
-				return operator-=(static_cast<typename reverse_iterator::difference_type>(rhs));
-			}
-			inline const_reverse_iterator operator+(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline const_reverse_iterator operator+(const std::size_t rhs) const
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline const_reverse_iterator operator-(const typename reverse_iterator::difference_type rhs) const
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline const_reverse_iterator operator-(const std::size_t rhs) const
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator+(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite += rhs;
-				return ite;
-			}
-			inline reverse_iterator operator+(const std::size_t rhs)
-			{
-				return std::move(operator+(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline reverse_iterator operator-(const typename reverse_iterator::difference_type rhs)
-			{
-				reverse_iterator ite(*this);
-				ite -= rhs;
-				return ite;
-			}
-			inline reverse_iterator operator-(const std::size_t rhs)
-			{
-				return std::move(operator-(static_cast<typename reverse_iterator::difference_type>(rhs)));
-			}
-			inline typename reverse_iterator::difference_type operator-(const reverse_iterator rhs) const
-			{
-				if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
-					return 0;
-				return rhs.m_index - m_index;
-			}
+			inline bool operator==(const reverse_iterator& rhs) const;
+			inline bool operator!=(const reverse_iterator& rhs) const;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline bool operator>(const reverse_iterator& rhs) const;
+			inline bool operator>=(const reverse_iterator& rhs) const;
+			inline bool operator<(const reverse_iterator& rhs) const;
+			inline bool operator<=(const reverse_iterator& rhs) const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
-			//ムーブオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator&& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				update(m_index);
-				return *this;
-			}
-			//コピーオペレータ
-			inline reverse_iterator& operator=(const_reverse_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				m_value = rhs.m_value;
-				return *this;
-			}
-			inline reverse_iterator& operator=(const_iterator& rhs)
-			{
-				m_con = rhs.m_con;
-				m_index = rhs.m_index;
-				update(m_index);
-				return *this;
-			}
+			//演算オペレータ
+			inline const reverse_iterator& operator++() const;
+			inline const reverse_iterator& operator--() const;
+			inline reverse_iterator& operator++();
+			inline reverse_iterator& operator--();
+			inline const reverse_iterator operator++(int) const;
+			inline const reverse_iterator operator--(int) const;
+			inline reverse_iterator operator++(int);
+			inline reverse_iterator operator--(int);
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+			inline const reverse_iterator& operator+=(const int rhs) const;
+			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+			inline const reverse_iterator& operator-=(const int rhs) const;
+			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator+=(const int rhs);
+			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+			inline reverse_iterator& operator-=(const int rhs);
+			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator+(const int rhs) const;
+			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
+			inline const reverse_iterator operator-(const int rhs) const;
+			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
+			inline reverse_iterator operator+(const int rhs);
+			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
+			inline reverse_iterator operator-(const int rhs);
+			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
+			inline int operator-(const reverse_iterator& rhs) const;
+		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
-			inline bool isExist() const { return m_index != INVALID_INDEX && m_index > 0; }
+			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
-			inline bool isEnabled() const { return m_index != INVALID_INDEX; }
+			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
-			inline bool isEnd() const { return m_index == 0; }//終端か？
-			inline index_type getIndex() const { return m_index - 1; }//インデックス
-			inline const value_type* getValue() const { return m_value; }//現在の値
-			inline value_type* getValue(){ return m_value; }//現在の値
+			inline bool isEnd() const;//終端か？
+			inline index_type getIndex() const;//インデックス
+			inline const value_type* getValue() const;//現在の値
+			inline value_type* getValue();//現在の値
 		private:
-			//メソッド
-			void update(const index_type index) const
-			{
-				//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
-				if (index > static_cast<index_type>(m_con->m_used))
-				{
-					m_index = INVALID_INDEX;
-					m_value = nullptr;
-				}
-				else
-				{
-					m_index = index;
-					m_value = const_cast<value_type*>(m_con->_ref_node(m_index)) - 1;
-				}
-			}
-			inline void addIndexAndUpdate(const int add) const
-			{
-				update(m_index - add);
-			}
+			//参照を更新
+			void update(const index_type index) const;
+			void addIndexAndUpdate(const int add) const;
 		public:
 			//ベースを取得
-			inline const_iterator base() const
-			{
-				iterator ite(*this);
-				return ite;
-			}
-			inline iterator base()
-			{
-				iterator ite(*this);
-				return ite;
-			}
+			inline const iterator base() const;
+			inline iterator base();
+		public:
+			//ムーブオペレータ
+			reverse_iterator& operator=(const reverse_iterator&& rhs);
+			reverse_iterator& operator=(const iterator&& rhs);
+			//コピーオペレータ
+			reverse_iterator& operator=(const reverse_iterator& rhs);
+			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			inline reverse_iterator(const_reverse_iterator&& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(obj.m_value)
-			{}
-			inline reverse_iterator(const_iterator&& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(nullptr)
-			{
-				update(m_index);
-			}
+			reverse_iterator(const reverse_iterator&& obj);
+			reverse_iterator(const iterator&& obj);
 			//コピーコンストラクタ
-			inline reverse_iterator(const_reverse_iterator& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(obj.m_value)
-			{}
-			inline reverse_iterator(const_iterator& obj) :
-				m_con(obj.m_con),
-				m_index(obj.m_index),
-				m_value(nullptr)
-			{
-				update(m_index);
-			}
+			reverse_iterator(const reverse_iterator& obj);
+			reverse_iterator(const iterator& obj);
 			//コンストラクタ
-			inline reverse_iterator(const container& con, const bool is_end) :
-				m_con(&con),
-				m_index(INVALID_INDEX),
-				m_value(nullptr)
-			{
-				if (!is_end)
-					update(m_con->m_used);//末尾データ
-				else
-					update(0);//先頭データ
-			}
+			reverse_iterator(const container& con, const bool is_end);
+			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
 				m_index(INVALID_INDEX),
@@ -942,26 +456,111 @@ namespace binary_heap
 			mutable index_type m_index;//現在のインデックス
 			mutable value_type* m_value;//現在の値
 		};
-	#endif
+	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	public:
 		//アクセッサ
-		inline const node_type* at(const int index) const { return ref_node(index); }
-		//inline node_type* at(const int index){ return ref_node(index); }//直接変更禁止
-		inline const node_type* operator[](const int index) const { return ref_node(index); }
-		//inline node_type* operator[](const int index){ return ref_node(index); }//直接変更禁止
+		//※at(), []()は、値のポインタを返し、例外を発生させない点に注意
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後でロックの取得と解放を行う必要がある
+		inline const node_type* at(const int index) const { return refNode(index); }
+		//inline node_type* at(const int index){ return refNode(index); }//直接変更禁止
+		inline const node_type* operator[](const int index) const { return refNode(index); }
+		//inline node_type* operator[](const int index){ return refNode(index); }//直接変更禁止
 		inline status_t status() const { return m_status; }
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
 		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
 	public:
-		//メソッド
+		//メソッド：ロック取得系
+		//単一ロック取得
+		inline GASHA_ unique_lock<lock_type> lockUnique(){ GASHA_ unique_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		//スコープロック取得
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//メソッド：イテレータ取得系
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後でロックの取得と解放を行う必要がある
+		//イテレータ取得
+		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
+		inline const iterator cend() const { iterator ite(*this, true); return ite; }
+		inline const iterator begin() const { iterator ite(*this, false); return ite; }
+		inline const iterator end() const { iterator ite(*this, true); return ite; }
+		inline iterator begin() { iterator ite(*this, false); return ite; }
+		inline iterator end() { iterator ite(*this, true); return ite; }
+	#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+		//リバースイテレータを取得
+		inline const reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
+		inline const reverse_iterator rbegin() const { reverse_iterator ite(*this, false); return ite; }
+		inline const reverse_iterator rend() const { reverse_iterator ite(*this, true); return ite; }
+		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
+		inline reverse_iterator rend() { reverse_iterator ite(*this, true); return ite; }
+	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	private:
+		//メソッド：要素アクセス系（独自拡張版）
+		//※範囲チェックなし（非公開）
+		inline const node_type* _refNode(const index_type index) const { return reinterpret_cast<const node_type*>(&m_table[index]); }//ノード参照
+		inline const node_type* _refTop() const { return _refNode(0); }//先頭ノード参照
+		inline const node_type* _refBottom() const { return _refNode(m_used - 1); }//終端ノード参照
+		inline const node_type* _refNew() const { return _refNode(m_used); }//新規ノード参照
+		inline node_type* _refNode(const index_type index){ return reinterpret_cast<node_type*>(&m_table[index]); }//ノード参照
+		inline node_type* _refTop(){ return _refNode(0); }//先頭ノード参照
+		inline node_type* _refBottom(){ return _refNode(m_used - 1); }//終端ノード参照
+		inline node_type* _refNew(){ return _refNode(m_used); }//新規ノード参照
+		//inline index_type _adjIndex(const index_type index) const { return index >= 0 && index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
+		inline index_type _adjIndex(const index_type index) const { return index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
+		inline index_type refIndex(const node_type* node) const{ return node - _refTop(); }//ノードをインデックスに変換 ※範囲チェックなし
+		inline index_type _calcParent(const index_type index) const { return binary_heap::calcParent(index); }//親インデックス計算 ※範囲チェックなし
+		inline index_type _calcChildL(const index_type index) const { return binary_heap::calcChildL(index); }//左側の子インデックス計算 ※範囲チェックなし
+		inline index_type _calcChildR(const index_type index) const { return binary_heap::calcChildR(index); }//右側の子インデックス計算 ※範囲チェックなし
+	public:
+		//メソッド：要素アクセス系（独自拡張版）
+		//※範囲チェックあり（公開）
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
+		//inline const node_type* refNode(const index_type index) const { return index >= 0 && index < m_used ? _refNode(index) : nullptr; }//ノード参照
+		inline const node_type* refNode(const index_type index) const { return index < m_used ? _refNode(index) : nullptr; }//ノード参照
+		inline const node_type* refTop() const { return m_used == 0 ? nullptr : _refTop(); }//先頭ノード参照
+		inline const node_type* refBottom() const { return m_used == 0 ? nullptr : _refBottom(); }//終端ノード参照
+		inline const node_type* refNew() const { return m_used == TABLE_SIZE ? nullptr : _refNew(); }//新規ノード参照
+		inline node_type* refNode(const index_type index){ return  const_cast<node_type*>(const_cast<const container*>(this)->refNode(index)); }//ノード参照
+		inline node_type* refTop(){ return const_cast<node_type*>(const_cast<const container*>(this)->refTop()); }//先頭ノード参照
+		inline node_type* refBottom(){ return const_cast<node_type*>(const_cast<const container*>(this)->refBottom()); }//終端ノード参照
+		inline node_type* refNew(){ return const_cast<node_type*>(const_cast<const container*>(this)->refNew()); }//新規ノード参照
+		inline index_type ref_index(const node_type* node) const{ return _adjIndex(refIndex(node)); }//ノードをインデックスに変換
+		inline index_type calcParent(const index_type index) const { return _adjIndex(_calcParent(index)); }//親インデックス計算
+		inline index_type calcChildL(const index_type index) const { return _adjIndex(_calcChildL(index)); }//左側の子インデックス計算
+		inline index_type calcChildR(const index_type index) const { return _adjIndex(_calcChildR(index)); }//右側の子インデックス計算
+		inline index_type calc_child(const int index, const bool is_right) const { return is_right ? calcChildR(index) : calcChildL(index); }//子インデックス計算
+		inline const node_type* ref_parent(const node_type* node) const { return refNode(_calcParent(refIndex(node))); }//親ノード参照
+		inline const node_type* refChildL(const node_type* node) const { return refNode(_calcChildL(refIndex(node))); }//左側の子ノード参照
+		inline const node_type* refChildR(const node_type* node) const { return refNode(_calcChildR(refIndex(node))); }//右側の子ノード参照
+		inline const node_type* refChild(const node_type* node, const bool is_right) const { return is_right ? refChildR(node) : refChildL(node); }//子ノード参照
+		inline node_type* ref_parent(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_parent(index)); }//親ノード参照
+		inline node_type* refChildL(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildL(index)); }//左側の子ノード参照
+		inline node_type* refChildR(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildR(index)); }//左側の子ノード参照
+		inline node_type* refChild(const index_type index, const bool is_right){ return const_cast<node_type*>(const_cast<const container*>(this)->refChild(index, is_right)); }//子ノード参照
+	public:
+		//メソッド：基本情報系
 		inline size_type max_size() const { return TABLE_SIZE; }//最大要素数を取得
 		inline size_type capacity() const { return TABLE_SIZE; }//最大要素数を取得
 		inline size_type size() const { return m_used; }//使用中の要素数を取得
 		inline size_type remain() const { return TABLE_SIZE - m_used; }//残りの要素数を取得
 		inline bool empty() const { return m_used == 0; }//空か？
 		inline bool full() const { return m_used == TABLE_SIZE; }//満杯か？
+	public:
+		//メソッド：要素アクセス系
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
+		inline const node_type* top() const { return refTop(); }//先頭ノード参照
+		inline node_type* top(){ return refTop(); }//先頭ノード参照
 	public:
 		int depth_max() const//最大の深さを取得
 		{
@@ -977,122 +576,12 @@ namespace binary_heap
 			return depth;
 		}
 	private:
-		inline const node_type* _ref_node(const index_type index) const { return reinterpret_cast<const node_type*>(&m_table[index]); }//ノード参照
-		inline const node_type* _ref_top() const { return _ref_node(0); }//先頭ノード参照
-		inline const node_type* _ref_bottom() const { return _ref_node(m_used - 1); }//終端ノード参照
-		inline const node_type* _ref_new() const { return _ref_node(m_used); }//新規ノード参照
-		inline node_type* _ref_node(const index_type index){ return reinterpret_cast<node_type*>(&m_table[index]); }//ノード参照
-		inline node_type* _ref_top(){ return _ref_node(0); }//先頭ノード参照
-		inline node_type* _ref_bottom(){ return _ref_node(m_used - 1); }//終端ノード参照
-		inline node_type* _ref_new(){ return _ref_node(m_used); }//新規ノード参照
-	public:
-		//inline const node_type* ref_node(const index_type index) const { return index >= 0 && index < m_used ? _ref_node(index) : nullptr; }//ノード参照
-		inline const node_type* ref_node(const index_type index) const { return index < m_used ? _ref_node(index) : nullptr; }//ノード参照
-		inline const node_type* ref_top() const { return m_used == 0 ? nullptr : _ref_top(); }//先頭ノード参照
-		inline const node_type* ref_bottom() const { return m_used == 0 ? nullptr : _ref_bottom(); }//終端ノード参照
-		inline const node_type* ref_new() const { return m_used == TABLE_SIZE ? nullptr : _ref_new(); }//新規ノード参照
-		inline node_type* ref_node(const index_type index){ return  const_cast<node_type*>(const_cast<const container*>(this)->ref_node(index)); }//ノード参照
-		inline node_type* ref_top(){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_top()); }//先頭ノード参照
-		inline node_type* ref_bottom(){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_bottom()); }//終端ノード参照
-		inline node_type* ref_new(){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_new()); }//新規ノード参照
-	private:
-		//inline index_type _adj_index(const index_type index) const { return index >= 0 && index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
-		inline index_type _adj_index(const index_type index) const { return index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
-		inline index_type _ref_index(const node_type* node) const{ return node - _ref_top(); }//ノードをインデックスに変換 ※範囲チェックなし
-		inline index_type _calc_parent(const index_type index) const { return binary_heap::calcParent(index); }//親インデックス計算 ※範囲チェックなし
-		inline index_type _calc_child_l(const index_type index) const { return binary_heap::calcChildL(index); }//左側の子インデックス計算 ※範囲チェックなし
-		inline index_type _calc_child_r(const index_type index) const { return binary_heap::calcChildR(index); }//右側の子インデックス計算 ※範囲チェックなし
-	public:
-		inline index_type ref_index(const node_type* node) const{ return _adj_index(_ref_index(node)); }//ノードをインデックスに変換
-		inline index_type calc_parent(const index_type index) const { return _adj_index(_calc_parent(index)); }//親インデックス計算
-		inline index_type calc_child_l(const index_type index) const { return _adj_index(_calc_child_l(index)); }//左側の子インデックス計算
-		inline index_type calc_child_r(const index_type index) const { return _adj_index(_calc_child_r(index)); }//右側の子インデックス計算
-		inline index_type calc_child(const int index, const bool is_right) const { return is_right ? calc_child_r(index) : calc_child_l(index); }//子インデックス計算
-		inline const node_type* ref_parent(const node_type* node) const { return ref_node(_calc_parent(_ref_index(node))); }//親ノード参照
-		inline const node_type* ref_child_l(const node_type* node) const { return ref_node(_calc_child_l(_ref_index(node))); }//左側の子ノード参照
-		inline const node_type* ref_child_r(const node_type* node) const { return ref_node(_calc_child_r(_ref_index(node))); }//右側の子ノード参照
-		inline const node_type* ref_child(const node_type* node, const bool is_right) const { return is_right ? ref_child_r(node) : ref_child_l(node); }//子ノード参照
-		inline node_type* ref_parent(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_parent(index)); }//親ノード参照
-		inline node_type* ref_child_l(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_child_l(index)); }//左側の子ノード参照
-		inline node_type* ref_child_r(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_child_r(index)); }//左側の子ノード参照
-		inline node_type* ref_child(const index_type index, const bool is_right){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_child(index, is_right)); }//子ノード参照
-	public:
-		inline const node_type* top() const { return ref_top(); }//先頭ノード参照
-		inline node_type* top(){ return ref_top(); }//先頭ノード参照
-		inline bool less(const node_type& lhs, const node_type& rhs) const { return ope_type::less(lhs, rhs); }//キー比較
-		//イテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_iterator cbegin() const
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline const_iterator cend() const
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-		inline const_iterator begin() const
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline const_iterator end() const
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-		inline iterator begin()
-		{
-			iterator ite(*this, false);
-			return ite;
-		}
-		inline iterator end()
-		{
-			iterator ite(*this, true);
-			return ite;
-		}
-		//リバースイテレータを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		inline const_reverse_iterator crbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline const_reverse_iterator crend() const
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-		inline const_reverse_iterator rbegin() const
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline const_reverse_iterator rend() const
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-		inline reverse_iterator rbegin()
-		{
-			reverse_iterator ite(*this, false);
-			return ite;
-		}
-		inline reverse_iterator rend()
-		{
-			reverse_iterator ite(*this, true);
-			return ite;
-		}
-	private:
 		//プッシュ（本体）：ムーブ
 		node_type* _pushCopying(const node_type&& src)
 		{
 			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 				return nullptr;
-			node_type* obj = ref_new();
+			node_type* obj = refNew();
 			if (!obj)
 				return nullptr;
 			*obj = std::move(src);
@@ -1104,7 +593,7 @@ namespace binary_heap
 		{
 			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 				return nullptr;
-			node_type* obj = ref_new();
+			node_type* obj = refNew();
 			if (!obj)
 				return nullptr;
 			*obj = src;
@@ -1157,7 +646,7 @@ namespace binary_heap
 		{
 			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 				return nullptr;
-			node_type* obj = ref_new();
+			node_type* obj = refNew();
 			if (!obj)
 				return nullptr;
 			obj = new(obj)node_type(args...);//コンストラクタ呼び出し
@@ -1184,7 +673,7 @@ namespace binary_heap
 		{
 			if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 				return nullptr;
-			node_type* obj = ref_new();
+			node_type* obj = refNew();
 			if (!obj)
 				return nullptr;
 			++m_used;
@@ -1252,7 +741,7 @@ namespace binary_heap
 		{
 			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 				return nullptr;
-			node_type* obj = ref_top();
+			node_type* obj = refTop();
 			if (obj)
 				m_status = POP_BEGINNING;
 			return obj;
@@ -1275,14 +764,14 @@ namespace binary_heap
 		{
 			if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
 				return false;
-			node_type* obj = ref_bottom();
+			node_type* obj = refBottom();
 			if (!obj)
 				return false;
 			ope_type::callDestructor(obj);//デストラクタ呼び出し
 			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 			m_status = POP_ENDED;
 			//根ノードがポップされたので、末端の葉ノードを根ノードに上書きした上で、それを下方に移動
-			node_type* top_obj = _ref_top();
+			node_type* top_obj = _refTop();
 			*top_obj = std::move(*obj);
 			--m_used;
 			downHeap(top_obj);
@@ -1328,7 +817,7 @@ namespace binary_heap
 		//　必ず呼び出し元でロックを取得すること！
 		node_type* upHeap(node_type* obj)
 		{
-			return binary_heap::upHeap<ope_type>(_ref_top(), m_used, obj, ope_type::less);
+			return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less);
 		}
 		//ノードを下方に移動
 		//※ロックを取得しないで処理するので注意！
@@ -1336,7 +825,7 @@ namespace binary_heap
 		//　必ず呼び出し元でロックを取得すること！
 		node_type* downHeap(node_type* obj)
 		{
-			return binary_heap::downHeap<ope_type>(_ref_top(), m_used, obj, ope_type::less);
+			return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less);
 		}
 	private:
 		//クリア（本体）
@@ -1344,8 +833,8 @@ namespace binary_heap
 		{
 			if (m_used == 0)
 				return;
-			node_type* obj_end = _ref_top() + m_used;
-			for (node_type* obj = _ref_top(); obj < obj_end; ++obj)
+			node_type* obj_end = _refTop() + m_used;
+			for (node_type* obj = _refTop(); obj < obj_end; ++obj)
 			{
 				ope_type::callDestructor(obj);//デストラクタ呼び出し
 				operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
@@ -1379,48 +868,7 @@ namespace binary_heap
 		status_t m_status;//ステータス
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-#if 1//std::input_iterator_tag には本来必要ではない
-	//イテレータのムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::const_reverse_iterator&& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
-	//イテレータのコピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::const_reverse_iterator& rhs)//GCCはOK, VC++はNG
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)//VC++もOK
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
-	//イテレータのムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::const_reverse_iterator&& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
-	{
-		update(m_index);
-	}
-	//イテレータのコピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::const_reverse_iterator& obj) ://GCCはOK, VC++はNG
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) ://VC++もOK
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
-	{
-		update(m_index);
-	}
-#endif
+	
 	//--------------------
 	//安全なプッシュ／ポップ操作クラス
 	//※操作状態を記憶し、デストラクタで必ず完了させる
@@ -1510,10 +958,10 @@ namespace binary_heap
 		container_type& m_container;//コンテナ
 		status_t m_status;//ステータス
 	};
+	
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
-#endif
 }//namespace binary_heap
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

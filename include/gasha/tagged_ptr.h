@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------------
 
 #include <cstddef>//std::size_t, std::uintptr_t
-#include <cstdint>//std::uint32_t, std::uint64_t
+#include <cstdint>//C++11 std::uint32_t, std::uint64_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

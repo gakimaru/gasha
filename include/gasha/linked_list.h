@@ -527,6 +527,9 @@ namespace linked_list
 		//アクセッサ
 	#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 		//※at(), []()は、ノードのポインタを返し、例外を発生させない点に注意
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const node_type* at(const index_type index) const
 		{
 			return getForwardNode<ope_type>(m_first, index);
@@ -551,12 +554,13 @@ namespace linked_list
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
-		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
 	public:
 		//メソッド：イテレータ取得系
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		//イテレータ取得
 		inline const iterator cbegin() const { iterator ite(*this, false); return ite; }
 		inline const iterator cend() const { iterator ite(*this, true); return ite; }
@@ -579,11 +583,14 @@ namespace linked_list
 		inline bool empty() const { return m_first == nullptr; }//空か？
 	public:
 		//メソッド：要素アクセス系
-		inline node_type* front(){ return m_first; }//先頭ノードを参照
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const node_type* front() const { return m_first; }//先頭ノードを参照
-		inline node_type*& firstRef(){ return m_first; }//先頭ノードの参照を取得
-		inline node_type* back(){ return m_last; }//末尾ノードを参照
 		inline const node_type* back() const { return m_last; }//末尾ノードを参照
+		inline node_type* front(){ return m_first; }//先頭ノードを参照
+		inline node_type* back(){ return m_last; }//末尾ノードを参照
+		inline node_type*& firstRef(){ return m_first; }//先頭ノードの参照を取得
 		inline node_type*& lastRef(){ return m_last; }//末尾ノードの参照を取得
 	public:
 		//追加／削除系

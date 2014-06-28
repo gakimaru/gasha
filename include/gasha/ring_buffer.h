@@ -32,7 +32,6 @@
 #include <gasha/search_basic.h>//探索処理基本
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
-//#include <cstdint>//std::intptr_t
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -441,6 +440,9 @@ namespace ring_buffer
 	public:
 		//アクセッサ
 		//※at(), []()は、std::dequeと異なり、値のポインタを返し、例外を発生させない点に注意
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const value_type* at(const int logical_index) const { return refElement(logical_index); }
 		inline value_type* at(const int logical_index){ return refElement(logical_index); }
 		inline const value_type* operator[](const int logical_index) const { return refElement(logical_index); }
@@ -463,8 +465,8 @@ namespace ring_buffer
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
-		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ shared_lock_guard<lock_type> lockSharedScoped(){ GASHA_ shared_lock_guard<lock_type> lock(*this); return lock; }
 	public:
 		//メソッド：イテレータ取得系
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
@@ -508,7 +510,9 @@ namespace ring_buffer
 	public:
 		//メソッド：要素アクセス系（独自拡張版）
 		//※範囲チェックあり（公開）
-		//※取扱い注意（コンテナアダプタ以外からの利用は非推奨）
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		//inline const value_type* refElement(const index_type logical_index) const { return logical_index >= 0 && logical_index < m_size ? _refElement(logical_index) : nullptr; }//要素参照
 		inline const value_type* refElement(const index_type logical_index) const { return logical_index < m_size ? _refElement(logical_index) : nullptr; }//要素参照
 		inline const value_type* refFront() const { return m_size == 0 ? nullptr : _refFront(); }//先頭要素参照
@@ -532,9 +536,12 @@ namespace ring_buffer
 		inline index_type offset() const { return m_offset; }//有効要素の先頭インデックス（オフセット）
 	public:
 		//メソッド：要素アクセス系
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const value_type* front() const { return refFront(); }//先頭要素参照
-		inline value_type* front(){ return refFront(); }//先頭要素参照
 		inline const value_type* back() const { return refBack(); }//末尾要素参照
+		inline value_type* front(){ return refFront(); }//先頭要素参照
 		inline value_type* back(){ return refBack(); }//末尾要素参照
 	public:
 		//配列の再割り当て

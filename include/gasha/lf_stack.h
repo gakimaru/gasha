@@ -28,7 +28,7 @@
 #include <gasha/basic_math.h>//基本算術：calcStaticMSB()
 
 #include <cstddef>//std::size_t
-#include <cstdint>//std::uint32_t
+#include <cstdint>//C++11 std::uint32_t, std::uint64_t
 #include <atomic>//C++11 std::atomic
 
 //【VC++】例外を無効化した状態で <functional> <bitset> をインクルードすると、warning C4530 が発生する

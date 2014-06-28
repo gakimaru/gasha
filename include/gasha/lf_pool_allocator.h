@@ -24,6 +24,7 @@
 //--------------------------------------------------------------------------------
 
 #include <cstddef>//std::size_t
+#include <cstdint>//++11 std::uint32_t
 #include <atomic>//C++11 std::atomic
 
 //【VC++】例外を無効化した状態で <functional> <bitset> をインクルードすると、warning C4530 が発生する
@@ -47,19 +48,20 @@ class lfPoolAllocator
 public:
 	//型
 	typedef T value_type;//値型
+	typedef std::uint32_t index_type;//インデックス型
 
 	//再利用プール型
 	struct recycable_t
 	{
-		std::atomic<std::size_t> m_next_index;//再利用プール連結インデックス
+		std::atomic<std::uint32_t> m_next_index;//再利用プール連結インデックス
 	};
 
 public:
 	//定数
 	static const std::size_t POOL_SIZE = _POOL_SIZE;//プールサイズ（プールする個数）
 	static const std::size_t VALUE_SIZE = sizeof(value_type);//値のサイズ
-	static const std::size_t INVALID_INDEX = 0xffffffff;//無効なインデックス
-	static const std::size_t DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
+	static const index_type INVALID_INDEX = 0xffffffff;//無効なインデックス
+	static const index_type DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
 
 public:
 	//メソッド
@@ -69,10 +71,10 @@ public:
 
 private:
 	//メモリ解放（共通処理）
-	bool free(void* p, const std::size_t index);
+	bool free(void* p, const index_type index);
 	
 	//ポインタをインデックスに変換
-	std::size_t ptrToIndex(void* p);
+	index_type ptrToIndex(void* p);
 
 public:
 	//メモリ解放
@@ -106,8 +108,8 @@ public:
 private:
 	//フィールド
 	char m_pool[POOL_SIZE][VALUE_SIZE];//プールバッファ ※先頭に配置してクラスのアライメントと一致させる
-	std::atomic<std::size_t> m_vacantHead;//空きプールの先頭インデックス
-	std::atomic<std::size_t> m_recyclableHead;//再利用プールの先頭インデックス
+	std::atomic<index_type> m_vacantHead;//空きプールの先頭インデックス
+	std::atomic<index_type> m_recyclableHead;//再利用プールの先頭インデックス
 	std::atomic<unsigned char> m_tag;//ABA問題対策用のタグ
 	std::atomic<char> m_using[POOL_SIZE];//使用中インデックス（二重解放判定＆保険の排他制御用）  ※std::bitset使用不可
 	//std::atomic<std::size_t> m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない

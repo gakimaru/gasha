@@ -57,7 +57,7 @@ template<class T, std::size_t _POOL_SIZE>
 template<typename ObjType>
 bool lfPoolAllocator<T, _POOL_SIZE>::deleteObj(ObjType* p)
 {
-	const std::size_t index = ptrToIndex(p);//ポインタをインデックスに変換
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;
 	p->~ObjType();//デストラクタ呼び出し

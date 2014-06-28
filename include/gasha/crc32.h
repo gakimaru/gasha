@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <cstddef>//std::size_t
-#include <cstdint>//std::int**_t
+#include <cstdint>//C++11 std::uint32_t
 
 #if defined(GASHA_USE_SSE4_2) && defined(GASHA_CRC32_IS_CRC32C)
 #define CALC_RUNTIME_CRC32_BY_SSE//ランタイムCRC32の算出にSSE命令を使用する（CRC-32Cを算出する）
