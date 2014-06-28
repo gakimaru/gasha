@@ -142,6 +142,24 @@ namespace priority_queue
 			}
 		};
 
+		//シーケンス番号をリセット
+		//※リセット後の値を返す
+		//※デフォルト
+		//※必要に応じて派生クラスで処理を変更する
+		inline static SEQ_TYPE resetSeqNo(SEQ_TYPE& seq_no)
+		{
+			seq_no = 0;
+			return seq_no;
+		}
+		//シーケンス番号をカウントアップ
+		//※カウントアップ前の値を返す
+		//※デフォルト
+		//※必要に応じて派生クラスで処理を変更する
+		inline static SEQ_TYPE countupSeqNo(SEQ_TYPE& seq_no)
+		{
+			return seq_no++;
+		}
+
 		//デストラクタ呼び出し
 		static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
 
@@ -234,32 +252,16 @@ namespace priority_queue
 		inline bool full() const { return m_container.full(); }//満杯か？
 	private:
 		//シーケンス番号発行
-		inline seq_type getNextSeqNo(){ return m_seqNo++; }
+		inline seq_type getNextSeqNo();
+		
 		//可能ならシーケンス番号をリセット
-		inline void checkAndResetSeqNo()
-		{
-			if (m_container.empty())
-				m_seqNo = 0;
-		}
+		void checkAndResetSeqNo();
 	private:
 		//エンキュー（本体）：ムーブ
-		node_type* _enqueueCopying(const node_type&& obj)
-		{
-			if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type obj_tmp(std::move(obj));//一時オブジェクトにムーブ
-			ope_type::setSeqNo(obj_tmp, getNextSeqNo());//シーケンス番号をセット
-			return m_container.pushCopying(std::move(obj_tmp));//コンテナにプッシュ（ムーブ）
-		}
+		node_type* _enqueueCopying(const node_type&& obj);
+		
 		//エンキュー（本体）：コピー
-		node_type* _enqueueCopying(const node_type& obj)
-		{
-			if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type obj_tmp(obj);//一時オブジェクトにコピー
-			ope_type::setSeqNo(obj_tmp, getNextSeqNo());//シーケンス番号をセット
-			return m_container.pushCopying(std::move(obj_tmp));//コンテナにプッシュ（ムーブ）
-		}
+		node_type* _enqueueCopying(const node_type& obj);
 	public:
 		//エンキュー
 		//※オブジェクト渡し
@@ -268,31 +270,12 @@ namespace priority_queue
 		//　（シーケンス番号をセットするために1回テンポラリにコピーし、プッシュ時にさらにコピーする。）
 		//※ムーブコンストラクタとムーブオペレータを使用してコピーする点に注意
 		//※処理中、ロックを取得する
-		inline node_type* enqueueCopying(const node_type&& obj)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _enqueueCopying(std::move(obj));
-		}
-		inline node_type* enqueueCopying(const node_type& obj)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _enqueueCopying(obj);
-		}
+		inline node_type* enqueueCopying(const node_type&& obj);
+		inline node_type* enqueueCopying(const node_type& obj);
 	private:
 		//エンキュー（本体）
 		template<typename... Tx>
-		node_type* _enqueue(const priority_type priority, Tx... args)
-		{
-			//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			//	return nullptr;
-			node_type* obj = m_container.pushBegin(args...);//コンテナにプッシュ開始
-			if (!obj)
-				return nullptr;
-			ope_type::setPriority(*obj, priority);//優先度を設定
-			ope_type::setSeqNo(*obj, getNextSeqNo());//シーケンス番号をセット
-			obj = m_container.pushEnd();//コンテナにプッシュ終了
-			return obj;
-		}
+		node_type* _enqueue(const priority_type priority, Tx... args);
 	public:
 		//エンキュー
 		//※パラメータ渡し
@@ -300,25 +283,11 @@ namespace priority_queue
 		//※オブジェクトには、シーケンス番号が書き込まれる
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		inline node_type* enqueue(const priority_type priority, Tx... args)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _enqueue(priority, args...);
-		}
+		node_type* enqueue(const priority_type priority, Tx... args);
 	private:
 		//エンキュー開始（本体）
 		template<typename... Tx>
-		node_type* _enqueueBegin(const priority_type priority, Tx... args)
-		{
-			//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			//	return nullptr;
-			node_type* obj = m_container.pushBegin(args...);//コンテナにプッシュ開始
-			if (!obj)
-				return nullptr;
-			ope_type::setPriority(*obj, priority);//優先度を設定
-			ope_type::setSeqNo(*obj, getNextSeqNo());//シーケンス番号を設定
-			return obj;
-		}
+		node_type* _enqueueBegin(const priority_type priority, Tx... args);
 	public:
 		//エンキュー開始
 		//※空きキュー取得
@@ -326,199 +295,81 @@ namespace priority_queue
 		//※この時点で、優先度とシーケンス番号が書き込まれる
 		//※処理が成功すると、ロックを取得した状態になる（enqueueEndで解放する）
 		template<typename... Tx>
-		inline node_type* enqueueBegin(const priority_type priority, Tx... args)
-		{
-			m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-			node_type* obj = _enqueueBegin(args...);//エンキュー開始
-			if (!obj)
-				m_lock.unlock();//プッシュ失敗時はロック解放
-			return obj;
-		}
+		node_type* enqueueBegin(const priority_type priority, Tx... args);
 	private:
 		//エンキュー終了（本体）
-		inline node_type* _enqueueEnd()
-		{
-			//if (m_container.status() != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			//	return;
-			return m_container.pushEnd();//コンテナにプッシュ終了
-		}
+		node_type* _enqueueEnd();
 	public:
 		//エンキュー終了
 		//※enqueueBeginで取得したロックを解放する
-		inline node_type* enqueueEnd()
-		{
-			const bool unlock = (m_container.status() == status_t::PUSH_BEGINNING);//プッシュ開始中ならアンロックする
-			node_type* new_obj = _enqueueEnd();//エンキュー終了
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return new_obj;
-		}
+		node_type* enqueueEnd();
 	private:
 		//エンキュー取り消し（本体）
-		inline bool _enqueueCancel()
-		{
-			//if (m_container.status() != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			//	return;
-			return m_container.pushCancel();//プッシュ取り消し
-		}
+		bool _enqueueCancel();
 	public:
 		//エンキュー取り消し
 		//※enqueueBeginで取得したロックを解放する
-		inline bool enqueueCancel()
-		{
-			const bool unlock = (m_container.status() == status_t::PUSH_BEGINNING);//プッシュ開始中ならアンロックする
-			const bool result = m_container.pushCancel();//プッシュ取り消し
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool enqueueCancel();
 	private:
 		//デキュー（本体）
-		bool _dequeueCopying(node_type& dst)
-		{
-			//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			//	return nullptr;
-			const bool result = m_container.popCopying(dst);//コンテナからポップ
-			if (!result)
-				return false;
-			checkAndResetSeqNo();//キューが空になったらシーケンス番号をリセットする
-			return true;
-		}
+		bool _dequeueCopying(node_type& dst);
 	public:
 		//デキュー
 		//※オブジェクトのコピーを受け取る領域を渡す
 		//※オブジェクトのデストラクタが呼び出される ※コピー後に実行
 		//※処理中、ロックを取得する
-		inline bool dequeueCopying(node_type& dst)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _dequeueCopying(dst);
-		}
+		inline bool dequeueCopying(node_type& dst);
 	private:
 		//デキュー開始（本体）
 		//※デキュー完了時に dequeueEnd を呼び出す必要あり
-		node_type* _dequeueBegin()
-		{
-			//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			//	return nullptr;
-			node_type* obj = m_container.popBegin();//コンテナからポップ開始
-			if (!obj)
-				return nullptr;
-			return obj;
-		}
+		node_type* _dequeueBegin();
 	public:
 		//デキュー開始
 		//※デキュー完了時に dequeueEnd を呼び出す必要あり
 		//※処理が成功すると、ロックを取得した状態になる（dequeueEndで解放する）
-		inline node_type* dequeueBegin()
-		{
-			m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-			node_type* obj = _dequeueBegin();//デキュー開始
-			if (!obj)
-				m_lock.unlock();//プッシュ失敗時はロック解放
-			return obj;
-		}
+		node_type* dequeueBegin();
 	private:
 		//デキュー終了（本体）
-		bool _dequeueEnd()
-		{
-			//if (m_container.status() != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			//	return false;
-			const bool result = m_container.popEnd();//コンテナからポップ終了
-			checkAndResetSeqNo();//キューが空になったらシーケンス番号をリセットする
-			return result;
-		}
+		bool _dequeueEnd();
 	public:
 		//デキュー終了
 		//※オブジェクトのデストラクタが呼び出される
 		//※dequeueBeginで取得したロックを解放する
-		inline bool dequeueEnd()
-		{
-			const bool unlock = (m_container.status() == status_t::POP_BEGINNING);//ポップ開始中ならアンロックする
-			const bool result = _dequeueEnd();//デキュー終了
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool dequeueEnd();
 	private:
 		//デキュー取り消し（本体）
-		bool _dequeueCancel()
-		{
-			//if (m_container.status() != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			//	return false;
-			return m_container.popCancel();//ポップ取り消し
-		}
+		bool _dequeueCancel();
 	public:
 		//デキュー取り消し
 		//※dequeueBeginで取得したロックを解放する
-		inline bool dequeueCancel()
-		{
-			const bool unlock = (m_container.status() == status_t::POP_BEGINNING);//ポップ開始中ならアンロックする
-			const bool result = _dequeueCancel();//デキュー取り消し
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool dequeueCancel();
 		//先頭（根）キューを参照
 		//※デキューしない
-		inline const node_type* top() const
-		{
-			return m_container.top();//コンテナの先頭（根）ノードを取得
-		}
+		const node_type* top() const;
 	private:
 		//先頭（根）キューのプライオリティ変更（本体）
-		node_type* _changePriorityOnTop(const priority_type priority)
-		{
-			node_type* obj = m_container.top();
-			if (!obj)
-				return nullptr;
-			ope_type::setPriority(*obj, priority);//優先度を更新
-			ope_type::setSeqNo(*obj, getNextSeqNo());//シーケンス番号を更新
-			return m_container.downHeap(obj);//ダウンヒープ
-		}
+		node_type* _changePriorityOnTop(const priority_type priority);
 	public:
 		//先頭（根）キューのプライオリティ変更
 		//※プライオリティを変更した時点でキューの位置が入れ替わる
 		//※シーケンス番号を再更新する
 		//※同じプライオリティに変更した場合、同じプライオリティのキューの一番最後に回される
 		//※処理中、ロックを取得する
-		inline node_type* changePriorityOnTop(const priority_type priority)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _changePriorityOnTop(priority);
-		}
+		inline node_type* changePriorityOnTop(const priority_type priority);
 		//※ロックなし版（top()参照～プライオリティ変更までを任意にロックするならこちらを使用する）
-		inline node_type* changePriorityOnTopWithoutLock(const priority_type priority)
-		{
-			return _changePriorityOnTop(priority);
-		}
+		inline node_type* changePriorityOnTopWithoutLock(const priority_type priority);
 	private:
 		//クリア（本体）
-		inline void _clear()
-		{
-			m_container.clear();
-		}
+		void _clear();
 	public:
 		//クリア
 		//※処理中、ロックを取得する
-		inline void clear()
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			_clear();
-		}
+		inline void clear();
 	public:
 		//コンストラクタ
-		container_adapter() :
-			m_container(),
-			m_seqNo(0),
-			m_lock()
-		{}
+		inline container_adapter();
 		//デストラクタ
-		~container_adapter()
-		{
-			enqueueCancel();//エンキュー取り消し
-			dequeueCancel();//デキュー取り消し
-		}
+		~container_adapter();
 	private:
 		//フィールド
 		container_type m_container;//コンテナ
@@ -538,79 +389,39 @@ namespace priority_queue
 		typedef CON container_adapter_type;//コンテナアダプター型
 		typedef typename CON::node_type node_type;//ノード型
 		typedef typename CON::status_t status_t;//ステータス型
+		typedef typename CON::priority_type priority_type;//優先度型
+		//typedef typename CON::seq_type seq_type;//シーケンス番号型
 	public:
 		//アクセッサ
 		status_t status() const { return m_status; }//ステータスを取得
 	public:
 		//エンキュー開始
 		template<typename... Tx>
-		node_type* enqueueBegin(const typename CON::priority_type priority, Tx... args)
-		{
-			if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* node = m_containerAdapter.enqueueBegin(priority, args...);//エンキュー開始
-			if (node)
-				m_status = status_t::PUSH_BEGINNING;//ステータス変更
-			return node;
-		}
+		node_type* enqueueBegin(const priority_type priority, Tx... args);
+		
 		//エンキュー終了
-		node_type* enqueueEnd()
-		{
-			if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return nullptr;
-			node_type* node = m_containerAdapter.enqueueEnd();//エンキュー終了
-			m_status = status_t::PUSH_ENDED;//ステータス変更
-			return node;
-		}
+		node_type* enqueueEnd();
+		
 		//エンキュー取り消し
-		bool enqueueCancel()
-		{
-			if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return nullptr;
-			m_containerAdapter.enqueueCancel();//エンキュー取り消し
-			m_status = status_t::PUSH_CANCELLED;//ステータス変更
-			return true;
-		}
+		bool enqueueCancel();
+		
 		//デキュー開始
-		node_type* dequeueBegin()
-		{
-			if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* node = m_containerAdapter.dequeueBegin();//デキュー開始
-			if (node)
-				m_status = status_t::POP_BEGINNING;//ステータス変更
-			return node;
-		}
+		node_type* dequeueBegin();
+		
 		//デキュー終了
-		bool dequeueEnd()
-		{
-			if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			const bool result = m_containerAdapter.dequeueEnd();//デキュー終了
-			m_status = status_t::POP_ENDED;//ステータス変更
-			return result;
-		}
+		bool dequeueEnd();
+		
 		//デキュー取り消し
-		bool dequeueCancel()
-		{
-			if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			m_containerAdapter.dequeueCancel();//デキュー取り消し
-			m_status = status_t::POP_CANCELLED;//ステータス変更
-			return true;
-		}
+		bool dequeueCancel();
 	public:
 		//コンストラクタ
-		operation_guard(container_adapter_type& container_adapter) :
-			m_containerAdapter(container_adapter),
-			m_status(status_t::IDLE)
-		{}
+		inline operation_guard(container_adapter_type& container_adapter);
+		
+		//デフォルトコンストラクタ
+		operation_guard() = delete;
+
 		//デストラクタ
-		~operation_guard()
-		{
-			enqueueEnd();//エンキュー終了
-			dequeueEnd();//デキュー終了
-		}
+		~operation_guard();
 	private:
 		//フィールド
 		container_adapter_type& m_containerAdapter;//コンテナアダプタ

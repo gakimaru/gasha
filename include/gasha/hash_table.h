@@ -657,380 +657,143 @@ namespace hash_table
 		inline int getUsingCount() const { return m_usingCount; }//使用中データ数を取得
 		inline int getDeletedCount() const { return m_deletedCount; }//削除済みデータ数を取得
 		inline int getMaxFindingCycle() const { return m_maxFindingCycle; }//検索時の最大巡回回数を取得
-		int getNotOptimizedCount() const//最適化されていないデータ件数を取得 ※検索の際に2回以上の巡回が必要なデータ = 本来のインデックスと実際のインデックスが異なるデータ
-		{
-			int count = 0;
-			for (index_type index = 0; index < TABLE_SIZE; ++index)
-			{
-				if (!m_using[index] || m_deleted[index])
-					continue;
-				if (index != calcIndex(m_keyTable[index]))
-					++count;
-			}
-			return count;
-		}
+		int getNotOptimizedCount() const;//最適化されていないデータ件数を取得 ※検索の際に2回以上の巡回が必要なデータ = 本来のインデックスと実際のインデックスが異なるデータ
 	public:
 		//メソッド：インデックス計算
-		inline index_type calcIndexStep(const key_type key) const { return INDEX_STEP_BASE - key % INDEX_STEP_BASE; }//キーからインデックスの歩幅（第二ハッシュ）を計算
-		inline index_type calcIndex(const key_type key) const { return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key); }//キーからインデックス（第一ハッシュ）を計算
-		inline index_type calcNextIndex(const key_type key, const index_type index) const { return (index + calcIndexStep(key)) % TABLE_SIZE; }//次のインデックスを計算（指定のインデックスに歩幅を加算）
+		inline index_type calcIndexStep(const key_type key) const;//キーからインデックスの歩幅（第二ハッシュ）を計算
+		inline index_type calcIndex(const key_type key) const;//キーからインデックス（第一ハッシュ）を計算
+		inline index_type calcNextIndex(const key_type key, const index_type index) const;//次のインデックスを計算（指定のインデックスに歩幅を加算）
 	public:
 		//メソッド：インデックスを取得
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		index_type getFirstIndex() const
-		{
-			if (m_usingCount == 0 || m_deletedCount == m_usingCount)
-				return INVALID_INDEX;
-			for (index_type index = 0; index < TABLE_SIZE; ++index)
-			{
-				if (m_using[index])
-					return index;
-			}
-			return INVALID_INDEX;
-		}
-		index_type getLastIndex() const
-		{
-			if (m_usingCount == 0 || m_deletedCount == m_usingCount)
-				return INVALID_INDEX;
-			for (index_type index = TABLE_SIZE; index > 0; --index)
-			{
-				if (m_using[index - 1])
-					return index - 1;
-			}
-			return INVALID_INDEX;
-		}
-		index_type getNextIndex(const index_type index) const
-		{
-			index_type next_index = index == INVALID_INDEX ? 0 : index + 1;
-			if (index < 0 || index >= TABLE_SIZE - 1 || m_usingCount == 0 || m_deletedCount == m_usingCount)
-				return INVALID_INDEX;
-			for (; next_index < TABLE_SIZE; ++next_index)
-			{
-				if (m_using[next_index])
-					return next_index;
-			}
-			return INVALID_INDEX;
-		}
-		index_type getPrevIndex(const index_type index) const
-		{
-			index_type now_index = index == INVALID_INDEX ? TABLE_SIZE : index;
-			if (index <= 0 || index >= TABLE_SIZE || m_usingCount == 0 || m_deletedCount == m_usingCount)
-				return INVALID_INDEX;
-			for (; now_index > 0; --now_index)
-			{
-				if (m_using[now_index - 1])
-					return now_index - 1;
-			}
-			return INVALID_INDEX;
-		}
+		index_type getFirstIndex() const;
+		index_type getLastIndex() const;
+		index_type getNextIndex(const index_type index) const;
+		index_type getPrevIndex(const index_type index) const;
 	private:
 		//キーで検索してインデックスを取得（共通）
-		index_type _findIndexCommon(const key_type key) const
-		{
-			if (m_usingCount == 0 || m_deletedCount == m_usingCount)
-				return INVALID_INDEX;
-			const index_type index_first = calcIndex(key);//キーからインデックス（ハッシュ）を計算
-			index_type index = index_first;
-			do
-			{
-				if (!m_using[index])//未使用インデックスなら検索失敗
-					break;
-				if (!m_deleted[index] && m_keyTable[index] == key)//キーが一致するインデックスなら検索成功
-					return index;
-				index = calcNextIndex(key, index);//次のインデックスへ
-			} while (index != index_first);//最初のインデックスに戻ったら終了（検索失敗）
-			return INVALID_INDEX;
-		}
+		index_type _findIndexCommon(const key_type key) const;
 		//キーで検索してインデックスを取得
-		inline index_type _findIndex(const key_type key) const{ return _findIndexCommon(key); }
-		inline index_type _findIndex(const char* key) const{ return _findIndexCommon(calcCRC32(key)); }
-		inline index_type _findIndex(const std::string& key) const{ return _findIndexCommon(key.c_str()); }
-		inline index_type _findIndex(const value_type& value) const{ return _findIndexCommon(ope_type::getKey(value)); }
+		inline index_type _findIndex(const key_type key) const;
+		inline index_type _findIndex(const char* key) const;
+		inline index_type _findIndex(const std::string& key) const;
+		inline index_type _findIndex(const value_type& value) const;
 	private:
 		//キーで検索して値を取得（本体）
-		inline const value_type* _findValue(const key_type key) const
-		{
-			const index_type index = _findIndex(key);//検索してインデックスを取得
-			if (index == INVALID_INDEX)
-				return nullptr;
-			return reinterpret_cast<const value_type*>(&m_table[index]);
-		}
+		const value_type* _findValue(const key_type key) const;
 	public:
 		//キーで検索して値を取得
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline const value_type* findValue(const key_type key) const { return _findValue(key); }
-		inline const value_type* findValue(const char* key) const { return _findValue(calcCRC32(key)); }
-		inline const value_type* findValue(const std::string& key) const { return _findValue(key.c_str()); }
-		inline const value_type* findValue(const value_type& value) const { return _findValue(ope_type::getKey(value)); }
-		inline value_type* findValue(const key_type key){ return const_cast<value_type*>(_findValue(key)); }
-		inline value_type* findValue(const char* key){ return const_cast<value_type*>(_findValue(calcCRC32(key))); }
-		inline value_type* findValue(const std::string& key){ return const_cast<value_type*>(_findValue(key.c_str())); }
-		inline value_type* findValue(const value_type& value){ return const_cast<value_type*>(_findValue(ope_type::getKey(value))); }
+		inline const value_type* findValue(const key_type key) const;
+		inline const value_type* findValue(const char* key) const;
+		inline const value_type* findValue(const std::string& key) const;
+		inline const value_type* findValue(const value_type& value) const;
+		inline value_type* findValue(const key_type key);
+		inline value_type* findValue(const char* key);
+		inline value_type* findValue(const std::string& key);
+		inline value_type* findValue(const value_type& value);
 	public:
 		//キーで検索してイテレータを取得
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		const iterator find(const key_type key) const
-		{
-			const index_type index = _findIndex(key);
-			if (index == INVALID_INDEX)
-				return iterator(*this, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false);
-			return iterator(*this, index, m_keyTable[index], reinterpret_cast<const value_type*>(m_table[index]), m_deleted[index]);
-		}
-		inline const iterator find(const char* key) const { return find(calcCRC32(key)); }
-		inline const iterator find(const std::string& key) const { return find(key.c_str()); }
-		inline const iterator find(const value_type& value) const { return find(ope_type::getKey(value)); }
-		inline iterator find(const key_type key){ return const_cast<const container*>(this)->find(key); }
-		inline iterator find(const char* key){ return const_cast<const container*>(this)->find(key); }
-		inline iterator find(const std::string& key){ return const_cast<const container*>(this)->find(key); }
-		inline iterator find(const value_type value){ return const_cast<const container*>(this)->find(value); }
+		const iterator find(const key_type key) const;
+		inline const iterator find(const char* key) const;
+		inline const iterator find(const std::string& key) const;
+		inline const iterator find(const value_type& value) const;
+		inline iterator find(const key_type key);
+		inline iterator find(const char* key);
+		inline iterator find(const std::string& key);
+		inline iterator find(const value_type value);
 	private:
 		//キー割り当て（本体）
 		//※割り当てた配列要素（データテーブル）のポインタを返す
-		value_type* _assign(const key_type key)
-		{
-			if (m_usingCount == TABLE_SIZE && m_deletedCount == 0)
-				return nullptr;
-			index_type index = _findIndexCommon(key);
-			if (ope_type::REPLACE_ATTR == ope_type::NEVER_REPLACE && index != INVALID_INDEX)//同じキーが既に割り当て済みなら割り当て失敗
-				return nullptr;
-			int find_cycle = 0;
-			if (index != INVALID_INDEX)
-			{
-				//置換
-				_eraseByIndex(index);//デストラクタの呼び出しあり
-			}
-			else
-			{
-				//新規登録
-				const index_type index_first = calcIndex(key);//キーからインデックス（ハッシュ）を計算
-				index = index_first;
-				do
-				{
-					++find_cycle;
-					if (!m_using[index] || m_deleted[index])//未使用／削除済みインデックスなら割り当て成功
-						break;
-					if (FINDING_CYCLE_LIMIT > 0 && find_cycle == FINDING_CYCLE_LIMIT)//巡回回数が制限に達したら割り当て失敗
-						return nullptr;
-					index = calcNextIndex(key, index);//次のインデックスへ
-				} while (index != index_first);//最初のインデックスに戻ったら終了（割り当て失敗）
-			}
-			m_keyTable[index] = key;//キーテーブルにキー登録
-			if (!m_using[index])//未使用インデックスの割り当てなら使用中数を調整
-			{
-				m_using[index] = true;//使用中フラグをセット
-				++m_usingCount;//使用中数をカウントアップ
-			}
-			if (m_deleted[index])//削除済みインデックスの再割り当てなら削除数を調整
-			{
-				m_deleted[index] = false;//削除済みフラグをリセット
-				--m_deletedCount;//削除済み数をカウントダウン
-			}
-			m_maxFindingCycle = m_maxFindingCycle >= find_cycle ? m_maxFindingCycle : find_cycle;//最大巡回回数を更新
-			return reinterpret_cast<value_type*>(&m_table[index]);
-		}
+		value_type* _assign(const key_type key);
 	public:
 		//キー割り当て
 		//※割り当てた配列要素（データテーブル）のポインタを返す
 		//※処理中、排他ロック（ライトロック）を取得する
-		inline value_type* assign(const key_type key)
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			return _assign(key);
-		}
-		inline value_type* assign(const char* key){ return assign(calcCRC32(key)); }
-		inline value_type* assign(const std::string& key){ return assign(key.c_str()); }
-		inline value_type* assign(const value_type& value){ return assign(ope_type::getKey(value)); }
+		inline value_type* assign(const key_type key);
+		inline value_type* assign(const char* key);
+		inline value_type* assign(const std::string& key);
+		inline value_type* assign(const value_type& value);
 	private:
 		//キー割り当てして値を挿入（コピー）（本体）
 		//※オブジェクトのコピーが発生する点に注意
-		value_type* _insert(const key_type key, const value_type& value)
-		{
-			value_type* assigned_value = _assign(key);
-			if (!assigned_value)
-				return nullptr;
-			*assigned_value = value;
-			return assigned_value;
-		}
+		value_type* _insert(const key_type key, const value_type& value);
 	public:
 		//キー割り当てして値を挿入（コピー）
 		//※オブジェクトのコピーが発生する点に注意
 		//※処理中、排他ロック（ライトロック）を取得する
-		inline value_type* insert(const key_type key, const value_type& value)
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			return _insert(key, value);
-		}
-		inline value_type* insert(const char* key, const value_type& value){ return insert(calcCRC32(key), value); }
-		inline value_type* insert(const std::string& key, const value_type& value){ return insert(key.c_str(), value); }
+		inline value_type* insert(const key_type key, const value_type& value);
+		inline value_type* insert(const char* key, const value_type& value);
+		inline value_type* insert(const std::string& key, const value_type& value);
+		
 		//値を挿入（コピー）し、キーは自動割り当て
 		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
 		//※オブジェクトのコピーが発生する点に注意
-		inline value_type* insertAuto(const value_type& value){ return insert(ope_type::getKey(value), value); }
+		inline value_type* insertAuto(const value_type& value);
 	private:
 		//キー割り当てして値を初期化（本体）
 		//※コンストラクタが呼び出される
 		template<typename... Tx>
-		value_type* _emplace(const key_type key, Tx... args)//const Tx&... args とも書ける
-		{
-			value_type* assigned_value = _assign(key);
-			if (!assigned_value)
-				return nullptr;
-			assigned_value = new(assigned_value) value_type(args...);//コンストラクタ呼び出し
-			return assigned_value;
-		}
+		value_type* _emplace(const key_type key, Tx... args);
 	public:
 		//キー割り当てして値を初期化
 		//※コンストラクタが呼び出される
 		//※処理中、排他ロック（ライトロック）を取得する
 		template<typename... Tx>
-		inline value_type* emplace(const key_type key, Tx... args)//const Tx&... args とも書ける
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			return _emplace(key, args...);
-		}
+		inline value_type* emplace(const key_type key, Tx... args);
 		template<typename... Tx>
-		inline value_type* emplace(const char* key, Tx... args){ return emplace(calcCRC32(key), args...); }
+		inline value_type* emplace(const char* key, Tx... args);
 		template<typename... Tx>
-		inline value_type* emplace(const std::string& key, Tx... args){ return emplace(key.c_str(), args...); }
+		inline value_type* emplace(const std::string& key, Tx... args);
+		
 		//値を初期化して自動的にキー割り当て
 		//※オブジェクトのコピーが発生する点に注意
 		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
 		//※処理中、ライトロックを取得する
 		template<typename... Tx>
-		inline value_type* emplaceAuto(Tx... args)
-		{
-			value_type value(args...);
-			return insertAuto(value);
-		}
+		inline value_type* emplaceAuto(Tx... args);
 	private:
 		//インデックスを指定して削除
-		void _eraseByIndex(const index_type index)
-		{
-			value_type* data_p = reinterpret_cast<value_type*>(&m_table[index]);
-			ope_type::callDestructor(data_p);//デストラクタ呼び出し
-			operator delete(data_p, data_p);//（作法として）deleteオペレータ呼び出し
-			m_deleted[index] = true;//削除済みインデックスを更新
-			++m_deletedCount;//削除済み数をカウントアップ
-		}
+		void _eraseByIndex(const index_type index);
+		
 		//キーを削除（本体）
-		bool _erase(const key_type key)
-		{
-			const index_type index = _findIndex(key);//検索してインデックスを取得
-			if (index == INVALID_INDEX)//検索失敗なら削除失敗
-				return false;
-			_eraseByIndex(index);
-			if (m_usingCount == m_deletedCount || m_deletedCount == AUTO_REHASH_SIZE)//自動リハッシュ
-				_rehash();
-			return true;
-		}
+		bool _erase(const key_type key);
 	public:
 		//キーを削除
 		//※処理中、排他ロック（ライトロック）を取得する
-		inline bool erase(const key_type key)
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			return _erase(key);
-		}
-		inline bool erase(const char* key){ return erase(calcCRC32(key)); }
-		inline bool erase(const std::string& key){ return erase(key.c_str()); }
+		inline bool erase(const key_type key);
+		inline bool erase(const char* key);
+		inline bool erase(const std::string& key);
 		//キーを削除
 		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
-		inline bool eraseAuto(const value_type& value){ return erase(ope_type::getKey(value)); }
+		inline bool eraseAuto(const value_type& value);
 	private:
 		//リハッシュ（本体）
-		bool _rehash()
-		{
-			if (m_usingCount == 0 || m_deletedCount == 0)
-				return false;
-			if (m_usingCount == m_deletedCount)
-			{
-				_clear();
-				return true;
-			}
-			m_maxFindingCycle = 1;//最大巡回回数を1にリセット
-			//値の移動
-			for (index_type index = 0; index < TABLE_SIZE; ++index)
-			{
-				if (!m_using[index] || m_deleted[index])//未使用インデックスまたは削除済みインデックスは処理をスキップ
-					continue;
-				const key_type key = m_keyTable[index];//キーを取得
-				if (calcIndex(key) == index)//キーが本来のインデックスと異なる場合、移動を試みる
-					continue;
-				value_type* value = reinterpret_cast<value_type*>(m_table[index]);//現在の値を記憶
-				m_deleted[index] = true;//一旦削除済みにする
-				++m_deletedCount;       //（同上）
-				value_type* value_new = _assign(key);//改めてキーを割り当て
-				if (value_new != value)//インデックスが違っていたなら値を移動
-				{
-				#if 1
-					*value_new = std::move(*value);//ムーブ演算子で移動
-				#else
-					memcpy(value_new, value, sizeof(value_type));//memcpyで移動
-				#endif
-				}
-			}
-			//削除済みインデックスのクリア
-			for (index_type index = 0; index < TABLE_SIZE; ++index)
-			{
-				if (!m_using[index] || !m_deleted[index])//未使用インデックスまたは未削除インデックスは処理をスキップ
-					continue;
-				m_deleted[index] = false;//削除済みを解消する
-				--m_deletedCount;       //（同上）
-				m_using[index] = false;//使用中を解消する
-				--m_usingCount;        //（同上）
-			}
-			return true;
-		}
+		bool _rehash();
 	public:
 		//リハッシュ
 		//※テーブルを拡大・再構築するのではなく、削除済みデータを完全に削除するだけ。
 		//　そのために、削除済みデータの位置に移動可能なデータを移動する。
 		//※処理中、排他ロック（ライトロック）を取得する
-		inline bool rehash()
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			return _rehash();
-		}
+		inline bool rehash();
 	private:
 		//クリア（本体）
-		void _clear()
-		{
-			for (index_type index = 0; index < TABLE_SIZE; ++index)
-			{
-				if (m_using[index] && !m_deleted[index])//使用中データはデストラクタ呼び出し
-					_eraseByIndex(index);
-			}
-			m_using.reset();
-			m_deleted.reset();
-			m_usingCount = 0;
-			m_deletedCount = 0;
-			m_maxFindingCycle = 0;
-		}
+		void _clear();
 	public:
 		//クリア
 		//※処理中、排他ロック（ライトロック）を取得する
-		inline void clear()
-		{
-			lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-			_clear();
-		}
+		inline void clear();
 	public:
-		//コンストラクタ
-		container() :
-			m_using(),
-			m_deleted(),
-			m_usingCount(0),
-			m_deletedCount(0),
-			m_maxFindingCycle(0)
-		{}
+		//デフォルトコンストラクタ
+		inline container();
 		//デストラクタ
-		~container()
-		{}
+		~container();
 	private:
 		unsigned char m_table[TABLE_SIZE][sizeof(value_type)];//データテーブル（バケット）
 		key_type m_keyTable[TABLE_SIZE];//キーテーブル

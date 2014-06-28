@@ -550,80 +550,24 @@ namespace ring_buffer
 		//※要素の初期化は行わない（必要なら size に 0 を指定して、後で resize() を呼び出す）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		template<size_type N>
-		inline void assignArray(value_type(&array)[N], const int size = 0)
-		{
-			assignArray(array, N, size);
-		}
+		template<std::size_t N>
+		inline void assignArray(value_type(&array)[N], const int size = 0);
 		//※ポインタと配列要素数指定版
-		void assignArray(value_type* array, const size_type max_size, const int size = 0)
-		{
-			if (m_array && m_autoClearAttr == AUTO_CLEAR)
-				clear();//クリア
-			m_array = array;
-			m_maxSize = max_size;
-			m_size = size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size);
-			m_offset = 0;
-		}
+		void assignArray(value_type* array, const size_type max_size, const int size = 0);
 		//※voidポインタとバッファサイズ数指定版
-		void assignArray(void* buff_ptr, const size_type buff_size, const int size = 0)
-		{
-			assignArray(static_cast<value_type*>(buff_ptr), buff_size / sizeof(value_type), size);
-		}
+		inline void assignArray(void* buff_ptr, const size_type buff_size, const int size = 0);
+		
 		//使用中のサイズを変更（新しいサイズを返す）
 		//※新しい要素にはnew_valueをセットし、削除された要素はデストラクタを呼び出す
 		//※最大要素数を超えるサイズにはできない
 		//※指定数が -1 なら最大要素数に変更
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		size_type resize(const int size, const value_type& new_value)
-		{
-			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-			if (_size > m_size)
-			{
-				for (index_type index = m_size; index < _size; ++index)
-				{
-					value_type* value = _refElement(index);
-					*value = new_value;//新しい値を初期化
-				}
-			}
-			else if (_size < m_size)
-			{
-				for (index_type index = _size; index < m_size; ++index)
-				{
-					value_type* value = _refElement(index);
-					ope_type::callDestructor(value);//デストラクタ呼び出し
-					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-				}
-			}
-			m_size = _size;
-			return m_size;
-		}
+		size_type resize(const int size, const value_type& new_value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		size_type resize(const int size, Tx... args)
-		{
-			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-			if (_size > m_size)
-			{
-				for (index_type index = m_size; index < _size; ++index)
-				{
-					value_type* value = _refElement(index);
-					new(value)value_type(args...);//コンストラクタ呼び出し
-				}
-			}
-			else if (_size < m_size)
-			{
-				for (index_type index = size; index < m_size; ++index)
-				{
-					value_type* value = _refElement(index);
-					ope_type::callDestructor(value);//デストラクタ呼び出し
-					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-				}
-			}
-			m_size = _size;
-			return m_size;
-		}
+		size_type resize(const int size, Tx... args);
+		
 		//使用中のサイズを変更（新しいサイズを返す）
 		//※新しい値の代入も削除された要素のデストラクタ呼び出しも行わず、
 		//　使用中のサイズだけを変更する
@@ -631,253 +575,78 @@ namespace ring_buffer
 		//※指定数が -1 なら最大要素数に変更
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		size_type resizeSilently(const int size)
-		{
-			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-			m_size = _size;
-			return m_size;
-		}
+		size_type resizeSilently(const int size);
+		
 		//先頭から指定数の要素にデータを割り当てる
 		//※new_valueで要素を上書きする
 		//※既存の要素を上書きする際は、コピーオペレータを使用（デストラクタは呼び出さない）
 		//※指定数が -1 なら最大素数を対象にする
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		size_type assign(const int size, const value_type& new_value)
-		{
-			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-			//{
-			//	const size_type used_size = _size < m_size ? _size : m_size;
-			//	for (index_type index = 0; index < used_size; ++index)
-			//	{
-			//		value_type* value = _refElement(index);
-			//		ope_type::callDestructor(value);//デストラクタ呼び出し
-			//		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-			//	}
-			//}
-			{
-				for (index_type index = 0; index < _size; ++index)
-				{
-					value_type* value = _refElement(index);
-					*value = new_value;//データを上書き
-				}
-			}
-			if(m_size < _size)
-				m_size = _size;
-			return m_size;
-		}
+		size_type assign(const int size, const value_type& new_value);
 		//※コンストラクタ呼び出し版
 		//※既存の要素を上書きする際は、先にデストラクタを呼び出す
 		template<typename... Tx>
-		size_type assign(const int size, Tx... args)
-		{
-			const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-			{
-				const size_type used_size = _size < m_size ? _size : m_size;
-				for (index_type index = 0; index < used_size; ++index)
-				{
-					value_type* value = _refElement(index);
-					ope_type::callDestructor(value);//デストラクタ呼び出し
-					operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-				}
-			}
-			{
-				for (index_type index = 0; index < _size; ++index)
-				{
-					value_type* value = _refElement(index);
-					new(value)value_type(args...);//コンストラクタ呼び出し
-				}
-			}
-			if (m_size < _size)
-				m_size = _size;
-			return m_size;
-		}
+		size_type assign(const int size, Tx... args);
+		
 		//先頭に要素を追加
 		//※オブジェクト渡し
 		//※オブジェクトのコピーが発生する点に注意（少し遅くなる）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline value_type* push_front(const value_type&& src)//ムーブ版
-		{
-			value_type* obj = refFrontNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			*obj = std::move(src);
-			++m_size;
-			m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
-			return obj;
-		}
-		inline value_type* push_front(const value_type& src)//コピー版
-		{
-			value_type* obj = refFrontNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			*obj = src;
-			++m_size;
-			m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
-			return obj;
-		}
+		value_type* push_front(const value_type&& src);//ムーブ版
+		value_type* push_front(const value_type& src);//コピー版
+		
 		//先頭に要素を追加
 		//※パラメータ渡し
 		//※オブジェクトのコンストラクタが呼び出される
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		template<typename... Tx>
-		value_type* push_front(Tx... args)
-		{
-			value_type* obj = refFrontNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			new(obj)value_type(args...);//コンストラクタ呼び出し
-			++m_size;
-			m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
-			return obj;
-		}
+		value_type* push_front(Tx... args);
+		
 		//末尾に要素を追加
 		//※オブジェクト渡し
 		//※オブジェクトのコピーが発生する点に注意（少し遅くなる）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline value_type* push_back(const value_type&& src)//ムーブ版
-		{
-			value_type* obj = refBackNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			*obj = std::move(src);
-			++m_size;
-			return obj;
-		}
-		inline value_type* push_back(const value_type& src)//コピー版
-		{
-			value_type* obj = refBackNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			*obj = src;
-			++m_size;
-			return obj;
-		}
+		value_type* push_back(const value_type&& src);//ムーブ版
+		value_type* push_back(const value_type& src);//コピー版
+		
 		//末尾に要素を追加
 		//※パラメータ渡し
 		//※オブジェクトのコンストラクタが呼び出される
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		template<typename... Tx>
-		value_type* push_back(Tx... args)
-		{
-			value_type* obj = refBackNew();//サイズチェック含む
-			if (!obj)
-				return nullptr;
-			new(obj)value_type(args...);//コンストラクタ呼び出し
-			++m_size;
-			return obj;
-		}
+		value_type* push_back(Tx... args);
+		
 		//先頭の要素を削除
 		//※オブジェクトのデストラクタが呼び出される
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		bool pop_front()
-		{
-			if (m_size == 0)
-				return false;
-			value_type* value = const_cast<value_type*>(refFront());
-			ope_type::callDestructor(value);//デストラクタ呼び出し
-			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-			--m_size;
-			m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
-			return true;
-		}
+		bool pop_front();
 		//※オブジェクトの値を受け取る
-		bool pop_front(value_type& value)
-		{
-			if (m_size == 0)
-				return false;
-			value_type* obj = const_cast<value_type*>(refFront());
-			value = std::move(*obj);//ムーブ
-			ope_type::callDestructor(obj);//デストラクタ呼び出し
-			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
-			--m_size;
-			m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
-			return true;
-		}
+		bool pop_front(value_type& value);
+		
 		//末尾の要素を削除
 		//※オブジェクトのデストラクタが呼び出される
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		bool pop_back()
-		{
-			if (m_size == 0)
-				return false;
-			value_type* value = const_cast<value_type*>(refFront());
-			ope_type::callDestructor(value);//デストラクタ呼び出し
-			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-			--m_size;
-			return true;
-		}
+		bool pop_back();
 		//※オブジェクトの値を受け取る
-		bool pop_back(value_type& value)
-		{
-			if (m_size == 0)
-				return false;
-			value_type* obj = const_cast<value_type*>(refBack());
-			value = std::move(*obj);//ムーブ
-			ope_type::callDestructor(obj);//デストラクタ呼び出し
-			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
-			--m_size;
-			return true;
-		}
+		bool pop_back(value_type& value);
 	public:
 		//クリア
 		//※デストラクタを呼び出す
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline void clear()
-		{
-			if (m_size == 0)
-				return;
-			for (size_type i = 0; i < m_size; ++i)
-			{
-				value_type* value = _refElement(i);
-				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-			}
-			m_size = 0;
-			m_offset = 0;
-		}
+		inline void clear();
 	private:
 		//要素の移動（昇順）
-		void moveAsc(const index_type dst_pos, const index_type src_pos, const size_type num)
-		{
-			index_type _dst_pos = dst_pos;
-			index_type _src_pos = src_pos;
-			for (size_type i = 0; i < num; ++i)
-			{
-				value_type* dst = _refElement(_dst_pos);
-				value_type* src = _refElement(_src_pos);
-				if (_dst_pos >= m_size)
-					new(dst)value_type(std::move(*src));//ムーブコンストラクタ
-				else
-					*dst = std::move(*src);//ムーブオペレータ
-				++_dst_pos;
-				++_src_pos;
-			}
-		}
+		void moveAsc(const index_type dst_pos, const index_type src_pos, const size_type num);
 		//要素の移動（降順）
-		void moveDesc(const index_type dst_pos, const index_type src_pos, const size_type num)
-		{
-			index_type _dst_pos = dst_pos + num - 1;
-			index_type _src_pos = src_pos + num - 1;
-			for (size_type i = 0; i < num; ++i)
-			{
-				value_type* dst = _refElement(_dst_pos);
-				value_type* src = _refElement(_src_pos);
-				if (_dst_pos >= m_size)
-					new(dst)value_type(std::move(*src));//ムーブコンストラクタ
-				else
-					*dst = std::move(*src);//ムーブオペレータ
-				--_dst_pos;
-				--_src_pos;
-			}
-		}
+		void moveDesc(const index_type dst_pos, const index_type src_pos, const size_type num);
 	public:
 		//要素の挿入
 		//※numの挿入によって最大要素数を超える場合は、可能なサイズに縮小して返す
@@ -885,82 +654,13 @@ namespace ring_buffer
 		//※指定数が -1 なら可能な限りの数を挿入
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		iterator insert(iterator pos, const int num, value_type& value)
-		{
-			if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
-			{
-				iterator ite(*this, INVALID_INDEX);
-				return ite;
-			}
-			index_type index = pos.getIndex();
-			const size_type remain = m_maxSize - m_size;
-			const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
-			//移動
-			moveDesc(index + _num, index, _num);
-			//要素数変更
-			m_size += _num;
-			//挿入
-			index_type _index = index;
-			for (size_type i = 0; i < _num; ++i)
-			{
-				value_type* new_value = _refElement(_index);
-				*new_value = value;
-				++_index;
-			}
-			//終了
-			iterator now(*this, index);
-			return now;
-		}
+		iterator insert(iterator pos, const int num, value_type& value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		iterator insert(iterator pos, const int num, Tx... args)
-		{
-			if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
-			{
-				iterator ite(*this, INVALID_INDEX);
-				return ite;
-			}
-			index_type index = pos.getIndex();
-			const size_type remain = m_maxSize - m_size;
-			const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
-			const size_type move_num = m_size - index;
-			//移動
-			moveDesc(index + _num, index, move_num);
-			//要素数変更
-			m_size += _num;
-			//挿入
-			index_type _index = index;
-			for (size_type i = 0; i < _num; ++i)
-			{
-				value_type* new_value = _refElement(_index);
-				new(new_value)value_type(args...);
-				++_index;
-			}
-			//終了
-			iterator now(*this, index);
-			return now;
-		}
+		iterator insert(iterator pos, const int num, Tx... args);
 	private:
 		//要素の削除
-		void _erase(const index_type index, const size_type num)
-		{
-			const size_type remain = m_maxSize - m_size;
-			const size_type _num = num < 0 || num > remain ? remain : num;
-			const size_type move_num = m_size - index;
-			//削除
-			index_type _index = index;
-			for (size_type i = 0; i < _num; ++i)
-			{
-				value_type* delete_value = _refElement(_index);
-				ope_type::callDestructor(delete_value);//デストラクタ呼び出し
-				operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
-				++_index;
-			}
-			//移動
-			moveAsc(index, index + _num, move_num);
-			//要素数変更
-			m_size -= _num;
-		}
+		void _erase(const index_type index, const size_type num);
 	public:
 		//要素の削除
 		//※デストラクタを呼び出す
@@ -968,82 +668,38 @@ namespace ring_buffer
 		//※指定数が -1 なら以降の全要素を削除
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		iterator erase(iterator pos, const int num = 1)
-		{
-			if (pos.isNotExist() || num == 0 || m_size == 0)
-			{
-				iterator ite(*this, INVALID_INDEX);
-				return ite;
-			}
-			const index_type index = pos.getIndex();
-			//削除
-			_erase(index, num);
-			//終了
-			iterator now(*this, index);
-			return now;
-		}
+		iterator erase(iterator pos, const int num = 1);
 		//※範囲指定版
-		iterator erase(iterator start, iterator end)
-		{
-			if (start.isNotExist() || end.isNotExist() || start >= end || m_size == 0)
-			{
-				iterator ite(*this, INVALID_INDEX);
-				return ite;
-			}
-			index_type index = start.getIndex();
-			index_type end_index = end.getIndex();
-			const size_type num = end_index - index;
-			//削除
-			_erase(index, num);
-			//終了
-			iterator now(*this, index);
-			return now;
-		}
+		iterator erase(iterator start, iterator end);
 	public:
 		//ソート
-		//※シェルソートを使用
+		//※イントロソートを使用
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void sort()
-		{
-			GASHA_ iteratorIntroSort(begin(), end(), typename ope_type::predicateForSort());
-		}
+		inline void sort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void sort(PREDICATE predicate)
-		{
-			GASHA_ iteratorIntroSort(begin(), end(), predicate);
-		}
+		inline void sort(PREDICATE predicate);
+		
 		//安定ソート
 		//※挿入ソートを使用
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stableSort()
-		{
-			GASHA_ iteratorInsertionSort(begin(), end(), typename ope_type::predicateForSort());
-		}
+		inline void stableSort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stableSort(PREDICATE predicate)
-		{
-			GASHA_ iteratorInsertionSort(begin(), end(), predicate);
-		}
+		inline void stableSort(PREDICATE predicate);
+		
 		//ソート済み状態チェック
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		bool isOrdered() const
-		{
-			return GASHA_ iteratorIsOrdered(begin(), end(), typename ope_type::predicateForSort());
-		}
+		inline bool isOrdered() const;
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool isOrdered(PREDICATE predicate) const
-		{
-			return GASHA_ iteratorIsOrdered(begin(), end(), predicate);
-		}
+		inline bool isOrdered(PREDICATE predicate) const;
 	public:
 		//線形探索
 		//※探索値指定版
@@ -1051,95 +707,43 @@ namespace ring_buffer
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value)
-		{
-			iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, typename ope_type::predicateForFind());
-			return found;
-		}
+		inline iterator findValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate)
-		{
-			iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, predicate);
-			return found;
-		}
+		inline iterator findValue(const V& value, PREDICATE predicate);
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate)
-		{
-			iterator found = GASHA_ iteratorLinearSearch(begin(), end(), predicate);
-			return found;
-		}
+		inline iterator find(PREDICATE predicate);
+		
 		//二分探索
 		//※探索値指定版
 		//※ope_type::comparisonForSearch() を使用して探索（標準では、データ型の operator==() と operator<() に従って探索）
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binarySearchValue(const V& value)
-		{
-			iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
-			return found;
-		}
+		inline iterator binarySearchValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison)
-		{
-			iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, comparison);
-			return found;
-		}
+		inline iterator binarySearchValue(const V& value, COMPARISON comparison);
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison)
-		{
-			iterator found = GASHA_ iteratorBinarySearch(begin(), end(), comparison);
-			return found;
-		}
+		inline iterator binary_search(COMPARISON comparison);
 	public:
 		//コンストラクタ
 		//※初期状態で使用中の要素数を指定する（-1で全要素を使用中にする）
 		//※要素の初期化は行わない（必要なら size に 0 を指定して、後で resize() を呼び出す）
-		template<size_type N>
-		container(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
-			m_array(array),
-			m_maxSize(N),
-			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
-			m_offset(0),
-			m_autoClearAttr(auto_clear_attr)
-		{}
+		template<std::size_t N>
+		container(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR);
 		//※ポインタと配列要素数指定版
-		container(value_type* array, const size_type max_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
-			m_array(array),
-			m_maxSize(max_size),
-			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
-			m_offset(0),
-			m_autoClearAttr(auto_clear_attr)
-		{}
+		container(value_type* array, const size_type max_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR);
 		//※voidポインタとバッファサイズ数指定版
-		container(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
-			m_array(static_cast<value_type*>(buff_ptr)),
-			m_maxSize(buff_size / sizeof(value_type)),
-			m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
-			m_offset(0),
-			m_autoClearAttr(auto_clear_attr)
-		{}
+		container(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR);
 		//デフォルトコンストラクタ
-		container() :
-			m_array(nullptr),
-			m_maxSize(0),
-			m_size(0),
-			m_offset(0),
-			m_autoClearAttr(NEVER_CLEAR)
-		{}
+		inline container();
 		//デストラクタ
-		~container()
-		{
-			//自動クリア属性が有効なら、自動クリアする
-			if (m_array && m_autoClearAttr == AUTO_CLEAR)
-				clear();
-		}
+		~container();
 	private:
 		//フィールド
 		value_type* m_array;//配列の先頭

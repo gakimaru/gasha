@@ -431,14 +431,36 @@ namespace singly_linked_list
 
 	//----------------------------------------
 	//コンテナ本体のメソッド
-
-	//配列の再割り当て
-	//※ポインタと配列要素数指定版
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::assignArray(value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size)
-//	{
-//	}
 	
+	//全ノードをクリア
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::clear()
+	{
+		node_type* first = m_first;
+		m_first = nullptr;
+		m_last = nullptr;
+		return first;
+	}
+
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(const container&& con) :
+		m_first(con.m_first),
+		m_last(con.m_last)
+	{}
+	
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(const container& con) :
+		m_first(con.m_first),
+		m_last(con.m_last)
+	{}
+	
+	//デストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::~container()
+	{}
+
 }//namespace singly_linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

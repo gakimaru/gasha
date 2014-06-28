@@ -572,12 +572,123 @@ namespace binary_heap
 		return binary_heap::calcChildR(index);
 	}
 
-	//配列の再割り当て
-//	template<class OPE_TYPE>
-//	template<std::size_t N>
-//	inline void container<OPE_TYPE>::assignArray(typename container<OPE_TYPE>::value_type(&array)[N], const int size)
-//	{
-//	}
+	//プッシュ
+	//※オブジェクト渡し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)//ムーブ
+	{
+		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
+		return _pushCopying(std::move(src));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type& src)//コピー
+	{
+		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
+		return _pushCopying(src);
+	}
+
+	//プッシュ（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_push(Tx... args)
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* obj = pushBegin(args...);
+		if (!obj)
+			return nullptr;
+		return pushEnd();
+	}
+
+	//プッシュ
+	//※パラメータ渡し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::push(Tx... args)
+	{
+		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
+		return _push(args...);
+	}
+
+	//プッシュ開始（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushBegin(Tx... args)
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* obj = refNew();
+		if (!obj)
+			return nullptr;
+		obj = new(obj)node_type(args...);//コンストラクタ呼び出し
+		if (obj)
+			m_status = PUSH_BEGINNING;
+		return obj;
+	}
+
+	//プッシュ開始
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushBegin(Tx... args)
+	{
+		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
+		node_type* obj = _pushBegin(args...);//プッシュ開始
+		if (!obj)
+			m_lock.unlock();//プッシュ失敗時はロック解放
+		return obj;
+	}
+
+	//ポップ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::popCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type& dst)
+	{
+		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
+		return _popCopying(dst);
+	}
+
+	//ノードを上方に移動
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::upHeap(typename container<OPE_TYPE, _TABLE_SIZE>::node_type* obj)
+	{
+		return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
+	}
+
+	//ノードを下方に移動
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::downHeap(typename container<OPE_TYPE, _TABLE_SIZE>::node_type* obj)
+	{
+		return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
+	}
+
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline container<OPE_TYPE, _TABLE_SIZE>::container() :
+		m_used(0),
+		m_status(IDLE)
+	{}
+
+	//--------------------
+	//安全なプッシュ／ポップ操作クラス
+
+	//プッシュ開始
+	template<class CON>
+	template<typename... Tx>
+	typename operation_guard<CON>::node_type* operation_guard<CON>::pushBegin(Tx... args)
+	{
+		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* node = m_container.pushBegin(args...);//プッシュ開始
+		if (node)
+			m_status = status_t::PUSH_BEGINNING;//ステータス変更
+		return node;
+	}
+
+	//コンストラクタ
+	template<class CON>
+	inline operation_guard<CON>::operation_guard(typename operation_guard<CON>::container_type& container) :
+		m_container(container),
+		m_status(status_t::IDLE)
+	{}
 
 }//namespace binary_heap
 

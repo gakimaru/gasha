@@ -667,29 +667,29 @@ namespace dynamic_array
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void sort();
+		inline void sort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void sort(PREDICATE predicate);
+		inline void sort(PREDICATE predicate);
 		
 		//安定ソート
 		//※挿入ソートを使用
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stableSort();
+		inline void stableSort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stableSort(PREDICATE predicate);
+		inline void stableSort(PREDICATE predicate);
 		
 		//ソート済み状態チェック
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		bool isOrdered() const;
+		inline bool isOrdered() const;
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool isOrdered(PREDICATE predicate) const;
+		inline bool isOrdered(PREDICATE predicate) const;
 	
 	public:
 		//線形探索
@@ -733,13 +733,7 @@ namespace dynamic_array
 		//※voidポインタとバッファサイズ数指定版
 		container(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR);
 		//デフォルトコンストラクタ
-		inline container() :
-			m_array(nullptr),
-			m_maxSizeReal(0),
-			m_maxSize(0),
-			m_size(0),
-			m_autoClearAttr(NEVER_CLEAR)
-		{}
+		inline container();
 		//デストラクタ
 		~container();
 	

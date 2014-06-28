@@ -516,13 +516,49 @@ namespace rb_tree
 	//----------------------------------------
 	//コンテナ本体のメソッド
 
-	//配列の再割り当て
-	//※ポインタと配列要素数指定版
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::assignArray(value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size)
-//	{
-//	}
+	//全ノードをクリア
+	//※根ノードを返す
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::clear()
+	{
+		node_type* root = m_root;
+		m_root = nullptr;
+		return root;
+	}
+		
+	//キーが一致する範囲を返す
+	template<class OPE_TYPE>
+	const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::_equal_range(const typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key) const
+	{
+		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, FOR_MATCH));
+		while (ite.m_value && ope_type::getKey(*ite) == key)
+			++ite;
+		return ite;
+	}
 	
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(const container&& con) :
+		m_root(con.m_root)
+	{}
+	
+	//コピーコンストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(const container& con) :
+		m_root(con.m_root)
+	{}
+	
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline container<OPE_TYPE>::container() :
+		m_root(nullptr)
+	{}
+	
+	//デストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::~container()
+	{}
+
 }//namespace rb_tree
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

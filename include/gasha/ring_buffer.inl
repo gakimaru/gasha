@@ -460,9 +460,6 @@ namespace ring_buffer
 	//----------------------------------------
 	//コンテナ本体のメソッド
 
-	//メソッド：要素アクセス系
-	//※範囲チェックなし
-
 	//論理インデックスを物理インデックスに変換
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_toRealIndex(const typename container<OPE_TYPE>::index_type logical_index) const
@@ -491,11 +488,250 @@ namespace ring_buffer
 	}
 	
 	//配列の再割り当て
-//	template<class OPE_TYPE>
-//	template<std::size_t N>
-//	inline void container<OPE_TYPE>::assignArray(typename container<OPE_TYPE>::value_type(&array)[N], const int size)
-//	{
-//	}
+	template<class OPE_TYPE>
+	template<std::size_t N>
+	inline void container<OPE_TYPE>::assignArray(typename container<OPE_TYPE>::value_type(&array)[N], const int size)
+	{
+		assignArray(array, N, size);
+	}
+	//※voidポインタとバッファサイズ数指定版
+	template<class OPE_TYPE>
+	inline void container<OPE_TYPE>::assignArray(void* buff_ptr, const typename container<OPE_TYPE>::size_type buff_size, const int size)
+	{
+		assignArray(static_cast<value_type*>(buff_ptr), buff_size / sizeof(value_type), size);
+	}
+
+	//使用中のサイズを変更（新しいサイズを返す）
+	//※コンストラクタ呼び出し版
+	template<class OPE_TYPE>
+	template<typename... Tx>
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, Tx... args)
+	{
+		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
+		if (_size > m_size)
+		{
+			for (index_type index = m_size; index < _size; ++index)
+			{
+				value_type* value = _refElement(index);
+				new(value)value_type(args...);//コンストラクタ呼び出し
+			}
+		}
+		else if (_size < m_size)
+		{
+			for (index_type index = size; index < m_size; ++index)
+			{
+				value_type* value = _refElement(index);
+				ope_type::callDestructor(value);//デストラクタ呼び出し
+				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			}
+		}
+		m_size = _size;
+		return m_size;
+	}
+
+	//先頭から指定数の要素にデータを割り当てる
+	//※コンストラクタ呼び出し版
+	template<class OPE_TYPE>
+	template<typename... Tx>
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, Tx... args)
+	{
+		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
+		{
+			const size_type used_size = _size < m_size ? _size : m_size;
+			for (index_type index = 0; index < used_size; ++index)
+			{
+				value_type* value = _refElement(index);
+				ope_type::callDestructor(value);//デストラクタ呼び出し
+				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			}
+		}
+		{
+			for (index_type index = 0; index < _size; ++index)
+			{
+				value_type* value = _refElement(index);
+				new(value)value_type(args...);//コンストラクタ呼び出し
+			}
+		}
+		if (m_size < _size)
+			m_size = _size;
+		return m_size;
+	}
+
+	//先頭に要素を追加
+	//※パラメータ渡し
+	template<class OPE_TYPE>
+	template<typename... Tx>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(Tx... args)
+	{
+		value_type* obj = refFrontNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		new(obj)value_type(args...);//コンストラクタ呼び出し
+		++m_size;
+		m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
+		return obj;
+	}
+
+	//末尾に要素を追加
+	//※パラメータ渡し
+	template<class OPE_TYPE>
+	template<typename... Tx>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(Tx... args)
+	{
+		value_type* obj = refBackNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		new(obj)value_type(args...);//コンストラクタ呼び出し
+		++m_size;
+		return obj;
+	}
+
+	//要素の挿入
+	//※コンストラクタ呼び出し版
+	template<class OPE_TYPE>
+	template<typename... Tx>
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, Tx... args)
+	{
+		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
+		{
+			iterator ite(*this, INVALID_INDEX);
+			return ite;
+		}
+		index_type index = pos.getIndex();
+		const size_type remain = m_maxSize - m_size;
+		const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
+		const size_type move_num = m_size - index;
+		//移動
+		moveDesc(index + _num, index, move_num);
+		//要素数変更
+		m_size += _num;
+		//挿入
+		index_type _index = index;
+		for (size_type i = 0; i < _num; ++i)
+		{
+			value_type* new_value = _refElement(_index);
+			new(new_value)value_type(args...);
+			++_index;
+		}
+		//終了
+		iterator now(*this, index);
+		return now;
+	}
+
+	//ソート
+	template<class OPE_TYPE>
+	inline void container<OPE_TYPE>::sort()
+	{
+		GASHA_ iteratorIntroSort(begin(), end(), typename ope_type::predicateForSort());
+	}
+	//※プレディケート関数指定版
+	template<class OPE_TYPE>
+	template<class PREDICATE>
+	inline void container<OPE_TYPE>::sort(PREDICATE predicate)
+	{
+		GASHA_ iteratorIntroSort(begin(), end(), predicate);
+	}
+
+	//安定ソート
+	template<class OPE_TYPE>
+	inline void container<OPE_TYPE>::stableSort()
+	{
+		GASHA_ iteratorInsertionSort(begin(), end(), typename ope_type::predicateForSort());
+	}
+	//※プレディケート関数指定版
+	template<class OPE_TYPE>
+	template<class PREDICATE>
+	inline void container<OPE_TYPE>::stableSort(PREDICATE predicate)
+	{
+		GASHA_ iteratorInsertionSort(begin(), end(), predicate);
+	}
+
+	//ソート済み状態チェック
+	template<class OPE_TYPE>
+	inline bool container<OPE_TYPE>::isOrdered() const
+	{
+		return GASHA_ iteratorIsOrdered(begin(), end(), typename ope_type::predicateForSort());
+	}
+	//※プレディケート関数指定版
+	template<class OPE_TYPE>
+	template<class PREDICATE>
+	inline bool container<OPE_TYPE>::isOrdered(PREDICATE predicate) const
+	{
+		return GASHA_ iteratorIsOrdered(begin(), end(), predicate);
+	}
+
+	//線形探索
+	//※探索値指定版
+	template<class OPE_TYPE>
+	template<typename V>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
+	{
+		iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, typename ope_type::predicateForFind());
+		return found;
+	}
+	//※比較関数＋値指定版
+	template<class OPE_TYPE>
+	template<typename V, class PREDICATE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
+	{
+		iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, predicate);
+		return found;
+	}
+	//※比較関数指定版
+	template<class OPE_TYPE>
+	template<class PREDICATE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
+	{
+		iterator found = GASHA_ iteratorLinearSearch(begin(), end(), predicate);
+		return found;
+	}
+
+	//二分探索
+	//※探索値指定版
+	template<class OPE_TYPE>
+	template<typename V>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
+	{
+		iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
+		return found;
+	}
+	//※比較関数＋値指定版
+	template<class OPE_TYPE>
+	template<typename V, class COMPARISON>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
+	{
+		iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, comparison);
+		return found;
+	}
+	//※比較関数指定版
+	template<class OPE_TYPE>
+	template<class COMPARISON>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
+	{
+		iterator found = GASHA_ iteratorBinarySearch(begin(), end(), comparison);
+		return found;
+	}
+
+	//コンストラクタ
+	template<class OPE_TYPE>
+	template<std::size_t N>
+	container<OPE_TYPE>::container(typename container<OPE_TYPE>::value_type(&array)[N], const int size, const autoClearAttr_t auto_clear_attr) :
+		m_array(array),
+		m_maxSize(N),
+		m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
+		m_offset(0),
+		m_autoClearAttr(auto_clear_attr)
+	{}
+
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline container<OPE_TYPE>::container() :
+		m_array(nullptr),
+		m_maxSize(0),
+		m_size(0),
+		m_offset(0),
+		m_autoClearAttr(NEVER_CLEAR)
+	{}
 
 }//namespace ring_buffer
 

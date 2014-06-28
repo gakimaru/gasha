@@ -236,13 +236,284 @@ namespace binary_heap
 	//----------------------------------------
 	//コンテナ本体のメソッド
 
-	//配列の再割り当て
-	//※ポインタと配列要素数指定版
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::assignArray(value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size)
-//	{
-//	}
+	//最大の深さを取得
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	int container<OPE_TYPE, _TABLE_SIZE>::depth_max() const
+	{
+		if (m_used == 0)
+			return -1;
+		int depth = 0;
+		int used = m_used >> 1;
+		while (used != 0)
+		{
+			++depth;
+			used >>= 1;
+		}
+		return depth;
+	}
+		
+	//プッシュ（本体）：ムーブ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* obj = refNew();
+		if (!obj)
+			return nullptr;
+		*obj = std::move(src);
+		m_status = PUSH_BEGINNING;
+		return pushEnd();
+	}
 	
+	//プッシュ（本体）：コピー
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type& src)
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* obj = refNew();
+		if (!obj)
+			return nullptr;
+		*obj = src;
+		m_status = PUSH_BEGINNING;
+		return pushEnd();
+	}
+		
+	//プッシュ終了（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushEnd()
+	{
+		if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return nullptr;
+		node_type* obj = refNew();
+		if (!obj)
+			return nullptr;
+		++m_used;
+		m_status = PUSH_ENDED;
+		//末端の葉ノードとして登録された新規ノードを上方に移動
+		return upHeap(obj);
+	}
+		
+	//プッシュ終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushEnd()
+	{
+		const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
+		node_type* new_obj = _pushEnd();//プッシュ終了
+		if (unlock)
+			m_lock.unlock();//ロック解放
+		return new_obj;
+	}
+		
+	//プッシュ取り消し（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::_pushCancel()
+	{
+		if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return false;
+		m_status = PUSH_CANCELLED;
+		return true;
+	}
+		
+	//プッシュ取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::pushCancel()
+	{
+		const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
+		const bool result = _pushCancel();//プッシュ取り消し
+		if (unlock)
+			m_lock.unlock();//ロック解放
+		return result;
+	}
+	
+	//ポップ（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::_popCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type& dst)
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return false;
+		const node_type* obj = popBegin();
+		if (!obj)
+			return false;
+		dst = *obj;
+		return popEnd();
+	}
+	
+	//ポップ開始（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_popBegin()
+	{
+		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* obj = refTop();
+		if (obj)
+			m_status = POP_BEGINNING;
+		return obj;
+	}
+	
+	//ポップ開始
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::popBegin()
+	{
+		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
+		node_type* obj = _popBegin();//ポップ開始
+		if (!obj)
+			m_lock.unlock();//プッシュ失敗時はロック解放
+		return obj;
+	}
+	
+	//ポップ終了（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::_popEnd()
+	{
+		if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		node_type* obj = refBottom();
+		if (!obj)
+			return false;
+		ope_type::callDestructor(obj);//デストラクタ呼び出し
+		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		m_status = POP_ENDED;
+		//根ノードがポップされたので、末端の葉ノードを根ノードに上書きした上で、それを下方に移動
+		node_type* top_obj = _refTop();
+		*top_obj = std::move(*obj);
+		--m_used;
+		downHeap(top_obj);
+		return true;
+	}
+	
+	//ポップ終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::popEnd()
+	{
+		const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
+		const bool result = _popEnd();//ポップ終了
+		if (unlock)
+			m_lock.unlock();//ロック解放
+		return result;
+	}
+	
+	//ポップ取り消し（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::_popCancel()
+	{
+		if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		m_status = POP_CANCELLED;
+		return true;
+	}
+	
+	//ポップ取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::popCancel()
+	{
+		const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
+		const bool result = _popCancel();//ポップ取り消し
+		if (unlock)
+			m_lock.unlock();//ロック解放
+		return result;
+	}
+	
+	//クリア（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	void container<OPE_TYPE, _TABLE_SIZE>::_clear()
+	{
+		if (m_used == 0)
+			return;
+		node_type* obj_end = _refTop() + m_used;
+		for (node_type* obj = _refTop(); obj < obj_end; ++obj)
+		{
+			ope_type::callDestructor(obj);//デストラクタ呼び出し
+			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		}
+		m_used = 0;
+	}
+	
+	//クリア
+	//※処理中、ロックを取得する
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline void container<OPE_TYPE, _TABLE_SIZE>::clear()
+	{
+		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
+		_clear();
+	}
+
+	//デストラクタ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	container<OPE_TYPE, _TABLE_SIZE>::~container()
+	{
+		pushCancel();//プッシュ取り消し
+		popCancel();//ポップ取り消し
+	}
+
+	//--------------------
+	//安全なプッシュ／ポップ操作クラス
+	
+	//プッシュ終了
+	template<class CON>
+	typename operation_guard<CON>::node_type* operation_guard<CON>::pushEnd()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return nullptr;
+		node_type* node = m_container.pushEnd();//プッシュ終了
+		m_status = status_t::PUSH_ENDED;//ステータス変更
+		return node;
+	}
+
+	//プッシュ取り消し
+	template<class CON>
+	bool operation_guard<CON>::pushCancel()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return false;
+		m_container.pushCancel();//プッシュ取り消し
+		m_status = status_t::PUSH_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//ポップ開始
+	template<class CON>
+	typename operation_guard<CON>::node_type* operation_guard<CON>::popBegin()
+	{
+		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* node = m_container.popBegin();//ポップ開始
+		if (node)
+			m_status = status_t::POP_BEGINNING;//ステータス変更
+		return node;
+	}
+
+	//ポップ終了
+	template<class CON>
+	bool operation_guard<CON>::popEnd()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		const bool result = m_container.popEnd();//ポップ終了
+		m_status = status_t::POP_ENDED;//ステータス変更
+		return result;
+	}
+
+	//ポップ取り消し
+	template<class CON>
+	bool operation_guard<CON>::popCancel()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		m_container.popCancel();//ポップ取り消し
+		m_status = status_t::POP_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//デストラクタ
+	template<class CON>
+	operation_guard<CON>::~operation_guard()
+	{
+		pushEnd();//プッシュ終了
+		popEnd();//ポップ終了
+	}
+
 }//namespace binary_heap
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

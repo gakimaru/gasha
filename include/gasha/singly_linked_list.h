@@ -241,7 +241,7 @@ namespace singly_linked_list
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードの次のノードを連結から外す
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* removeNodeAftere(typename OPE_TYPE::node_type* prev_target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
+	typename OPE_TYPE::node_type* removeNodeAftere(typename OPE_TYPE::node_type* before_target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードを連結から外す
 	//【注意】低速処理（backwardを指定することで高速化可能）
@@ -586,10 +586,7 @@ namespace singly_linked_list
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		const node_type* at(const index_type index) const
-		{
-			return getForwardNode<ope_type>(m_first, index);
-		}
+		const node_type* at(const index_type index) const { return getForwardNode<ope_type>(m_first, index); }
 		inline node_type* at(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->at(index)); }
 		inline const node_type* operator[](const index_type index) const { return at(index); }
 		inline node_type* operator[](const index_type index){ return at(index); }
@@ -657,52 +654,33 @@ namespace singly_linked_list
 		//※insert_before()を追加
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
+		
 		//先頭にノードを挿入（連結に追加）
-		inline node_type* push_front(const node_type& node)
-		{
-			return insertNodeBeginning<ope_type>(*const_cast<node_type*>(&node), m_first, m_last);
-		}
+		inline node_type* push_front(const node_type& node);
+		
 		//末尾にノードを挿入（連結に追加）
 		//※std::forward_listにないメソッド
-		inline node_type* push_back(const node_type& node)
-		{
-			return insertNodeEnd<ope_type>(*const_cast<node_type*>(&node), m_first, m_last);
-		}
+		inline node_type* push_back(const node_type& node);
+		
 		//先頭ノードを削除（連結解除）
-		inline node_type* pop_front()
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(*m_first, m_first, m_last, nullptr);
-		}
+		inline node_type* pop_front();
+		
 		//末尾ノードを削除（連結解除）
 		//【注意】低速処理（backwardを指定することで高速化可能）
 		//※もし、lastの直前もしくはそれより前のノードが分かっているなら、
 		//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
 		//　nullptrを指定した場合、firstからlastまで辿る。
 		//※std::forward_listにないメソッド
-		inline node_type* pop_back(node_type* backward = nullptr)
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(*m_last, m_first, m_last, backward);
-		}
+		inline node_type* pop_back(node_type* backward = nullptr);
+		
 		//指定の位置の後ろにノードを挿入（連結に追加）
 		//※位置はイテレータで指定
-		inline node_type* insert_after(iterator pos, const node_type& node)
-		{
-			if (pos.isNotExist() && !pos.isBeforeBegin())
-				return nullptr;
-			return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
-		}
+		inline node_type* insert_after(iterator pos, const node_type& node);
+		
 		//※insert_after()とinsert()は同じ
 		//※std::forward_listにないメソッド
-		inline node_type* insert(iterator pos, const node_type& node)
-		{
-			if (pos.isNotExist() && !pos.isBeforeBegin())
-				return nullptr;
-			return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
-		}
+		inline node_type* insert(iterator pos, const node_type& node);
+		
 		//指定の位置の前にノードを挿入（連結に追加）
 		//※位置はイテレータで指定
 		//【注意】低速処理（backwardを指定することで高速化可能）
@@ -710,43 +688,23 @@ namespace singly_linked_list
 		//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
 		//　nullptrを指定した場合、firstからposまで辿る。
 		//※std::forward_listにないメソッド
-		inline node_type* insert_before(iterator pos, const node_type& node, node_type* backward = nullptr)
-		{
-			if (pos.isNotExist())
-				return nullptr;
-			return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last, backward);
-		}
+		inline node_type* insert_before(iterator pos, const node_type& node, node_type* backward = nullptr);
+		
 		//指定ノードを削除（連結解除）
 		//【注意】低速処理（backwardを指定することで高速化可能）
 		//※もし、nodeの直前もしくはそれより前のノードが分かっているなら、
 		//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
 		//　nullptrを指定した場合、firstからnodeまで辿る。
-		inline node_type* remove(node_type& node, node_type* backward = nullptr)
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(node, m_first, m_last, backward);
-		}
+		inline node_type* remove(node_type& node, node_type* backward = nullptr);
+		
 		//指定位置の次のノードを削除（連結解除）
 		//※位置はイテレータで指定
-		inline node_type* erase_after(iterator pos)
-		{
-			if (!m_first || pos.isNotExist())
-				return nullptr;
-			node_type* before = &*pos;
-			node_type& _pos = *const_cast<node_type*>(ope_type::getNext(*pos));
-			return removeNode<ope_type>(_pos, m_first, m_last, before);
-		}
+		inline node_type* erase_after(iterator before);
+		
 		//指定位置の次のノードからの範囲のノードを削除（連結解除）
 		//※範囲はイテレータで指定
-		inline node_type* erase_after(iterator start, iterator end)
-		{
-			if (!m_first || start.isNotExist() || end.isNotEnabled())
-				return nullptr;
-			node_type* before = &*start;
-			node_type& _start = *const_cast<node_type*>(ope_type::getNext(*start));
-			return removeNodes<ope_type>(_start, *end, m_first, m_last, before);
-		}
+		inline node_type* erase_after(iterator start_before, iterator end);
+		
 		//指定位置のノードを削除（連結解除）
 		//※位置はイテレータで指定
 		//【注意】低速処理（backwardを指定することで高速化可能）
@@ -754,12 +712,8 @@ namespace singly_linked_list
 		//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
 		//　nullptrを指定した場合、firstからposまで辿る。
 		//※std::forward_listにないメソッド
-		inline node_type* erase(iterator pos, node_type* backward = nullptr)
-		{
-			if (!m_first || pos.isNotExist())
-				return nullptr;
-			return removeNode<ope_type>(*pos, m_first, m_last, backward);
-		}
+		inline node_type* erase(iterator pos, node_type* backward = nullptr);
+		
 		//指定範囲のノードを削除（連結解除）
 		//※範囲はイテレータで指定
 		//【注意】低速処理（backwardを指定することで高速化可能）
@@ -767,68 +721,40 @@ namespace singly_linked_list
 		//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
 		//　nullptrを指定した場合、firstからstartまで辿る。
 		//※std::forward_listにないメソッド
-		inline node_type* erase(iterator start, iterator end, node_type* backward = nullptr)
-		{
-			if (!m_first || start.isNotExist() || end.isNotEnabled())
-				return nullptr;
-			return removeNodes<ope_type>(*start, *end, m_first, m_last, backward);
-		}
+		inline node_type* erase(iterator start, iterator end, node_type* backward = nullptr);
+		
 		//全ノードをクリア
 		//※先頭ノードを返す
-		inline node_type* clear()
-		{ 
-			node_type* first = m_first;
-			m_first = nullptr;
-			m_last = nullptr;
-			return first;
-		}
+		node_type* clear();
 	public:
 		//ソート
 		//※挿入ソートを使用（シェルソートではあまり速度が上がらないため）
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void sort()
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-		}
+		inline void sort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void sort(PREDICATE predicate)
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, predicate);
-		}
+		inline void sort(PREDICATE predicate);
 	#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_STABLE_SORT
 		//安定ソート
 		//※挿入ソートを使用
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stableSort()
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-		}
+		inline void stableSort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stableSort(PREDICATE predicate)
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, predicate);
-		}
+		inline void stableSort(PREDICATE predicate);
 	#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_STABLE_SORT
 		//ソート済み状態チェック
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		bool isOrdered() const
-		{
-			return isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
-		}
+		inline bool isOrdered() const;
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool isOrdered(PREDICATE predicate) const
-		{
-			return isOrdered<OPE_TYPE>(m_first, predicate);
-		}
+		inline bool isOrdered(PREDICATE predicate) const;
 	public:
 		//線形探索
 		//※探索値指定版
@@ -836,29 +762,14 @@ namespace singly_linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value)
-		{
-			const node_type* found_node = linearSearchValue(m_first, value, typename ope_type::predicateForFind());
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator findValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate)
-		{
-			const node_type* found_node = linearSearchValue(m_first, value, predicate);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator findValue(const V& value, PREDICATE predicate);
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate)
-		{
-			const node_type* found_node = linearSearch(m_first, predicate);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator find(PREDICATE predicate);
 	#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//二分探索
 		//※探索値指定版
@@ -867,29 +778,14 @@ namespace singly_linked_list
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		//【注意】低速処理
 		template<typename V>
-		iterator binarySearchValue(const V& value)
-		{
-			const node_type* found_node = binarySearchValue(m_first, value, typename ope_type::comparisonForSearch());
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binarySearchValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison)
-		{
-			const node_type* found_node = binarySearchValue(m_first, value, comparison);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binarySearchValue(const V& value, COMPARISON comparison);
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison)
-		{
-			const node_type* found_node = binarySearch(m_first, comparison);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binary_search(COMPARISON comparison);
 	#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド
@@ -897,23 +793,13 @@ namespace singly_linked_list
 
 	public:
 		//ムーブコンストラクタ
-		container(const container&& con) :
-			m_first(con.m_first),
-			m_last(con.m_last)
-		{}
+		container(const container&& con);
 		//コピーコンストラクタ
-		container(const container& con) :
-			m_first(con.m_first),
-			m_last(con.m_last)
-		{}
+		container(const container& con);
 		//コンストラクタ
-		container() :
-			m_first(nullptr),
-			m_last(nullptr)
-		{}
+		inline container();
 		//デストラクタ
-		~container()
-		{}
+		~container();
 	private:
 		//フィールド
 		node_type* m_first;//先頭ノード

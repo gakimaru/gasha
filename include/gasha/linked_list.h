@@ -530,10 +530,7 @@ namespace linked_list
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline const node_type* at(const index_type index) const
-		{
-			return getForwardNode<ope_type>(m_first, index);
-		}
+		inline const node_type* at(const index_type index) const { return getForwardNode<ope_type>(m_first, index); }
 		inline node_type* at(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->at(index)); }
 		inline const node_type* operator[](const index_type index) const { return at(index); }
 		inline node_type* operator[](const index_type index){ return at(index); }
@@ -602,132 +599,70 @@ namespace linked_list
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		
 		//先頭にノードを挿入（連結に追加）
-		inline node_type* push_front(const node_type& node)
-		{
-			return insertNodeBeginning<ope_type>(*const_cast<node_type*>(&node), m_first, m_last);
-		}
+		inline node_type* push_front(const node_type& node);
+		
 		//末尾にノードを挿入（連結に追加）
-		inline node_type* push_back(const node_type& node)
-		{
-			return insertNodeEnd<ope_type>(*const_cast<node_type*>(&node), m_first, m_last);
-		}
+		inline node_type* push_back(const node_type& node);
+		
 		//先頭ノードを削除（連結解除）
-		inline node_type* pop_front()
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(*m_first, m_first, m_last);
-		}
+		inline node_type* pop_front();
+		
 		//末尾ノードを削除（連結解除）
-		inline node_type* pop_back()
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(*m_last, m_first, m_last);
-		}
+		inline node_type* pop_back();
+		
 		//指定の位置の後ろにノードを挿入（連結に追加）
 		//※位置はイテレータで指定
-		inline node_type* insert(iterator pos, const node_type& node)
-		{
-			if (pos.isNotExist())
-				return nullptr;
-			return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
-		}
+		inline node_type* insert(iterator pos, const node_type& node);
+		
 		//指定の位置の前にノードを挿入（連結に追加）
 		//※位置はイテレータで指定
-		inline node_type* insert_before(iterator pos, const node_type& node)
-		{
-			if (pos.isNotExist())
-				return nullptr;
-			return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
-		}
+		inline node_type* insert_before(iterator pos, const node_type& node);
+		
 		//指定ノードを削除（連結解除）
-		inline node_type* remove(node_type& node)
-		{
-			if (!m_first)
-				return nullptr;
-			return removeNode<ope_type>(node, m_first, m_last);
-		}
+		inline node_type* remove(node_type& node);
+		
 		//指定位置のノードを削除（連結解除）
 		//※位置はイテレータで指定
-		inline node_type* erase(iterator pos)
-		{
-			if (!m_first || pos.isNotExist())
-				return nullptr;
-			return removeNode<ope_type>(*pos, m_first, m_last);
-		}
+		inline node_type* erase(iterator pos);
+		
 		//指定範囲のノードを削除（連結解除）
 		//※範囲はイテレータで指定
-		inline node_type* erase(iterator start, iterator end)
-		{
-			if (!m_first || start.isNotExist() || end.isNotEnabled())
-				return nullptr;
-			return removeNodes<ope_type>(*start, *end, m_first, m_last);
-		}
+		inline node_type* erase(iterator start, iterator end);
+		
 		//全ノードをクリア
 		//※先頭ノードを返す
-		inline node_type* clear()
-		{ 
-			node_type* first = m_first;
-			m_first = nullptr;
-			m_last = nullptr;
-			return first;
-		}
+		node_type* clear();
 	public:
 		//ソート
 		//※挿入ソートを使用（シェルソートではあまり速度が上がらないため）
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void sort()
-		{
-		#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
-			shellSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-		#else//GASHA_LINKED_LIST_USE_SHELL_SORT
-			insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-		#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
-		}
+		inline void sort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void sort(PREDICATE predicate)
-		{
-		#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
-			shellSort<OPE_TYPE>(m_first, m_last, predicate);
-		#else//GASHA_LINKED_LIST_USE_SHELL_SORT
-			insertionSort<OPE_TYPE>(m_first, m_last, predicate);
-		#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
-		}
+		inline void sort(PREDICATE predicate);
+
 	#ifdef GASHA_LINKED_LIST_ENABLE_STABLE_SORT
 		//安定ソート
 		//※挿入ソートを使用
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		void stableSort()
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-		}
+		inline void stableSort();
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		void stableSort(PREDICATE predicate)
-		{
-			insertionSort<OPE_TYPE>(m_first, m_last, predicate);
-		}
+		inline void stableSort(PREDICATE predicate);
+
 	#endif//GASHA_LINKED_LIST_ENABLE_STABLE_SORT
 		//ソート済み状態チェック
 		//※ope_type::predicateForSort() を使用して探索（標準では、データ型の operator<() に従って探索）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-		bool isOrdered() const
-		{
-			return isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
-		}
+		inline bool isOrdered() const;
 		//※プレディケート関数指定版
 		template<class PREDICATE>
-		bool isOrdered(PREDICATE predicate) const
-		{
-			return isOrdered<OPE_TYPE>(m_first, predicate);
-		}
+		inline bool isOrdered(PREDICATE predicate) const;
 	public:
 		//線形探索
 		//※探索値指定版
@@ -735,29 +670,16 @@ namespace linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value)
-		{
-			const node_type* found_node = linearSearchValue(m_first, value, typename ope_type::predicateForFind());
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator findValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate)
-		{
-			const node_type* found_node = linearSearchValue(m_first, value, predicate);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator findValue(const V& value, PREDICATE predicate);
+		
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate)
-		{
-			const node_type* found_node = linearSearch(m_first, predicate);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator find(PREDICATE predicate);
+
 	#ifdef GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//二分探索
 		//※探索値指定版
@@ -765,29 +687,14 @@ namespace linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binarySearchValue(const V& value)
-		{
-			const node_type* found_node = binarySearchValue(m_first, value, typename ope_type::comparisonForSearch());
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binarySearchValue(const V& value);
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison)
-		{
-			const node_type* found_node = binarySearchValue(m_first, value, comparison);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binarySearchValue(const V& value, COMPARISON comparison);
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison)
-		{
-			const node_type* found_node = binarySearch(m_first, comparison);
-			iterator found(*this, found_node, found_node == nullptr);
-			return found;
-		}
+		iterator binary_search(COMPARISON comparison);
 	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド
@@ -795,23 +702,13 @@ namespace linked_list
 
 	public:
 		//ムーブコンストラクタ
-		container(const container&& con) :
-			m_first(con.m_first),
-			m_last(con.m_last)
-		{}
+		container(const container&& con);
 		//コピーコンストラクタ
-		container(const container& con) :
-			m_first(con.m_first),
-			m_last(con.m_last)
-		{}
+		container(const container& con);
 		//コンストラクタ
-		container() :
-			m_first(nullptr),
-			m_last(nullptr)
-		{}
+		inline container();
 		//デストラクタ
-		~container()
-		{}
+		~container();
 	private:
 		//フィールド
 		node_type* m_first;//先頭ノード

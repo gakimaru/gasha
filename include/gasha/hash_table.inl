@@ -550,12 +550,267 @@ namespace hash_table
 	//----------------------------------------
 	//コンテナ本体のメソッド
 
-	//配列の再割り当て
-//	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-//	template<std::size_t N>
-//	inline void container<OPE_TYPE, _TABLE_SIZE>::assignArray(typename container<OPE_TYPE, _TABLE_SIZE>::value_type(&array)[N], const int size)
-//	{
-//	}
+	//キーからインデックスの歩幅（第二ハッシュ）を計算
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcIndexStep(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	{
+		return INDEX_STEP_BASE - key % INDEX_STEP_BASE;
+	}
+	//キーからインデックス（第一ハッシュ）を計算
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	{
+		return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key);
+	}
+	//次のインデックスを計算（指定のインデックスに歩幅を加算）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcNextIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	{
+		return (index + calcIndexStep(key)) % TABLE_SIZE;
+	}
+
+	//キーで検索してインデックスを取得
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	{
+		return _findIndexCommon(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const char* key) const
+	{
+		return _findIndexCommon(calcCRC32(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const std::string& key) const
+	{
+		return _findIndexCommon(calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
+	{
+		return _findIndexCommon(ope_type::getKey(value));
+	}
+
+	//キーで検索して値を取得
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	{
+		return _findValue(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const char* key) const
+	{
+		return _findValue(calcCRC32(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const std::string& key) const
+	{
+		return _findValue(calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
+	{
+		return _findValue(ope_type::getKey(value));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
+	{
+		return const_cast<value_type*>(_findValue(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const char* key)
+	{
+		return const_cast<value_type*>(_findValue(calcCRC32(key)));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const std::string& key)
+	{
+		return const_cast<value_type*>(_findValue(calcCRC32(key.c_str())));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		return const_cast<value_type*>(_findValue(ope_type::getKey(value)));
+	}
+
+	//キーで検索してイテレータを取得
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const char* key) const
+	{
+		return find(calcCRC32(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const std::string& key) const
+	{
+		return find(calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
+	{
+		return find(ope_type::getKey(value));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const key_type key)
+	{
+		return const_cast<const container*>(this)->find(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const char* key)
+	{
+		return const_cast<const container*>(this)->find(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const std::string& key)
+	{
+		return const_cast<const container*>(this)->find(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type value)
+	{
+		return const_cast<const container*>(this)->find(value);
+	}
+
+	//キー割り当て
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _assign(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const char* key)
+	{
+		return assign(calcCRC32(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const std::string& key)
+	{
+		return assign(calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const value_type& value)
+	{
+		return assign(ope_type::getKey(value));
+	}
+
+	//キー割り当てして値を挿入（コピー）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insert(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _insert(key, value);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insert(const char* key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		return insert(calcCRC32(key), value);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insert(const std::string& key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		return insert(calcCRC32(key.c_str()), value);
+	}
+
+	//値を挿入（コピー）し、キーは自動割り当て
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insertAuto(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		return insert(ope_type::getKey(value), value);
+	}
+
+	//キー割り当てして値を初期化（本体）
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, Tx... args)
+	{
+		value_type* assigned_value = _assign(key);
+		if (!assigned_value)
+			return nullptr;
+		assigned_value = new(assigned_value)value_type(args...);//コンストラクタ呼び出し
+		return assigned_value;
+	}
+
+	//キー割り当てして値を初期化
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, Tx... args)
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _emplace(key, args...);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const char* key, Tx... args)
+	{
+		return emplace(calcCRC32(key), args...);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const std::string& key, Tx... args)
+	{
+		return emplace(calcCRC32(key.c_str()), args...);
+	}
+
+	//値を初期化して自動的にキー割り当て
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplaceAuto(Tx... args)
+	{
+		value_type value(args...);
+		return insertAuto(value);
+	}
+
+	//キーを削除
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::erase(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _erase(key);
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::erase(const char* key)
+	{
+		return erase(calcCRC32(key));
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::erase(const std::string& key)
+	{
+		return erase(calcCRC32(key.c_str()));
+	}
+
+	//キーを削除
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::eraseAuto(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
+	{
+		return erase(ope_type::getKey(value));
+	}
+
+	//リハッシュ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline bool container<OPE_TYPE, _TABLE_SIZE>::rehash()
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _rehash();
+	}
+
+	//クリア
+	//※処理中、排他ロック（ライトロック）を取得する
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline void container<OPE_TYPE, _TABLE_SIZE>::clear()
+	{
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		_clear();
+	}
+
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline container<OPE_TYPE, _TABLE_SIZE>::container() :
+		m_using(),
+		m_deleted(),
+		m_usingCount(0),
+		m_deletedCount(0),
+		m_maxFindingCycle(0)
+	{}
 
 }//namespace hash_table
 

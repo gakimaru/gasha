@@ -250,11 +250,352 @@ namespace ring_buffer
 
 	//配列の再割り当て
 	//※ポインタと配列要素数指定版
-//	template<class OPE_TYPE>
-//	void container<OPE_TYPE>::assignArray(value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size)
-//	{
-//	}
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::assignArray(value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size)
+	{
+		if (m_array && m_autoClearAttr == AUTO_CLEAR)
+			clear();//クリア
+		m_array = array;
+		m_maxSize = max_size;
+		m_size = size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size);
+		m_offset = 0;
+	}
+
+	//使用中のサイズを変更（新しいサイズを返す）
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, const typename container<OPE_TYPE>::value_type& new_value)
+	{
+		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
+		if (_size > m_size)
+		{
+			for (index_type index = m_size; index < _size; ++index)
+			{
+				value_type* value = _refElement(index);
+				*value = new_value;//新しい値を初期化
+			}
+		}
+		else if (_size < m_size)
+		{
+			for (index_type index = _size; index < m_size; ++index)
+			{
+				value_type* value = _refElement(index);
+				ope_type::callDestructor(value);//デストラクタ呼び出し
+				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			}
+		}
+		m_size = _size;
+		return m_size;
+	}
+
+	//使用中のサイズを変更（新しいサイズを返す）
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resizeSilently(const int size)
+	{
+		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
+		m_size = _size;
+		return m_size;
+	}
+
+	//先頭から指定数の要素にデータを割り当てる
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, const value_type& new_value)
+	{
+		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
+	#if 0
+		//上書き前のデストラクタ呼び出し → ..は、やらず、コピーオペレータで直接上書きする
+		{
+			const size_type used_size = _size < m_size ? _size : m_size;
+			for (index_type index = 0; index < used_size; ++index)
+			{
+				value_type* value = _refElement(index);
+				ope_type::callDestructor(value);//デストラクタ呼び出し
+				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			}
+		}
+	#endif
+		{
+			for (index_type index = 0; index < _size; ++index)
+			{
+				value_type* value = _refElement(index);
+				*value = new_value;//コピーオペレータでデータを上書き
+			}
+		}
+		if (m_size < _size)
+			m_size = _size;
+		return m_size;
+	}
+
+	//先頭に要素を追加
+	//※オブジェクト渡し
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(const typename container<OPE_TYPE>::value_type&& src)//ムーブ版
+	{
+		value_type* obj = refFrontNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		*obj = std::move(src);
+		++m_size;
+		m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
+		return obj;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(const typename container<OPE_TYPE>::value_type& src)//コピー版
+	{
+		value_type* obj = refFrontNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		*obj = src;
+		++m_size;
+		m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
+		return obj;
+	}
+
+	//末尾に要素を追加
+	//※オブジェクト渡し
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const typename container<OPE_TYPE>::value_type&& src)//ムーブ版
+	{
+		value_type* obj = refBackNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		*obj = std::move(src);
+		++m_size;
+		return obj;
+	}
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const typename container<OPE_TYPE>::value_type& src)//コピー版
+	{
+		value_type* obj = refBackNew();//サイズチェック含む
+		if (!obj)
+			return nullptr;
+		*obj = src;
+		++m_size;
+		return obj;
+	}
+
+	//先頭の要素を削除
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::pop_front()
+	{
+		if (m_size == 0)
+			return false;
+		value_type* value = const_cast<value_type*>(refFront());
+		ope_type::callDestructor(value);//デストラクタ呼び出し
+		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		--m_size;
+		m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
+		return true;
+	}
+	//※オブジェクトの値を受け取る
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::pop_front(typename container<OPE_TYPE>::value_type& value)
+	{
+		if (m_size == 0)
+			return false;
+		value_type* obj = const_cast<value_type*>(refFront());
+		value = std::move(*obj);//ムーブ
+		ope_type::callDestructor(obj);//デストラクタ呼び出し
+		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		--m_size;
+		m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
+		return true;
+	}
+
+	//末尾の要素を削除
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::pop_back()
+	{
+		if (m_size == 0)
+			return false;
+		value_type* value = const_cast<value_type*>(refFront());
+		ope_type::callDestructor(value);//デストラクタ呼び出し
+		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		--m_size;
+		return true;
+	}
+	//※オブジェクトの値を受け取る
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::pop_back(typename container<OPE_TYPE>::value_type& value)
+	{
+		if (m_size == 0)
+			return false;
+		value_type* obj = const_cast<value_type*>(refBack());
+		value = std::move(*obj);//ムーブ
+		ope_type::callDestructor(obj);//デストラクタ呼び出し
+		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		--m_size;
+		return true;
+	}
+
+	//クリア
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::clear()
+	{
+		if (m_size == 0)
+			return;
+		for (size_type i = 0; i < m_size; ++i)
+		{
+			value_type* value = _refElement(i);
+			ope_type::callDestructor(value);//デストラクタ呼び出し
+			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		}
+		m_size = 0;
+		m_offset = 0;
+	}
 	
+	//要素の移動（昇順）
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::moveAsc(const index_type dst_pos, const index_type src_pos, const size_type num)
+	{
+		index_type _dst_pos = dst_pos;
+		index_type _src_pos = src_pos;
+		for (size_type i = 0; i < num; ++i)
+		{
+			value_type* dst = _refElement(_dst_pos);
+			value_type* src = _refElement(_src_pos);
+			if (_dst_pos >= m_size)
+				new(dst)value_type(std::move(*src));//ムーブコンストラクタ
+			else
+				*dst = std::move(*src);//ムーブオペレータ
+			++_dst_pos;
+			++_src_pos;
+		}
+	}
+
+	//要素の移動（降順）
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::moveDesc(const index_type dst_pos, const index_type src_pos, const size_type num)
+	{
+		index_type _dst_pos = dst_pos + num - 1;
+		index_type _src_pos = src_pos + num - 1;
+		for (size_type i = 0; i < num; ++i)
+		{
+			value_type* dst = _refElement(_dst_pos);
+			value_type* src = _refElement(_src_pos);
+			if (_dst_pos >= m_size)
+				new(dst)value_type(std::move(*src));//ムーブコンストラクタ
+			else
+				*dst = std::move(*src);//ムーブオペレータ
+			--_dst_pos;
+			--_src_pos;
+		}
+	}
+		
+	//要素の挿入
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, typename container<OPE_TYPE>::value_type& value)
+	{
+		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
+		{
+			iterator ite(*this, INVALID_INDEX);
+			return ite;
+		}
+		index_type index = pos.getIndex();
+		const size_type remain = m_maxSize - m_size;
+		const size_type _num = num < 0 || static_cast<size_type>(num) > remain ? remain : static_cast<size_type>(num);
+		//移動
+		moveDesc(index + _num, index, _num);
+		//要素数変更
+		m_size += _num;
+		//挿入
+		index_type _index = index;
+		for (size_type i = 0; i < _num; ++i)
+		{
+			value_type* new_value = _refElement(_index);
+			*new_value = value;
+			++_index;
+		}
+		//終了
+		iterator now(*this, index);
+		return now;
+	}
+
+	//要素の削除
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_erase(const typename container<OPE_TYPE>::index_type index, const typename container<OPE_TYPE>::size_type num)
+	{
+		const size_type remain = m_maxSize - m_size;
+		const size_type _num = num < 0 || num > remain ? remain : num;
+		const size_type move_num = m_size - index;
+		//削除
+		index_type _index = index;
+		for (size_type i = 0; i < _num; ++i)
+		{
+			value_type* delete_value = _refElement(_index);
+			ope_type::callDestructor(delete_value);//デストラクタ呼び出し
+			operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
+			++_index;
+		}
+		//移動
+		moveAsc(index, index + _num, move_num);
+		//要素数変更
+		m_size -= _num;
+	}
+
+	//要素の削除
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::erase(typename container<OPE_TYPE>::iterator pos, const int num)
+	{
+		if (pos.isNotExist() || num == 0 || m_size == 0)
+		{
+			iterator ite(*this, INVALID_INDEX);
+			return ite;
+		}
+		const index_type index = pos.getIndex();
+		//削除
+		_erase(index, num);
+		//終了
+		iterator now(*this, index);
+		return now;
+	}
+	//※範囲指定版
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::erase(typename container<OPE_TYPE>::iterator start, typename container<OPE_TYPE>::iterator end)
+	{
+		if (start.isNotExist() || end.isNotExist() || start >= end || m_size == 0)
+		{
+			iterator ite(*this, INVALID_INDEX);
+			return ite;
+		}
+		index_type index = start.getIndex();
+		index_type end_index = end.getIndex();
+		const size_type num = end_index - index;
+		//削除
+		_erase(index, num);
+		//終了
+		iterator now(*this, index);
+		return now;
+	}
+	
+	//コンストラクタ
+	//※ポインタと配列要素数指定版
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(typename container<OPE_TYPE>::value_type* array, const typename container<OPE_TYPE>::size_type max_size, const int size, const autoClearAttr_t auto_clear_attr) :
+		m_array(array),
+		m_maxSize(max_size),
+		m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
+		m_offset(0),
+		m_autoClearAttr(auto_clear_attr)
+	{}
+	//※voidポインタとバッファサイズ数指定版
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::container(void* buff_ptr, const typename container<OPE_TYPE>::size_type buff_size, const int size, const autoClearAttr_t auto_clear_attr) :
+		m_array(static_cast<value_type*>(buff_ptr)),
+		m_maxSize(buff_size / sizeof(value_type)),
+		m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
+		m_offset(0),
+		m_autoClearAttr(auto_clear_attr)
+	{}
+	
+	//デストラクタ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::~container()
+	{
+		//自動クリア属性が有効なら、自動クリアする
+		if (m_array && m_autoClearAttr == AUTO_CLEAR)
+			clear();
+	}
+
 }//namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

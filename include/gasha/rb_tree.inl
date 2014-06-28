@@ -1991,12 +1991,173 @@ namespace rb_tree
 	//----------------------------------------
 	//コンテナ本体のメソッド
 
-	//配列の再割り当て
-//	template<class OPE_TYPE>
-//	template<std::size_t N>
-//	inline void container<OPE_TYPE>::assignArray(typename container<OPE_TYPE>::value_type(&array)[N], const int size)
-//	{
-//	}
+	//ノードを挿入（連結に追加）
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::insert(const typename container<OPE_TYPE>::node_type& node)
+	{
+		return addNode<ope_type>(const_cast<node_type*>(&node), m_root);
+	}
+
+	//ノードを削除（連結解除）
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::erase(const typename container<OPE_TYPE>::node_type& node)
+	{
+		return removeNode<ope_type>(&node, m_root);
+	}
+
+	//ノードを削除（連結解除）
+	//※キー指定
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::erase(const typename container<OPE_TYPE>::key_type key)
+	{
+		return removeNode<ope_type>(at(key), m_root);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::erase(const char* key)
+	{
+		return removeNode<ope_type>(at(key), m_root);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::erase(const std::string& key)
+	{
+		return removeNode<ope_type>(at(key), m_root);
+	}
+	//template<class OPE_TYPE>
+	//inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::erase(const  typename container<OPE_TYPE>::node_type& node)
+	//{
+	//	return removeNode<ope_type>(at(node), m_root);
+	//}
+
+	//キーを探索（共通）
+	//※キーが一致する範囲の先頭のイテレータを返す
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::_find(const typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
+	{
+		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
+		return ite;
+	}
+
+	//キーを探索
+	//※キーが一致する範囲の先頭のイテレータを返す
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
+	{
+		const iterator ite;
+		return _find(ite, key, type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const char* key, const match_type_t type) const
+	{
+		const iterator ite;
+		return _find(ite, calcCRC32(key), type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const std::string& key, const match_type_t type) const
+	{
+		const iterator ite;
+		return _find(ite, calcCRC32(key.c_str()), type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type) const
+	{
+		const iterator ite;
+		return _find(ite, node_type::getKey(node), type);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::key_type key, const match_type_t type)
+	{
+		iterator ite;
+		return _find(ite, key, type);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const char* key, const match_type_t type)
+	{
+		iterator ite;
+		return _find(ite, key, type);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const std::string& key, const match_type_t type)
+	{
+		iterator ite;
+		return _find(ite, key, type);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type)
+	{
+		iterator ite;
+		return _find(ite, node, type);
+	}
+	//キーが一致するノードの数を返す
+	template<class OPE_TYPE>
+	inline std::size_t container<OPE_TYPE>::count(const key_type key) const
+	{
+		return countNodes<ope_type>(m_root, key);
+	}
+	template<class OPE_TYPE>
+	inline std::size_t container<OPE_TYPE>::count(const char* key) const
+	{
+		return countNodes<ope_type>(m_root, calcCRC32(key));
+	}
+	template<class OPE_TYPE>
+	inline std::size_t container<OPE_TYPE>::count(const std::string& key) const
+	{
+		return countNodes<ope_type>(m_root, calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE>
+	inline std::size_t container<OPE_TYPE>::count(const typename container<OPE_TYPE>::node_type& node) const
+	{
+		return countNodes<ope_type>(m_root, ope_type::getKey(node));
+	}
+
+	//キーが一致する範囲を返す
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::key_type key) const
+	{
+		const iterator ite;
+		return _equal_range(ite, key);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const char* key) const
+	{
+		const iterator ite;
+		return _equal_range(ite, calcCRC32(key));
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const std::string& key) const
+	{
+		const iterator ite;
+		return _equal_range(ite, calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const node_type& node) const
+	{
+		const iterator ite;
+		return _equal_range(ite, ope_type::getKey(node));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::key_type key)
+	{
+		iterator ite;
+		return _equal_range(ite, key);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const char* key)
+	{
+		iterator ite;
+		return _equal_range(ite, calcCRC32(key));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const std::string& key)
+	{
+		iterator ite;
+		return _equal_range(ite, calcCRC32(key.c_str()));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::node_type&node)
+	{
+		iterator ite;
+		return _equal_range(ite, ope_type::getKey(node));
+	}
 
 }//namespace rb_tree
 

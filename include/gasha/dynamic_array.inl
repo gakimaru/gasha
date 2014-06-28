@@ -672,6 +672,16 @@ namespace dynamic_array
 		m_size(size < 0 || static_cast<size_type>(size) >= m_maxSize ? m_maxSize : static_cast<size_type>(size)),
 		m_autoClearAttr(auto_clear_attr)
 	{}
+	
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline container<OPE_TYPE>::container() :
+		m_array(nullptr),
+		m_maxSizeReal(0),
+		m_maxSize(0),
+		m_size(0),
+		m_autoClearAttr(NEVER_CLEAR)
+	{}
 
 }//namespace dynamic_array
 

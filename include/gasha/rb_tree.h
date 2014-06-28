@@ -675,11 +675,7 @@ namespace rb_tree
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		const node_type* at(const key_type key) const
-		{
-			stack_type stack;
-			return searchNode<ope_type>(m_root, key, stack, FOR_MATCH);
-		}
+		inline const node_type* at(const key_type key) const { stack_type stack; return searchNode<ope_type>(m_root, key, stack, FOR_MATCH); }
 		inline node_type* at(const key_type key){ return const_cast<node_type*>(const_cast<const container*>(this)->at(key)); }
 		inline const node_type* operator[](const key_type key) const { return at(key); }
 		inline node_type* operator[](const key_type key){ return at(key); }
@@ -759,173 +755,72 @@ namespace rb_tree
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		
 		//ノードを挿入（連結に追加）
-		inline node_type* insert(const node_type& node)
-		{
-			return addNode<ope_type>(const_cast<node_type*>(&node), m_root);
-		}
+		inline node_type* insert(const node_type& node);
+
 		//ノードを削除（連結解除）
-		inline node_type* erase(const node_type& node)
-		{
-			return removeNode<ope_type>(&node, m_root);
-		}
+		inline node_type* erase(const node_type& node);
+
 		//ノードを削除（連結解除）
 		//※キー指定
-		inline node_type* erase(const key_type key)
-		{
-			return removeNode<ope_type>(at(key), m_root);
-		}
-		inline node_type* erase(const char* key)
-		{
-			return removeNode<ope_type>(at(key), m_root);
-		}
-		inline node_type* erase(const std::string& key)
-		{
-			return removeNode<ope_type>(at(key), m_root);
-		}
-		//inline node_type* erase(const node_type& node)
-		//{
-		//	return removeNode<ope_type>(at(node), m_root);
-		//}
+		inline node_type* erase(const key_type key);
+		inline node_type* erase(const char* key);
+		inline node_type* erase(const std::string& key);
+		//inline node_type* erase(const node_type& node);
+		
 		//全ノードをクリア
 		//※根ノードを返す
-		inline node_type* clear()
-		{ 
-			node_type* root = m_root;
-			m_root = nullptr;
-			return root;
-		}
+		node_type* clear();
 
 		//探索系メソッド
 		//※lower_bound(), upper_bound()には非対応
 		//※代わりに、find_nearestに対応
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
-
 	private:
 		//キーを探索（共通）
 		//※キーが一致する範囲の先頭のイテレータを返す
-		inline const iterator& _find(const iterator& ite, const key_type key, const match_type_t type) const
-		{
-			ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
-			return ite;
-		}
+		inline const iterator& _find(const iterator& ite, const key_type key, const match_type_t type) const;
 	public:
 		//キーを探索
 		//※キーが一致する範囲の先頭のイテレータを返す
-		inline const iterator find(const key_type key, const match_type_t type = FOR_MATCH) const
-		{
-			const iterator ite;
-			return _find(ite, key, type);
-		}
-		inline const iterator find(const char* key, const match_type_t type = FOR_MATCH) const
-		{
-			const iterator ite;
-			return _find(ite, calcCRC32(key), type);
-		}
-		inline const iterator find(const std::string& key, const match_type_t type = FOR_MATCH) const
-		{
-			const iterator ite;
-			return _find(ite, calcCRC32(key.c_str()), type);
-		}
-		inline const iterator find(const node_type& node, const match_type_t type = FOR_MATCH) const
-		{
-			const iterator ite;
-			return _find(ite, node_type::getKey(node), type);
-		}
-		inline iterator find(const key_type key, const match_type_t type = FOR_MATCH)
-		{
-			iterator ite;
-			return _find(ite, key, type);
-		}
-		inline iterator find(const char* key, const match_type_t type = FOR_MATCH)
-		{
-			iterator ite;
-			return _find(ite, key, type);
-		}
-		inline iterator find(const std::string& key, const match_type_t type = FOR_MATCH)
-		{
-			iterator ite;
-			return _find(ite, key, type);
-		}
-		inline iterator find(const node_type& node, const match_type_t type = FOR_MATCH)
-		{
-			iterator ite;
-			return _find(ite, node, type);
-		}
+		inline const iterator find(const key_type key, const match_type_t type = FOR_MATCH) const;
+		inline const iterator find(const char* key, const match_type_t type = FOR_MATCH) const;
+		inline const iterator find(const std::string& key, const match_type_t type = FOR_MATCH) const;
+		inline const iterator find(const node_type& node, const match_type_t type = FOR_MATCH) const;
+		inline iterator find(const key_type key, const match_type_t type = FOR_MATCH);
+		inline iterator find(const char* key, const match_type_t type = FOR_MATCH);
+		inline iterator find(const std::string& key, const match_type_t type = FOR_MATCH);
+		inline iterator find(const node_type& node, const match_type_t type = FOR_MATCH);
+		
 		//キーが一致するノードの数を返す
-		inline std::size_t count(const key_type key) const { return countNodes<ope_type>(m_root, key); }
-		inline std::size_t count(const char* key) const { return countNodes<ope_type>(m_root, calcCRC32(key)); }
-		inline std::size_t count(const std::string& key) const { return countNodes<ope_type>(m_root, calcCRC32(key.c_str())); }
-		inline std::size_t count(const node_type& node) const { return countNodes<ope_type>(m_root, ope_type::getKey(node)); }
+		inline std::size_t count(const key_type key) const;
+		inline std::size_t count(const char* key) const;
+		inline std::size_t count(const std::string& key) const;
+		inline std::size_t count(const node_type& node) const;
 	private:
 		//キーが一致する範囲を返す
 		//※キーが一致する範囲の末尾（の次）のイテレータを返す
-		const iterator& _equal_range(const iterator& ite, const key_type key) const
-		{
-			ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, FOR_MATCH));
-			while (ite.m_value && ope_type::getKey(*ite) == key)
-				++ite;
-			return ite;
-		}
+		const iterator& _equal_range(const iterator& ite, const key_type key) const;
 	public:
 		//キーが一致する範囲を返す
 		//※キーが一致する範囲の末尾（の次）のイテレータを返す
-		inline const iterator equal_range(const key_type key) const
-		{
-			const iterator ite;
-			return _equal_range(ite, key);
-		}
-		inline const iterator equal_range(const char* key) const
-		{
-			const iterator ite;
-			return _equal_range(ite, calcCRC32(key));
-		}
-		inline const iterator equal_range(const std::string& key) const
-		{
-			const iterator ite;
-			return _equal_range(ite, calcCRC32(key.c_str()));
-		}
-		inline const iterator equal_range(const node_type& node) const
-		{
-			const iterator ite;
-			return _equal_range(ite, ope_type::getKey(node));
-		}
-		inline iterator equal_range(const key_type key)
-		{
-			iterator ite;
-			return _equal_range(ite, key);
-		}
-		inline iterator equal_range(const char* key)
-		{
-			iterator ite;
-			return _equal_range(ite, calcCRC32(key));
-		}
-		inline iterator equal_range(const std::string& key)
-		{
-			iterator ite;
-			return _equal_range(ite, calcCRC32(key.c_str()));
-		}
-		inline iterator equal_range(const node_type&node)
-		{
-			iterator ite;
-			return _equal_range(ite, ope_type::getKey(node));
-		}
+		inline const iterator equal_range(const key_type key) const;
+		inline const iterator equal_range(const char* key) const;
+		inline const iterator equal_range(const std::string& key) const;
+		inline const iterator equal_range(const node_type& node) const;
+		inline iterator equal_range(const key_type key);
+		inline iterator equal_range(const char* key);
+		inline iterator equal_range(const std::string& key);
+		inline iterator equal_range(const node_type&node);
 	public:
 		//ムーブコンストラクタ
-		container(const container&& con) :
-			m_root(con.m_root)
-		{}
+		container(const container&& con);
 		//コピーコンストラクタ
-		container(const container& con) :
-			m_root(con.m_root)
-		{}
-		//コンストラクタ
-		container() :
-			m_root(nullptr)
-		{}
+		container(const container& con);
+		//デフォルトコンストラクタ
+		inline container();
 		//デストラクタ
-		~container()
-		{}
+		~container();
 	private:
 		//フィールド
 		node_type* m_root;//根ノード

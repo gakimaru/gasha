@@ -562,305 +562,115 @@ namespace binary_heap
 		inline const node_type* top() const { return refTop(); }//先頭ノード参照
 		inline node_type* top(){ return refTop(); }//先頭ノード参照
 	public:
-		int depth_max() const//最大の深さを取得
-		{
-			if (m_used == 0)
-				return -1;
-			int depth = 0;
-			int used = m_used >> 1;
-			while (used != 0)
-			{
-				++depth;
-				used >>= 1;
-			}
-			return depth;
-		}
+		//最大の深さを取得
+		int depth_max() const;
 	private:
 		//プッシュ（本体）：ムーブ
-		node_type* _pushCopying(const node_type&& src)
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* obj = refNew();
-			if (!obj)
-				return nullptr;
-			*obj = std::move(src);
-			m_status = PUSH_BEGINNING;
-			return pushEnd();
-		}
+		node_type* _pushCopying(const node_type&& src);
+		
 		//プッシュ（本体）：コピー
-		node_type* _pushCopying(const node_type& src)
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* obj = refNew();
-			if (!obj)
-				return nullptr;
-			*obj = src;
-			m_status = PUSH_BEGINNING;
-			return pushEnd();
-		}
+		node_type* _pushCopying(const node_type& src);
 	public:
 		//プッシュ
 		//※オブジェクト渡し
 		//※オブジェクトのコピーが発生する点に注意（少し遅くなる）
 		//※ムーブオペレータを使用してコピーする点に注意
 		//※処理中、ロックを取得する
-		inline node_type* pushCopying(const node_type&& src)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _pushCopying(std::move(src));
-		}
-		inline node_type* pushCopying(const node_type& src)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _pushCopying(src);
-		}
+		inline node_type* pushCopying(const node_type&& src);
+		inline node_type* pushCopying(const node_type& src);
 	private:
 		//プッシュ（本体）
 		template<typename... Tx>
-		node_type* _push(Tx... args)
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* obj = pushBegin(args...);
-			if (!obj)
-				return nullptr;
-			return pushEnd();
-		}
+		node_type* _push(Tx... args);
 	public:
 		//プッシュ
 		//※パラメータ渡し
 		//※オブジェクトのコンストラクタが呼び出される
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		inline node_type* push(Tx... args)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _push(args...);
-		}
+		inline node_type* push(Tx... args);
 	private:
 		//プッシュ開始（本体）
 		template<typename... Tx>
-		node_type* _pushBegin(Tx... args)
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* obj = refNew();
-			if (!obj)
-				return nullptr;
-			obj = new(obj)node_type(args...);//コンストラクタ呼び出し
-			if (obj)
-				m_status = PUSH_BEGINNING;
-			return obj;
-		}
+		node_type* _pushBegin(Tx... args);
 	public:
 		//プッシュ開始
 		//※空きノードを取得し、コンストラクタが呼び出される
 		//※処理が成功すると、ロックを取得した状態になる（pushEndで解放する）
 		template<typename... Tx>
-		inline node_type* pushBegin(Tx... args)
-		{
-			m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-			node_type* obj = _pushBegin(args...);//プッシュ開始
-			if (!obj)
-				m_lock.unlock();//プッシュ失敗時はロック解放
-			return obj;
-		}
+		node_type* pushBegin(Tx... args);
 	private:
 		//プッシュ終了（本体）
-		node_type* _pushEnd()
-		{
-			if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return nullptr;
-			node_type* obj = refNew();
-			if (!obj)
-				return nullptr;
-			++m_used;
-			m_status = PUSH_ENDED;
-			//末端の葉ノードとして登録された新規ノードを上方に移動
-			return upHeap(obj);
-		}
+		node_type* _pushEnd();
 	public:
 		//プッシュ終了
 		//※追加した新規ノードを上に移動
 		//※pushBeginで取得したロックを解放する
-		inline node_type* pushEnd()
-		{
-			const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
-			node_type* new_obj = _pushEnd();//プッシュ終了
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return new_obj;
-		}
+		node_type* pushEnd();
 	private:
 		//プッシュ取り消し（本体）
-		bool _pushCancel()
-		{
-			if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return false;
-			m_status = PUSH_CANCELLED;
-			return true;
-		}
+		bool _pushCancel();
 	public:
 		//プッシュ取り消し
 		//※pushBeginで取得したロックを解放する
-		inline bool pushCancel()
-		{
-			const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
-			const bool result = _pushCancel();//プッシュ取り消し
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool pushCancel();
 	private:
 		//ポップ（本体）
-		bool _popCopying(node_type& dst)
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return false;
-			const node_type* obj = popBegin();
-			if (!obj)
-				return false;
-			dst = *obj;
-			return popEnd();
-		}
+		bool _popCopying(node_type& dst);
 	public:
 		//ポップ
 		//※オブジェクトのコピーを受け取る領域を渡す
 		//※オブジェクトのデストラクタが呼び出される ※コピー後に実行
 		//※処理中、ロックを取得する
-		inline bool popCopying(node_type& dst)
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			return _popCopying(dst);
-		}
+		inline bool popCopying(node_type& dst);
 	private:
 		//ポップ開始（本体）
-		node_type* _popBegin()
-		{
-			if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* obj = refTop();
-			if (obj)
-				m_status = POP_BEGINNING;
-			return obj;
-		}
+		node_type* _popBegin();
 	public:
 		//ポップ開始
 		//※根ノード取得
 		//※処理が成功すると、ロックを取得した状態になる（popEndで解放する）
-		node_type* popBegin()
-		{
-			m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-			node_type* obj = _popBegin();//ポップ開始
-			if (!obj)
-				m_lock.unlock();//プッシュ失敗時はロック解放
-			return obj;
-		}
+		node_type* popBegin();
 	private:
 		//ポップ終了（本体）
-		bool _popEnd()
-		{
-			if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			node_type* obj = refBottom();
-			if (!obj)
-				return false;
-			ope_type::callDestructor(obj);//デストラクタ呼び出し
-			operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
-			m_status = POP_ENDED;
-			//根ノードがポップされたので、末端の葉ノードを根ノードに上書きした上で、それを下方に移動
-			node_type* top_obj = _refTop();
-			*top_obj = std::move(*obj);
-			--m_used;
-			downHeap(top_obj);
-			return true;
-		}
+		bool _popEnd();
 	public:
 		//ポップ終了
 		//※オブジェクトのデストラクタが呼び出される
 		//※削除した根ノードの隙間を埋めるために、以降のノードを上に移動
 		//※popBeginで取得したロックを解放する
-		inline bool popEnd()
-		{
-			const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
-			const bool result = _popEnd();//ポップ終了
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool popEnd();
 	private:
 		//ポップ取り消し（本体）
-		bool _popCancel()
-		{
-			if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			m_status = POP_CANCELLED;
-			return true;
-		}
+		bool _popCancel();
 	public:
 		//ポップ取り消し
 		//※popBeginで取得したロックを解放する
-		inline bool popCancel()
-		{
-			const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
-			const bool result = _popCancel();//ポップ取り消し
-			if (unlock)
-				m_lock.unlock();//ロック解放
-			return result;
-		}
+		bool popCancel();
 	public:
 		//ノードを上方に移動
 		//※ロックを取得しないで処理するので注意！
 		//　（局所的なロックで済む処理ではないため）
 		//　必ず呼び出し元でロックを取得すること！
-		node_type* upHeap(node_type* obj)
-		{
-			return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
-		}
+		inline node_type* upHeap(node_type* obj);
+		
 		//ノードを下方に移動
 		//※ロックを取得しないで処理するので注意！
 		//　（局所的なロックで済む処理ではないため）
 		//　必ず呼び出し元でロックを取得すること！
-		node_type* downHeap(node_type* obj)
-		{
-			return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
-		}
+		inline node_type* downHeap(node_type* obj);
 	private:
 		//クリア（本体）
-		void _clear()
-		{
-			if (m_used == 0)
-				return;
-			node_type* obj_end = _refTop() + m_used;
-			for (node_type* obj = _refTop(); obj < obj_end; ++obj)
-			{
-				ope_type::callDestructor(obj);//デストラクタ呼び出し
-				operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
-			}
-			m_used = 0;
-		}
+		void _clear();
 	public:
 		//クリア
 		//※処理中、ロックを取得する
-		inline void clear()
-		{
-			lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-			_clear();
-		}
+		void clear();
 	public:
 		//コンストラクタ
-		container() :
-			m_used(0),
-			m_status(IDLE)
-		{}
+		container();
 		//デストラクタ
-		~container()
-		{
-			pushCancel();//プッシュ取り消し
-			popCancel();//ポップ取り消し
-		}
+		~container();
 	private:
 		//フィールド
 		unsigned char m_table[TABLE_SIZE][sizeof(value_type)];//データテーブル
@@ -886,73 +696,31 @@ namespace binary_heap
 	public:
 		//プッシュ開始
 		template<typename... Tx>
-		node_type* pushBegin(Tx... args)
-		{
-			if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* node = m_container.pushBegin(args...);//プッシュ開始
-			if (node)
-				m_status = status_t::PUSH_BEGINNING;//ステータス変更
-			return node;
-		}
+		node_type* pushBegin(Tx... args);
+		
 		//プッシュ終了
-		node_type* pushEnd()
-		{
-			if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return nullptr;
-			node_type* node = m_container.pushEnd();//プッシュ終了
-			m_status = status_t::PUSH_ENDED;//ステータス変更
-			return node;
-		}
+		node_type* pushEnd();
+		
 		//プッシュ取り消し
-		bool pushCancel()
-		{
-			if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-				return false;
-			m_container.pushCancel();//プッシュ取り消し
-			m_status = status_t::PUSH_CANCELLED;//ステータス変更
-			return true;
-		}
+		bool pushCancel();
+		
 		//ポップ開始
-		node_type* popBegin()
-		{
-			if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-				return nullptr;
-			node_type* node = m_container.popBegin();//ポップ開始
-			if (node)
-				m_status = status_t::POP_BEGINNING;//ステータス変更
-			return node;
-		}
+		node_type* popBegin();
+		
 		//ポップ終了
-		bool popEnd()
-		{
-			if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			const bool result = m_container.popEnd();//ポップ終了
-			m_status = status_t::POP_ENDED;//ステータス変更
-			return result;
-		}
+		bool popEnd();
+		
 		//ポップ取り消し
-		bool popCancel()
-		{
-			if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-				return false;
-			m_container.popCancel();//ポップ取り消し
-			m_status = status_t::POP_CANCELLED;//ステータス変更
-			return true;
-		}
+		bool popCancel();
 	public:
 		//コンストラクタ
-		operation_guard(container_type& container) :
-			m_container(container),
-			m_status(status_t::IDLE)
-		{}
+		operation_guard(container_type& container);
+
+		//デフォルトコンストラクタ
+		operation_guard() = delete;
+
 		//デストラクタ
-		~operation_guard()
-		{
-			pushEnd();//プッシュ終了
-			popEnd();//ポップ終了
-		}
+		~operation_guard();
 	private:
 		//フィールド
 		container_type& m_container;//コンテナ

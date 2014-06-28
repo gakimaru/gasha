@@ -337,19 +337,22 @@ namespace dynamic_array
 	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, const typename container<OPE_TYPE>::value_type& new_value)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
-		//{
-		//	const size_type used_size = _size < m_size ? _size : m_size;
-		//	value_type* value = _refFront();
-		//	for (index_type index = 0; index < used_size; ++index, ++value)
-		//	{
-		//		ope_type::callDestructor(value);//デストラクタ呼び出し
-		//		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
-		//	}
-		//}
+	#if 0
+		//上書き前のデストラクタ呼び出し → ..は、やらず、コピーオペレータで直接上書きする
+		{
+			const size_type used_size = _size < m_size ? _size : m_size;
+			value_type* value = _refFront();
+			for (index_type index = 0; index < used_size; ++index, ++value)
+			{
+				ope_type::callDestructor(value);//デストラクタ呼び出し
+				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			}
+		}
+	#endif
 		{
 			value_type* value = _refFront();
 			for (index_type index = 0; index < _size; ++index, ++value)
-				*value = new_value;//データを上書き
+				*value = new_value;//コピーオペレータでデータを上書き
 		}
 		if(m_size < _size)
 			m_size = _size;
