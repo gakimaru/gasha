@@ -92,7 +92,7 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 			--end;
 		if (begin >= end)
 			break;
-		swapValues(*begin, *end);
+		GASHA_ swapValues(*begin, *end);
 		pivot = pivot == begin ? end : pivot == end ? begin : pivot;//軸の位置調整（軸の位置も入れ替わるため）
 		++swapped_count;
 		++begin;
@@ -154,7 +154,7 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 				--end;
 			if (begin >= end)
 				break;
-			swapValues(*begin, *end);
+			GASHA_ swapValues(*begin, *end);
 			pivot = pivot == begin ? end : pivot == end ? begin : pivot;//軸の位置調整（軸の位置も入れ替わるため）
 			++swapped_count;
 			++begin;
@@ -250,7 +250,7 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 						--end;
 					if (begin >= end)
 						break;
-					swapValues(*begin, *end);
+					GASHA_ swapValues(*begin, *end);
 					pivot = pivot == begin ? end : pivot == end ? begin : pivot;//軸の位置調整（軸の位置も入れ替わるため）
 					++swapped_count;
 					++begin;

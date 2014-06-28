@@ -70,7 +70,7 @@ std::size_t gnomeSort(T* array, const std::size_t size, PREDICATE predicate)
 			{
 				if (predicate(*now, *prev))
 				{
-					swapValues(*now, *prev);
+					GASHA_ swapValues(*now, *prev);
 					++swapped_count;
 				}
 				else

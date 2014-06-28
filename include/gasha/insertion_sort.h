@@ -76,7 +76,7 @@ std::size_t insertionSort(T* array, const std::size_t size, PREDICATE predicate)
 					break;
 				--prev;
 			}
-			rotateValues(min, next, 1);
+			GASHA_ rotateValues(min, next, 1);
 			++swapped_count;
 		}
 		++now;
@@ -122,7 +122,7 @@ std::size_t iteratorInsertionSort(ITERATOR begin, ITERATOR end, PREDICATE predic
 					break;
 				--prev;
 			}
-			iteratorRotateValues(min, next, 1);
+			GASHA_ iteratorRotateValues(min, next, 1);
 			++swapped_count;
 		}
 		++now;

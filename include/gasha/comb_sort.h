@@ -69,7 +69,7 @@ std::size_t combSort(T* array, const std::size_t size, PREDICATE predicate)
 		{
 			if (predicate(*next, *now))
 			{
-				swapValues(*next, *now);
+				GASHA_ swapValues(*next, *now);
 				is_swapped = true;
 				++swapped_count;
 			}

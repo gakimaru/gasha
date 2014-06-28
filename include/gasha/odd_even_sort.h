@@ -78,7 +78,7 @@ std::size_t oddEvenSort(T* array, const std::size_t size, PREDICATE predicate)
 				next = now + 1;
 				if (predicate(*next, *now))
 				{
-					swapValues(*next, *now);
+					GASHA_ swapValues(*next, *now);
 					is_swapped = true;
 					++swapped_count;
 				}

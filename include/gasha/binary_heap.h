@@ -27,6 +27,8 @@
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/unique_lock.h>//単一ロック
 
+#include <gasha/sort_basic.h>//ソート処理基本（大小比較用）
+
 #include <cstddef>//std::size_t, std::ptrdiff_t用
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
@@ -81,6 +83,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //      at()メソッドが返す情報がポインターなど、インターフェースの相違点がある。
 //    - （他のコンテナと同様に）コンテナ操作対象・方法を設定した
 //      構造体をユーザー定義して用いる。
+//・プッシュ時に値（キュー）のコピーをせずに、直接要素のコンストラクタを呼び出して
+//　初期化可能とする。（処理時間を効率化する）
 //--------------------------------------------------------------------------------
 //【想定する具的的な用途】
 //・優先度付きキュー。ただし、キューイングの順序性を保証しない。
@@ -114,10 +118,10 @@ namespace binary_heap
 		typedef NODE_TYPE node_type;//ノード型
 
 		//ロック型
-		typedef dummy_lock lock_type;//ロックオブジェクト型
+		typedef dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効なロック型（spinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -148,21 +152,21 @@ namespace binary_heap
 	
 	//--------------------
 	//二分ヒープ操作関数：親のインデックス計算
-	inline static std::size_t calcParent(const std::size_t index);
+	inline std::size_t calcParent(const std::size_t index);
 	//--------------------
 	//二分ヒープ操作関数：子のインデックス計算
-	inline static std::size_t calcChildL(const std::size_t index);
-	inline static std::size_t calcChildR(const std::size_t index);
+	inline std::size_t calcChildL(const std::size_t index);
+	inline std::size_t calcChildR(const std::size_t index);
 	//--------------------
 	//二分ヒープ操作関数：アップヒープ
 	//※ノードを上方に移動
 	template<class OPE_TYPE, class PREDICATE>
-	static typename OPE_TYPE::node_type* upHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
+	typename OPE_TYPE::node_type* upHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
 	//--------------------
 	//二分ヒープ操作関数：ダウンヒープ
 	//※ノードを下方に移動
 	template<class OPE_TYPE, class PREDICATE>
-	static typename OPE_TYPE::node_type* downHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
+	typename OPE_TYPE::node_type* downHeap(typename OPE_TYPE::node_type* top, const std::size_t size, typename OPE_TYPE::node_type* now, PREDICATE less);
 	
 	//----------------------------------------
 	//二分ヒープコンテナ
@@ -300,27 +304,23 @@ namespace binary_heap
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-			typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs);
+			iterator& operator=(const reverse_iterator&& rhs);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-			typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs);
+			iterator& operator=(const reverse_iterator& rhs);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
 			iterator(const iterator&& obj);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-			container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj);
+			iterator(const reverse_iterator&& obj);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
-			inline iterator(const iterator& obj);
+			iterator(const iterator& obj);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-			container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj);
+			iterator(const reverse_iterator& obj);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コンストラクタ
 			iterator(const container& con, const bool is_end);
@@ -469,8 +469,8 @@ namespace binary_heap
 		inline status_t status() const { return m_status; }
 	public:
 		//キャストオペレータ
-		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
-		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
+		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
+		inline operator lock_type&() const { return m_lock; }//ロックオブジェクト ※mutable
 	public:
 		//メソッド：ロック取得系
 		//単一ロック取得
@@ -515,9 +515,9 @@ namespace binary_heap
 		//inline index_type _adjIndex(const index_type index) const { return index >= 0 && index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
 		inline index_type _adjIndex(const index_type index) const { return index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
 		inline index_type refIndex(const node_type* node) const{ return node - _refTop(); }//ノードをインデックスに変換 ※範囲チェックなし
-		inline index_type _calcParent(const index_type index) const { return binary_heap::calcParent(index); }//親インデックス計算 ※範囲チェックなし
-		inline index_type _calcChildL(const index_type index) const { return binary_heap::calcChildL(index); }//左側の子インデックス計算 ※範囲チェックなし
-		inline index_type _calcChildR(const index_type index) const { return binary_heap::calcChildR(index); }//右側の子インデックス計算 ※範囲チェックなし
+		inline index_type _calcParent(const index_type index) const;//親インデックス計算 ※範囲チェックなし
+		inline index_type _calcChildL(const index_type index) const;//左側の子インデックス計算 ※範囲チェックなし
+		inline index_type _calcChildR(const index_type index) const;//右側の子インデックス計算 ※範囲チェックなし
 	public:
 		//メソッド：要素アクセス系（独自拡張版）
 		//※範囲チェックあり（公開）
@@ -817,7 +817,7 @@ namespace binary_heap
 		//　必ず呼び出し元でロックを取得すること！
 		node_type* upHeap(node_type* obj)
 		{
-			return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less);
+			return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
 		}
 		//ノードを下方に移動
 		//※ロックを取得しないで処理するので注意！
@@ -825,7 +825,7 @@ namespace binary_heap
 		//　必ず呼び出し元でロックを取得すること！
 		node_type* downHeap(node_type* obj)
 		{
-			return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less);
+			return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
 		}
 	private:
 		//クリア（本体）

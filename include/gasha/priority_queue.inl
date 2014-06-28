@@ -16,13 +16,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/priority_queue.h>//優先度付きキューコンテナ【宣言部】
+#include <gasha/priority_queue.h>//優先度付きキューコンテナアダプタ【宣言部】
 
-#include <gasha/intro_sort.h>//イントロソート
-#include <gasha/insertion_sort.h>//挿入ソート
-
-#include <gasha/linear_search.h>//線形探索
-#include <gasha/binary_search.h>//二分探索
+#include <gasha/binary_heap.inl>//二分ヒープコンテナ【インライン関数／テンプレート定義部】
 
 //【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。

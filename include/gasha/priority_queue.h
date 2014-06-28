@@ -23,33 +23,47 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/dummy_shared_lock.h>//ダミー共有ロック
+#include <gasha/dummy_lock.h>//ダミーロック
 #include <gasha/lock_guard.h>//スコープロック
-#include <gasha/shared_lock_guard.h>//スコープ共有ロック
-#include <gasha/unique_shared_lock.h>//単一共有ロック
+#include <gasha/unique_lock.h>//単一ロック
 
-#include <cstddef>//std::size_t, std::ptrdiff_t用
-#include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/search_basic.h>//探索処理基本
-
-//【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <iterator>//std::iterator用
+#include <gasha/binary_heap.h>//二分ヒープコンテナ【宣言部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//プライオリティキュー
-//※プライオリティとともに、シーケンス番号を扱うことで、キューイングの順序性を保証する。
+//データ構造とアルゴリズム
 //--------------------------------------------------------------------------------
-
-//#include <utility>//C++11 std::move用
+//【特徴】
+//・ヒープ系コンテナを活用し、エンキュー時の順序性を保証する優先度付きキュー。
+//--------------------------------------------------------------------------------
+//【利点】
+//・優先度が高いデータの探索がほぼO(1)で行える。
+//・優先度が同じキューは、デキュー時にエンキュー時の順序性を保証する。
+//--------------------------------------------------------------------------------
+//【欠点】
+//・エンキュー／デキュー以外の操作ができない。
+//・各要素にはシーケンス番頭と優先度を保持する必要がある。（メモリオーバーヘッドがある）
+//--------------------------------------------------------------------------------
+//【本プログラムにおける実装要件】
+//・ヒープ系コンテナを内包したコンテナアダプタとする。
+//・ノードの優先度情報とシーケンス番号をユーザー定義可能とする。
+//　コンテナアダプタ操作用のユーザー定義構造体に、優先度情報とシーケンス番号への
+//　アクセスメソッドを実装することを必要とする。
+//・STLの std::priority_qeueu と異なり、優先度付きキューに特化した独自の
+//　インターフェースを実装。
+//・デキュー時にキューを取り出さず、優先度を変更することに対応。
+//・（他のコンテナと同様に）コンテナ操作対象・方法を設定した
+//　構造体をユーザー定義して用いる。
+//・エンキュー時に値（キュー）のコピーをせずに、直接コンテナのコンストラクタを
+//　呼び出して初期化可能とする。（処理時間を効率化する）
+//--------------------------------------------------------------------------------
+//【想定する具的的な用途】
+//・エンキュー時の順序性を保証する優先度付きキュー。
+//--------------------------------------------------------------------------------
 
 namespace priority_queue
 {
-#if 0
 	//--------------------
 	//優先度付きキュー操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
@@ -84,44 +98,49 @@ namespace priority_queue
 		typedef SEQ_TYPE seq_type;//シーケンス番号型
 		
 		//ロック型
-		typedef dummy_lock lock_type;//ロックオブジェクト型
+		typedef dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（spin_lock など）を
+		//　baseOpe_tの派生クラスにて、有効なロック型（spinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
-
-		//シーケンス番号を比較
-		inline static bool lessSeqNo(const seq_type lhs, const seq_type rhs)
-		{
-			return lhs > rhs;
-		}
 
 		//優先度を比較
 		//※デフォルト
 		//Return value:
 		//  0     ... lhs == rhs
-		//  1以上 ... lhs > rhs
-		// -1以下 ... lhs < rhs
+		//  1以上 ... lhs > rhs ※正順
+		// -1以下 ... lhs < rhs ※逆順
 		inline static int comparePriority(const priority_type lhs, const priority_type rhs)
 		{
-			return static_cast<int>(lhs)-static_cast<int>(rhs);
+			return static_cast<int>(lhs) - static_cast<int>(rhs);
 		}
 
-		//キーを比較
+		//シーケンス番号を比較
+		//※デフォルト
 		//※lhsの方が小さいければ true を返す
-		inline static bool _lessSeqNo(const int compare_priority, const seq_type lhs, const seq_type rhs)
+		inline static bool lessSeqNo(const seq_type lhs, const seq_type rhs)
 		{
-			return compare_priority < 0 ? true : compare_priority > 0 ? false : ope_type::lessSeqNo(lhs, rhs);
-		}
-		inline static bool less(const node_type& lhs, const node_type& rhs)
-		{
-			return _lessSeqNo(ope_type::comparePriority(ope_type::getPriority(lhs), ope_type::getPriority(rhs)), ope_type::getSeqNo(lhs), ope_type::getSeqNo(rhs));
+			return lhs < rhs;
 		}
 
-		//STLのstd::priority_queueと共用するための関数オブジェクト
-		inline bool operator()(const node_type& lhs, const node_type& rhs) const{ return ope_type::less(lhs, rhs); }
+		//優先度とシーケンス番号を比較する
+		//※lhsの方が優先度が高ければ true を返す
+		//※優先度が同じなら、シー件番号が小さければ true を返す
+		inline static bool lessPriorityAndSeqNo(const int compare_priority, const seq_type lhs, const seq_type rhs)
+		{
+			return compare_priority > 0 ? true : compare_priority == 0 ? ope_type::lessSeqNo(lhs, rhs) : false;
+		}
+
+		//ノード比較用プレディケート関数オブジェクト
+		//※trueで並び順が正しい
+		struct less{
+			inline bool operator()(const node_type& lhs, const node_type& rhs) const
+			{
+				return lessPriorityAndSeqNo(ope_type::comparePriority(ope_type::getPriority(lhs), ope_type::getPriority(rhs)), ope_type::getSeqNo(lhs), ope_type::getSeqNo(rhs));
+			}
+		};
 
 		//デストラクタ呼び出し
 		static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
@@ -132,25 +151,25 @@ namespace priority_queue
 			typedef OPE_TYPE adapter_ope_type;//コンテナアダプタのノード操作型
 			typedef container_ope_type ope_type;//ノード操作型
 			typedef NODE_TYPE node_type;//ノード型
+
+			//ノード比較用プレディケート関数オブジェクト
+			//※trueでlhsの方が小さい（並び順が正しい）
+			struct less{
+				inline bool operator()(const node_type& lhs, const node_type& rhs) const
+				{
+					return adapter_ope_type::less()(lhs, rhs);
+				}
+			};
 			
-			//キーを比較
-			//※lhsの方が小さいければ true を返す
-			inline static bool less(const node_type& lhs, const node_type& rhs)
-			{
-				return adapter_ope_type::less(lhs, rhs);
-			}
-
-			//STLのstd::priority_queueと共用するための関数オブジェクト
-			inline bool operator()(const node_type& lhs, const node_type& rhs) const{ return adapter_ope_type::less(lhs, rhs); }
-
 			//デストラクタ呼び出し
 			static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
 			
 			//ロック型
-			typedef dummy_lock lock_type;//ロックオブジェクト型
-			//※コンテナ側でのロックは使用しない
+			typedef dummyLock lock_type;//ロックオブジェクト型
+			//※コンテナ側ではロック制御しない
 		};
 	};
+	
 	//--------------------
 	//基本型定義マクロ
 	#define DECLARE_OPE_TYPES(OPE_TYPE) \
@@ -165,6 +184,7 @@ namespace priority_queue
 		typedef typename ope_type::priority_type priority_type; \
 		typedef typename ope_type::seq_type seq_type; \
 		typedef typename ope_type::lock_type lock_type;
+	
 	//----------------------------------------
 	//プライオリティキューコンテナアダプタ
 	//※コンテナのデフォルトは二分ヒープ（binary_heap::container）。
@@ -192,10 +212,20 @@ namespace priority_queue
 		//キャストオペレータ
 		inline operator const container_type&() const{ return m_container; }//コンテナを返す
 		inline operator container_type&(){ return m_container; }//コンテナを返す
-		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
-		inline operator lock_type&() const { return m_lock; }//共有ロックオブジェクト ※mutable
+		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
+		inline operator lock_type&() const { return m_lock; }//ロックオブジェクト ※mutable
 	public:
-		//メソッド
+		//メソッド：ロック取得系
+		//単一ロック取得
+		inline GASHA_ unique_lock<lock_type> lockUnique(){ GASHA_ unique_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		//スコープロック取得
+		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//メソッド：基本情報系
 		inline size_type max_size() const { return m_container.max_aize(); }//最大要素数を取得
 		inline size_type capacity() const { return m_container.capacity(); }//最大要素数を取得
 		inline size_type size() const { return m_container.size(); }//使用中の要素数を取得
@@ -496,6 +526,7 @@ namespace priority_queue
 		seq_type m_seqNo;//シーケンス番号 ※mutable修飾子
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
+	
 	//--------------------
 	//安全なエンキュー／デキュー操作クラス
 	//※操作状態を記憶し、デストラクタで必ず完了させる
@@ -585,10 +616,10 @@ namespace priority_queue
 		container_adapter_type& m_containerAdapter;//コンテナアダプタ
 		status_t m_status;//ステータス
 	};
+	
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
-#endif
 }//namespace priority_queue
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

@@ -69,7 +69,7 @@ std::size_t heapSort(T* array, const std::size_t size, PREDICATE predicate)
 			T* parent = array + parent_i;
 			if (predicate(*parent, *now))
 			{
-				swapValues(*parent, *now);
+				GASHA_ swapValues(*parent, *now);
 				++swapped_count;
 			}
 			else
@@ -83,7 +83,7 @@ std::size_t heapSort(T* array, const std::size_t size, PREDICATE predicate)
 		T* now = array + heap_size;
 		//ダウンヒープ
 		{
-			swapValues(*array, *now);
+			GASHA_ swapValues(*array, *now);
 			++swapped_count;
 		}
 		now = array;
@@ -102,7 +102,7 @@ std::size_t heapSort(T* array, const std::size_t size, PREDICATE predicate)
 			}
 			if(predicate(*now, *child))
 			{
-				swapValues(*now, *child);
+				GASHA_ swapValues(*now, *child);
 				++swapped_count;
 			}
 			else

@@ -82,7 +82,7 @@ std::size_t shellSort(T* array, const std::size_t size, PREDICATE predicate)
 						break;
 					prev -= h;
 				}
-				rotateValues(min, next, h);
+				GASHA_ rotateValues(min, next, h);
 				++swapped_count;
 			}
 			++now;
@@ -137,7 +137,7 @@ std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 						break;
 					prev -= h;
 				}
-				iteratorRotateValues(min, next, h);
+				GASHA_ iteratorRotateValues(min, next, h);
 				++swapped_count;
 			}
 			++now;

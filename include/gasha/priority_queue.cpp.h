@@ -16,7 +16,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/priority_queue.inl>//優先度付きキューコンテナ【インライン関数／テンプレート関数定義部】
+#include <gasha/priority_queue.inl>//優先度付きキューコンテナアダプタ【インライン関数／テンプレート関数定義部】
+
+#include <gasha/binary_heap.cpp.h>//二分ヒープコンテナ【関数定義部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

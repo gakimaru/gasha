@@ -71,7 +71,7 @@ std::size_t selectionSort(T* array, const std::size_t size, PREDICATE predicate)
 		}
 		if (now != min)
 		{
-			swapValues(*min, *now);
+			GASHA_ swapValues(*min, *now);
 			++swapped_count;
 		}
 	}

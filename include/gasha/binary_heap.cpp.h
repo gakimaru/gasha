@@ -27,8 +27,7 @@ namespace binary_heap
 	
 	//参照を更新
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		void update(const index_type index) const
+	void container<OPE_TYPE, _TABLE_SIZE>::iterator::update(const index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
 		if (index > static_cast<index_type>(m_con->m_used))
@@ -43,15 +42,13 @@ namespace binary_heap
 		}
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		void addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE, _TABLE_SIZE>::iterator::addIndexAndUpdate(const int add) const
 	{
 		update(m_index + add);
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		iterator& operator=(const iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -70,8 +67,7 @@ namespace binary_heap
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コピーオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		iterator& operator=(const iterator& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -90,8 +86,7 @@ namespace binary_heap
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		iterator(const iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
@@ -108,8 +103,7 @@ namespace binary_heap
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コピーコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		inline iterator(const iterator& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
@@ -126,8 +120,7 @@ namespace binary_heap
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::
-		iterator(const container& con, const bool is_end) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -144,8 +137,7 @@ namespace binary_heap
 	//メソッド
 	//参照を更新
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		void update(const index_type index) const
+	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::update(const index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
 		if (index > static_cast<index_type>(m_con->m_used))
@@ -160,15 +152,13 @@ namespace binary_heap
 		}
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		void addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::addIndexAndUpdate(const int add) const
 	{
 		update(m_index - add);
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator& operator=(const reverse_iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -176,8 +166,7 @@ namespace binary_heap
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator& operator=(const iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -186,8 +175,7 @@ namespace binary_heap
 	}
 	//コピーオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator& operator=(const reverse_iterator& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -195,8 +183,7 @@ namespace binary_heap
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator& operator=(const iterator& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -205,15 +192,13 @@ namespace binary_heap
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator(const reverse_iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator(const iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -222,15 +207,13 @@ namespace binary_heap
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator(const reverse_iterator& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator(const iterator& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -239,8 +222,7 @@ namespace binary_heap
 	}
 	//コンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::
-		reverse_iterator(const container& con, const bool is_end) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)

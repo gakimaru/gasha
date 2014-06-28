@@ -70,7 +70,7 @@ std::size_t shakerSort(T* array, const std::size_t size, PREDICATE predicate)
 		{
 			if (predicate(*next, *now))
 			{
-				swapValues(*next, *now);
+				GASHA_ swapValues(*next, *now);
 				is_swapped = true;
 				++swapped_count;
 			}
@@ -85,7 +85,7 @@ std::size_t shakerSort(T* array, const std::size_t size, PREDICATE predicate)
 		{
 			if (predicate(*now, *prev))
 			{
-				swapValues(*now, *prev);
+				GASHA_ swapValues(*now, *prev);
 				is_swapped = true;
 				++swapped_count;
 			}

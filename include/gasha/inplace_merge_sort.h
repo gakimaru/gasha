@@ -111,7 +111,7 @@ std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predica
 					}
 				#endif
 					//挿入
-					rotateValues(left_ins, right, 1);
+					GASHA_ rotateValues(left_ins, right, 1);
 					++swapped_count;
 					++left;
 					++right;
@@ -192,7 +192,7 @@ std::size_t inplaceMergeSort(T* array, const std::size_t size, PREDICATE predica
 					}
 				#endif
 					//挿入
-					rotateValues(left_ins, right, 1);
+					GASHA_ rotateValues(left_ins, right, 1);
 					++swapped_count;
 					++left;
 					++right;
