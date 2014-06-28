@@ -192,6 +192,18 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//【C++11仕様】範囲に基づくforループ
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+		#define GASHA_HAS_RANGE_BASED_FOR
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 6)
+		#define GASHA_HAS_RANGE_BASED_FOR
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
 //【C++11仕様】列挙型の型付け
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++11.1(2012)以後 ※VC++12(2013)以後とする

@@ -746,11 +746,64 @@ namespace dynamic_array
 		autoClearAttr_t m_autoClearAttr;//コンテナ破棄時に残っている要素の自動クリア属性
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプルコンテナ型
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	template<typename VALUE_TYPE>
+	struct simpleContainer
+	{
+		//動的配列操作用構造体
+		struct ope_t : public dynamic_array::baseOpe_t<ope_t, VALUE_TYPE>{};
+		
+		//基本型定義
+		DECLARE_OPE_TYPES(ope_t);
+
+		//コンテナ型
+		class con : public dynamic_array::container<ope_type>
+		{
+		public:
+			//コンストラクタ
+			template<std::size_t N>
+			inline con(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(array, size, auto_clear_attr)
+			{}
+			inline con(value_type* array, const size_type max_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(array, max_size, size, auto_clear_attr)
+			{}
+			inline con(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(buff_ptr, buff_size, size, auto_clear_attr)
+			{}
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type>()
+			{}
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace dynamic_array
+
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//動的配列操作用テンプレート構造体
+template<class OPE_TYPE, typename VALUE_TYPE>
+using dArrayOpe = dynamic_array::baseOpe_t<OPE_TYPE, VALUE_TYPE>;
+
+//コンテナ型
+template<class OPE_TYPE>
+using dArray = dynamic_array::container<OPE_TYPE>;
+
+//シンプルコンテナ型
+template<typename VALUE_TYPE>
+using dArrayS = dynamic_array::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
