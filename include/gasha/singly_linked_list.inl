@@ -556,7 +556,7 @@ namespace singly_linked_list
 #endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//比較オペレータ
 	template<class OPE_TYPE>
-	inline bool container<OPE_TYPE>::reverse_iterator::operator==(const reverse_iterator& rhs) const
+	inline bool container<OPE_TYPE>::reverse_iterator::operator==(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		return !rhs.isEnabled() || !isEnabled() ? false :
 			rhs.m_isEnd && m_isEnd ? true :
@@ -564,7 +564,7 @@ namespace singly_linked_list
 			m_value == rhs.m_value;
 	}
 	template<class OPE_TYPE>
-	inline bool container<OPE_TYPE>::reverse_iterator::operator!=(const reverse_iterator& rhs) const
+	inline bool container<OPE_TYPE>::reverse_iterator::operator!=(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		return !rhs.isEnabled() || !isEnabled() ? false :
 			rhs.m_isEnd && m_isEnd ? false :

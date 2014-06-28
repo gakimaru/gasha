@@ -333,6 +333,7 @@ namespace binary_heap
 		return m_value;
 	}
 
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 	//--------------------
 	//リバースイテレータのインライン関数
 
@@ -550,6 +551,7 @@ namespace binary_heap
 		iterator ite(*this);
 		return ite;
 	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 
 	//----------------------------------------
 	//コンテナ本体のメソッド

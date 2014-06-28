@@ -40,7 +40,6 @@ namespace singly_linked_list
 			m_value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
 		m_isEnd = (prev && !m_value);
 	}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updatePrev() const
 	{
@@ -60,7 +59,6 @@ namespace singly_linked_list
 			m_value = const_cast<node_type*>(getPrevNode<ope_type>(*m_value, m_con->m_first, nullptr));
 		m_isEnd = false;
 	}
-#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateForward(const std::size_t step) const
 	{
@@ -77,7 +75,6 @@ namespace singly_linked_list
 			m_value = const_cast<node_type*>(getForwardNode<ope_type>(*m_value, _step));
 		m_isEnd = (prev && !m_value && _step == 0);
 	}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateBackward(const std::size_t step) const
 	{
@@ -99,7 +96,6 @@ namespace singly_linked_list
 			m_value = const_cast<node_type*>(getBackwardNode<ope_type>(*m_value, _step, m_con->m_first, nullptr));
 		m_isEnd = false;
 	}
-#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateBeforeBegin() const
 	{

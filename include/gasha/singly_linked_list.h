@@ -329,10 +329,10 @@ namespace singly_linked_list
 		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			friend class reverse_iterator;
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
-		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			typedef typename container::reverse_iterator reverse_iterator;
 		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			//キャストオペレータ
@@ -414,13 +414,9 @@ namespace singly_linked_list
 			//メソッド
 			//参照を更新
 			void updateNext() const;
-		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			void updatePrev() const;
-		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			void updateForward(const std::size_t step) const;
-		#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			void updateBackward(const std::size_t step) const;
-		#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 			void updateBeforeBegin() const;
 		public:
 			//ムーブオペレータ

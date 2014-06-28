@@ -131,6 +131,7 @@ namespace binary_heap
 			update(m_con->m_used);//末尾データ
 	}
 
+#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 	//----------------------------------------
 	//リバースイテレータのメソッド
 
@@ -232,6 +233,7 @@ namespace binary_heap
 		else
 			update(0);//先頭データ
 	}
+#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 
 	//----------------------------------------
 	//コンテナ本体のメソッド
