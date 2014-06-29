@@ -27,7 +27,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------
 //ビルド設定が実行環境に適合するかチェック
 //※ダメな要素があった場合、即abort
-void checkBuildSettings();
+void diagnoseBuildSettings();
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
