@@ -32,6 +32,7 @@
 #include <gasha/crc32.h>//CRC32
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
+#include <cstdint>//std::uint32_t
 
 //【VC++】例外を無効化した状態で <iterator> <bitset> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -116,9 +117,9 @@ namespace hash_table
 	//--------------------
 	//開番地法ハッシュテーブル操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public hash_table::baseOpe_t<派生構造体名, 要素の型, キーの型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
+	//  //struct 派生構造体名 : public hash_table::baseOpe<派生構造体名, 要素の型, キーの型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
 	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
-	//	struct ope_t : public hash_table::baseOpe_t<ope_t, data_t, crc32_t, 500>
+	//	struct ope : public hash_table::baseOpe<ope, data_t, crc32_t, 500>
 	//	{
 	//		//データ置換属性 ※必要に応じて定義
 	//		static const replaceAttr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
@@ -131,8 +132,8 @@ namespace hash_table
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-	struct baseOpe_t
+	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
+	struct baseOpe
 	{
 		//定数
 		static const KEY_TYPE KEY_MIN = _KEY_MIN;//キーの最小値
@@ -161,7 +162,7 @@ namespace hash_table
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
+		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足①】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -733,7 +734,7 @@ namespace hash_table
 		inline value_type* insert(const std::string& key, const value_type& value);
 		
 		//値を挿入（コピー）し、キーは自動割り当て
-		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe の派生クラスで、getKey() を実装する必要あり
 		//※オブジェクトのコピーが発生する点に注意
 		inline value_type* insertAuto(const value_type& value);
 	private:
@@ -754,7 +755,7 @@ namespace hash_table
 		
 		//値を初期化して自動的にキー割り当て
 		//※オブジェクトのコピーが発生する点に注意
-		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe の派生クラスで、getKey() を実装する必要あり
 		//※処理中、ライトロックを取得する
 		template<typename... Tx>
 		inline value_type* emplaceAuto(Tx... args);
@@ -771,7 +772,7 @@ namespace hash_table
 		inline bool erase(const char* key);
 		inline bool erase(const std::string& key);
 		//キーを削除
-		//※操作用クラス baseOpe_t の派生クラスで、getKey() を実装する必要あり
+		//※操作用クラス baseOpe の派生クラスで、getKey() を実装する必要あり
 		inline bool eraseAuto(const value_type& value);
 	private:
 		//リハッシュ（本体）
@@ -804,13 +805,69 @@ namespace hash_table
 		int m_maxFindingCycle;//検索時の最大巡回回数 ※登録を削除しても減らない（リハッシュ時には調整される）
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプルハッシュテーブルコンテナ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	struct simpleContainer
+	{
+		//ハッシュテーブル操作用構造体
+		struct ope : public baseOpe<ope, VALUE_TYPE>{};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//ハッシュテーブルコンテナ
+		class con : public container<ope_type, _TABLE_SIZE>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type, _TABLE_SIZE>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace hash_table
 
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//ハッシュテーブル操作用テンプレート構造体
+template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
+using hashTable_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _KEY_MIN, _KEY_MAX, _INVALID_KEY>;
+
+//ハッシュテーブルコンテナ
+template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+using hashTable = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプルハッシュテーブルコンテナ
+template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+using simpleHashTable = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_HASH_TABLE_ALLWAYS_TOGETHER_INL
+#include <gasha/dynamic_array.inl>
+#endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dynamic_array.cpp.h>
+#endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__HASH_TABLE_H_
 

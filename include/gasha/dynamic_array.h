@@ -96,8 +96,8 @@ namespace dynamic_array
 	//動的配列操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename VALUE_TYPE>
-	//  //struct 派生構造体名 : public dynamic_array::baseOpe_t<派生構造体名, 要素の型>
-	//	struct ope_t : public dynamic_array::baseOpe_t<ope_t, data_t>
+	//  //struct 派生構造体名 : public dynamic_array::baseOpe<派生構造体名, 要素の型>
+	//	struct ope : public dynamic_array::baseOpe<ope, data_t>
 	//	{
 	//		//ソート用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
@@ -130,7 +130,7 @@ namespace dynamic_array
 	//		}
 	//	};
 	template<class OPE_TYPE, typename VALUE_TYPE>
-	struct baseOpe_t
+	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//要素操作型
@@ -140,13 +140,13 @@ namespace dynamic_array
 		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（sharedSpinLock など）を
+		//　baseOpeの派生クラスにて、有効なロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 
 		//デストラクタ呼び出し
 		inline static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
 		//※デストラクタの呼び出しを禁止したい場合、
-		//　baseOpe_tの派生クラスにて、なにもしない
+		//　baseOpeの派生クラスにて、なにもしない
 		//　callDestructor メソッドを再定義する。
 
 		//ソート用プレディケート関数オブジェクト
@@ -747,22 +747,25 @@ namespace dynamic_array
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
 	//----------------------------------------
-	//シンプルコンテナ型
+	//シンプル動的配列コンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
 	template<typename VALUE_TYPE>
 	struct simpleContainer
 	{
 		//動的配列操作用構造体
-		struct ope_t : public dynamic_array::baseOpe_t<ope_t, VALUE_TYPE>{};
+		struct ope : public baseOpe<ope, VALUE_TYPE>{};
 		
 		//基本型定義
-		DECLARE_OPE_TYPES(ope_t);
+		DECLARE_OPE_TYPES(ope);
 
-		//コンテナ型
-		class con : public dynamic_array::container<ope_type>
+		//動的配列コンテナ
+		class con : public container<ope_type>
 		{
 		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//コンストラクタ
 			template<std::size_t N>
 			inline con(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
@@ -778,6 +781,7 @@ namespace dynamic_array
 			inline con() :
 				container<ope_type>()
 			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デストラクタ
 			inline ~con()
 			{}
@@ -795,15 +799,15 @@ namespace dynamic_array
 
 //動的配列操作用テンプレート構造体
 template<class OPE_TYPE, typename VALUE_TYPE>
-using dArrayOpe = dynamic_array::baseOpe_t<OPE_TYPE, VALUE_TYPE>;
+using dArray_baseOpe = dynamic_array::baseOpe<OPE_TYPE, VALUE_TYPE>;
 
-//コンテナ型
+//動的配列コンテナ
 template<class OPE_TYPE>
 using dArray = dynamic_array::container<OPE_TYPE>;
 
-//シンプルコンテナ型
+//シンプル動的配列コンテナ
 template<typename VALUE_TYPE>
-using dArrayS = dynamic_array::simpleContainer<VALUE_TYPE>;
+using simpleDArray = dynamic_array::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

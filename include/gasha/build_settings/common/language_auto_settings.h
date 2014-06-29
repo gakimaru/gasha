@@ -114,7 +114,7 @@
 
 //【C++11仕様】auto型推論
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+	#if _MSC_VER >= 1600//VC++10.0(2010)以降
 		#define GASHA_HAS_AUTO
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -126,7 +126,7 @@
 
 //【C++11仕様】decltype型指定子
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+	#if _MSC_VER >= 1600//VC++10.0(2010)以降
 		#define GASHA_HAS_DECLTYPE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -138,7 +138,7 @@
 
 //【C++11仕様】default/detete宣言
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
 		#define GASHA_HAS_DEFAULT_AND_DELETE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -170,7 +170,7 @@
 
 //【C++11仕様】ユーザー定義リテラル
 #ifdef GASHA_IS_VC
-	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
+	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）※しばらく対応はなさそう
 		#define GASHA_HAS_USER_DEFINED_LITERAL
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -182,7 +182,7 @@
 
 //【C++11仕様】ラムダ式
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+	#if _MSC_VER >= 1600//VC++10.0(2010)以降
 		#define GASHA_HAS_LAMBDA_EXPRESSION
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -194,7 +194,7 @@
 
 //【C++11仕様】範囲に基づくforループ
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
 		#define GASHA_HAS_RANGE_BASED_FOR
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -206,7 +206,7 @@
 
 //【C++11仕様】列挙型の型付け
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++11.1(2012)以後 ※VC++12(2013)以後とする
+	#if _MSC_VER >= 1800//VC++11.1(2012)以降 ※VC++12(2013)以降とする
 		#define GASHA_HAS_ENUM_CLASS
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -218,7 +218,7 @@
 
 //【C++11仕様】可変長引数テンプレート
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++12.1(2013)以後 ※VC++12(2013)以後とする
+	#if _MSC_VER >= 1800//VC++12.1(2013)以降 ※VC++12(2013)以降とする
 		#define GASHA_HAS_VARIADIC_TEMPLATE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -230,7 +230,7 @@
 
 //【C++11仕様】エイリアステンプレート
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++12.1(2013)以後 ※VC++12(2013)以後とする
+	#if _MSC_VER >= 1800//VC++12.1(2013)以降 ※VC++12(2013)以降とする
 		#define GASHA_HAS_TEMPLATE_ALIASES
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -240,9 +240,21 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//【C++11仕様】継承コンストラクタ
+#ifdef GASHA_IS_VC
+	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
+		#define GASHA_HAS_INHERITING_CONSTRUCTORS
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 8)
+		#define GASHA_HAS_INHERITING_CONSTRUCTORS
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
 //【C++11仕様】右辺値参照とstd::move
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1800//VC++12.0(2013)以後
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
 		#define GASHA_HAS_RVALUE_REFERENCE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -254,7 +266,7 @@
 
 //【C++11仕様】static_assert
 #ifdef GASHA_IS_VC
-	#if _MSC_VER >= 1600//VC++10.0(2010)以後
+	#if _MSC_VER >= 1600//VC++10.0(2010)以降
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
 		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]

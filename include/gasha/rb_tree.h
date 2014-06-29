@@ -31,7 +31,7 @@
 #include <gasha/crc32.h>//CRC32
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
-#include <cstdint>//C++11 std::int64_t
+#include <cstdint>//C++11 std::int64_t, std::uint32_t
 
 //【VC++】例外を無効化した状態で <iterator> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -132,9 +132,10 @@ namespace rb_tree
 	//--------------------
 	//赤黒木操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public rb_tree::baseOpe_t<派生構造体名, ノードの型, キーの型, スタックの最大の深さ = 32>
+	//  //struct 派生構造体名 : public rb_tree::baseOpe<派生構造体名, ノードの型, キーの型, スタックの最大の深さ = 40>
 	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
-	//	struct ope_t : public rb_tree::baseOpe_t<ope_t, data_t, int>
+	//	//※スタックの最大の深さ = log2(最大件数) * 2 以上（デフォルトの40は100万件を処理可能）
+	//	struct ope : public rb_tree::baseOpe<ope, data_t, int>
 	//	{
 	//		//子ノードを取得
 	//		inline static const node_type* getChildL(const node_type& node){ return ???; }//大（右）側
@@ -159,11 +160,11 @@ namespace rb_tree
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename NODE_TYPE, typename KEY_TYPE, int _STACK_DEPTH_MAX = 32>
-	struct baseOpe_t
+	template<class OPE_TYPE, typename NODE_TYPE, typename KEY_TYPE = std::uint32_t, std::size_t _STACK_DEPTH_MAX = 40>
+	struct baseOpe
 	{
 		//定数
-		static const int STACK_DEPTH_MAX = _STACK_DEPTH_MAX;//スタックの最大の深さ
+		static const std::size_t STACK_DEPTH_MAX = _STACK_DEPTH_MAX;//スタックの最大の深さ
 		enum color_t//色
 		{
 			RED = 0,//赤
@@ -179,7 +180,7 @@ namespace rb_tree
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
+		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 
 		//子ノードを取得 ※const外し(remove_const)
@@ -285,7 +286,7 @@ namespace rb_tree
 		typedef typename OPE_TYPE::node_type node_type;
 	public:
 		//定数
-		static const int DEPTH_MAX = ope_type::STACK_DEPTH_MAX;//最大の深さ（スタック処理用）
+		static const std::size_t DEPTH_MAX = ope_type::STACK_DEPTH_MAX;//最大の深さ（スタック処理用）
 	public:
 		//型
 		//ノード情報型
@@ -826,13 +827,102 @@ namespace rb_tree
 		node_type* m_root;//根ノード
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプル赤黒木コンテナ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	//プロトタイプ：
+	//  key_type& GET_KEY_FUNC(const node_type&)
+	//  node_type*& REF_CHILD_L_PTR_FUNC(node_type&)
+	//  node_type*& REF_CHILD_S_PTR_FUNC(node_type&)
+	//  bool& REF_IS_BLACK_FUNC(node_type&)
+	template<typename NODE_TYPE, class GET_KEY_FUNC, class REF_CHILD_L_PTR_FUNC, class REF_CHILD_S_PTR_FUNC, class REF_IS_BLACK_FUNC>
+	struct simpleContainer
+	{
+		//赤黒木操作用構造体
+		struct ope : public baseOpe<ope, NODE_TYPE>
+		{
+			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
+			typedef typename baseOpe<ope, NODE_TYPE>::key_type key_type;
+			typedef typename baseOpe<ope, NODE_TYPE>::color_t color_t;
+
+			//子ノードを取得
+			inline static const node_type* getChildL(const node_type& node){ node_type& ref_child_l = REF_CHILD_L_PTR(const_cast<node_type*>(node)); return ref_child_l; }//大（右）側
+			inline static const node_type* getChildS(const node_type& node){ node_type& ref_child_s = REF_CHILD_S_PTR(const_cast<node_type*>(node)); return ref_child_s; }//小（左）側
+			//子ノードを変更
+			inline static void setChildL(node_type& node, const node_type* child){ node_type& ref_child_l = REF_CHILD_L_PTR(const_cast<node_type*>(node)); ref_child_l = const_cast<node_type*>(child); }//大（右）側
+			inline static void setChildS(node_type& node, const node_type* child){ node_type& ref_child_s = REF_CHILD_S_PTR(const_cast<node_type*>(node)); ref_child_s = const_cast<node_type*>(child); }//小（左）側
+			
+			//ノードの色を取得
+			inline static color_t getColor(const node_type& node){ bool& ref_is_black = REF_IS_BLACK_FUNC(const_cast<node_type*>(node)); return ref_is_black ? color_t::BLACK : color_t::RED; }
+			//ノードの色を変更
+			inline static void setColor(node_type& node, const color_t color){ bool& ref_is_black = REF_IS_BLACK_FUNC(const_cast<node_type*>(node)); ref_is_black = (color == color_t::BLACK); }
+			
+			//キーを取得
+			inline static key_type getKey(const node_type& node){ return GET_KEY_FUNC(node); }
+		};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//赤黒木コンテナ
+		class con : public container<ope_type>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//ムーブコンストラクタ
+			inline con(const con&& con) :
+				container<ope_type>(std::move(con))
+			{}
+			//コピーコンストラクタ
+			inline con(const con& con) :
+				container<ope_type>(con)
+			{}
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace rb_tree
 
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//赤黒木操作用テンプレート構造体
+template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, std::size_t _STACK_DEPTH_MAX = 40>
+using rbTree_baseOpe = rb_tree::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _STACK_DEPTH_MAX>;
+
+//赤黒木コンテナ
+template<class OPE_TYPE>
+using rbTree = rb_tree::container<OPE_TYPE>;
+
+//シンプル赤黒木コンテナ
+template<typename NODE_TYPE, class GET_KEY_FUNC, class REF_CHILD_L_PTR_FUNC, class REF_CHILD_S_PTR_FUNC, class REF_IS_BLACK_FUNC>
+using simpleRBTree = rb_tree::simpleContainer<NODE_TYPE, GET_KEY_FUNC, REF_CHILD_L_PTR_FUNC, REF_CHILD_S_PTR_FUNC, REF_IS_BLACK_FUNC>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_INL
+#include <gasha/dynamic_array.inl>
+#endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dynamic_array.cpp.h>
+#endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__RB_TREE_H_
 

@@ -103,8 +103,8 @@ namespace ring_buffer
 	//リングバッファ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename VALUE_TYPE>
-	//  //struct 派生構造体名 : public ring_buffer::baseOpe_t<派生構造体名, 要素の型>
-	//	struct ope_t : public ring_buffer::baseOpe_t<ope_t, data_t>
+	//  //struct 派生構造体名 : public ring_buffer::baseOpe<派生構造体名, 要素の型>
+	//	struct ope : public ring_buffer::baseOpe<ope, data_t>
 	//	{
 	//		//ソート用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
@@ -137,7 +137,7 @@ namespace ring_buffer
 	//		}
 	//	};
 	template<class OPE_TYPE, typename VALUE_TYPE>
-	struct baseOpe_t
+	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//要素操作型
@@ -147,13 +147,13 @@ namespace ring_buffer
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（sharedSpinLock など）を
+		//　baseOpeの派生クラスにて、有効なロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 
 		//デストラクタ呼び出し
 		inline static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
 		//※デストラクタの呼び出しを禁止したい場合、
-		//　baseOpe_tの派生クラスにて、なにもしない
+		//　baseOpeの派生クラスにて、なにもしない
 		//　callDestructor メソッドを再定義する。
 
 		//ソート用プレディケート関数オブジェクト
@@ -753,11 +753,68 @@ namespace ring_buffer
 		autoClearAttr_t m_autoClearAttr;//コンテナ破棄時に残っている要素の自動クリア属性
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプルリングバッファコンテナ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	template<typename VALUE_TYPE>
+	struct simpleContainer
+	{
+		//リングバッファ操作用構造体
+		struct ope : public baseOpe<ope, VALUE_TYPE>{};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//リングバッファコンテナ
+		class con : public container<ope_type>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//コンストラクタ
+			template<std::size_t N>
+			inline con(value_type(&array)[N], const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(array, size, auto_clear_attr)
+			{}
+			inline con(value_type* array, const size_type max_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(array, max_size, size, auto_clear_attr)
+			{}
+			inline con(void* buff_ptr, const size_type buff_size, const int size = 0, const autoClearAttr_t auto_clear_attr = NEVER_CLEAR) :
+				container<ope_type>(buff_ptr, buff_size, size, auto_clear_attr)
+			{}
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace ring_buffer
+
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//リングバッファ操作用テンプレート構造体
+template<class OPE_TYPE, typename VALUE_TYPE>
+using ringBuff_baseOpe = ring_buffer::baseOpe<OPE_TYPE, VALUE_TYPE>;
+
+//リングバッファコンテナ
+template<class OPE_TYPE>
+using ringBuff = ring_buffer::container<OPE_TYPE>;
+
+//シンプルリングバッファコンテナ
+template<typename VALUE_TYPE>
+using sinmpleRingBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -98,8 +98,8 @@ namespace linked_list
 	//--------------------
 	//双方向連結リスト操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public linked_list::baseOpe_t<派生構造体名, ノードの型>
-	//	struct ope_t : public linked_list::baseOpe_t<ope_t, data_t>
+	//  //struct 派生構造体名 : public linked_list::baseOpe<派生構造体名, ノードの型>
+	//	struct ope : public linked_list::baseOpe<ope, data_t>
 	//	{
 	//		//前ノードを取得
 	//		inline static const node_type* getPrev(const node_type& node){ return ???; }
@@ -129,7 +129,7 @@ namespace linked_list
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
-	struct baseOpe_t
+	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
@@ -139,7 +139,7 @@ namespace linked_list
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
+		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
 		//　lock_type 型として再定義する。
 
 		//前ノードを取得 ※const外し(remove_const)
@@ -705,7 +705,7 @@ namespace linked_list
 		container(const container&& con);
 		//コピーコンストラクタ
 		container(const container& con);
-		//コンストラクタ
+		//デフォルトコンストラクタ
 		inline container();
 		//デストラクタ
 		~container();
@@ -715,11 +715,81 @@ namespace linked_list
 		node_type* m_last;//末尾ノード
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプル双方向連結リストコンテナ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	//プロトタイプ：
+	//  node_type*& REF_NEXT_PTR_FUNC(node_type&)
+	//  node_type*& REF_PREV_PTR_FUNC(node_type&)
+	template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC, class REF_PREV_PTR_FUNC>
+	struct simpleContainer
+	{
+		//双方向連結リスト操作用構造体
+		struct ope : public baseOpe<ope, NODE_TYPE>
+		{
+			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
+
+			//前ノードを取得
+			inline static const node_type* getPrev(const node_type& node){ node_type*& ref_prev = REF_PREV_PTR_FUNC(const_cast<node_type*>(node)); return ref_prev; }
+			//前ノードを変更
+			inline static void setPrev(node_type& node, const node_type* prev){ node_type*& ref_prev = REF_PREV_PTR_FUNC(const_cast<node_type*>(node)); ref_prev = const_cast<node_type*>(prev); }
+			
+			//次ノードを取得
+			inline static const node_type* getNext(const node_type& node){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); return ref_next; }
+			//次ノードを変更
+			inline static void setNext(node_type& node, const node_type* next){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); ref_next = const_cast<node_type*>(next); }
+		};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//双方向連結リストコンテナ
+		class con : public container<ope_type>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//ムーブコンストラクタ
+			inline con(const con&& con):
+				container<ope_type>(std::move(con))
+			{}
+			//コピーコンストラクタ
+			inline con(const con& con) :
+				container<ope_type>(con)
+			{}
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace linked_list
+
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//双方向連結リスト操作用テンプレート構造体
+template<class OPE_TYPE, typename NODE_TYPE>
+using linkList_baseOpe = linked_list::baseOpe<OPE_TYPE, NODE_TYPE>;
+
+//双方向連結リストコンテナ
+template<class OPE_TYPE>
+using linkList = linked_list::container<OPE_TYPE>;
+
+//シンプル双方向連結リストコンテナ
+template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC, class REF_PREV_PTR_FUNC>
+using simpleLinkList = linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC, REF_PREV_PTR_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

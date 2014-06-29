@@ -27,6 +27,8 @@
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/unique_lock.h>//単一ロック
 
+#include <cstdint>//std::int32_t, std::uint32_t
+
 #include <gasha/binary_heap.h>//二分ヒープコンテナ【宣言部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -67,8 +69,8 @@ namespace priority_queue
 	//--------------------
 	//優先度付きキュー操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public priority_queue::baseOpe_t<派生構造体名, 要素の型, 優先度の型, シーケンス番号の型>
-	//	struct ope_t : public priority_queue::baseOpe_t<ope_t, data_t, int, unsigned int>
+	//  //struct 派生構造体名 : public priority_queue::baseOpe<派生構造体名, 要素の型, 優先度の型, シーケンス番号の型>
+	//	struct ope : public priority_queue::baseOpe<ope, data_t, int, unsigned int>
 	//	{
 	//		//優先度を取得
 	//		inline static priority_type getPriority(const node_type& node){ return node.m_priority; }
@@ -76,9 +78,9 @@ namespace priority_queue
 	//		inline static void setPriority(node_type& node, const priority_type priority){ node.m_priority = priority; }
 	//		
 	//		//シーケンス番号を取得
-	//		inline static seq_type getSeqNo(const node_type& node){ return node.m_seqNo; }
+	//		inline static seq_no_type getSeqNo(const node_type& node){ return node.m_seqNo; }
 	//		//シーケンス番号を更新
-	//		inline static void setSeqNo(node_type& node, const seq_type seq_no) const { node.m_seqNo = seq_no; }
+	//		inline static void setSeqNo(node_type& node, const seq_no_type seq_no){ node.m_seqNo = seq_no; }
 	//		
 	//		//優先度を比較 ※必要に応じて定義
 	//		inline static int compareProior(const priority_type lhs, const priority_type rhs){ return ???; }
@@ -88,20 +90,20 @@ namespace priority_queue
 	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
 	//		typedef spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename NODE_TYPE, typename PRIOR_TYPE = int, typename SEQ_TYPE = unsigned int>
-	struct baseOpe_t
+	template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
+	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
 		typedef NODE_TYPE node_type;//ノード型
-		typedef PRIOR_TYPE priority_type;//優先度型
-		typedef SEQ_TYPE seq_type;//シーケンス番号型
+		typedef PRIORITY_TYPE priority_type;//優先度型
+		typedef SEQ_NO_TYPE seq_no_type;//シーケンス番号型
 		
 		//ロック型
 		typedef dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（spinLock など）を
+		//　baseOpeの派生クラスにて、有効なロック型（spinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -120,7 +122,7 @@ namespace priority_queue
 		//シーケンス番号を比較
 		//※デフォルト
 		//※lhsの方が小さいければ true を返す
-		inline static bool lessSeqNo(const seq_type lhs, const seq_type rhs)
+		inline static bool lessSeqNo(const seq_no_type lhs, const seq_no_type rhs)
 		{
 			return lhs < rhs;
 		}
@@ -128,7 +130,7 @@ namespace priority_queue
 		//優先度とシーケンス番号を比較する
 		//※lhsの方が優先度が高ければ true を返す
 		//※優先度が同じなら、シー件番号が小さければ true を返す
-		inline static bool lessPriorityAndSeqNo(const int compare_priority, const seq_type lhs, const seq_type rhs)
+		inline static bool lessPriorityAndSeqNo(const int compare_priority, const seq_no_type lhs, const seq_no_type rhs)
 		{
 			return compare_priority > 0 ? true : compare_priority == 0 ? ope_type::lessSeqNo(lhs, rhs) : false;
 		}
@@ -146,16 +148,17 @@ namespace priority_queue
 		//※リセット後の値を返す
 		//※デフォルト
 		//※必要に応じて派生クラスで処理を変更する
-		inline static SEQ_TYPE resetSeqNo(SEQ_TYPE& seq_no)
+		inline static SEQ_NO_TYPE resetSeqNo(SEQ_NO_TYPE& seq_no)
 		{
 			seq_no = 0;
 			return seq_no;
 		}
+
 		//シーケンス番号をカウントアップ
 		//※カウントアップ前の値を返す
 		//※デフォルト
 		//※必要に応じて派生クラスで処理を変更する
-		inline static SEQ_TYPE countupSeqNo(SEQ_TYPE& seq_no)
+		inline static SEQ_NO_TYPE countupSeqNo(SEQ_NO_TYPE& seq_no)
 		{
 			return seq_no++;
 		}
@@ -200,7 +203,7 @@ namespace priority_queue
 		typedef const value_type* const_pointer; \
 		typedef std::size_t size_type; \
 		typedef typename ope_type::priority_type priority_type; \
-		typedef typename ope_type::seq_type seq_type; \
+		typedef typename ope_type::seq_no_type seq_no_type; \
 		typedef typename ope_type::lock_type lock_type;
 	
 	//----------------------------------------
@@ -208,14 +211,14 @@ namespace priority_queue
 	//※コンテナのデフォルトは二分ヒープ（binary_heap::container）。
 	//　同じインターフェースを持ったクラスなら、置き換えて使用可能。
 	//※std::priority_queueとはあまり互換性がなく、イテレータにも対応しない
-	//※イテレータが必要なら、container_adapter::container_type にキャストして
+	//※イテレータが必要なら、containerAdapter::container_type にキャストして
 	//　コンテナを取り出せば操作可能。
 	//※データのコピーを避けて処理効率を向上させるために、
 	//　enqueueBegin()～enqueueEnd()、dequeueBegin()～dequeueEnd()
 	//　というメソッドを用意している。内部のバッファを直接参照するので高速。
 	//　なお、begin～end の間はロックが行われる点に注意。
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE = binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE> >
-	class container_adapter
+	class containerAdapter
 	{
 	public:
 		//型
@@ -252,7 +255,7 @@ namespace priority_queue
 		inline bool full() const { return m_container.full(); }//満杯か？
 	private:
 		//シーケンス番号発行
-		inline seq_type getNextSeqNo();
+		inline seq_no_type getNextSeqNo();
 		
 		//可能ならシーケンス番号をリセット
 		void checkAndResetSeqNo();
@@ -367,15 +370,63 @@ namespace priority_queue
 		inline void clear();
 	public:
 		//コンストラクタ
-		inline container_adapter();
+		inline containerAdapter();
 		//デストラクタ
-		~container_adapter();
+		~containerAdapter();
 	private:
 		//フィールド
 		container_type m_container;//コンテナ
 		int m_dummy;
-		seq_type m_seqNo;//シーケンス番号 ※mutable修飾子
+		seq_no_type m_seqNo;//シーケンス番号 ※mutable修飾子
 		mutable lock_type m_lock;//ロックオブジェクト
+	};
+	//----------------------------------------
+	//シンプル優先度付きキューコンテナアダプタ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	//プロトタイプ：
+	//  int& REF_PRIORITY_FUNC(const value_type&)
+	//  int& REF_SEQ_NO_FUNC(const std::uint32&)
+	template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>
+	struct simpleContainerAdapter
+	{
+		//優先度付きキュー操作用構造体
+		struct ope : public baseOpe<ope, NODE_TYPE>
+		{
+			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
+			typedef typename baseOpe<ope, NODE_TYPE>::priority_type priority_type;
+			typedef typename baseOpe<ope, NODE_TYPE>::seq_no_type seq_no_type;
+			
+			//優先度を取得
+			inline static priority_type getPriority(const node_type& node){ priority_type& ref_priority = REF_PRIORTIY_FUNC(const_cast<node_type*>(node)); return ref_priority; }
+			//優先度を更新
+			inline static void setPriority(node_type& node, const priority_type priority){ priority_type& ref_priority = REF_PRIORTIY_FUNC(const_cast<node_type*>(node)); ref_priority = priority; }
+			
+			//シーケンス番号を取得
+			inline static seq_no_type getSeqNo(const node_type& node){ seq_no_type& ref_seq_no = REF_SEQ_NO_FUNC(const_cast<node_type*>(node)); return ref_seq_no; }
+			//シーケンス番号を更新
+			inline static void setSeqNo(node_type& node, const seq_no_type seq_no){ seq_no_type& ref_seq_no = REF_SEQ_NO_FUNC(const_cast<node_type*>(node)); ref_seq_no = seq_no; }
+		};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//優先度付きキューコンテナアダプタ
+		class con : public containerAdapter<ope_type, _TABLE_SIZE>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using containerAdapter<ope_type, _TABLE_SIZE>::containerAdapter;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デフォルトコンスタラクタ
+			inline con() :
+				containerAdapter<ope_type, _TABLE_SIZE>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
 	};
 	
 	//--------------------
@@ -390,7 +441,7 @@ namespace priority_queue
 		typedef typename CON::node_type node_type;//ノード型
 		typedef typename CON::status_t status_t;//ステータス型
 		typedef typename CON::priority_type priority_type;//優先度型
-		//typedef typename CON::seq_type seq_type;//シーケンス番号型
+		//typedef typename CON::seq_no_type seq_no_type;//シーケンス番号型
 	public:
 		//アクセッサ
 		status_t status() const { return m_status; }//ステータスを取得
@@ -415,7 +466,7 @@ namespace priority_queue
 		bool dequeueCancel();
 	public:
 		//コンストラクタ
-		inline operation_guard(container_adapter_type& container_adapter);
+		inline operation_guard(container_adapter_type& containerAdapter);
 		
 		//デフォルトコンストラクタ
 		operation_guard() = delete;
@@ -427,13 +478,39 @@ namespace priority_queue
 		container_adapter_type& m_containerAdapter;//コンテナアダプタ
 		status_t m_status;//ステータス
 	};
-	
+
 	//--------------------
 	//基本型定義マクロ消去
 	#undef DECLARE_OPE_TYPES
 }//namespace priority_queue
 
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//優先度付きキュー操作用テンプレート構造体
+template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE, typename SEQ_NO_TYPE>
+using priorityQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
+
+//優先度付きキューコンテナアダプタ
+template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+using priorityQueue = priority_queue::containerAdapter<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプル優先度付きキューコンテナアダプタ
+template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>
+using simplePriorityQueue = priority_queue::simpleContainerAdapter<NODE_TYPE, _TABLE_SIZE, REF_PRIORTIY_FUNC, REF_SEQ_NO_FUNC>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_INL
+#include <gasha/dynamic_array.inl>
+#endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dynamic_array.cpp.h>
+#endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__PRIORITY_QUEUE_H_
 

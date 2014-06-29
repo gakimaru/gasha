@@ -96,8 +96,8 @@ namespace binary_heap
 	//二分ヒープ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename NODE_TYPE>
-	//  //struct 派生構造体名 : public binary_heap::baseOpe_t<派生構造体名, ノードの型>
-	//	struct ope_t : public binary_heap::baseOpe_t<ope_t, data_t>
+	//  //struct 派生構造体名 : public binary_heap::baseOpe<派生構造体名, ノードの型>
+	//	struct ope : public binary_heap::baseOpe<ope, data_t>
 	//	{
 	//		//ノード比較用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
@@ -111,7 +111,7 @@ namespace binary_heap
 	//		typedef spin_lock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
-	struct baseOpe_t
+	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
@@ -121,7 +121,7 @@ namespace binary_heap
 		typedef dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-		//　baseOpe_tの派生クラスにて、有効なロック型（spinLock など）を
+		//　baseOpeの派生クラスにて、有効なロック型（spinLock など）を
 		//　lock_type 型として再定義する。
 		//【補足】コンテナには、あらかじめロック制御のための仕組みがソースコードレベルで
 		//　　　　仕込んであるが、有効な型を与えない限りは、実行時のオーバーヘッドは一切ない。
@@ -667,7 +667,7 @@ namespace binary_heap
 		//※処理中、ロックを取得する
 		void clear();
 	public:
-		//コンストラクタ
+		//デフォルトコンストラクタ
 		container();
 		//デストラクタ
 		~container();
@@ -678,7 +678,37 @@ namespace binary_heap
 		status_t m_status;//ステータス
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
-	
+	//----------------------------------------
+	//シンプル二分ヒープコンテナ
+	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
+	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
+	template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
+	struct simpleContainer
+	{
+		//二分ヒープ操作用構造体
+		struct ope : public baseOpe<ope, NODE_TYPE>{};
+
+		//基本型定義
+		DECLARE_OPE_TYPES(ope);
+
+		//二分ヒープコンテナ
+		class con : public container<ope_type, _TABLE_SIZE>
+		{
+		public:
+		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
+			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
+		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デフォルトコンスタラクタ
+			inline con() :
+				container<ope_type, _TABLE_SIZE>()
+			{}
+		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
+			//デストラクタ
+			inline ~con()
+			{}
+		};
+	};
+
 	//--------------------
 	//安全なプッシュ／ポップ操作クラス
 	//※操作状態を記憶し、デストラクタで必ず完了させる
@@ -732,7 +762,33 @@ namespace binary_heap
 	#undef DECLARE_OPE_TYPES
 }//namespace binary_heap
 
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//二分ヒープ操作用テンプレート構造体
+template<class OPE_TYPE, typename NODE_TYPE>
+using binaryHeap_baseOpe = binary_heap::baseOpe<OPE_TYPE, NODE_TYPE>;
+
+//二分ヒープコンテナ
+template<class NODE_TYPE, std::size_t _TABLE_SIZE>
+using binaryHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
+
+//シンプル二分ヒープコンテナ
+template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
+using simpleBinaryHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_INL
+#include <gasha/dynamic_array.inl>
+#endif//GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_INL
+
+//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dynamic_array.cpp.h>
+#endif//GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_CPP_H
 
 #endif//__BINARY_HEAP_H_
 

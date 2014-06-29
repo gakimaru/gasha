@@ -36,7 +36,7 @@ namespace priority_queue
 #if 0
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::iterator& container_adapter<OPE_TYPE>::iterator::operator=(const typename container_adapter<OPE_TYPE>::iterator&& rhs)
+	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -45,7 +45,7 @@ namespace priority_queue
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::iterator& container_adapter<OPE_TYPE>::iterator::operator=(const typename container_adapter<OPE_TYPE>::reverse_iterator&& rhs)
+	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -54,7 +54,7 @@ namespace priority_queue
 	}
 	//コピーオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::iterator& container_adapter<OPE_TYPE>::iterator::operator=(const typename container_adapter<OPE_TYPE>::iterator& rhs)
+	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -63,7 +63,7 @@ namespace priority_queue
 	}
 	//コピーオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::iterator& container_adapter<OPE_TYPE>::iterator::operator=(const typename container_adapter<OPE_TYPE>::reverse_iterator& rhs)
+	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -72,14 +72,14 @@ namespace priority_queue
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const typename container_adapter<OPE_TYPE>::iterator&& obj) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const typename container_adapter<OPE_TYPE>::reverse_iterator&& obj) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -88,14 +88,14 @@ namespace priority_queue
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const typename container_adapter<OPE_TYPE>::iterator& obj) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const typename container_adapter<OPE_TYPE>::reverse_iterator& obj) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -104,7 +104,7 @@ namespace priority_queue
 	}
 	//コンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const container_adapter<OPE_TYPE>& con, const bool is_end) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const containerAdapter<OPE_TYPE>& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -115,7 +115,7 @@ namespace priority_queue
 			update(m_con->m_size);//末尾データ
 	}
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::iterator::iterator(const container_adapter<OPE_TYPE>& con, const typename container_adapter<OPE_TYPE>::index_type index) :
+	inline containerAdapter<OPE_TYPE>::iterator::iterator(const containerAdapter<OPE_TYPE>& con, const typename containerAdapter<OPE_TYPE>::index_type index) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -130,7 +130,7 @@ namespace priority_queue
 #if 0
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::reverse_iterator& container_adapter<OPE_TYPE>::reverse_iterator::operator=(const typename container_adapter<OPE_TYPE>::reverse_iterator&& rhs)
+	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -139,7 +139,7 @@ namespace priority_queue
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::reverse_iterator& container_adapter<OPE_TYPE>::reverse_iterator::operator=(const typename container_adapter<OPE_TYPE>::iterator&& rhs)
+	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -148,7 +148,7 @@ namespace priority_queue
 	}
 	//コピーオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::reverse_iterator& container_adapter<OPE_TYPE>::reverse_iterator::operator=(const typename container_adapter<OPE_TYPE>::reverse_iterator& rhs)
+	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -157,7 +157,7 @@ namespace priority_queue
 	}
 	//コピーオペレータ
 	template<class OPE_TYPE>
-	inline typename container_adapter<OPE_TYPE>::reverse_iterator& container_adapter<OPE_TYPE>::reverse_iterator::operator=(const typename container_adapter<OPE_TYPE>::iterator& rhs)
+	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -166,14 +166,14 @@ namespace priority_queue
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container_adapter<OPE_TYPE>::reverse_iterator&& obj) :
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container_adapter<OPE_TYPE>::iterator&& obj) :
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -182,14 +182,14 @@ namespace priority_queue
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container_adapter<OPE_TYPE>::reverse_iterator& obj) :
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container_adapter<OPE_TYPE>::iterator& obj) :
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -198,7 +198,7 @@ namespace priority_queue
 	}
 	//コンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const container_adapter<OPE_TYPE>& con, const bool is_end) :
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const containerAdapter<OPE_TYPE>& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -210,7 +210,7 @@ namespace priority_queue
 	}
 	//コンストラクタ
 	template<class OPE_TYPE>
-	inline container_adapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const  container_adapter<OPE_TYPE>& con, const typename  container_adapter<OPE_TYPE>::index_type index):
+	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const  containerAdapter<OPE_TYPE>& con, const typename  containerAdapter<OPE_TYPE>::index_type index):
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -224,7 +224,7 @@ namespace priority_queue
 
 	//シーケンス番号発行
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::seq_type container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::getNextSeqNo()
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::seq_no_type containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::getNextSeqNo()
 	{
 		return ope_type::countupSeqNo(m_seqNo);
 	}
@@ -232,13 +232,13 @@ namespace priority_queue
 	//エンキュー
 	//※オブジェクト渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueCopying(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type&& obj)//ムーブ
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueCopying(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type&& obj)//ムーブ
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _enqueueCopying(std::move(obj));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueCopying(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type& obj)//コピー
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueCopying(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type& obj)//コピー
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _enqueueCopying(obj);
@@ -247,7 +247,7 @@ namespace priority_queue
 	//エンキュー（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueue(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
 	{
 		//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 		//	return nullptr;
@@ -264,7 +264,7 @@ namespace priority_queue
 	//※パラメータ渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueue(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _enqueue(priority, args...);
@@ -273,7 +273,7 @@ namespace priority_queue
 	//エンキュー開始（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueueBegin(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
 	{
 		//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 		//	return nullptr;
@@ -288,7 +288,7 @@ namespace priority_queue
 	//エンキュー開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueBegin(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
 		node_type* obj = _enqueueBegin(args...);//エンキュー開始
@@ -299,7 +299,7 @@ namespace priority_queue
 
 	//デキュー
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline bool container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::dequeueCopying(typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type& dst)
+	inline bool containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::dequeueCopying(typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type& dst)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _dequeueCopying(dst);
@@ -307,14 +307,14 @@ namespace priority_queue
 
 	//先頭（根）キューのプライオリティ変更
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::changePriorityOnTop(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority)
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::changePriorityOnTop(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _changePriorityOnTop(priority);
 	}
 	//※ロックなし版（top()参照～プライオリティ変更までを任意にロックするならこちらを使用する）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::changePriorityOnTopWithoutLock(const typename container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority)
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::changePriorityOnTopWithoutLock(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority)
 	{
 		return _changePriorityOnTop(priority);
 	}
@@ -322,7 +322,7 @@ namespace priority_queue
 	//クリア
 	//※処理中、ロックを取得する
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline void container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::clear()
+	inline void containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::clear()
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		_clear();
@@ -330,7 +330,7 @@ namespace priority_queue
 
 	//デフォルトコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
-	inline container_adapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::container_adapter() :
+	inline containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::containerAdapter() :
 		m_container(),
 		m_lock()
 	{
@@ -355,8 +355,8 @@ namespace priority_queue
 
 	//コンストラクタ
 	template<class CON>
-	inline operation_guard<CON>::operation_guard(typename operation_guard<CON>::container_adapter_type& container_adapter) :
-		m_containerAdapter(container_adapter),
+	inline operation_guard<CON>::operation_guard(typename operation_guard<CON>::container_adapter_type& containerAdapter) :
+		m_containerAdapter(containerAdapter),
 		m_status(status_t::IDLE)
 	{}
 
