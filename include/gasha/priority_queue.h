@@ -490,15 +490,15 @@ namespace priority_queue
 
 //優先度付きキュー操作用テンプレート構造体
 template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE, typename SEQ_NO_TYPE>
-using priorityQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
+using pQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
 
 //優先度付きキューコンテナアダプタ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using priorityQueue = priority_queue::containerAdapter<OPE_TYPE, _TABLE_SIZE>;
+using pQueue = priority_queue::containerAdapter<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル優先度付きキューコンテナアダプタ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>
-using simplePriorityQueue = priority_queue::simpleContainerAdapter<NODE_TYPE, _TABLE_SIZE, REF_PRIORTIY_FUNC, REF_SEQ_NO_FUNC>;
+using simplePQueue = priority_queue::simpleContainerAdapter<NODE_TYPE, _TABLE_SIZE, REF_PRIORTIY_FUNC, REF_SEQ_NO_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

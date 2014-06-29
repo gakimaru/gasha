@@ -806,15 +806,15 @@ namespace ring_buffer
 
 //リングバッファ操作用テンプレート構造体
 template<class OPE_TYPE, typename VALUE_TYPE>
-using ringBuff_baseOpe = ring_buffer::baseOpe<OPE_TYPE, VALUE_TYPE>;
+using rBuff_baseOpe = ring_buffer::baseOpe<OPE_TYPE, VALUE_TYPE>;
 
 //リングバッファコンテナ
 template<class OPE_TYPE>
-using ringBuff = ring_buffer::container<OPE_TYPE>;
+using rBuff = ring_buffer::container<OPE_TYPE>;
 
 //シンプルリングバッファコンテナ
 template<typename VALUE_TYPE>
-using sinmpleRingBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
+using sinmpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

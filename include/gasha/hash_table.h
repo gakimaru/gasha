@@ -847,15 +847,15 @@ namespace hash_table
 
 //ハッシュテーブル操作用テンプレート構造体
 template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-using hashTable_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _KEY_MIN, _KEY_MAX, _INVALID_KEY>;
+using hashTbl_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _KEY_MIN, _KEY_MAX, _INVALID_KEY>;
 
 //ハッシュテーブルコンテナ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using hashTable = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+using hashTbl = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプルハッシュテーブルコンテナ
 template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
-using simpleHashTable = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>;
+using simpleHashTbl = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

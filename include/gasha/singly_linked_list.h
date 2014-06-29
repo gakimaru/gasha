@@ -862,15 +862,15 @@ namespace singly_linked_list
 
 //片方向連結リスト操作用テンプレート構造体
 template<class OPE_TYPE, typename NODE_TYPE>
-using singleLinkList_baseOpe = singly_linked_list::baseOpe<OPE_TYPE, NODE_TYPE>;
+using slList_baseOpe = singly_linked_list::baseOpe<OPE_TYPE, NODE_TYPE>;
 
 //片方向連結リストコンテナ
 template<class OPE_TYPE>
-using singleLinkList = singly_linked_list::container<OPE_TYPE>;
+using slList = singly_linked_list::container<OPE_TYPE>;
 
 //シンプル片方向連結リストコンテナ
 template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC>
-using simpleSingleLinkList = singly_linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC>;
+using simpleSLList = singly_linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -12,13 +12,15 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/build_settings/project/first_settings.h>//プロジェクト固有のビルド設定（先行設定） リポジトリ：gasha_settings
+#include <gasha/build_settings/project/first_settings.h>//プロジェクト固有のビルド設定（先行設定） ※リポジトリ：gasha_settings
 
-#include <gasha/build_settings/common/compiler_auto_settings.h>//コンパイラ自動判別・設定       リポジトリ：gasha
-#include <gasha/build_settings/common/platform_auto_settings.h>//プラットフォーム自動判別・設定 リポジトリ：gasha
-#include <gasha/build_settings/common/language_auto_settings.h>//言語機能自動判別・設定         リポジトリ：gasha
+#include <gasha/build_settings/common/build_configuration.h>//ビルド構成
 
-#include <gasha/build_settings/project/last_settings.h>//プロジェクト固有のビルド設定 リポジトリ：gasha_settings
+#include <gasha/build_settings/common/compiler_auto_settings.h>//コンパイラ自動判別・設定
+#include <gasha/build_settings/common/platform_auto_settings.h>//プラットフォーム自動判別・設定
+#include <gasha/build_settings/common/language_auto_settings.h>//言語機能自動判別・設定
+
+#include <gasha/build_settings/project/last_settings.h>//プロジェクト固有のビルド設定（最終設定） ※リポジトリ：gasha_settings
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

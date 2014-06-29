@@ -766,17 +766,19 @@ namespace binary_heap
 //クラスの別名
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
+//※略称が bHeap では、「二項ヒープ」（Binomial Heap）と区別が付かないが、良しとする
+
 //二分ヒープ操作用テンプレート構造体
 template<class OPE_TYPE, typename NODE_TYPE>
-using binaryHeap_baseOpe = binary_heap::baseOpe<OPE_TYPE, NODE_TYPE>;
+using bHeap_baseOpe = binary_heap::baseOpe<OPE_TYPE, NODE_TYPE>;
 
 //二分ヒープコンテナ
 template<class NODE_TYPE, std::size_t _TABLE_SIZE>
-using binaryHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
+using bHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
 
 //シンプル二分ヒープコンテナ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
-using simpleBinaryHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
+using simpleHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

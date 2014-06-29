@@ -781,15 +781,15 @@ namespace linked_list
 
 //双方向連結リスト操作用テンプレート構造体
 template<class OPE_TYPE, typename NODE_TYPE>
-using linkList_baseOpe = linked_list::baseOpe<OPE_TYPE, NODE_TYPE>;
+using lList_baseOpe = linked_list::baseOpe<OPE_TYPE, NODE_TYPE>;
 
 //双方向連結リストコンテナ
 template<class OPE_TYPE>
-using linkList = linked_list::container<OPE_TYPE>;
+using lList = linked_list::container<OPE_TYPE>;
 
 //シンプル双方向連結リストコンテナ
 template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC, class REF_PREV_PTR_FUNC>
-using simpleLinkList = linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC, REF_PREV_PTR_FUNC>;
+using simpleLList = linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC, REF_PREV_PTR_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
