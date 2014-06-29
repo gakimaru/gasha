@@ -233,7 +233,7 @@ std::size_t _iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate
 		const int _depth = stack_p->depth;
 		//配列の範囲情報
 		ITERATOR _begin = _begin_range;
-		ITERATOR _end = _end_range - 1;
+		ITERATOR _end = _end_range - static_cast<typename ITERATOR::difference_type>(1);
 		//軸を決定
 		ITERATOR _mid = _begin + (_size >> 1);
 		ITERATOR _pivot =
@@ -267,7 +267,7 @@ std::size_t _iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate
 		//            1 : 軸以上の配列をプッシュ
 		for (int recursive = 0; recursive < 2; ++recursive)
 		{
-			ITERATOR _new_begin = recursive == 0 ? _begin_range : _end + 1;
+			ITERATOR _new_begin = recursive == 0 ? _begin_range : _end + static_cast<typename ITERATOR::difference_type>(1);
 			ITERATOR _new_end = recursive == 0 ? _begin : _end_range;
 			const typename ITERATOR::difference_type _new_size = _new_end - _new_begin;
 			const int _new_depth = _depth - 1;
@@ -303,7 +303,7 @@ inline std::size_t iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE pre
 {
 	if (begin == end)
 		return 0;
-	if (iteratorCalcUnordered(begin, end, predicate) == 0)
+	if (iteratorIsOrdered(begin, end, predicate))
 		return 0;
 	return _iteratorIntroSort(begin, end, predicate);
 }

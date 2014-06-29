@@ -38,15 +38,15 @@ namespace ring_buffer
 		else
 		{
 			m_logicalIndex = logical_index;
-			const index_type real_index = m_con->_to_real_index(m_logicalIndex);
-			m_value = const_cast<value_type*>(m_con->_ref_real_element(real_index));
+			const index_type real_index = m_con->_toRealIndex(m_logicalIndex);
+			m_value = const_cast<value_type*>(m_con->_refRealElement(real_index));
 		}
 	}
 	//参照を更新
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
-		update(m_logicalIndex + add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_logicalIndex) + add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
@@ -149,15 +149,15 @@ namespace ring_buffer
 		else
 		{
 			m_logicalIndex = logical_index;
-			const index_type real_index = m_con->_to_real_index(m_logicalIndex);
-			m_value = real_index == 0 ? const_cast<value_type*>(m_con->_ref_real_element(m_con->m_maxSize - 1)) : const_cast<value_type*>(m_con->_ref_real_element(real_index - 1));
+			const index_type real_index = m_con->_toRealIndex(m_logicalIndex);
+			m_value = real_index == 0 ? const_cast<value_type*>(m_con->_refRealElement(m_con->m_maxSize - 1)) : const_cast<value_type*>(m_con->_refRealElement(real_index - 1));
 		}
 	}
 	//参照を更新
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
-		update(m_logicalIndex - add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_logicalIndex) - add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>

@@ -93,18 +93,6 @@ namespace ring_buffer
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++() const
-	{
-		addIndexAndUpdate(1);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator--() const
-	{
-		addIndexAndUpdate(-1);
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++()
 	{
 		addIndexAndUpdate(1);
@@ -115,20 +103,6 @@ namespace ring_buffer
 	{
 		addIndexAndUpdate(-1);
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int) const
-	{
-		iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator--(int) const
-	{
-		iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int)
@@ -145,63 +119,37 @@ namespace ring_buffer
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(-rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs)
-	{
-		addIndexAndUpdate(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs)
-	{
-		addIndexAndUpdate(-rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs)
-	{
-		iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs)
-	{
-		iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
+	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || m_logicalIndex < rhs.m_logicalIndex)
 			return 0;
-		return static_cast<int>(m_logicalIndex - rhs.m_logicalIndex);
+		return static_cast<difference_type>(m_logicalIndex - rhs.m_logicalIndex);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -297,18 +245,6 @@ namespace ring_buffer
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++() const
-	{
-		addIndexAndUpdate(1);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator--() const
-	{
-		addIndexAndUpdate(-1);
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++()
 	{
 		addIndexAndUpdate(1);
@@ -319,20 +255,6 @@ namespace ring_buffer
 	{
 		addIndexAndUpdate(-1);
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int) const
-	{
-		reverse_iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator--(int) const
-	{
-		reverse_iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int)
@@ -349,63 +271,37 @@ namespace ring_buffer
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(-rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs)
-	{
-		addIndexAndUpdate(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs)
-	{
-		addIndexAndUpdate(-rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs) const
+	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex < m_logicalIndex)
 			return 0;
-		return static_cast<int>(rhs.m_logicalIndex - m_logicalIndex);
+		return static_cast<difference_type>(rhs.m_logicalIndex - m_logicalIndex);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -479,6 +375,26 @@ namespace ring_buffer
 	{
 		return m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
 	}
+	
+	//論理インデックスを範囲内に補正
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_adjLogicalIndex(const typename container<OPE_TYPE>::index_type logical_index) const
+	{
+		return static_cast<index_type>(logical_index >= 0 && logical_index < static_cast<int>(m_maxSize) ? logical_index : INVALID_INDEX);
+	}
+	//要素を物理インデックスに変換 ※範囲チェックなし
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_refRealIndex(const typename container<OPE_TYPE>::value_type* node) const
+	{
+		return static_cast<index_type>(node - _refFront());
+	}
+	//要素を論理インデックスに変換 ※範囲チェックなし
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_refLogicalIndex(const typename container<OPE_TYPE>::value_type* node) const
+	{
+		return _toLogicalIndex(_refRealIndex(node));
+	}
+	
 	//末尾の新規インデックス
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::size_type container<OPE_TYPE>::_backNewRealIndex() const

@@ -179,11 +179,12 @@ namespace dynamic_array
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
 		typedef const value_type* const_pointer; \
-		typedef std::ptrdiff_t difference_type; \
+		typedef int difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
-	
+		//typedef std::ptrdiff_t difference_type;//※difference_typeは、std::ptrdiff_t を使用するとイテレータのオペレータのオーバーロードで問題を起こすので、int 型で扱う
+
 	//----------------------------------------
 	//コンテナ破棄時の要素の自動クリア属性
 	enum autoClearAttr_t
@@ -218,6 +219,9 @@ namespace dynamic_array
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
@@ -244,31 +248,19 @@ namespace dynamic_array
 			inline bool operator<=(const iterator& rhs) const;
 		public:
 			//演算オペレータ
-			inline const iterator& operator++() const;
-			inline const iterator& operator--() const;
 			inline iterator& operator++();
 			inline iterator& operator--();
-			inline const iterator operator++(int) const;
-			inline const iterator operator--(int) const;
 			inline iterator operator++(int);
 			inline iterator operator--(int);
-			inline const iterator& operator+=(const int rhs) const;
-			inline const iterator& operator+=(const unsigned int rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const iterator& operator-=(const int rhs) const;
-			inline const iterator& operator-=(const unsigned int rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline iterator& operator+=(const int rhs);
-			inline iterator& operator+=(const unsigned int rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline iterator& operator-=(const int rhs);
-			inline iterator& operator-=(const unsigned int rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const iterator operator+(const int rhs) const;
-			inline const iterator operator+(const unsigned int rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const iterator operator-(const int rhs) const;
-			inline const iterator operator-(const unsigned int rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline iterator operator+(const int rhs);
-			inline iterator operator+(const unsigned int rhs) { return operator+(static_cast<int>(rhs)); }
-			inline iterator operator-(const int rhs);
-			inline iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const iterator& rhs) const;
+			inline iterator& operator+=(const difference_type rhs);
+			inline iterator& operator+=(const size_type rhs){ return operator+=(static_cast<difference_type>(rhs)); }
+			inline iterator& operator-=(const difference_type rhs);
+			inline iterator& operator-=(const size_type rhs){ return operator-=(static_cast<difference_type>(rhs)); }
+			inline iterator operator+(const difference_type rhs) const;
+			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline iterator operator-(const difference_type rhs) const;
+			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			inline difference_type operator-(const iterator& rhs) const;
 		public:
 			//アクセッサ
 			inline bool isExist() const;
@@ -327,6 +319,9 @@ namespace dynamic_array
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -353,31 +348,19 @@ namespace dynamic_array
 			inline bool operator<=(const reverse_iterator& rhs) const;
 		public:
 			//演算オペレータ
-			inline const reverse_iterator& operator++() const;
-			inline const reverse_iterator& operator--() const;
 			inline reverse_iterator& operator++();
 			inline reverse_iterator& operator--();
-			inline const reverse_iterator operator++(int) const;
-			inline const reverse_iterator operator--(int) const;
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
-			inline const reverse_iterator& operator+=(const int rhs) const;
-			inline const reverse_iterator& operator+=(const unsigned int rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const reverse_iterator& operator-=(const int rhs) const;
-			inline const reverse_iterator& operator-=(const unsigned int rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator+=(const int rhs);
-			inline reverse_iterator& operator+=(const unsigned int rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator-=(const int rhs);
-			inline reverse_iterator& operator-=(const unsigned int rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator+(const int rhs) const;
-			inline const reverse_iterator operator+(const unsigned int rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator-(const int rhs) const;
-			inline const reverse_iterator operator-(const unsigned int rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline reverse_iterator operator+(const int rhs);
-			inline reverse_iterator operator+(const unsigned int rhs) { return operator+(static_cast<int>(rhs)); }
-			inline reverse_iterator operator-(const int rhs);
-			inline reverse_iterator operator-(const unsigned int rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const reverse_iterator& rhs) const;
+			inline reverse_iterator& operator+=(const difference_type rhs);
+			inline reverse_iterator& operator+=(const size_type rhs){ return operator+=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator& operator-=(const difference_type rhs);
+			inline reverse_iterator& operator-=(const size_type rhs){ return operator-=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator+(const difference_type rhs) const;
+			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator-(const difference_type rhs) const;
+			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			inline difference_type operator-(const reverse_iterator& rhs) const;
 		public:
 			//アクセッサ
 			inline bool isExist() const;

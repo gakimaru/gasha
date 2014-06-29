@@ -186,11 +186,12 @@ namespace ring_buffer
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
 		typedef const value_type* const_pointer; \
-		typedef std::ptrdiff_t difference_type; \
+		typedef int difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
-	
+		//typedef std::ptrdiff_t difference_type;//※difference_typeは、std::ptrdiff_t を使用するとイテレータのオペレータのオーバーロードで問題を起こすので、int 型で扱う
+
 	//----------------------------------------
 	//コンテナ破棄時の要素の自動クリア属性
 	enum autoClearAttr_t
@@ -225,6 +226,9 @@ namespace ring_buffer
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
@@ -250,31 +254,19 @@ namespace ring_buffer
 			inline bool operator<(const iterator& rhs) const;
 			inline bool operator<=(const iterator& rhs) const;
 			//演算オペレータ
-			inline const iterator& operator++() const;
-			inline const iterator& operator--() const;
 			inline iterator& operator++();
 			inline iterator& operator--();
-			inline const iterator operator++(int) const;
-			inline const iterator operator--(int) const;
 			inline iterator operator++(int);
 			inline iterator operator--(int);
-			inline const iterator& operator+=(const int rhs) const;
-			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const iterator& operator-=(const int rhs) const;
-			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline iterator& operator+=(const int rhs);
-			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline iterator& operator-=(const int rhs);
-			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const iterator operator+(const int rhs) const;
-			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const iterator operator-(const int rhs) const;
-			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline iterator operator+(const int rhs);
-			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-			inline iterator operator-(const int rhs);
-			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const iterator& rhs) const;
+			inline iterator& operator+=(const difference_type rhs);
+			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
+			inline iterator& operator-=(const difference_type rhs);
+			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline iterator operator+(const difference_type rhs) const;
+			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline iterator operator-(const difference_type rhs) const;
+			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			inline difference_type operator-(const iterator& rhs) const;
 		public:
 			//アクセッサ
 			inline bool isExist() const;
@@ -290,7 +282,13 @@ namespace ring_buffer
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const;
+		public:
+			//値を差分型に変換
+			template<typename T>
+			difference_type toDifferenceType(const T value) const { return static_cast<difference_type>(value); }
+			template<typename T>
+			difference_type toDiff(const T value) const { return toDifferenceType(value); }
 		public:
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
@@ -334,6 +332,9 @@ namespace ring_buffer
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -359,31 +360,19 @@ namespace ring_buffer
 			inline bool operator<(const reverse_iterator& rhs) const;
 			inline bool operator<=(const reverse_iterator& rhs) const;
 			//演算オペレータ
-			inline const reverse_iterator& operator++() const;
-			inline const reverse_iterator& operator--() const;
 			inline reverse_iterator& operator++();
 			inline reverse_iterator& operator--();
-			inline const reverse_iterator operator++(int) const;
-			inline const reverse_iterator operator--(int) const;
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
-			inline const reverse_iterator& operator+=(const int rhs) const;
-			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const reverse_iterator& operator-=(const int rhs) const;
-			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator+=(const int rhs);
-			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator-=(const int rhs);
-			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator+(const int rhs) const;
-			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator-(const int rhs) const;
-			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline reverse_iterator operator+(const int rhs);
-			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-			inline reverse_iterator operator-(const int rhs);
-			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const reverse_iterator& rhs) const;
+			inline reverse_iterator& operator+=(const difference_type rhs);
+			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator& operator-=(const difference_type rhs);
+			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator+(const difference_type rhs) const;
+			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator-(const difference_type rhs) const;
+			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			inline difference_type operator-(const reverse_iterator& rhs) const;
 		public:
 			//アクセッサ
 			inline bool isExist() const;
@@ -403,7 +392,13 @@ namespace ring_buffer
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const;
+		public:
+			//値を差分型に変換
+			template<typename T>
+			difference_type toDifferenceType(const T value) const { return static_cast<difference_type>(value); }
+			template<typename T>
+			difference_type toDiff(const T value) const { return toDifferenceType(value); }
 		public:
 			//ムーブオペレータ
 			reverse_iterator& operator=(const reverse_iterator&& rhs);
@@ -504,9 +499,9 @@ namespace ring_buffer
 		inline value_type* _refBack(){ return _refElement(m_size - 1); }//末尾要素参照
 		inline value_type* _refFrontNew(){ return _refRealElement(_frontNewRealIndex()); }//先頭の新規要素参照
 		inline value_type* _refBackNew(){ return _refRealElement(_backNewRealIndex()); }//末尾の新規要素参照
-		inline int _adjLogicalIndex(const int logical_index) const { return logical_index >= 0 && logical_index < m_maxSize ? logical_index : INVALID_INDEX; }//論理インデックスを範囲内に補正
-		inline int _refRealIndex(const value_type* node) const{ return node - _refFront(); }//要素を物理インデックスに変換 ※範囲チェックなし
-		inline int _refLogicalIndex(const value_type* node) const{ return _toLogicalIndex(_refRealIndex(node)); }//要素を論理インデックスに変換 ※範囲チェックなし
+		inline index_type _adjLogicalIndex(const index_type logical_index) const;//論理インデックスを範囲内に補正
+		inline index_type _refRealIndex(const value_type* node) const;//要素を物理インデックスに変換 ※範囲チェックなし
+		inline index_type _refLogicalIndex(const value_type* node) const;//要素を論理インデックスに変換 ※範囲チェックなし
 	public:
 		//メソッド：要素アクセス系（独自拡張版）
 		//※範囲チェックあり（公開）
@@ -524,7 +519,7 @@ namespace ring_buffer
 		inline value_type* refBack(){ return const_cast<value_type*>(const_cast<const container*>(this)->refBack()); }//末尾要素参照
 		inline value_type* refFrontNew(){ return const_cast<value_type*>(const_cast<const container*>(this)->refFrontNew()); }//先頭の新規要素参照
 		inline value_type* refBackNew(){ return const_cast<value_type*>(const_cast<const container*>(this)->refBackNew()); }//末尾の新規要素参照
-		inline int refLogicalIndex(const value_type* node) const{ return _adjLogicalIndex(_refLogicalIndex(node)); }//要素を論理インデックスに変換
+		inline index_type refLogicalIndex(const value_type* node) const{ return _adjLogicalIndex(_refLogicalIndex(node)); }//要素を論理インデックスに変換
 	public:
 		//メソッド：基本情報系
 		inline size_type max_size() const { return m_maxSize; }//最大要素数を取得
@@ -641,7 +636,7 @@ namespace ring_buffer
 		//※デストラクタを呼び出す
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline void clear();
+		void clear();
 	private:
 		//要素の移動（昇順）
 		void moveAsc(const index_type dst_pos, const index_type src_pos, const size_type num);
@@ -814,7 +809,7 @@ using rBuff = ring_buffer::container<OPE_TYPE>;
 
 //シンプルリングバッファコンテナ
 template<typename VALUE_TYPE>
-using sinmpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
+using simpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

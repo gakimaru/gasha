@@ -235,7 +235,7 @@ inline void rotateValues(T* val1, T* val2, int step)
 //----------------------------------------
 //データのローテーション
 template<class ITERATOR>
-inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, int step)
+inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, typename ITERATOR::difference_type step)
 {
 	typedef typename ITERATOR::value_type value_type;
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー

@@ -113,8 +113,8 @@ std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 		return 0;
 	std::size_t swapped_count = 0;
 	const typename ITERATOR::difference_type size = iteratorDifference(begin, end);
-	const int h_max = size / 3;
-	int h = 1;
+	const typename ITERATOR::difference_type h_max = size / 3;
+	typename ITERATOR::difference_type h = 1;
 	while (h <= h_max)
 		h = 3 * h + 1;
 	while (h > 0)

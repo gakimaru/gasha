@@ -93,18 +93,6 @@ namespace dynamic_array
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++() const
-	{
-		addIndexAndUpdate(1);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator--() const
-	{
-		addIndexAndUpdate(-1);
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++()
 	{
 		addIndexAndUpdate(1);
@@ -115,20 +103,6 @@ namespace dynamic_array
 	{
 		addIndexAndUpdate(-1);
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int) const
-	{
-		iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator--(int) const
-	{
-		iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int)
@@ -145,63 +119,37 @@ namespace dynamic_array
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(-rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs)
-	{
-		addIndexAndUpdate(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs)
-	{
-		addIndexAndUpdate(-rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs)
-	{
-		iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs)
-	{
-		iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
+	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
 			return 0;
-		return static_cast<int>(m_index - rhs.m_index);
+		return static_cast<difference_type>(m_index - rhs.m_index);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -292,18 +240,6 @@ namespace dynamic_array
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++() const
-	{
-		addIndexAndUpdate(1);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator--() const
-	{
-		addIndexAndUpdate(-1);
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++()
 	{
 		addIndexAndUpdate(1);
@@ -314,20 +250,6 @@ namespace dynamic_array
 	{
 		addIndexAndUpdate(-1);
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int) const
-	{
-		reverse_iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator--(int) const
-	{
-		reverse_iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int)
@@ -344,63 +266,37 @@ namespace dynamic_array
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		addIndexAndUpdate(-rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs)
-	{
-		addIndexAndUpdate(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs)
-	{
-		addIndexAndUpdate(-rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
+	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
 			return 0;
-		return static_cast<int>(rhs.m_index - m_index);
+		return static_cast<difference_type>(rhs.m_index - m_index);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>

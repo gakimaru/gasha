@@ -90,12 +90,12 @@ ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON compariso
 {
 	if (begin == end)
 		return end;
-	const int size = iteratorDifference(begin, end);
-	int range = size;
+	const typename ITERATOR::difference_type size = iteratorDifference(begin, end);
+	typename ITERATOR::difference_type range = size;
 	ITERATOR found = end;
 	while (true)
 	{
-		const int range_half = range / 2;//探索範囲の半分の範囲
+		const typename ITERATOR::difference_type range_half = range / 2;//探索範囲の半分の範囲
 		ITERATOR mid = begin + range_half;//探索範囲の中心要素
 		const int comp = comparison(*mid);//中心要素を探索値と比較
 		if (comp == 0)//中心要素が探索値と一致
@@ -106,7 +106,7 @@ ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON compariso
 			range = range_half;
 		else//if (comp > 0)//探索値が中心要素より大きかった場合、次に中心より後の範囲に絞って探索する
 		{
-			begin = mid + 1;
+			begin = mid + static_cast<typename ITERATOR::difference_type>(1);
 			range -= (range_half + 1);
 		}
 	}

@@ -42,9 +42,9 @@ namespace dynamic_array
 		}
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
-		update(m_index + add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_index) + add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
@@ -151,9 +151,9 @@ namespace dynamic_array
 		}
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
-		update(m_index - add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_index) - add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
