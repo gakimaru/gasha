@@ -704,26 +704,79 @@ namespace linked_list
 	//シンプル双方向連結リストコンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	//プロトタイプ：
-	//  node_type*& REF_NEXT_PTR_FUNC(node_type&)
-	//  node_type*& REF_PREV_PTR_FUNC(node_type&)
-	template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC, class REF_PREV_PTR_FUNC>
+	template<typename VALUE_TYPE>
 	struct simpleContainer
 	{
-		//双方向連結リスト操作用構造体
-		struct ope : public baseOpe<ope, NODE_TYPE>
+		typedef VALUE_TYPE core_value_type;//値型
+
+		//データノード型
+		struct node
 		{
-			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
+			mutable const node* m_next;
+			mutable const node* m_prev;
+			core_value_type m_value;
+
+			//キャストオペレータ
+			operator const core_value_type&() const { return m_value; }
+			operator core_value_type&(){ return m_value; }
+			operator const core_value_type*() const { return &m_value; }
+			operator core_value_type*(){ return &m_value; }
+
+			//アクセッサ
+			const core_value_type& value() const { return m_value; }
+			core_value_type& value(){ return m_value; }
+			const core_value_type* pointer() const { return &m_value; }
+			core_value_type* pointer(){ return &m_value; }
+
+			//比較オペレータ
+			inline bool operator==(const node& rhs) const { return m_value == rhs.m_value; }
+			//inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
+			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }
+			//inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
+			//inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
+			//inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
+
+			//ムーブオペレータ
+			inline node& operator=(core_value_type&& value) { m_value = std::move(value); return *this; }
+			//コピーオペレータ
+			inline node& operator=(const core_value_type& value) { m_value = value; return *this; }
+			//ムーブコンストラクタ
+			inline node(core_value_type&& value) :
+				m_next(nullptr),
+				m_prev(nullptr),
+				m_value(std::move(value))
+			{}
+			//コピーコンストラクタ
+			inline node(const core_value_type& value) :
+				m_next(nullptr),
+				m_prev(nullptr),
+				m_value(value)
+			{}
+			//デフォルトコンストラクタ
+			inline node():
+				m_next(nullptr),
+				m_prev(nullptr),
+				m_value()
+			{}
+			//デストラクタ
+			inline ~node()
+			{}
+		};
+
+		//双方向連結リスト操作用構造体
+		struct ope : public baseOpe<ope, node>
+		{
+			typedef typename baseOpe<ope, node>::node_type node_type;
 
 			//前ノードを取得
-			inline static const node_type* getPrev(const node_type& node){ node_type*& ref_prev = REF_PREV_PTR_FUNC(const_cast<node_type*>(node)); return ref_prev; }
+			inline static const node_type* getPrev(const node_type& node){ return node.m_prev; }
 			//前ノードを変更
-			inline static void setPrev(node_type& node, const node_type* prev){ node_type*& ref_prev = REF_PREV_PTR_FUNC(const_cast<node_type*>(node)); ref_prev = const_cast<node_type*>(prev); }
+			inline static void setPrev(node_type& node, const node_type* prev){ node.m_prev = prev; }
 			
 			//次ノードを取得
-			inline static const node_type* getNext(const node_type& node){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); return ref_next; }
+			inline static const node_type* getNext(const node_type& node){ return node.m_next; }
 			//次ノードを変更
-			inline static void setNext(node_type& node, const node_type* next){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); ref_next = const_cast<node_type*>(next); }
+			inline static void setNext(node_type& node, const node_type* next){ node.m_next = next; }
 		};
 
 		//基本型定義
@@ -773,8 +826,8 @@ template<class OPE_TYPE>
 using lList = linked_list::container<OPE_TYPE>;
 
 //シンプル双方向連結リストコンテナ
-template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC, class REF_PREV_PTR_FUNC>
-using simpleLList = linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC, REF_PREV_PTR_FUNC>;
+template<typename NODE_TYPE>
+using simpleLList = linked_list::simpleContainer<NODE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
