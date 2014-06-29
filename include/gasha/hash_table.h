@@ -723,24 +723,24 @@ namespace hash_table
 		//キー割り当てして値を初期化（本体）
 		//※コンストラクタが呼び出される
 		template<typename... Tx>
-		value_type* _emplace(const key_type key, Tx... args);
+		value_type* _emplace(const key_type key, const Tx&... args);
 	public:
 		//キー割り当てして値を初期化
 		//※コンストラクタが呼び出される
 		//※処理中、排他ロック（ライトロック）を取得する
 		template<typename... Tx>
-		inline value_type* emplace(const key_type key, Tx... args);
+		inline value_type* emplace(const key_type key, const Tx&... args);
 		template<typename... Tx>
-		inline value_type* emplace(const char* key, Tx... args);
+		inline value_type* emplace(const char* key, const Tx&... args);
 		template<typename... Tx>
-		inline value_type* emplace(const std::string& key, Tx... args);
+		inline value_type* emplace(const std::string& key, const Tx&... args);
 		
 		//値を初期化して自動的にキー割り当て
 		//※オブジェクトのコピーが発生する点に注意
 		//※操作用クラス baseOpe の派生クラスで、getKey() を実装する必要あり
 		//※処理中、ライトロックを取得する
 		template<typename... Tx>
-		inline value_type* emplaceAuto(Tx... args);
+		inline value_type* emplaceAuto(const Tx&... args);
 	private:
 		//インデックスを指定して削除
 		void _eraseByIndex(const index_type index);

@@ -244,7 +244,7 @@ namespace priority_queue
 		public:
 			//エンキュー開始
 			template<typename... Tx>
-			node_type* enqueueBegin(const priority_type priority, Tx... args);
+			node_type* enqueueBegin(const priority_type priority, const Tx&... args);
 			
 			//エンキュー終了
 			node_type* enqueueEnd();
@@ -332,7 +332,7 @@ namespace priority_queue
 	private:
 		//エンキュー（本体）
 		template<typename... Tx>
-		node_type* _enqueue(const priority_type priority, Tx... args);
+		node_type* _enqueue(const priority_type priority, const Tx&... args);
 	public:
 		//エンキュー
 		//※パラメータ渡し
@@ -340,11 +340,11 @@ namespace priority_queue
 		//※オブジェクトには、シーケンス番号が書き込まれる
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		node_type* enqueue(const priority_type priority, Tx... args);
+		node_type* enqueue(const priority_type priority, const Tx&... args);
 	private:
 		//エンキュー開始（本体）
 		template<typename... Tx>
-		node_type* _enqueueBegin(const priority_type priority, Tx... args);
+		node_type* _enqueueBegin(const priority_type priority, const Tx&... args);
 	public:
 		//エンキュー開始
 		//※空きキュー取得
@@ -352,7 +352,7 @@ namespace priority_queue
 		//※この時点で、優先度とシーケンス番号が書き込まれる
 		//※処理が成功すると、ロックを取得した状態になる（enqueueEndで解放する）
 		template<typename... Tx>
-		node_type* enqueueBegin(const priority_type priority, Tx... args);
+		node_type* enqueueBegin(const priority_type priority, const Tx&... args);
 	private:
 		//エンキュー終了（本体）
 		node_type* _enqueueEnd();

@@ -779,6 +779,70 @@ namespace linked_list
 		m_last(nullptr)
 	{}
 #endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
+	
+	//----------------------------------------
+	//シンプル双方向連結リストコンテナ
+	
+	//明示的なコンストラクタ呼び出し
+	template<typename VALUE_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE>::node::constructor(const Tx&... args)
+	{
+		new(&m_value)core_value_type(args...);
+	}
+	
+	//明示的なデストラクタ呼び出し
+	template<typename VALUE_TYPE>
+	inline void simpleContainer<VALUE_TYPE>::node::destructor()
+	{
+		m_value.~core_value_type();//デストラクタ呼び出し
+		operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+	}
+
+	//ムーブオペレータ
+	template<typename VALUE_TYPE>
+	inline typename simpleContainer<VALUE_TYPE>::node& simpleContainer<VALUE_TYPE>::node::operator=(typename simpleContainer<VALUE_TYPE>::core_value_type&& value)
+	{
+		m_value = std::move(value);
+		return *this;
+	}
+	
+	//コピーオペレータ
+	template<typename VALUE_TYPE>
+	inline typename simpleContainer<VALUE_TYPE>::node& simpleContainer<VALUE_TYPE>::node::operator=(const typename simpleContainer<VALUE_TYPE>::core_value_type& value)
+	{
+		m_value = value;
+		return *this;
+	}
+	
+	//ムーブコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node(typename simpleContainer<VALUE_TYPE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_next(nullptr),
+		m_prev(nullptr)
+	{}
+	
+	//コピーコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node(const typename simpleContainer<VALUE_TYPE>::core_value_type& value) :
+		m_value(value),
+		m_next(nullptr),
+		m_prev(nullptr)
+	{}
+	
+	//デフォルトコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node() :
+		m_value(),
+		m_next(nullptr),
+		m_prev(nullptr)
+	{}
+	
+	//デストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::~node()
+	{}
 
 }//namespace linked_list
 

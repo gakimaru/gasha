@@ -36,7 +36,7 @@ namespace priority_queue
 	//エンキュー開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::priority_type priority, const Tx&... args)
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -90,7 +90,7 @@ namespace priority_queue
 	//エンキュー（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, const Tx&... args)
 	{
 		//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 		//	return nullptr;
@@ -107,7 +107,7 @@ namespace priority_queue
 	//※パラメータ渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	inline typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueue(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, const Tx&... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _enqueue(priority, args...);
@@ -116,7 +116,7 @@ namespace priority_queue
 	//エンキュー開始（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::_enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, const Tx&... args)
 	{
 		//if (m_container.status() == status_t::PUSH_BEGINNING || m_container.status() == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 		//	return nullptr;
@@ -131,7 +131,7 @@ namespace priority_queue
 	//エンキュー開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	template<typename... Tx>
-	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx... args)
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, const Tx&... args)
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
 		node_type* obj = _enqueueBegin(args...);//エンキュー開始

@@ -33,7 +33,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※既定の型
 template<class T, std::size_t _POOL_SIZE>
 template<typename...Tx>
-typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newObj(Tx... args)
+typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newObj(const Tx&... args)
 {
 	void* p = alloc();
 	if (!p)
@@ -43,7 +43,7 @@ typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SI
 //※型指定
 template<class T, std::size_t _POOL_SIZE>
 template<typename ObjType, typename...Tx>
-ObjType* lfPoolAllocator<T, _POOL_SIZE>::newObj(Tx... args)
+ObjType* lfPoolAllocator<T, _POOL_SIZE>::newObj(const Tx&... args)
 {
 	static_assert(sizeof(ObjType) <= VALUE_SIZE, "sizeof(ObjType) is too large.");
 	void* p = alloc();

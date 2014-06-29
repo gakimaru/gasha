@@ -705,62 +705,85 @@ namespace linked_list
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
 	template<typename VALUE_TYPE>
-	struct simpleContainer
+	class simpleContainer
 	{
+	public:
 		typedef VALUE_TYPE core_value_type;//値型
 
 		//データノード型
+		//※元の値型に対するプロキシーとして振る舞う
 		struct node
 		{
-			mutable const node* m_next;
-			mutable const node* m_prev;
-			core_value_type m_value;
+			core_value_type m_value;//値
+			mutable const node* m_next;//次のノード
+			mutable const node* m_prev;//前のノード
 
 			//キャストオペレータ
-			operator const core_value_type&() const { return m_value; }
-			operator core_value_type&(){ return m_value; }
-			operator const core_value_type*() const { return &m_value; }
-			operator core_value_type*(){ return &m_value; }
-
+			inline operator const core_value_type&() const { return m_value; }
+			inline operator core_value_type&(){ return m_value; }
+			inline operator const core_value_type*() const { return &m_value; }
+			inline operator core_value_type*(){ return &m_value; }
 			//アクセッサ
-			const core_value_type& value() const { return m_value; }
-			core_value_type& value(){ return m_value; }
-			const core_value_type* pointer() const { return &m_value; }
-			core_value_type* pointer(){ return &m_value; }
-
+			inline const core_value_type& value() const { return m_value; }
+			inline core_value_type& value(){ return m_value; }
+			inline const core_value_type* pointer() const { return &m_value; }
+			inline core_value_type* pointer(){ return &m_value; }
+			//基本オペレータ
+			inline const core_value_type& operator*() const { return m_value; }
+			inline core_value_type& operator*(){ return m_value; }
+			inline const core_value_type* operator->() const { return &m_value; }
+			inline core_value_type* operator->(){ return &m_value; }
 			//比較オペレータ
 			inline bool operator==(const node& rhs) const { return m_value == rhs.m_value; }
-			//inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
-			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }
-			//inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
-			//inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
-			//inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
+			inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
+			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
+			inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
+			inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
+			inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
+			template<class V>
+			inline bool operator==(const V& rhs) const { return m_value == rhs; }//container::find(), std::find()に必要
+			template<class V>
+			inline bool operator!=(const V& rhs) const { return m_value != rhs; }
+			template<class V>
+			inline bool operator<(const V& rhs) const { return m_value < rhs; }//container::binarySearch(), std::binary_search(), std::lower_bound(), std::upper_bound() に必要
+			template<class V>
+			inline bool operator>(const V& rhs) const { return m_value > rhs; }
+			template<class V>
+			inline bool operator<=(const V& rhs) const { return m_value <= rhs; }
+			template<class V>
+			inline bool operator>=(const V& rhs) const { return m_value >= rhs; }
+			//フレンド比較演算子（静的関数になる） ※左辺値が自身の型以外の二項演算子
+			template<class V>
+			friend inline bool operator==(const V& lhs, const node& rhs){ return lhs == rhs; }
+			template<class V>
+			friend inline bool operator!=(const V& lhs, const node& rhs){ return lhs != rhs; }
+			template<class V>
+			friend inline bool operator<(const V& lhs, const node& rhs){ return lhs < rhs; }//std::binary_search(), std::upper_bound() に必要
+			template<class V>
+			friend inline bool operator>(const V& lhs, const node& rhs){ return lhs > rhs; }
+			template<class V>
+			friend inline bool operator<=(const V& lhs, const node& rhs){ return lhs <= rhs; }
+			template<class V>
+			friend inline bool operator>=(const V& lhs, const node& rhs){ return lhs >= rhs; }
+
+			//明示的なコンストラクタ呼び出し
+			template<typename... Tx>
+			inline void constructor(const Tx&... args);
+			//明示的なデストラクタ呼び出し
+			inline void destructor();
 
 			//ムーブオペレータ
-			inline node& operator=(core_value_type&& value) { m_value = std::move(value); return *this; }
+			inline node& operator=(core_value_type&& value);
 			//コピーオペレータ
-			inline node& operator=(const core_value_type& value) { m_value = value; return *this; }
+			inline node& operator=(const core_value_type& value);
 			//ムーブコンストラクタ
-			inline node(core_value_type&& value) :
-				m_next(nullptr),
-				m_prev(nullptr),
-				m_value(std::move(value))
-			{}
+			inline node(core_value_type&& value);
 			//コピーコンストラクタ
-			inline node(const core_value_type& value) :
-				m_next(nullptr),
-				m_prev(nullptr),
-				m_value(value)
-			{}
+			inline node(const core_value_type& value);
 			//デフォルトコンストラクタ
-			inline node():
-				m_next(nullptr),
-				m_prev(nullptr),
-				m_value()
-			{}
+			inline node();
 			//デストラクタ
-			inline ~node()
-			{}
+			inline ~node();
 		};
 
 		//双方向連結リスト操作用構造体
@@ -828,6 +851,15 @@ using lList = linked_list::container<OPE_TYPE>;
 //シンプル双方向連結リストコンテナ
 template<typename NODE_TYPE>
 using simpleLList = linked_list::simpleContainer<NODE_TYPE>;
+
+//双方向連結リストコンテナインスタンス化
+#define INSTANCING_lList(ope_type) \
+	template class linked_list::container<ope_type>;
+
+//シンプル双方向連結リストコンテナインスタンス化
+#define INSTANCING_simpleLList(value_type) \
+	template class linked_list::simpleContainer<value_type>; \
+	template class linked_list::container<linked_list::simpleContainer<value_type>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -29,7 +29,7 @@ namespace rb_tree
 	//デバッグ用補助関数
 #ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 	template<typename... Tx>
-	inline int printf_dbg_add(const char* fmt, Tx... args)
+	inline int printf_dbg_add(const char* fmt, const Tx&... args)
 	{
 		return printf(fmt, args...);
 	}
@@ -38,7 +38,7 @@ namespace rb_tree
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 #ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	template<typename... Tx>
-	inline int printf_dbg_remove(const char* fmt, Tx... args)
+	inline int printf_dbg_remove(const char* fmt, const Tx&... args)
 	{
 		return printf(fmt, args...);
 	}

@@ -447,7 +447,7 @@ namespace binary_heap
 	//プッシュ開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushBegin(Tx... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushBegin(const Tx&... args)
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -512,7 +512,7 @@ namespace binary_heap
 	//プッシュ（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_push(Tx... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_push(const Tx&... args)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -526,7 +526,7 @@ namespace binary_heap
 	//※パラメータ渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::push(Tx... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::push(const Tx&... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _push(args...);
@@ -535,7 +535,7 @@ namespace binary_heap
 	//プッシュ開始（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushBegin(Tx... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushBegin(const Tx&... args)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -551,7 +551,7 @@ namespace binary_heap
 	//プッシュ開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushBegin(Tx... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushBegin(const Tx&... args)
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
 		node_type* obj = _pushBegin(args...);//プッシュ開始

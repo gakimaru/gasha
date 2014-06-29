@@ -31,12 +31,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //値が二つの max()
 template<typename T1, typename T2>
-inline T1 max(T1 n1, T2 n2){ return n1 > static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
+inline T1 max(const T1 n1, const T2 n2){ return n1 > static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
 
 //値が三つ以上の max() : 再帰処理
 //※テンプレートの特殊化ではなく、関数のオーバーロードで再起を終結させる
 template<typename T1, typename T2, typename T3, typename... Tx>
-inline T1 max(T1 n1, T2 n2, T3 n3, Tx... nx){ return GASHA_ max(GASHA_ max(n1, n2), n3, nx...); }//nxが空になったら、引数が二つの関数が呼ばれる
+inline T1 max(const T1 n1, const T2 n2, const T3 n3, const Tx&... nx){ return GASHA_ max(GASHA_ max(n1, n2), n3, nx...); }//nxが空になったら、引数が二つの関数が呼ばれる
 
 //----------------------------------------
 //最小値取得
@@ -44,12 +44,12 @@ inline T1 max(T1 n1, T2 n2, T3 n3, Tx... nx){ return GASHA_ max(GASHA_ max(n1, n
 
 //値が二つの min()
 template<typename T1, typename T2>
-inline T1 min(T1 n1, T2 n2){ return n1 < static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
+inline T1 min(const T1 n1, const T2 n2){ return n1 < static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
 
 //値が三つ以上の min() : 再帰処理
 //※テンプレートの特殊化ではなく、関数のオーバーロードで再起を終結させる
 template<typename T1, typename T2, typename T3, typename... Tx>
-inline T1 min(T1 n1, T2 n2, T3 n3, Tx... nx){ return GASHA_ min(GASHA_ min(n1, n2), n3, nx...); }//nxが空になったら、引数が二つの関数が呼ばれる
+inline T1 min(const T1 n1, const T2 n2, const T3 n3, const Tx&... nx){ return GASHA_ min(GASHA_ min(n1, n2), n3, nx...); }//nxが空になったら、引数が二つの関数が呼ばれる
 
 //--------------------------------------------------------------------------------
 //値の交換

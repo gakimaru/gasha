@@ -557,7 +557,7 @@ namespace dynamic_array
 		size_type resize(const int size, const value_type& new_value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		size_type resize(const int size, Tx... args);
+		size_type resize(const int size, const Tx&... args);
 		
 		//使用中のサイズを変更（新しいサイズを返す）
 		//※新しい値の代入も削除された要素のデストラクタ呼び出しも行わず、
@@ -578,7 +578,7 @@ namespace dynamic_array
 		//※コンストラクタ呼び出し版
 		//※既存の要素を上書きする際は、先にデストラクタを呼び出す
 		template<typename... Tx>
-		size_type assign(const int size, Tx... args);
+		size_type assign(const int size, const Tx&... args);
 		
 		//末尾に要素を追加
 		//※オブジェクト渡し
@@ -594,7 +594,7 @@ namespace dynamic_array
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		template<typename... Tx>
-		value_type* push_back(Tx... args);
+		value_type* push_back(const Tx&... args);
 		
 		//末尾の要素を削除
 		//※オブジェクトのデストラクタが呼び出される
@@ -628,7 +628,7 @@ namespace dynamic_array
 		iterator insert(iterator pos, const int num, value_type& value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		iterator insert(iterator pos, const int num, Tx... args);
+		iterator insert(iterator pos, const int num, const Tx&... args);
 	
 	private:
 		//要素の削除
@@ -735,8 +735,9 @@ namespace dynamic_array
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
 	template<typename VALUE_TYPE>
-	struct simpleContainer
+	class simpleContainer
 	{
+	public:
 		//動的配列操作用構造体
 		struct ope : public baseOpe<ope, VALUE_TYPE>{};
 		

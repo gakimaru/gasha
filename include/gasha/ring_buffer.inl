@@ -421,7 +421,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, Tx... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, const Tx&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		if (_size > m_size)
@@ -449,7 +449,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, Tx... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, const Tx&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		{
@@ -477,7 +477,7 @@ namespace ring_buffer
 	//※パラメータ渡し
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(Tx... args)
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(const Tx&... args)
 	{
 		value_type* obj = refFrontNew();//サイズチェック含む
 		if (!obj)
@@ -492,7 +492,7 @@ namespace ring_buffer
 	//※パラメータ渡し
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(Tx... args)
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const Tx&... args)
 	{
 		value_type* obj = refBackNew();//サイズチェック含む
 		if (!obj)
@@ -506,7 +506,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, Tx... args)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, const Tx&... args)
 	{
 		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 		{

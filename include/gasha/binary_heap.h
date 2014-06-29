@@ -457,7 +457,7 @@ namespace binary_heap
 		public:
 			//プッシュ開始
 			template<typename... Tx>
-			node_type* pushBegin(Tx... args);
+			node_type* pushBegin(const Tx&... args);
 			
 			//プッシュ終了
 			node_type* pushEnd();
@@ -616,24 +616,24 @@ namespace binary_heap
 	private:
 		//プッシュ（本体）
 		template<typename... Tx>
-		node_type* _push(Tx... args);
+		node_type* _push(const Tx&... args);
 	public:
 		//プッシュ
 		//※パラメータ渡し
 		//※オブジェクトのコンストラクタが呼び出される
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		inline node_type* push(Tx... args);
+		inline node_type* push(const Tx&... args);
 	private:
 		//プッシュ開始（本体）
 		template<typename... Tx>
-		node_type* _pushBegin(Tx... args);
+		node_type* _pushBegin(const Tx&... args);
 	public:
 		//プッシュ開始
 		//※空きノードを取得し、コンストラクタが呼び出される
 		//※処理が成功すると、ロックを取得した状態になる（pushEndで解放する）
 		template<typename... Tx>
-		node_type* pushBegin(Tx... args);
+		node_type* pushBegin(const Tx&... args);
 	private:
 		//プッシュ終了（本体）
 		node_type* _pushEnd();
