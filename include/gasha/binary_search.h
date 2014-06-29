@@ -140,14 +140,14 @@ const T* linkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_func, GET
 	if (!first)
 		return nullptr;
 	int size = 0;
-	for (const T* node = first; node; ++size, node = get_next_func(node));
+	for (const T* node = first; node; ++size, node = get_next_func(*node));
 	int range = size;
 	const T* found = nullptr;
 	while (true)
 	{
 		const int range_half = range / 2;//探索範囲の半分の範囲
 		const T* mid = first;//探索範囲の中心要素
-		for (int forward = range_half; --forward >= 0; mid = get_next_func(mid));
+		for (int forward = range_half; --forward >= 0; mid = get_next_func(*mid));
 		const int comp = comparison(*mid);//中心要素を探索値と比較
 		if (comp == 0)//中心要素が探索値と一致
 			found = mid;//発見した場所を記憶 ※見つかった位置の先頭を発見するため、探索を続行する
@@ -157,13 +157,13 @@ const T* linkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_func, GET
 			range = range_half;
 		else//if (comp > 0)//探索値が中心要素より大きかった場合、次に中心より後の範囲に絞って探索する
 		{
-			first = get_next_func(mid);
+			first = get_next_func(*mid);
 			range -= (range_half + 1);
 		}
 	}
 	if (found && found != first)//見つかった地点が先頭でなければ、一つ前を調べる
 	{
-		const T* found_prev = get_prev_func(found);
+		const T* found_prev = get_prev_func(*found);
 		if (comparison(*found_prev) == 0)//一つ前が一致するならそれを返す
 			found = found_prev;
 	}

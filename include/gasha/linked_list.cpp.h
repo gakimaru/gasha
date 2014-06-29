@@ -88,7 +88,7 @@ namespace linked_list
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		difference_type _step = static_cast<std::size_t>(step);
+		std::size_t _step = static_cast<std::size_t>(step);
 		if (_step > 0 && m_isEnd)
 		{
 			m_value = const_cast<node_type*>(m_con->m_last);
@@ -407,7 +407,7 @@ namespace linked_list
 	}
 	template<class OPE_TYPE>
 	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
-		m_con(con),
+		m_con(&con),
 		m_value(value),
 		m_isEnd(is_end)
 	{}
@@ -438,13 +438,6 @@ namespace linked_list
 	container<OPE_TYPE>::container(const container& con) :
 		m_first(con.m_first),
 		m_last(con.m_last)
-	{}
-		
-	//デフォルトコンストラクタ
-	template<class OPE_TYPE>
-	inline container<OPE_TYPE>::container() :
-		m_first(nullptr),
-		m_last(nullptr)
 	{}
 
 	//デストラクタ

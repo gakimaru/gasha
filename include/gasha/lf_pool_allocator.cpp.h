@@ -121,18 +121,18 @@ typename lfPoolAllocator<T, _POOL_SIZE>::index_type lfPoolAllocator<T, _POOL_SIZ
 	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE);
 	if (index >= POOL_SIZE)//範囲外のインデックスなら終了
 	{
-	#ifdef _DEBUG
+	#ifdef GASHA_ASSERTION_ENABLED
 		static const bool IS_INVALID_POINTER_OF_POOL = false;
 		assert(IS_INVALID_POINTER_OF_POOL);
-	#endif//_DEBUG
+	#endif//GASHA_ASSERTION_ENABLED
 		return INVALID_INDEX;
 	}
 	if (m_using[index].load() == 0)//インデックスが既に未使用状態なら終了
 	{
-	#ifdef _DEBUG
+	#ifdef GASHA_ASSERTION_ENABLED
 		static const bool IS_ALREADY_DELETE_POINTER = false;
 		assert(IS_ALREADY_DELETE_POINTER);
-	#endif//_DEBUG
+	#endif//GASHA_ASSERTION_ENABLED
 		return INVALID_INDEX;
 	}
 	return index;

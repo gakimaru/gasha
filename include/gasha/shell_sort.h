@@ -179,7 +179,7 @@ std::size_t linkedListShellSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func
 			node = get_next_func(*node);
 		}
 	}
-	const int h_max = size / 3;
+	const int h_max = static_cast<int>(size) / 3;
 	int h = 1;
 	while (h <= h_max)
 		h = 3 * h + 1;

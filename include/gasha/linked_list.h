@@ -257,15 +257,15 @@ namespace linked_list
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first);
+	bool isUnordered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
+	bool isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
 	//----------------------------------------
 	//双方向連結リスト操作関数：整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first);
+	bool isOrdered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
+	bool isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列要素数計上
 	template<class OPE_TYPE, class PREDICATE>
@@ -515,7 +515,7 @@ namespace linked_list
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline const node_type* at(const index_type index) const { return getForwardNode<ope_type>(m_first, index); }
+		inline const node_type* at(const index_type index) const { std::size_t _index = static_cast<std::size_t>(index); return m_first ? getForwardNode<ope_type>(*m_first, _index) : nullptr; }
 		inline node_type* at(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->at(index)); }
 		inline const node_type* operator[](const index_type index) const { return at(index); }
 		inline node_type* operator[](const index_type index){ return at(index); }
@@ -679,7 +679,7 @@ namespace linked_list
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison);
+		iterator binarySearch(COMPARISON comparison);
 	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド

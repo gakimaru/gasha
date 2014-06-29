@@ -268,12 +268,12 @@ namespace linked_list
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first)
+	bool isUnordered(const typename OPE_TYPE::node_type* first)
 	{
 		return GASHA_ singlyLinkedListIsUnordered(first, OPE_TYPE::getNext);
 	}
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
+	bool isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
 	{
 		return GASHA_ singlyLinkedListIsUnordered(first, OPE_TYPE::getNext, predicate);
 	}
@@ -281,12 +281,12 @@ namespace linked_list
 	//----------------------------------------
 	//双方向連結リスト操作関数：整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first)
+	bool isOrdered(const typename OPE_TYPE::node_type* first)
 	{
 		return GASHA_ singlyLinkedListIsOrdered(first, OPE_TYPE::getNext);
 	}
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
+	bool isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
 	{
 		return GASHA_ singlyLinkedListIsOrdered(first, OPE_TYPE::getNext, predicate);
 	}
@@ -703,14 +703,14 @@ namespace linked_list
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::isOrdered() const
 	{
-		return isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
+		return linked_list::isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline bool container<OPE_TYPE>::isOrdered(PREDICATE predicate) const
 	{
-		return isOrdered<OPE_TYPE>(m_first, predicate);
+		return linked_list::isOrdered<OPE_TYPE>(m_first, predicate);
 	}
 
 	//線形探索
@@ -719,8 +719,8 @@ namespace linked_list
 	template<typename V>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
 	{
-		const node_type* found_node = linearSearchValue(m_first, value, typename ope_type::predicateForFind());
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, typename ope_type::predicateForFind());
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数＋値指定版
@@ -728,8 +728,8 @@ namespace linked_list
 	template<typename V, class PREDICATE>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
 	{
-		const node_type* found_node = linearSearchValue(m_first, value, predicate);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, predicate);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数指定版
@@ -737,8 +737,8 @@ namespace linked_list
 	template<class PREDICATE>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
 	{
-		const node_type* found_node = linearSearch(m_first, predicate);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearch<ope_type>(m_first, predicate);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 
@@ -749,8 +749,8 @@ namespace linked_list
 	template<typename V>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
 	{
-		const node_type* found_node = binarySearchValue(m_first, value, typename ope_type::comparisonForSearch());
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linked_list::binarySearchValue<ope_type>(m_first, value, typename ope_type::comparisonForSearch());
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数＋値指定版
@@ -758,19 +758,26 @@ namespace linked_list
 	template<typename V, class COMPARISON>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
 	{
-		const node_type* found_node = binarySearchValue(m_first, value, comparison);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linked_list::binarySearchValue<ope_type>(m_first, value, comparison);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearch(COMPARISON comparison)
 	{
-		const node_type* found_node = binarySearch(m_first, comparison);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linked_list::binarySearch<ope_type>(m_first, comparison);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
+
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline container<OPE_TYPE>::container() :
+		m_first(nullptr),
+		m_last(nullptr)
+	{}
 #endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 }//namespace linked_list
