@@ -206,13 +206,14 @@ namespace dynamic_array
 	public:
 		//--------------------
 		//イテレータ宣言
+		typedef std::random_access_iterator_tag iterator_category;
 		class iterator;
 		class reverse_iterator;
 		typedef const iterator const_iterator;
 		typedef const reverse_iterator const_reverse_iterator;
 		//--------------------
 		//イテレータ
-		class iterator : public std::iterator<std::random_access_iterator_tag, value_type>
+		class iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
 			friend class reverse_iterator;
@@ -275,7 +276,7 @@ namespace dynamic_array
 			//メソッド
 			//参照を更新
 			void update(const index_type index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
@@ -312,7 +313,7 @@ namespace dynamic_array
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
-		class reverse_iterator : public std::iterator<std::random_access_iterator_tag, value_type>
+		class reverse_iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
 			friend class iterator;
@@ -379,7 +380,7 @@ namespace dynamic_array
 			//メソッド
 			//参照を更新
 			void update(const index_type index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
 			reverse_iterator& operator=(const reverse_iterator&& rhs);

@@ -146,9 +146,11 @@ namespace binary_heap
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
 		typedef const value_type* const_pointer; \
+		typedef int difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
+		//typedef std::ptrdiff_t difference_type;//※difference_typeは、std::ptrdiff_t を使用するとイテレータのオペレータのオーバーロードで問題を起こすので、int 型で扱う
 	
 	//--------------------
 	//二分ヒープ操作関数：親のインデックス計算
@@ -200,20 +202,30 @@ namespace binary_heap
 	public:
 		//--------------------
 		//イテレータ宣言
+		typedef std::input_iterator_tag iterator_category;
 		class iterator;
 		class reverse_iterator;
 		typedef const iterator const_iterator;
+	#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 		typedef const reverse_iterator const_reverse_iterator;
+	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		//--------------------
 		//イテレータ
-		class iterator : public std::iterator<std::input_iterator_tag, value_type>
+		class iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			friend class reverse_iterator;
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			typedef typename container::reverse_iterator reverse_iterator;
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		public:
 			//キャストオペレータ
 			inline operator bool() const { return isExist(); }
@@ -243,48 +255,28 @@ namespace binary_heap
 		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//演算オペレータ
-			inline const iterator& operator++() const;
-		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline const iterator& operator--() const;
-		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			inline iterator& operator++();
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			inline iterator& operator--();
-		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
-			inline const iterator operator++(int) const;
-		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline const iterator operator--(int) const;
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			inline iterator operator++(int);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			inline iterator operator--(int);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
-			inline const iterator& operator+=(const int rhs) const;
-			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
+			inline iterator& operator+=(const difference_type rhs);
+			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline const iterator& operator-=(const int rhs) const;
-			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
+			inline iterator& operator-=(const difference_type rhs);
+			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline iterator& operator+=(const int rhs);
-			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
+			inline iterator operator+(const difference_type rhs) const;
+			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline iterator& operator-=(const int rhs);
-			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
+			inline iterator operator-(const difference_type rhs) const;
+			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline const iterator operator+(const int rhs) const;
-			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline const iterator operator-(const int rhs) const;
-			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline iterator operator+(const int rhs);
-			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline iterator operator-(const int rhs);
-			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			inline int operator-(const iterator& rhs) const;
+			inline difference_type operator-(const iterator& rhs) const;
 		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -299,7 +291,7 @@ namespace binary_heap
 		private:
 			//メソッド
 			void update(const index_type index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
@@ -343,13 +335,16 @@ namespace binary_heap
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
-		class reverse_iterator : public std::iterator<std::input_iterator_tag, value_type>
+		class reverse_iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
 			friend class iterator;
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -364,7 +359,7 @@ namespace binary_heap
 			//inline value_type& operator*(){ return *getValue(); }//std::input_iterator_tag には不要
 			inline const_pointer operator->() const { return getValue(); }
 			//inline pointer operator->(){ return getValue(); }//std::input_iterator_tag には不要
-		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
 			inline const reverse_iterator operator[](const int index) const;
 			inline reverse_iterator operator[](const int index);
 		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
@@ -372,7 +367,7 @@ namespace binary_heap
 			//比較オペレータ
 			inline bool operator==(const reverse_iterator& rhs) const;
 			inline bool operator!=(const reverse_iterator& rhs) const;
-		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
 			inline bool operator>(const reverse_iterator& rhs) const;
 			inline bool operator>=(const reverse_iterator& rhs) const;
 			inline bool operator<(const reverse_iterator& rhs) const;
@@ -380,32 +375,20 @@ namespace binary_heap
 		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//演算オペレータ
-			inline const reverse_iterator& operator++() const;
-			inline const reverse_iterator& operator--() const;
 			inline reverse_iterator& operator++();
 			inline reverse_iterator& operator--();
-			inline const reverse_iterator operator++(int) const;
-			inline const reverse_iterator operator--(int) const;
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
-		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
-			inline const reverse_iterator& operator+=(const int rhs) const;
-			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const reverse_iterator& operator-=(const int rhs) const;
-			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator+=(const int rhs);
-			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator-=(const int rhs);
-			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator+(const int rhs) const;
-			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator-(const int rhs) const;
-			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline reverse_iterator operator+(const int rhs);
-			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-			inline reverse_iterator operator-(const int rhs);
-			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-			inline int operator-(const reverse_iterator& rhs) const;
+		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
+			inline reverse_iterator& operator+=(const difference_type rhs);
+			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator& operator-=(const difference_type rhs);
+			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator+(const difference_type rhs) const;
+			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator-(const difference_type rhs) const;
+			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			inline difference_type operator-(const reverse_iterator& rhs) const;
 		#endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -420,7 +403,7 @@ namespace binary_heap
 		private:
 			//参照を更新
 			void update(const index_type index) const;
-			void addIndexAndUpdate(const int add) const;
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ベースを取得
 			inline const iterator base() const;
@@ -458,6 +441,55 @@ namespace binary_heap
 		};
 	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	public:
+		//--------------------
+		//単一操作オブジェクト（安全なプッシュ／ポップ操作クラス）
+		//※操作状態を記憶し、デストラクタで必ず完了させる
+		class uniqueOperation
+		{
+		public:
+			//型
+			typedef container container_type;//コンテナ型
+			typedef typename container::node_type node_type;//ノード型
+			typedef typename container::status_t status_t;//ステータス型
+		public:
+			//アクセッサ
+			status_t status() const { return m_status; }//ステータスを取得
+		public:
+			//プッシュ開始
+			template<typename... Tx>
+			node_type* pushBegin(Tx... args);
+			
+			//プッシュ終了
+			node_type* pushEnd();
+			
+			//プッシュ取り消し
+			bool pushCancel();
+			
+			//ポップ開始
+			node_type* popBegin();
+			
+			//ポップ終了
+			bool popEnd();
+			
+			//ポップ取り消し
+			bool popCancel();
+		public:
+			//ムーブコンストラクタ
+			inline uniqueOperation(uniqueOperation&& obj);
+			//コピーコンストラクタ
+			uniqueOperation(const uniqueOperation& obj) = delete;
+			//コンストラクタ
+			inline uniqueOperation(container_type& container);
+			//デフォルトコンストラクタ
+			uniqueOperation() = delete;
+			//デストラクタ
+			~uniqueOperation();
+		private:
+			//フィールド
+			container_type& m_container;//コンテナ
+			status_t m_status;//ステータス
+		};
+	public:
 		//アクセッサ
 		//※at(), []()は、値のポインタを返し、例外を発生させない点に注意
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
@@ -492,7 +524,7 @@ namespace binary_heap
 		inline const iterator end() const { iterator ite(*this, true); return ite; }
 		inline iterator begin() { iterator ite(*this, false); return ite; }
 		inline iterator end() { iterator ite(*this, true); return ite; }
-	#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 		//リバースイテレータを取得
 		inline const reverse_iterator crbegin() const { reverse_iterator ite(*this, false); return ite; }
 		inline const reverse_iterator crend() const { reverse_iterator ite(*this, true); return ite; }
@@ -501,6 +533,9 @@ namespace binary_heap
 		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
 		inline reverse_iterator rend() { reverse_iterator ite(*this, true); return ite; }
 	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+	public:
+		//単一操作オブジェクト
+		inline uniqueOperation operationunique(){ uniqueOperation operation(*this); return operation; }
 	private:
 		//メソッド：要素アクセス系（独自拡張版）
 		//※範囲チェックなし（非公開）
@@ -707,54 +742,6 @@ namespace binary_heap
 			inline ~con()
 			{}
 		};
-	};
-
-	//--------------------
-	//安全なプッシュ／ポップ操作クラス
-	//※操作状態を記憶し、デストラクタで必ず完了させる
-	template<class CON>
-	class operation_guard
-	{
-	public:
-		//型
-		typedef CON container_type;//コンテナ型
-		typedef typename CON::node_type node_type;//ノード型
-		typedef typename CON::status_t status_t;//ステータス型
-	public:
-		//アクセッサ
-		status_t status() const { return m_status; }//ステータスを取得
-	public:
-		//プッシュ開始
-		template<typename... Tx>
-		node_type* pushBegin(Tx... args);
-		
-		//プッシュ終了
-		node_type* pushEnd();
-		
-		//プッシュ取り消し
-		bool pushCancel();
-		
-		//ポップ開始
-		node_type* popBegin();
-		
-		//ポップ終了
-		bool popEnd();
-		
-		//ポップ取り消し
-		bool popCancel();
-	public:
-		//コンストラクタ
-		operation_guard(container_type& container);
-
-		//デフォルトコンストラクタ
-		operation_guard() = delete;
-
-		//デストラクタ
-		~operation_guard();
-	private:
-		//フィールド
-		container_type& m_container;//コンテナ
-		status_t m_status;//ステータス
 	};
 	
 	//--------------------

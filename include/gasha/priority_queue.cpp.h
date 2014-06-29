@@ -24,6 +24,73 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace priority_queue
 {
+	//--------------------
+	//単一操作オブジェクト（安全なエンキュー／デキュー操作クラス）
+	
+	//エンキュー終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::enqueueEnd()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return nullptr;
+		node_type* node = m_containerAdapter.enqueueEnd();//エンキュー終了
+		m_status = status_t::PUSH_ENDED;//ステータス変更
+		return node;
+	}
+
+	//エンキュー取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	bool containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::enqueueCancel()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return nullptr;
+		m_containerAdapter.enqueueCancel();//エンキュー取り消し
+		m_status = status_t::PUSH_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//デキュー開始
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::dequeueBegin()
+	{
+		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* node = m_containerAdapter.dequeueBegin();//デキュー開始
+		if (node)
+			m_status = status_t::POP_BEGINNING;//ステータス変更
+		return node;
+	}
+
+	//デキュー終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	bool containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::dequeueEnd()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		const bool result = m_containerAdapter.dequeueEnd();//デキュー終了
+		m_status = status_t::POP_ENDED;//ステータス変更
+		return result;
+	}
+
+	//デキュー取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	bool containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::dequeueCancel()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		m_containerAdapter.dequeueCancel();//デキュー取り消し
+		m_status = status_t::POP_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//デストラクタ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::~uniqueOperation()
+	{
+		enqueueEnd();//エンキュー終了
+		dequeueEnd();//デキュー終了
+	}
+
 	//----------------------------------------
 	//コンテナ本体のメソッド
 	
@@ -211,73 +278,6 @@ namespace priority_queue
 	{
 		enqueueCancel();//エンキュー取り消し
 		dequeueCancel();//デキュー取り消し
-	}
-
-	//--------------------
-	//安全なエンキュー／デキュー操作クラス
-	
-	//エンキュー終了
-	template<class CON>
-	typename operation_guard<CON>::node_type* operation_guard<CON>::enqueueEnd()
-	{
-		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			return nullptr;
-		node_type* node = m_containerAdapter.enqueueEnd();//エンキュー終了
-		m_status = status_t::PUSH_ENDED;//ステータス変更
-		return node;
-	}
-
-	//エンキュー取り消し
-	template<class CON>
-	bool operation_guard<CON>::enqueueCancel()
-	{
-		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			return nullptr;
-		m_containerAdapter.enqueueCancel();//エンキュー取り消し
-		m_status = status_t::PUSH_CANCELLED;//ステータス変更
-		return true;
-	}
-
-	//デキュー開始
-	template<class CON>
-	typename operation_guard<CON>::node_type* operation_guard<CON>::dequeueBegin()
-	{
-		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			return nullptr;
-		node_type* node = m_containerAdapter.dequeueBegin();//デキュー開始
-		if (node)
-			m_status = status_t::POP_BEGINNING;//ステータス変更
-		return node;
-	}
-
-	//デキュー終了
-	template<class CON>
-	bool operation_guard<CON>::dequeueEnd()
-	{
-		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			return false;
-		const bool result = m_containerAdapter.dequeueEnd();//デキュー終了
-		m_status = status_t::POP_ENDED;//ステータス変更
-		return result;
-	}
-
-	//デキュー取り消し
-	template<class CON>
-	bool operation_guard<CON>::dequeueCancel()
-	{
-		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			return false;
-		m_containerAdapter.dequeueCancel();//デキュー取り消し
-		m_status = status_t::POP_CANCELLED;//ステータス変更
-		return true;
-	}
-
-	//デストラクタ
-	template<class CON>
-	operation_guard<CON>::~operation_guard()
-	{
-		enqueueEnd();//エンキュー終了
-		dequeueEnd();//デキュー終了
 	}
 
 }//namespace priority_queue

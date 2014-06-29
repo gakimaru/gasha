@@ -126,9 +126,9 @@ namespace hash_table
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateForward(const int step) const
+	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		const index_type prev_index = m_set.m_index;
 		index_type index = prev_index;
 		while (_step > 0 && index != INVALID_INDEX)
@@ -140,9 +140,9 @@ namespace hash_table
 		m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateBackward(const int step) const
+	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		index_type index = m_set.m_index;
 		if (_step > 0 && m_isEnd)
 		{
@@ -305,9 +305,9 @@ namespace hash_table
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateForward(const int step) const
+	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		const index_type prev_index = m_set.m_index;
 		index_type index = prev_index;
 		while (_step > 0 && index != INVALID_INDEX)
@@ -319,9 +319,9 @@ namespace hash_table
 		m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateBackward(const int step) const
+	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		index_type index = m_set.m_index;
 		if (_step > 0 && m_isEnd)
 		{

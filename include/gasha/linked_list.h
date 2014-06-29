@@ -180,9 +180,11 @@ namespace linked_list
 		typedef const node_type& const_reference; \
 		typedef node_type* pointer; \
 		typedef const node_type* const_pointer; \
+		typedef int difference_type; \
 		typedef std::size_t size_type; \
 		typedef std::size_t index_type; \
 		typedef typename ope_type::lock_type lock_type;
+		//typedef std::ptrdiff_t difference_type;//※difference_typeは、std::ptrdiff_t を使用するとイテレータのオペレータのオーバーロードで問題を起こすので、int 型で扱う
 	
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの次ノードを取得
@@ -296,19 +298,23 @@ namespace linked_list
 	public:
 		//--------------------
 		//イテレータ宣言
+		typedef std::bidirectional_iterator_tag iterator_category;
 		class iterator;
 		class reverse_iterator;
 		typedef const iterator const_iterator;
 		typedef const reverse_iterator const_reverse_iterator;
 		//--------------------
 		//イテレータ
-		class iterator : public std::iterator<std::bidirectional_iterator_tag, node_type>
+		class iterator : public std::iterator<iterator_category, node_type>
 		{
 			friend class container;
 			friend class reverse_iterator;
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::reverse_iterator reverse_iterator;
 		public:
 			//キャストオペレータ
@@ -333,32 +339,20 @@ namespace linked_list
 			inline bool operator!=(const iterator& rhs) const;
 		public:
 			//演算オペレータ
-			inline const iterator& operator++() const;
-			inline const iterator& operator--() const;
 			inline iterator& operator++();
 			inline iterator& operator--();
-			inline const iterator operator++(int) const;
-			inline const iterator operator--(int) const;
 			inline iterator operator++(int);
 			inline iterator operator--(int);
 		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
-			inline const iterator& operator+=(const int rhs) const;
-			inline const iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const iterator& operator-=(const int rhs) const;
-			inline const iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline iterator& operator+=(const int rhs);
-			inline iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline iterator& operator-=(const int rhs);
-			inline iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const iterator operator+(const int rhs) const;
-			inline const iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const iterator operator-(const int rhs) const;
-			inline const iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline iterator operator+(const int rhs);
-			inline iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-			inline iterator operator-(const int rhs);
-			inline iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-			//inline int operator-(const iterator& rhs) const;
+			inline iterator& operator+=(const difference_type rhs);
+			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
+			inline iterator& operator-=(const difference_type rhs);
+			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline iterator operator+(const difference_type rhs) const;
+			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline iterator operator-(const difference_type rhs) const;
+			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			difference_type operator-(const iterator& rhs) const;
 		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -374,8 +368,8 @@ namespace linked_list
 			//参照を更新
 			void updateNext() const;
 			void updatePrev() const;
-			void updateForward(const std::size_t step) const;
-			void updateBackward(const std::size_t step) const;
+			void updateForward(const difference_type step) const;
+			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
@@ -412,13 +406,16 @@ namespace linked_list
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
-		class reverse_iterator : public std::iterator<std::bidirectional_iterator_tag, node_type>
+		class reverse_iterator : public std::iterator<iterator_category, node_type>
 		{
 			friend class container;
 			friend class iterator;
 		public:
 			//※コンパイラによって優先して参照する型があいまいになることを避けるための定義
 			typedef typename container::value_type value_type;
+			typedef typename container::difference_type difference_type;
+			typedef typename container::size_type size_type;
+			typedef typename container::index_type indextype;
 			typedef typename container::iterator iterator;
 		public:
 			//キャストオペレータ
@@ -443,32 +440,20 @@ namespace linked_list
 			inline bool operator!=(const reverse_iterator& rhs) const;
 		public:
 			//演算オペレータ
-			inline const reverse_iterator& operator++() const;
-			inline const reverse_iterator& operator--() const;
 			inline reverse_iterator& operator++();
 			inline reverse_iterator& operator--();
-			inline const reverse_iterator operator++(int) const;
-			inline const reverse_iterator operator--(int) const;
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
 		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
-			inline const reverse_iterator& operator+=(const int rhs) const;
-			inline const reverse_iterator& operator+=(const std::size_t rhs) const { return operator+=(static_cast<int>(rhs)); }
-			inline const reverse_iterator& operator-=(const int rhs) const;
-			inline const reverse_iterator& operator-=(const std::size_t rhs) const { return operator-=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator+=(const int rhs);
-			inline reverse_iterator& operator+=(const std::size_t rhs) { return operator+=(static_cast<int>(rhs)); }
-			inline reverse_iterator& operator-=(const int rhs);
-			inline reverse_iterator& operator-=(const std::size_t rhs) { return operator-=(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator+(const int rhs) const;
-			inline const reverse_iterator operator+(const std::size_t rhs) const { return operator+(static_cast<int>(rhs)); }
-			inline const reverse_iterator operator-(const int rhs) const;
-			inline const reverse_iterator operator-(const std::size_t rhs) const { return operator-(static_cast<int>(rhs)); }
-			inline reverse_iterator operator+(const int rhs);
-			inline reverse_iterator operator+(const std::size_t rhs) { return operator+(static_cast<int>(rhs)); }
-			inline reverse_iterator operator-(const int rhs);
-			inline reverse_iterator operator-(const std::size_t rhs) { return operator-(static_cast<int>(rhs)); }
-			//inline int operator-(const reverse_iterator& rhs) const;
+			inline reverse_iterator& operator+=(const difference_type rhs);
+			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator& operator-=(const difference_type rhs);
+			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator+(const difference_type rhs) const;
+			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
+			inline reverse_iterator operator-(const difference_type rhs) const;
+			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
+			difference_type operator-(const reverse_iterator& rhs) const;
 		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -488,8 +473,8 @@ namespace linked_list
 			//参照を更新
 			void updateNext() const;
 			void updatePrev() const;
-			void updateForward(const std::size_t step) const;
-			void updateBackward(const std::size_t step) const;
+			void updateForward(const difference_type step) const;
+			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
 			reverse_iterator& operator=(const reverse_iterator&& rhs);

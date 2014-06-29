@@ -226,6 +226,57 @@ namespace priority_queue
 		typedef CONTAINER_TYPE container_type;//コンテナ型
 		typedef typename container_type::status_t status_t;//ステータス型
 	public:
+		//--------------------
+		//単一操作オブジェクト（安全なエンキュー／デキュー操作クラス）
+		//※操作状態を記憶し、デストラクタで必ず完了させる
+		class uniqueOperation
+		{
+		public:
+			//型
+			typedef containerAdapter container_adapter_type;//コンテナアダプター型
+			typedef typename container_adapter_type::node_type node_type;//ノード型
+			typedef typename container_adapter_type::status_t status_t;//ステータス型
+			typedef typename container_adapter_type::priority_type priority_type;//優先度型
+			//typedef typename container_adapter_type::seq_no_type seq_no_type;//シーケンス番号型
+		public:
+			//アクセッサ
+			status_t status() const { return m_status; }//ステータスを取得
+		public:
+			//エンキュー開始
+			template<typename... Tx>
+			node_type* enqueueBegin(const priority_type priority, Tx... args);
+			
+			//エンキュー終了
+			node_type* enqueueEnd();
+			
+			//エンキュー取り消し
+			bool enqueueCancel();
+			
+			//デキュー開始
+			node_type* dequeueBegin();
+			
+			//デキュー終了
+			bool dequeueEnd();
+			
+			//デキュー取り消し
+			bool dequeueCancel();
+		public:
+			//ムーブコンストラクタ
+			inline uniqueOperation(uniqueOperation&& obj);
+			//コピーコンストラクタ
+			uniqueOperation(const uniqueOperation& obj) = delete;
+			//コンストラクタ
+			inline uniqueOperation(container_adapter_type& container_adapter);
+			//デフォルトコンストラクタ
+			uniqueOperation() = delete;
+			//デストラクタ
+			~uniqueOperation();
+		private:
+			//フィールド
+			container_adapter_type& m_containerAdapter;//コンテナアダプタ
+			status_t m_status;//ステータス
+		};
+	public:
 		//アクセッサ
 		inline const container_type& getContainer() const { return m_container; }//コンテナ取得
 		inline container_type& getContainer(){ return m_container; }//コンテナ取得
@@ -245,6 +296,9 @@ namespace priority_queue
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
 		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//単一操作オブジェクト
+		inline uniqueOperation operationunique(){ uniqueOperation operation(*this); return operation; }
 	public:
 		//メソッド：基本情報系
 		inline size_type max_size() const { return m_container.max_aize(); }//最大要素数を取得
@@ -427,56 +481,6 @@ namespace priority_queue
 			inline ~con()
 			{}
 		};
-	};
-	
-	//--------------------
-	//安全なエンキュー／デキュー操作クラス
-	//※操作状態を記憶し、デストラクタで必ず完了させる
-	template<class CON>
-	class operation_guard
-	{
-	public:
-		//型
-		typedef CON container_adapter_type;//コンテナアダプター型
-		typedef typename CON::node_type node_type;//ノード型
-		typedef typename CON::status_t status_t;//ステータス型
-		typedef typename CON::priority_type priority_type;//優先度型
-		//typedef typename CON::seq_no_type seq_no_type;//シーケンス番号型
-	public:
-		//アクセッサ
-		status_t status() const { return m_status; }//ステータスを取得
-	public:
-		//エンキュー開始
-		template<typename... Tx>
-		node_type* enqueueBegin(const priority_type priority, Tx... args);
-		
-		//エンキュー終了
-		node_type* enqueueEnd();
-		
-		//エンキュー取り消し
-		bool enqueueCancel();
-		
-		//デキュー開始
-		node_type* dequeueBegin();
-		
-		//デキュー終了
-		bool dequeueEnd();
-		
-		//デキュー取り消し
-		bool dequeueCancel();
-	public:
-		//コンストラクタ
-		inline operation_guard(container_adapter_type& containerAdapter);
-		
-		//デフォルトコンストラクタ
-		operation_guard() = delete;
-
-		//デストラクタ
-		~operation_guard();
-	private:
-		//フィールド
-		container_adapter_type& m_containerAdapter;//コンテナアダプタ
-		status_t m_status;//ステータス
 	};
 
 	//--------------------

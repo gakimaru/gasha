@@ -369,18 +369,6 @@ namespace linked_list
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++()
 	{
 		updateNext();
@@ -391,20 +379,6 @@ namespace linked_list
 	{
 		updatePrev();
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int) const
-	{
-		iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator--(int) const
-	{
-		iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int)
@@ -422,62 +396,31 @@ namespace linked_list
 	}
 #ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs)
-	{
-		iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs)
-	{
-		iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	//template<class OPE_TYPE>
-	//inline int container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
-	//{
-	//	return ...;
-	//}
 #endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -544,18 +487,6 @@ namespace linked_list
 	}
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++()
 	{
 		updateNext();
@@ -566,20 +497,6 @@ namespace linked_list
 	{
 		updatePrev();
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int) const
-	{
-		reverse_iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator--(int) const
-	{
-		reverse_iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int)
@@ -597,62 +514,31 @@ namespace linked_list
 	}
 #ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	//template<class OPE_TYPE>
-	//inline int container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs)
-	//{
-	//	return ...;
-	//}
 #endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -779,22 +665,22 @@ namespace linked_list
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::sort()
 	{
-#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
+	#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
 		shellSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-#else//GASHA_LINKED_LIST_USE_SHELL_SORT
+	#else//GASHA_LINKED_LIST_USE_SHELL_SORT
 		insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
-#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
+	#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline void container<OPE_TYPE>::sort(PREDICATE predicate)
 	{
-#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
+	#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
 		shellSort<OPE_TYPE>(m_first, m_last, predicate);
-#else//GASHA_LINKED_LIST_USE_SHELL_SORT
+	#else//GASHA_LINKED_LIST_USE_SHELL_SORT
 		insertionSort<OPE_TYPE>(m_first, m_last, predicate);
-#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
+	#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
 	}
 
 #ifdef GASHA_LINKED_LIST_ENABLE_STABLE_SORT

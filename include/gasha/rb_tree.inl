@@ -1626,18 +1626,6 @@ namespace rb_tree
 #endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator++()
 	{
 		updateNext();
@@ -1648,20 +1636,6 @@ namespace rb_tree
 	{
 		updatePrev();
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int) const
-	{
-		iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator--(int) const
-	{
-		iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator++(int)
@@ -1679,62 +1653,31 @@ namespace rb_tree
 	}
 #ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator+(const int rhs)
-	{
-		iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator-(const int rhs)
-	{
-		iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	//template<class OPE_TYPE>
-	//inline int container<OPE_TYPE>::iterator::operator-(const iterator& rhs) const
-	//{
-	//	return ???;
-	//}
 #endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -1838,18 +1781,6 @@ namespace rb_tree
 #endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//演算オペレータ
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator++()
 	{
 		updateNext();
@@ -1860,20 +1791,6 @@ namespace rb_tree
 	{
 		updatePrev();
 		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int) const
-	{
-		reverse_iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator--(int) const
-	{
-		reverse_iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator++(int)
@@ -1891,62 +1808,31 @@ namespace rb_tree
 	}
 #ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const typename container<OPE_TYPE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator+(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite += rhs;
-		return ite;
-	}
-	template<class OPE_TYPE>
-	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator-(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	//template<class OPE_TYPE>
-	//inline int container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
-	//{
-	//	return ???;
-	//}
 #endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE>

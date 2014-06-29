@@ -126,6 +126,38 @@ namespace rb_tree
 	//----------------------------------------
 	//イテレータのメソッド
 	
+	//演算オペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const iterator& rhs) const
+	{
+		stack_t<OPE_TYPE>& stack;
+		if (!m_value && !rhs.m_value)
+			return 0;
+		difference_type diff = 0;
+		stack.reset();
+		node_type* value = searchNode<ope_type>(m_root, rhs.m_value, stack);
+		if (!rhs.m_isEnd)
+		{
+			while (value && value != m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value, stack));
+				++diff;
+			}
+			if (value == m_value)
+				return diff;
+		}
+		diff = 0;
+		stack.reset();
+		value = searchNode<ope_type>(m_root, m_value, stack);
+		while (value && value != rhs.m_value)
+		{
+			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value, stack));
+			++diff;
+		}
+		if (value == m_value)
+			return diff;
+		return 0;
+	}
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
@@ -148,9 +180,9 @@ namespace rb_tree
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::updateForward(const int step) const
+	void container<OPE_TYPE>::iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		value_type* prev = m_value;
 		while (_step > 0 && m_value)
 		{
@@ -160,9 +192,9 @@ namespace rb_tree
 		m_isEnd = (prev && !m_value && _step == 0);
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::updateBackward(const int step) const
+	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		if (_step > 0 && m_isEnd)
 		{
 			m_stack.reset();
@@ -321,6 +353,38 @@ namespace rb_tree
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+	//演算オペレータ
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
+	{
+		stack_t<OPE_TYPE>& stack;
+		if (!m_value && !rhs.m_value)
+			return 0;
+		difference_type diff = 0;
+		stack.reset();
+		node_type* value = searchNode<ope_type>(m_root, m_value, stack);
+		if (!m_isEnd)
+		{
+			while (value && value != rhs.m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value, stack));
+				++diff;
+			}
+			if (value == m_value)
+				return diff;
+		}
+		diff = 0;
+		stack.reset();
+		value = searchNode<ope_type>(m_root, rhs.m_value, stack);
+		while (value && value != m_value)
+		{
+			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value, stack));
+			--diff;
+		}
+		if (value == m_value)
+			return diff;
+		return 0;
+	}
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const
@@ -343,9 +407,9 @@ namespace rb_tree
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::updateForward(const int step) const
+	void container<OPE_TYPE>::reverse_iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		value_type* prev = m_value;
 		while (_step > 0 && m_value)
 		{
@@ -355,9 +419,9 @@ namespace rb_tree
 		m_isEnd = (prev && !m_value && _step == 0);
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::updateBackward(const int step) const
+	void container<OPE_TYPE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		int _step = step;
+		difference_type _step = step;
 		if (_step > 0 && m_isEnd)
 		{
 			m_stack.reset();

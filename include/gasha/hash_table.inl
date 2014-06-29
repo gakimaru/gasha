@@ -95,21 +95,6 @@ namespace hash_table
 			m_set.m_index <= rhs.m_set.m_index;
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
-	//演算オペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++()
 	{
@@ -122,22 +107,6 @@ namespace hash_table
 	{
 		updatePrev();
 		return *this;
-	}
-#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator++(int) const
-	{
-		iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator--(int) const
-	{
-		iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -158,35 +127,21 @@ namespace hash_table
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 #ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+=(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-=(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite += rhs;
@@ -194,7 +149,7 @@ namespace hash_table
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs) const
 	{
 		iterator ite(*this);
 		ite -= rhs;
@@ -202,26 +157,12 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator+(const int rhs)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
 	{
-		iterator ite(*this);
-		ite += rhs;
-		return ite;
+		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || m_set.m_index < rhs.m_set.m_index)
+			return 0;
+		return m_set.m_index - rhs.m_set.m_index;
 	}
-#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const int rhs)
-	{
-		iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-	//template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//inline int container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
-	//{
-	//	return ???;
-	//}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -361,18 +302,6 @@ namespace hash_table
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//演算オペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++() const
-	{
-		updateNext();
-		return *this;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--() const
-	{
-		updatePrev();
-		return *this;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++()
 	{
 		updateNext();
@@ -383,20 +312,6 @@ namespace hash_table
 	{
 		updatePrev();
 		return *this;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++(int) const
-	{
-		reverse_iterator ite(*this);
-		++(*this);
-		return ite;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator--(int) const
-	{
-		reverse_iterator ite(*this);
-		--(*this);
-		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator++(int)
@@ -414,62 +329,38 @@ namespace hash_table
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+=(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+=(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs)
 	{
 		updateForward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-=(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-=(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs)
 	{
 		updateBackward(rhs);
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+=(const int rhs)
-	{
-		updateForward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-=(const int rhs)
-	{
-		updateBackward(rhs);
-		return *this;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite += rhs;
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const int rhs) const
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type rhs) const
 	{
 		reverse_iterator ite(*this);
 		ite -= rhs;
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator+(const int rhs)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
 	{
-		reverse_iterator ite(*this);
-		ite += rhs;
-		return ite;
+		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || rhs.m_set.m_index < m_set.m_index)
+			return 0;
+		return rhs.m_set.m_index - m_set.m_index;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const int rhs)
-	{
-		reverse_iterator ite(*this);
-		ite -= rhs;
-		return ite;
-	}
-	//template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	//inline int container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator rhs) const
-	//{
-	//	return ???;
-	//}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>

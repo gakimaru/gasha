@@ -42,9 +42,9 @@ namespace binary_heap
 		}
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE, _TABLE_SIZE>::iterator::addIndexAndUpdate(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type add) const
 	{
-		update(m_index + add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_index) + add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -153,9 +153,9 @@ namespace binary_heap
 		}
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::addIndexAndUpdate(const int add) const
+	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::addIndexAndUpdate(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type add) const
 	{
-		update(m_index - add);
+		update(static_cast<index_type>(static_cast<difference_type>(m_index) - add));
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -234,6 +234,73 @@ namespace binary_heap
 			update(0);//先頭データ
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+
+	//--------------------
+	//単一操作オブジェクト（安全なプッシュ／ポップ操作クラス）
+	
+	//プッシュ終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushEnd()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return nullptr;
+		node_type* node = m_container.pushEnd();//プッシュ終了
+		m_status = status_t::PUSH_ENDED;//ステータス変更
+		return node;
+	}
+
+	//プッシュ取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushCancel()
+	{
+		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
+			return false;
+		m_container.pushCancel();//プッシュ取り消し
+		m_status = status_t::PUSH_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//ポップ開始
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popBegin()
+	{
+		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* node = m_container.popBegin();//ポップ開始
+		if (node)
+			m_status = status_t::POP_BEGINNING;//ステータス変更
+		return node;
+	}
+
+	//ポップ終了
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popEnd()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		const bool result = m_container.popEnd();//ポップ終了
+		m_status = status_t::POP_ENDED;//ステータス変更
+		return result;
+	}
+
+	//ポップ取り消し
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popCancel()
+	{
+		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
+			return false;
+		m_container.popCancel();//ポップ取り消し
+		m_status = status_t::POP_CANCELLED;//ステータス変更
+		return true;
+	}
+
+	//デストラクタ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::~uniqueOperation()
+	{
+		pushEnd();//プッシュ終了
+		popEnd();//ポップ終了
+	}
 
 	//----------------------------------------
 	//コンテナ本体のメソッド
@@ -447,73 +514,6 @@ namespace binary_heap
 	{
 		pushCancel();//プッシュ取り消し
 		popCancel();//ポップ取り消し
-	}
-
-	//--------------------
-	//安全なプッシュ／ポップ操作クラス
-	
-	//プッシュ終了
-	template<class CON>
-	typename operation_guard<CON>::node_type* operation_guard<CON>::pushEnd()
-	{
-		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			return nullptr;
-		node_type* node = m_container.pushEnd();//プッシュ終了
-		m_status = status_t::PUSH_ENDED;//ステータス変更
-		return node;
-	}
-
-	//プッシュ取り消し
-	template<class CON>
-	bool operation_guard<CON>::pushCancel()
-	{
-		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
-			return false;
-		m_container.pushCancel();//プッシュ取り消し
-		m_status = status_t::PUSH_CANCELLED;//ステータス変更
-		return true;
-	}
-
-	//ポップ開始
-	template<class CON>
-	typename operation_guard<CON>::node_type* operation_guard<CON>::popBegin()
-	{
-		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			return nullptr;
-		node_type* node = m_container.popBegin();//ポップ開始
-		if (node)
-			m_status = status_t::POP_BEGINNING;//ステータス変更
-		return node;
-	}
-
-	//ポップ終了
-	template<class CON>
-	bool operation_guard<CON>::popEnd()
-	{
-		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			return false;
-		const bool result = m_container.popEnd();//ポップ終了
-		m_status = status_t::POP_ENDED;//ステータス変更
-		return result;
-	}
-
-	//ポップ取り消し
-	template<class CON>
-	bool operation_guard<CON>::popCancel()
-	{
-		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
-			return false;
-		m_container.popCancel();//ポップ取り消し
-		m_status = status_t::POP_CANCELLED;//ステータス変更
-		return true;
-	}
-
-	//デストラクタ
-	template<class CON>
-	operation_guard<CON>::~operation_guard()
-	{
-		pushEnd();//プッシュ終了
-		popEnd();//ポップ終了
 	}
 
 }//namespace binary_heap

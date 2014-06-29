@@ -21,6 +21,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //イテレータの差（要素数）を返す
+//（注）ランダムアクセスイテレータ（動的配列、リングバッファ）以外は、結果として負の数を返す事がないことに注意。
+//      なにより、end と begin が順序が逆転していると、処理が終了できないので取扱い厳重注意！
+//      （ランダムアクセスイテレータは負の数を返すことができる）
 template<class ITERATOR>
 inline typename ITERATOR::difference_type iteratorDifference(ITERATOR begin, ITERATOR end, std::input_iterator_tag)
 {

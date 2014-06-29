@@ -31,193 +31,36 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace priority_queue
 {
 	//--------------------
-	//イテレータのインライン関数
-	
-#if 0
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator&& rhs)
+	//単一操作オブジェクト（安全なエンキュー／デキュー操作クラス）
+
+	//エンキュー開始
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	template<typename... Tx>
+	typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::node_type* containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::enqueueBegin(const typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::priority_type priority, Tx... args)
 	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
-		return *this;
+		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
+			return nullptr;
+		node_type* node = m_containerAdapter.enqueueBegin(priority, args...);//エンキュー開始
+		if (node)
+			m_status = status_t::PUSH_BEGINNING;//ステータス変更
+		return node;
 	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::iterator& containerAdapter<OPE_TYPE>::iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
+
 	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	inline containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::uniqueOperation(typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation&& obj) :
+		m_containerAdapter(obj.m_containerAdapter),
+		m_status(obj.m_status)
 	{
-		update(m_index);
+		obj.m_status = status_t::IDLE;
 	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
-	{
-		update(m_index);
-	}
+
 	//コンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const containerAdapter<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		if (!is_end)
-			update(0);//先頭データ
-		else
-			update(m_con->m_size);//末尾データ
-	}
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::iterator::iterator(const containerAdapter<OPE_TYPE>& con, const typename containerAdapter<OPE_TYPE>::index_type index) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		update(index);
-	}
-#endif
-	
-	//--------------------
-	//リバースイテレータのインライン関数
-	
-#if 0
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	//ムーブオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator&& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::reverse_iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		m_value = rhs.m_value;
-		return *this;
-	}
-	//コピーオペレータ
-	template<class OPE_TYPE>
-	inline typename containerAdapter<OPE_TYPE>::reverse_iterator& containerAdapter<OPE_TYPE>::reverse_iterator::operator=(const typename containerAdapter<OPE_TYPE>::iterator& rhs)
-	{
-		m_con = rhs.m_con;
-		m_index = rhs.m_index;
-		update(m_index);
-		return *this;
-	}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
+	inline containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::uniqueOperation(typename containerAdapter<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::container_adapter_type& container_adapter) :
+		m_containerAdapter(container_adapter),
+		m_status(status_t::IDLE)
 	{}
-	//ムーブコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::iterator&& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
-	{
-		update(obj.m_index);
-	}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::reverse_iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(obj.m_value)
-	{}
-	//コピーコンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename containerAdapter<OPE_TYPE>::iterator& obj) :
-		m_con(obj.m_con),
-		m_index(obj.m_index),
-		m_value(nullptr)
-	{
-		update(m_index);
-	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const containerAdapter<OPE_TYPE>& con, const bool is_end) :
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		if (!is_end)
-			update(m_con->m_size);//末尾データ
-		else
-			update(0);//先頭データ
-	}
-	//コンストラクタ
-	template<class OPE_TYPE>
-	inline containerAdapter<OPE_TYPE>::reverse_iterator::reverse_iterator(const  containerAdapter<OPE_TYPE>& con, const typename  containerAdapter<OPE_TYPE>::index_type index):
-		m_con(&con),
-		m_index(INVALID_INDEX),
-		m_value(nullptr)
-	{
-		update(index);
-	}
-#endif
 
 	//----------------------------------------
 	//コンテナ本体のメソッド
@@ -336,29 +179,6 @@ namespace priority_queue
 	{
 		ope_type::resetSeqNo(m_seqNo);
 	}
-
-	//--------------------
-	//安全なエンキュー／デキュー操作クラス
-
-	//エンキュー開始
-	template<class CON>
-	template<typename... Tx>
-	typename operation_guard<CON>::node_type* operation_guard<CON>::enqueueBegin(const typename operation_guard<CON>::priority_type priority, Tx... args)
-	{
-		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
-			return nullptr;
-		node_type* node = m_containerAdapter.enqueueBegin(priority, args...);//エンキュー開始
-		if (node)
-			m_status = status_t::PUSH_BEGINNING;//ステータス変更
-		return node;
-	}
-
-	//コンストラクタ
-	template<class CON>
-	inline operation_guard<CON>::operation_guard(typename operation_guard<CON>::container_adapter_type& containerAdapter) :
-		m_containerAdapter(containerAdapter),
-		m_status(status_t::IDLE)
-	{}
 
 }//namespace priority_queue
 

@@ -213,13 +213,14 @@ namespace ring_buffer
 	public:
 		//--------------------
 		//イテレータ宣言
+		typedef std::random_access_iterator_tag iterator_category;
 		class iterator;
 		class reverse_iterator;
 		typedef const iterator const_iterator;
 		typedef const reverse_iterator const_reverse_iterator;
 		//--------------------
 		//イテレータ
-		class iterator : public std::iterator<std::random_access_iterator_tag, value_type>
+		class iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
 			friend class reverse_iterator;
@@ -282,13 +283,7 @@ namespace ring_buffer
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
-			void addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const;
-		public:
-			//値を差分型に変換
-			template<typename T>
-			difference_type toDifferenceType(const T value) const { return static_cast<difference_type>(value); }
-			template<typename T>
-			difference_type toDiff(const T value) const { return toDifferenceType(value); }
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
 			iterator& operator=(const iterator&& rhs);
@@ -325,7 +320,7 @@ namespace ring_buffer
 		//--------------------
 		//リバースイテレータ
 		//class reverse_iterator : public std::reverse_iterator<iterator>
-		class reverse_iterator : public std::iterator<std::random_access_iterator_tag, value_type>
+		class reverse_iterator : public std::iterator<iterator_category, value_type>
 		{
 			friend class container;
 			friend class iterator;
@@ -392,13 +387,7 @@ namespace ring_buffer
 			//メソッド
 			//参照を更新
 			void update(const index_type logical_index) const;
-			void addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const;
-		public:
-			//値を差分型に変換
-			template<typename T>
-			difference_type toDifferenceType(const T value) const { return static_cast<difference_type>(value); }
-			template<typename T>
-			difference_type toDiff(const T value) const { return toDifferenceType(value); }
+			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
 			reverse_iterator& operator=(const reverse_iterator&& rhs);

@@ -25,6 +25,50 @@ namespace singly_linked_list
 	//----------------------------------------
 	//イテレータのメソッド
 	
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+	//演算オペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
+	{
+		if (!m_value && !rhs.m_value)
+			return 0;
+		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && !rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+			return 0;
+		difference_type diff = 0;
+		node_type* value = rhs.m_value;
+		if (!rhs.m_isEnd)
+		{
+			if (value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+			{
+				value = m_con->m_first;
+				++diff;
+			}
+			while (value && value != m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+				++diff;
+			}
+			if (value == m_value)
+				return diff;
+		}
+		diff = 0;
+		value = m_value;
+		if (value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+		{
+			value = m_con->m_first;
+			--diff;
+		}
+		while (value && value != rhs.m_value)
+		{
+			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+			--diff;
+		}
+		if (value == m_value)
+			return diff;
+		return 0;
+	}
+#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
+
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
@@ -60,11 +104,11 @@ namespace singly_linked_list
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::updateForward(const std::size_t step) const
+	void container<OPE_TYPE>::iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step == 0)
 			return;
-		std::size_t _step = step;
+		std::size_t _step = static_cast<std::size_t>(step);
 		node_type* prev = m_value;
 		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
 		{
@@ -76,7 +120,7 @@ namespace singly_linked_list
 		m_isEnd = (prev && !m_value && _step == 0);
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::iterator::updateBackward(const std::size_t step) const
+	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step == 0)
 			return;
@@ -86,7 +130,7 @@ namespace singly_linked_list
 			m_isEnd = false;
 			return;
 		}
-		std::size_t _step = step;
+		std::size_t _step = static_cast<std::size_t>(step);
 		if (_step > 0 && m_isEnd)
 		{
 			m_value = const_cast<node_type*>(m_con->m_last);
@@ -111,7 +155,7 @@ namespace singly_linked_list
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
@@ -139,7 +183,7 @@ namespace singly_linked_list
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
@@ -165,7 +209,7 @@ namespace singly_linked_list
 		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
@@ -190,7 +234,7 @@ namespace singly_linked_list
 		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
 	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
@@ -229,10 +273,51 @@ namespace singly_linked_list
 		m_isEnd(is_end)
 	{}
 
-#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
+#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+	//演算オペレータ
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs)
+	{
+		if (!m_value && !rhs.m_value)
+			return 0;
+		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && !rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+			return 0;
+		difference_type diff = 0;
+		node_type* value = m_value;
+		if (!rhs.m_isEnd)
+		{
+			if (value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+			{
+				value = m_con->m_first;
+				++diff;
+			}
+			while (value && value != rhs.m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+				++diff;
+			}
+		}
+		if (value == m_value)
+			return diff;
+		diff = 0;
+		value = rhs.m_value;
+		if (value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+		{
+			value = m_con->m_first;
+			--diff;
+		}
+		while (value && value != m_value)
+		{
+			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+			--diff;
+		}
+		if (value == m_value)
+			return diff;
+		return 0;
+	}
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const
@@ -256,18 +341,18 @@ namespace singly_linked_list
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::updateForward(const std::size_t step) const
+	void container<OPE_TYPE>::reverse_iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		std::size_t _step = step;
+		std::size_t _step = static_cast<std::size_t>(step);
 		node_type* prev = m_value;
 		if (m_value)
 			m_value = const_cast<node_type*>(getBackwardNode<ope_type>(*m_value, _step, m_con->m_first, nullptr));
 		m_isEnd = (prev && !m_value && _step == 0);
 	}
 	template<class OPE_TYPE>
-	void container<OPE_TYPE>::reverse_iterator::updateBackward(const std::size_t step) const
+	void container<OPE_TYPE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		std::size_t _step = step;
+		std::size_t _step = static_cast<std::size_t>(step);
 		if (_step > 0 && m_isEnd)
 		{
 			m_value = const_cast<node_type*>(m_con->m_first);
