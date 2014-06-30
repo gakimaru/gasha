@@ -13,11 +13,13 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <algorithm>//C++11 std::move()
+#include <type_traits>//c++11 std::conditional
 
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY
 #include <memory.h>//memcpy()
 #endif//GASHA_SWAP_VALUES_USE_MEMCPY
+
+#include <utility>//C++11 std::move
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

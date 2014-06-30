@@ -26,6 +26,15 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
+//【VC++】例外を無効化した状態で new 演算子を使用すると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace linked_list
@@ -847,6 +856,9 @@ namespace linked_list
 }//namespace linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__LINKED_LIST_INL_
 

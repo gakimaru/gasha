@@ -27,9 +27,13 @@
 #include <gasha/tagged_ptr.h>//タグ付きポインタ
 #include <gasha/basic_math.h>//基本算術：calcStaticMSB()
 
+#include <utility>//C++11 std::move
 #include <cstddef>//std::size_t
-#include <cstdint>//++11 std::uint32_t, std::uint64_t
+#include <cstdint>//C++11 std::uint32_t, std::uint64_t
 #include <atomic>//C++11 std::atomic
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
 
 //【VC++】例外を無効化した状態で <functional> <bitset> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -132,6 +136,9 @@ private:
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_LF_QUEUE_ALLWAYS_TOGETHER_INL

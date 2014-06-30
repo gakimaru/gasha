@@ -18,6 +18,9 @@
 
 #include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ【宣言部】
 
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
 //【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
@@ -66,6 +69,9 @@ bool lfPoolAllocator<T, _POOL_SIZE>::deleteObj(ObjType* p)
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__LOCKFREE_POOL_ALLOCATOR_INL_
 

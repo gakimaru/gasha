@@ -20,6 +20,7 @@
 
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数定義部】
 
+#include <utility>//C++11 std::move
 #include <stdio.h>//printf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

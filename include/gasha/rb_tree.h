@@ -32,6 +32,10 @@
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 #include <cstdint>//C++11 std::int64_t, std::uint32_t
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
 
 //【VC++】例外を無効化した状態で <iterator> <string> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -899,6 +903,9 @@ template<typename NODE_TYPE, class GET_KEY_FUNC, class REF_CHILD_L_PTR_FUNC, cla
 using simpleRBTree = rb_tree::simpleContainer<NODE_TYPE, GET_KEY_FUNC, REF_CHILD_L_PTR_FUNC, REF_CHILD_S_PTR_FUNC, REF_IS_BLACK_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_INL

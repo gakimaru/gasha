@@ -18,8 +18,12 @@
 
 #include <gasha/shared_pool_allocator.inl>//共有プールアロケータ【インライン関数／テンプレート関数定義部】
 
+#include <utility>//C++11 std::move
 #include <assert.h>//assert()
 #include <stdio.h>//printf()
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
 
 //【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -169,6 +173,9 @@ sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::~sharedPoolAllocator()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__SHARED_POOL_ALLOCATOR_CPP_H_
 

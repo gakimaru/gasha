@@ -18,6 +18,7 @@
 #include <climits>//***_MAX
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
 #include <malloc.h>//_aligned_malloc(), _aligned_free()
+#include <utility>//C++11 std::move
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

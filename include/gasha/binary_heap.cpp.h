@@ -18,6 +18,8 @@
 
 #include <gasha/binary_heap.inl>//二分ヒープコンテナ【インライン関数／テンプレート関数定義部】
 
+#include <utility>//C++11 std::move
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace binary_heap

@@ -26,6 +26,9 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
 //【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
@@ -582,6 +585,9 @@ namespace dynamic_array
 }//namespace dynamic_array
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__DYNAMIC_ARRAY_INL_
 

@@ -20,6 +20,7 @@
 
 #include <gasha/shared_pool_allocator.cpp.h>//マルチスレッド共有プールアロケータ【関数定義部】
 
+#include <utility>//C++11 std::move
 #include <stdio.h>//printf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

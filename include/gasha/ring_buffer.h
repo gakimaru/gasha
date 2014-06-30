@@ -33,20 +33,14 @@
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
 #include <iterator>//std::iterator
-
-
-//移動予定
-#include <gasha/is_ordered.h>//整列状態確認
-#include <gasha/intro_sort.h>//イントロソート
-#include <gasha/insertion_sort.h>//挿入ソート
-
-#include <gasha/linear_search.h>//線形探索
-#include <gasha/binary_search.h>//二分探索
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -802,6 +796,9 @@ template<typename VALUE_TYPE>
 using simpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_RING_BUFFER_ALLWAYS_TOGETHER_INL

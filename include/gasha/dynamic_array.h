@@ -33,6 +33,9 @@
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
@@ -795,6 +798,9 @@ template<typename VALUE_TYPE>
 using simpleDArray = dynamic_array::simpleContainer<VALUE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_INL

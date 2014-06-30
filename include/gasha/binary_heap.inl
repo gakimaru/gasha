@@ -20,6 +20,11 @@
 
 #include <gasha/utility.h>//汎用ユーティリティ（値の交換を使用）
 
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
 //【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
@@ -592,6 +597,9 @@ namespace binary_heap
 }//namespace binary_heap
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__BINARY_HEAP_INL_
 

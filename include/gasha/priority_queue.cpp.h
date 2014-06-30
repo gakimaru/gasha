@@ -20,6 +20,8 @@
 
 #include <gasha/binary_heap.cpp.h>//二分ヒープコンテナ【関数定義部】
 
+#include <utility>//C++11 std::move
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace priority_queue

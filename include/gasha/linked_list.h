@@ -32,6 +32,10 @@
 #include <gasha/search_basic.h>//探索処理基本
 
 #include <cstddef>//std::size_t
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -865,6 +869,9 @@ using simpleLList = linked_list::simpleContainer<NODE_TYPE>;
 	template class linked_list::container<linked_list::simpleContainer<value_type>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_LINKED_LIST_ALLWAYS_TOGETHER_INL

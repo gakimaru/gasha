@@ -28,9 +28,14 @@
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
-#include <cstddef>//std::size_t, std::ptrdiff_t用
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
+
+#include <cstddef>//std::size_t, std::ptrdiff_t用
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
 
 //【VC++】例外を無効化した状態で <iterator> をインクルードすると、warning C4530 が発生する
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
@@ -850,6 +855,9 @@ template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC>
 using simpleSLList = singly_linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_SINGLY_LINKED_LIST_ALLWAYS_TOGETHER_INL
