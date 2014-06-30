@@ -86,6 +86,28 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t
 template<typename T> inline std::size_t sizeofvalueof(T val){ return sizeof(T); }
 template<typename T> inline std::size_t sizeofvalueof(T* val){ return sizeof(T); }
 
+//--------------------------------------------------------------------------------
+//クラス／構造体に比較演算子を自動定義するためのCRPTクラス
+//--------------------------------------------------------------------------------
+//使用方法：
+//  struct derived : public operatorCRTP<derived, int>//テンプレート引数には、「自身の型」と「比較に用いる型」を指定する
+//  {                                                 //※自身の型には、「比較に用いる型」へのキャストオペレータを実装しておく必要がある
+//      operator int() const { return m_primaryData; }//int型にキャスト
+//      int m_primaryData;//主要データ（比較に用いる）
+//      int m_otherData;//他のデータ
+//  };
+template<class base, typename cast_type>
+class operatorCRTP
+{
+public:
+	friend inline bool operator==(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) == static_cast<cast_type>(rhs); }
+	friend inline bool operator!=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) != static_cast<cast_type>(rhs); }
+	friend inline bool operator<(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) < static_cast<cast_type>(rhs); }
+	friend inline bool operator>(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) > static_cast<cast_type>(rhs); }
+	friend inline bool operator<=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) <= static_cast<cast_type>(rhs); }
+	friend inline bool operator>=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) >= static_cast<cast_type>(rhs); }
+};
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__TYPE_TRAITS_H_

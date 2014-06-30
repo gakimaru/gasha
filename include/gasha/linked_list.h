@@ -733,13 +733,7 @@ namespace linked_list
 			inline core_value_type& operator*(){ return m_value; }
 			inline const core_value_type* operator->() const { return &m_value; }
 			inline core_value_type* operator->(){ return &m_value; }
-			//比較オペレータ
-			inline bool operator==(const node& rhs) const { return m_value == rhs.m_value; }
-			inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
-			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
-			inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
-			inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
-			inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
+			//比較オペレータ（テンプレート）
 			template<class V>
 			inline bool operator==(const V& rhs) const { return m_value == rhs; }//container::find(), std::find()に必要
 			template<class V>
@@ -752,6 +746,15 @@ namespace linked_list
 			inline bool operator<=(const V& rhs) const { return m_value <= rhs; }
 			template<class V>
 			inline bool operator>=(const V& rhs) const { return m_value >= rhs; }
+			//比較オペレータ（自身の型との比較）
+			//【注意】明示的なインスタンス化の際には、VALUE_TYPE に対して下記6つの比較演算子を全て実装しておく必要がある点に注意。
+			//※gasha/type_traits.h の operatorCRTP クラスを使用すると少しだけ簡単に定義可能。
+			inline bool operator==(const node& rhs) const { return m_value == rhs.m_value; }
+			inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
+			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
+			inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
+			inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
+			inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
 			//フレンド比較演算子（静的関数になる） ※左辺値が自身の型以外の二項演算子
 			template<class V>
 			friend inline bool operator==(const V& lhs, const node& rhs){ return lhs == rhs; }
