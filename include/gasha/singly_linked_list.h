@@ -648,8 +648,8 @@ namespace singly_linked_list
 		inline node_type* back(){ return m_last; }//末尾ノードを参照
 		inline const node_type* front() const { return m_first; }//先頭ノードを参照
 		inline const node_type* back() const { return m_last; }//末尾ノードを参照
-		inline node_type*& firstRef(){ return m_first; }//先頭ノードの参照を取得
-		inline node_type*& lastRef(){ return m_last; }//末尾ノードの参照を取得
+		inline node_type*& refFirst(){ return m_first; }//先頭ノードの参照を取得
+		inline node_type*& refLast(){ return m_last; }//末尾ノードの参照を取得
 	public:
 		//追加／削除系メソッド
 		//※std::forward_listと異なり、追加／削除対象のノードを直接指定し、結果をポインタで受け取る（成功したら、追加／削除したポインタを返す）

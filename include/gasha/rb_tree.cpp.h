@@ -33,13 +33,13 @@ namespace rb_tree
 
 	//スタックにノード情報を記録
 	template<class OPE_TYPE>
-	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type* node, const bool is_large)
+	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type& node, const bool is_large)
 	{
 	#ifdef GASHA_ASSERTION_IS_ENABLED
 		assert(m_depth < DEPTH_MAX);
 	#endif//GASHA_ASSERTION_IS_ENABLED
 		info_t* stack_node = &m_array[m_depth++];
-		stack_node->m_nodeRef = node;
+		stack_node->m_nodeRef = &node;
 		stack_node->m_isLarge = is_large;
 		return stack_node;
 	}
@@ -132,45 +132,57 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const iterator& rhs) const
 	{
-		stack_t<OPE_TYPE> stack;
+		if (!m_con->m_root)
+			return 0;
 		if (!m_value && !rhs.m_value)
 			return 0;
+		stack_t<OPE_TYPE> stack;
 		difference_type diff = 0;
-		stack.reset();
-		const node_type* value = searchNode<ope_type>(m_con->m_root, rhs.m_value, stack);
-		if (!rhs.m_isEnd)
+		if (rhs.m_value)
 		{
-			while (value && value != m_value)
+			stack.reset();
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *rhs.m_value, stack);
+			if (!rhs.m_isEnd)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(m_value, stack));
+				while (value && value != m_value)
+				{
+					value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
+					++diff;
+				}
+				if (value == m_value)
+					return diff;
+			}
+			diff = 0;
+		}
+		if (m_value)
+		{
+			stack.reset();
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
+			while (value && value != rhs.m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
 				++diff;
 			}
 			if (value == m_value)
 				return diff;
 		}
-		diff = 0;
-		stack.reset();
-		value = searchNode<ope_type>(m_con->m_root, m_value, stack);
-		while (value && value != rhs.m_value)
-		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(m_value, stack));
-			++diff;
-		}
-		if (value == m_value)
-			return diff;
 		return 0;
 	}
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
 	{
+		if (!m_con->m_root || !m_value)
+			return;
 		value_type* prev = m_value;
-		m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+		m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
 		m_isEnd = (prev && !m_value);
 	}
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updatePrev() const
 	{
+		if (!m_con->m_root)
+			return;
 		if (m_isEnd)
 		{
 			m_stack.reset();
@@ -178,17 +190,24 @@ namespace rb_tree
 			m_isEnd = false;
 			return;
 		}
-		m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+		if (m_value)
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (!m_con->m_root || !m_value)
+			return;
+		if (step == 0)
+			return;
+		if (step < 0)
+			updateBackward(-step);
 		difference_type _step = step;
 		value_type* prev = m_value;
 		while (_step > 0 && m_value)
 		{
-			m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+			m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
 			--_step;
 		}
 		m_isEnd = (prev && !m_value && _step == 0);
@@ -196,6 +215,10 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (!m_con->m_root)
+			return;
+		if (step <= 0)
+			updateForward(-step);
 		difference_type _step = step;
 		if (_step > 0 && m_isEnd)
 		{
@@ -205,7 +228,7 @@ namespace rb_tree
 		}
 		while (_step > 0 && m_value)
 		{
-			m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
 			--_step;
 		}
 		m_isEnd = false;
@@ -234,7 +257,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (rhs.m_isEnd)
+			if (rhs.m_isEnd && m_con->m_root)
 				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
 		}
 		return *this;
@@ -263,7 +286,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (rhs.m_isEnd)
+			if (rhs.m_isEnd && m_con->m_root)
 				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
 		}
 		return *this;
@@ -291,7 +314,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (obj.m_isEnd)
+			if (obj.m_isEnd && m_con->m_root)
 				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
 		}
 	}
@@ -318,7 +341,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (obj.m_isEnd)
+			if (obj.m_isEnd && m_con->m_root)
 				m_value = const_cast<node_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
 		}
 	}
@@ -330,7 +353,7 @@ namespace rb_tree
 		m_value(nullptr),
 		m_isEnd(is_end)
 	{
-		if (!is_end)
+		if (!is_end && m_con->m_root)
 		{
 			m_value = const_cast<value_type*>(getSmallestNode<ope_type>(m_con->m_root, m_stack));
 			if (!m_value)
@@ -359,45 +382,57 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
 	{
-		stack_t<OPE_TYPE> stack;
+		if (!m_con->m_root)
+			return 0;
 		if (!m_value && !rhs.m_value)
 			return 0;
+		stack_t<OPE_TYPE> stack;
 		difference_type diff = 0;
-		stack.reset();
-		const node_type* value = searchNode<ope_type>(m_con->m_root, m_value, stack);
-		if (!m_isEnd)
+		if (m_value)
 		{
-			while (value && value != rhs.m_value)
+			stack.reset();
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
+			if (!m_isEnd)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(m_value, stack));
-				++diff;
+				while (value && value != rhs.m_value)
+				{
+					value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
+					++diff;
+				}
+				if (value == m_value)
+					return diff;
+			}
+			diff = 0;
+		}
+		if (rhs.m_value)
+		{
+			stack.reset();
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *rhs.m_value, stack);
+			while (value && value != m_value)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
+				--diff;
 			}
 			if (value == m_value)
 				return diff;
 		}
-		diff = 0;
-		stack.reset();
-		value = searchNode<ope_type>(m_con->m_root, rhs.m_value, stack);
-		while (value && value != m_value)
-		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(m_value, stack));
-			--diff;
-		}
-		if (value == m_value)
-			return diff;
 		return 0;
 	}
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const
 	{
+		if (!m_con->m_root || !m_value)
+			return;
 		value_type* prev = m_value;
-		m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+		m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
 		m_isEnd = (prev && !m_value);
 	}
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updatePrev() const
 	{
+		if (!m_con->m_root)
+			return;
 		if (m_isEnd)
 		{
 			m_stack.reset();
@@ -405,17 +440,25 @@ namespace rb_tree
 			m_isEnd = false;
 			return;
 		}
-		m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+		if (!m_value)
+			return;
+		m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
 		m_isEnd = false;
 	}
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (!m_con->m_root || !m_value)
+			return;
+		if (step == 0)
+			return;
+		if (step < 0)
+			updateBackward(-step);
 		difference_type _step = step;
 		value_type* prev = m_value;
 		while (_step > 0 && m_value)
 		{
-			m_value = const_cast<value_type*>(getPrevNode<ope_type>(m_value, m_stack));
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
 			--_step;
 		}
 		m_isEnd = (prev && !m_value && _step == 0);
@@ -423,6 +466,10 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (!m_con->m_root)
+			return;
+		if (step <= 0)
+			updateForward(-step);
 		difference_type _step = step;
 		if (_step > 0 && m_isEnd)
 		{
@@ -432,7 +479,7 @@ namespace rb_tree
 		}
 		while (_step > 0 && m_value)
 		{
-			m_value = const_cast<value_type*>(getNextNode<ope_type>(m_value, m_stack));
+			m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
 			--_step;
 		}
 		m_isEnd = false;
@@ -461,7 +508,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (rhs.m_isEnd)
+			if (rhs.m_isEnd && m_con->m_root)
 				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
 		}
 		return *this;
@@ -490,7 +537,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (rhs.m_isEnd)
+			if (rhs.m_isEnd && m_con->m_root)
 				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
 		}
 		return *this;
@@ -518,7 +565,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (obj.m_isEnd)
+			if (obj.m_isEnd && m_con->m_root)
 				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
 		}
 	}
@@ -545,7 +592,7 @@ namespace rb_tree
 		else
 		{
 			m_stack.reset();
-			if (obj.m_isEnd)
+			if (obj.m_isEnd && m_con->m_root)
 				m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
 		}
 	}
@@ -557,7 +604,7 @@ namespace rb_tree
 		m_value(nullptr),
 		m_isEnd(is_end)
 	{
-		if (!is_end)
+		if (!is_end && m_con->m_root)
 		{
 			m_value = const_cast<value_type*>(getLargestNode<ope_type>(m_con->m_root, m_stack));
 			if (!m_value)

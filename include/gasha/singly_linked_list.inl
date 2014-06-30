@@ -353,14 +353,16 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index) const
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
+		iterator ite(*this);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index)
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
+		iterator ite(*this);
 		ite += index;
 		return ite;
 	}
@@ -486,14 +488,16 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index) const
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
+		reverse_iterator ite(*this);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index)
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
+		reverse_iterator ite(*this);
 		ite += index;
 		return ite;
 	}

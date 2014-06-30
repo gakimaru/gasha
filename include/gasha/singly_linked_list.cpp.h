@@ -45,7 +45,7 @@ namespace singly_linked_list
 			}
 			while (value && value != m_value)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value));
 				++diff;
 			}
 			if (value == m_value)
@@ -60,7 +60,7 @@ namespace singly_linked_list
 		}
 		while (value && value != rhs.m_value)
 		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+			value = const_cast<node_type*>(getNextNode<ope_type>(*value));
 			--diff;
 		}
 		if (value == m_value)
@@ -108,6 +108,8 @@ namespace singly_linked_list
 	{
 		if (step == 0)
 			return;
+		if (step < 0)
+			return updateBackward(-step);
 		std::size_t _step = static_cast<std::size_t>(step);
 		node_type* prev = m_value;
 		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
@@ -122,8 +124,8 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
-		if (step == 0)
-			return;
+		if (step <= 0)
+			return updateForward(-step);
 		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
 		{
 			m_value = nullptr;
@@ -296,7 +298,7 @@ namespace singly_linked_list
 			}
 			while (value && value != rhs.m_value)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value));
 				++diff;
 			}
 		}
@@ -311,7 +313,7 @@ namespace singly_linked_list
 		}
 		while (value && value != m_value)
 		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(*m_value));
+			value = const_cast<node_type*>(getNextNode<ope_type>(*value));
 			--diff;
 		}
 		if (value == m_value)
@@ -343,6 +345,10 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (step == 0)
+			return;
+		if (step < 0)
+			return updateBackward(-step);
 		std::size_t _step = static_cast<std::size_t>(step);
 		node_type* prev = m_value;
 		if (m_value)
@@ -352,6 +358,8 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
+		if (step <= 0)
+			return updateForward(-step);
 		std::size_t _step = static_cast<std::size_t>(step);
 		if (_step > 0 && m_isEnd)
 		{

@@ -179,21 +179,22 @@ namespace rb_tree
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
+	enum color_t//カラー型
+	{
+		RED = 0,//赤
+		BLACK = 1,//黒
+	};
 	template<class OPE_TYPE, typename NODE_TYPE, typename KEY_TYPE = std::uint32_t, std::size_t _STACK_DEPTH_MAX = 40>
 	struct baseOpe
 	{
 		//定数
 		static const std::size_t STACK_DEPTH_MAX = _STACK_DEPTH_MAX;//スタックの最大の深さ
-		enum color_t//色
-		{
-			RED = 0,//赤
-			BLACK = 1,//黒
-		};
 
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
 		typedef NODE_TYPE node_type;//ノード型
 		typedef KEY_TYPE key_type;//キー型
+		typedef rb_tree::color_t color_t;//カラー型
 
 		//ロック型
 		typedef dummySharedLock lock_type;//ロックオブジェクト型
@@ -325,7 +326,7 @@ namespace rb_tree
 		};
 	public:
 		//スタックにノード情報を記録
-		info_t* push(const node_type* node, const bool is_large);
+		info_t* push(const node_type& node, const bool is_large);
 		//スタックからノード情報を取得
 		info_t* pop();
 		//スタックの先頭のノード情報を参照
@@ -350,12 +351,9 @@ namespace rb_tree
 		//コピーコンストラクタ
 		stack_t(const stack_t& obj);
 		//デフォルトコンストラクタ
-		inline stack_t() :
-			m_depth(0)
-		{}
+		inline stack_t();
 		//デストラクタ
-		inline ~stack_t()
-		{}
+		inline ~stack_t();
 	private:
 		//フィールド
 		info_t m_array[DEPTH_MAX];//ノード情報の配列（スタック）
@@ -376,12 +374,12 @@ namespace rb_tree
 	//赤黒木操作関数：次ノード探索（カレントノードの次に大きいノードを探索）
 	//※get**Node()やsearchNode()でカレントノードを取得した際のスタックを渡す必要あり
 	template<class OPE_TYPE>
-	const typename OPE_TYPE::node_type* getNextNode(const typename OPE_TYPE::node_type* curr_node, stack_t<OPE_TYPE>& stack);
+	const typename OPE_TYPE::node_type* getNextNode(const typename OPE_TYPE::node_type& curr_node, stack_t<OPE_TYPE>& stack);
 	//--------------------
 	//赤黒木操作関数：前ノード探索（カレントノードの次に小さいノードを探索）
 	//※get**Node()やsearchNode()でカレントノードを取得した際のスタックを渡す必要あり
 	template<class OPE_TYPE>
-	const typename OPE_TYPE::node_type* getPrevNode(const typename OPE_TYPE::node_type* curr_node, stack_t<OPE_TYPE>& stack);
+	const typename OPE_TYPE::node_type* getPrevNode(const typename OPE_TYPE::node_type& curr_node, stack_t<OPE_TYPE>& stack);
 	//--------------------
 	//赤黒木操作関数：ノード探索（指定のキーと一致するノード、もしくは、指定のキーに最も近いノードを検索）
 	//※後からget**Node()やsearchNode()を実行できるように、スタックを渡す必要あり
@@ -398,11 +396,12 @@ namespace rb_tree
 	const typename OPE_TYPE::node_type* searchNode(const typename OPE_TYPE::node_type* root, const typename OPE_TYPE::key_type key, stack_t<OPE_TYPE>& stack, const match_type_t search_type = FOR_MATCH);
 	//既存ノード探索 ※キーを指定する代わりに、既存のノードを渡して探索する
 	template<class OPE_TYPE>
-	const typename OPE_TYPE::node_type* searchNode(const typename OPE_TYPE::node_type* root, const typename OPE_TYPE::node_type* node, stack_t<OPE_TYPE>& stack);
+	const typename OPE_TYPE::node_type* searchNode(const typename OPE_TYPE::node_type* root, const typename OPE_TYPE::node_type& node, stack_t<OPE_TYPE>& stack);
 	//--------------------
 	//赤黒木操作関数：木の最大深度を計測
 	//※内部でスタックを作成
-	//※-1でリストなし
+	//※根ノードのみの場合は 0
+	//※根ノードがnullの場合は -1
 	template<class OPE_TYPE>
 	int getDepthMax(const typename OPE_TYPE::node_type* root);
 	//--------------------
@@ -418,12 +417,12 @@ namespace rb_tree
 	//赤黒木操作関数：ノードを追加
 	//※関数内でスタックを使用
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* addNode(typename OPE_TYPE::node_type* new_node, typename OPE_TYPE::node_type*& root);
+	typename OPE_TYPE::node_type* addNode(typename OPE_TYPE::node_type& new_node, typename OPE_TYPE::node_type*& root);
 	//--------------------
 	//赤黒木操作関数：ノードを削除
 	//※関数内でスタックを二つ使用
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* removeNode(const typename OPE_TYPE::node_type* target_node, typename OPE_TYPE::node_type*& root);
+	typename OPE_TYPE::node_type* removeNode(const typename OPE_TYPE::node_type& target_node, typename OPE_TYPE::node_type*& root);
 	//--------------------
 	//※直接使用しない関数
 	namespace _private
@@ -703,7 +702,7 @@ namespace rb_tree
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline const node_type* at(const key_type key) const { stack_type stack; return searchNode<ope_type>(m_root, key, stack, FOR_MATCH); }
+		inline const node_type* at(const key_type key) const;
 		inline node_type* at(const key_type key){ return const_cast<node_type*>(const_cast<const container*>(this)->at(key)); }
 		inline const node_type* operator[](const key_type key) const { return at(key); }
 		inline node_type* operator[](const key_type key){ return at(key); }
@@ -763,9 +762,9 @@ namespace rb_tree
 		//メソッド：基本情報系
 		//inline std::size_t max_size() const { return (不定); }
 		//inline std::size_t capacity() const { return (不定); }
-		inline std::size_t size() const { return countNodes<ope_type>(m_root); }//ノード数を取得
-		inline bool empty() const { return m_root == nullptr; }//木が空か？
-		inline int depth_max() const { return getDepthMax<ope_type>(m_root); }//木の深さを取得
+		inline std::size_t size() const;//ノード数を取得
+		inline bool empty() const;//木が空か？
+		inline int maxDepth() const;//木の深さを取得 ※-1で木がない
 	public:
 		//メソッド：要素アクセス系
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
@@ -773,7 +772,7 @@ namespace rb_tree
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const node_type* root() const { return m_root; }//根ノードを参照
 		inline node_type* root(){ return m_root; }//根ノードを参照
-		inline node_type*& root_ref(){ return m_root; }//根ノードの参照を取得
+		inline node_type*& refRoot(){ return m_root; }//根ノードの参照を取得
 	public:
 		//追加／削除系メソッド
 		//※std::mapと異なり、追加／削除対象のノードを直接指定し、結果をポインタで受け取る（成功したら、追加／削除したポインタを返す）
@@ -783,10 +782,10 @@ namespace rb_tree
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		
 		//ノードを挿入（連結に追加）
-		inline node_type* insert(const node_type& node);
+		inline node_type* insert(node_type& node);
 
 		//ノードを削除（連結解除）
-		inline node_type* erase(const node_type& node);
+		inline node_type* erase(node_type& node);
 
 		//ノードを削除（連結解除）
 		//※キー指定
@@ -795,6 +794,11 @@ namespace rb_tree
 		inline node_type* erase(const std::string& key);
 		//inline node_type* erase(const node_type& node);
 		
+		//ノードを削除（連結解除）
+		//※イテレータ指定
+		//※以後、イテレータを使用できないことに注意
+		inline node_type* erase(iterator& ite);
+
 		//全ノードをクリア
 		//※根ノードを返す
 		node_type* clear();
@@ -948,7 +952,6 @@ namespace rb_tree
 		{
 			typedef typename baseOpe<ope, node>::node_type node_type;
 			typedef typename baseOpe<ope, node>::key_type key_type;
-			typedef typename baseOpe<ope, node>::color_t color_t;
 
 			//子ノードを取得
 			inline static const node_type* getChildS(const node_type& node){ return node.m_childS; }//小（左）側
