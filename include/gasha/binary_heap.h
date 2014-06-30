@@ -259,12 +259,26 @@ namespace binary_heap
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			inline iterator operator--(int);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			inline const iterator& operator++() const { return const_cast<iterator*>(this)->operator++(); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator--() const { return const_cast<iterator*>(this)->operator--(); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
+			inline const iterator operator++(int) const { return const_cast<iterator*>(this)->operator++(0); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator operator--(int) const { return const_cast<iterator*>(this)->operator--(0); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
 			inline iterator& operator+=(const difference_type rhs);
 			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			inline iterator& operator-=(const difference_type rhs);
 			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator+=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator+=(const size_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
+			inline const iterator& operator-=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator-=(rhs); }
+			inline const iterator& operator-=(const size_type rhs) const  { return const_cast<iterator*>(this)->operator-=(rhs); }
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 			inline iterator operator+(const difference_type rhs) const;
 			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
@@ -290,9 +304,9 @@ namespace binary_heap
 			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
-			iterator& operator=(const iterator&& rhs);
+			iterator& operator=(iterator&& rhs);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(reverse_iterator&& rhs);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
@@ -301,9 +315,9 @@ namespace binary_heap
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
-			iterator(const iterator&& obj);
+			iterator(iterator&& obj);
 		#ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-			iterator(const reverse_iterator&& obj);
+			iterator(reverse_iterator&& obj);
 		#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
 			iterator(const iterator& obj);
@@ -375,11 +389,19 @@ namespace binary_heap
 			inline reverse_iterator& operator--();
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator++() const { return const_cast<reverse_iterator*>(this)->operator++(); }
+			inline const reverse_iterator& operator--() const { return const_cast<reverse_iterator*>(this)->operator--(); }
+			inline const reverse_iterator operator++(int) const { return const_cast<reverse_iterator*>(this)->operator++(0); }
+			inline const reverse_iterator operator--(int) const { return const_cast<reverse_iterator*>(this)->operator--(0); }
 		#ifdef GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE//std::input_iterator_tag には本来必要ではない
 			inline reverse_iterator& operator+=(const difference_type rhs);
 			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator& operator-=(const difference_type rhs);
 			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const reverse_iterator& operator+=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator+=(const size_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator-=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
+			inline const reverse_iterator& operator-=(const size_type rhs) const  { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
 			inline reverse_iterator operator+(const difference_type rhs) const;
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
@@ -406,15 +428,15 @@ namespace binary_heap
 			inline iterator base();
 		public:
 			//ムーブオペレータ
-			reverse_iterator& operator=(const reverse_iterator&& rhs);
-			reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(reverse_iterator&& rhs);
+			reverse_iterator& operator=(iterator&& rhs);
 			//コピーオペレータ
 			reverse_iterator& operator=(const reverse_iterator& rhs);
 			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			reverse_iterator(const reverse_iterator&& obj);
-			reverse_iterator(const iterator&& obj);
+			reverse_iterator(reverse_iterator&& obj);
+			reverse_iterator(iterator&& obj);
 			//コピーコンストラクタ
 			reverse_iterator(const reverse_iterator& obj);
 			reverse_iterator(const iterator& obj);
@@ -453,7 +475,7 @@ namespace binary_heap
 		public:
 			//プッシュ開始
 			template<typename... Tx>
-			node_type* pushBegin(const Tx&... args);
+			node_type* pushBegin(Tx&&... args);
 			
 			//プッシュ終了
 			node_type* pushEnd();
@@ -597,7 +619,7 @@ namespace binary_heap
 		int depth_max() const;
 	private:
 		//プッシュ（本体）：ムーブ
-		node_type* _pushCopying(const node_type&& src);
+		node_type* _pushCopying(node_type&& src);
 		
 		//プッシュ（本体）：コピー
 		node_type* _pushCopying(const node_type& src);
@@ -607,29 +629,29 @@ namespace binary_heap
 		//※オブジェクトのコピーが発生する点に注意（少し遅くなる）
 		//※ムーブオペレータを使用してコピーする点に注意
 		//※処理中、ロックを取得する
-		inline node_type* pushCopying(const node_type&& src);
+		inline node_type* pushCopying(node_type&& src);
 		inline node_type* pushCopying(const node_type& src);
 	private:
 		//プッシュ（本体）
 		template<typename... Tx>
-		node_type* _push(const Tx&... args);
+		node_type* _push(Tx&&... args);
 	public:
 		//プッシュ
 		//※パラメータ渡し
 		//※オブジェクトのコンストラクタが呼び出される
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		inline node_type* push(const Tx&... args);
+		inline node_type* push(Tx&&... args);
 	private:
 		//プッシュ開始（本体）
 		template<typename... Tx>
-		node_type* _pushBegin(const Tx&... args);
+		node_type* _pushBegin(Tx&&... args);
 	public:
 		//プッシュ開始
 		//※空きノードを取得し、コンストラクタが呼び出される
 		//※処理が成功すると、ロックを取得した状態になる（pushEndで解放する）
 		template<typename... Tx>
-		node_type* pushBegin(const Tx&... args);
+		node_type* pushBegin(Tx&&... args);
 	private:
 		//プッシュ終了（本体）
 		node_type* _pushEnd();

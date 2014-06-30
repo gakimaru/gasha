@@ -165,7 +165,7 @@ typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SI
 	return new(p)value_type(std::move(org));
 }
 template<class T, std::size_t _POOL_SIZE>
-typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newCopyObj(typename lfPoolAllocator<T, _POOL_SIZE>::value_type& org)//※コピー版
+typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newCopyObj(const typename lfPoolAllocator<T, _POOL_SIZE>::value_type& org)//※コピー版
 {
 	void* p = alloc();
 	if (!p)

@@ -40,7 +40,7 @@ namespace hash_table
 
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::set& container<OPE_TYPE, _TABLE_SIZE>::set::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::set&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::set& container<OPE_TYPE, _TABLE_SIZE>::set::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::set&& rhs)
 	{
 		m_index = rhs.m_index;
 		m_primaryIndex = rhs.m_primaryIndex;
@@ -62,7 +62,7 @@ namespace hash_table
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::set::set(const typename container<OPE_TYPE, _TABLE_SIZE>::set&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::set::set(typename container<OPE_TYPE, _TABLE_SIZE>::set&& obj) :
 		m_index(obj.m_index),
 		m_primaryIndex(obj.m_primaryIndex),
 		m_key(obj.m_key),
@@ -155,7 +155,7 @@ namespace hash_table
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -164,7 +164,7 @@ namespace hash_table
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -207,14 +207,14 @@ namespace hash_table
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(obj.m_isEnd)
 	{}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(false)
@@ -334,7 +334,7 @@ namespace hash_table
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -342,7 +342,7 @@ namespace hash_table
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -382,13 +382,13 @@ namespace hash_table
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(false)

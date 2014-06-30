@@ -18,6 +18,8 @@
 
 #include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ【宣言部】
 
+#include <utility>//C++11 std::forward
+
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
 
@@ -36,23 +38,23 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※既定の型
 template<class T, std::size_t _POOL_SIZE>
 template<typename...Tx>
-typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newObj(const Tx&... args)
+typename lfPoolAllocator<T, _POOL_SIZE>::value_type* lfPoolAllocator<T, _POOL_SIZE>::newObj(Tx&&... args)
 {
 	void* p = alloc();
 	if (!p)
 		return nullptr;
-	return new(p)value_type(args...);
+	return new(p)value_type(std::forward<Tx>(args)...);
 }
 //※型指定
 template<class T, std::size_t _POOL_SIZE>
 template<typename ObjType, typename...Tx>
-ObjType* lfPoolAllocator<T, _POOL_SIZE>::newObj(const Tx&... args)
+ObjType* lfPoolAllocator<T, _POOL_SIZE>::newObj(Tx&&... args)
 {
 	static_assert(sizeof(ObjType) <= VALUE_SIZE, "sizeof(ObjType) is too large.");
 	void* p = alloc();
 	if (!p)
 		return nullptr;
-	return new(p)ObjType(args...);
+	return new(p)ObjType(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し

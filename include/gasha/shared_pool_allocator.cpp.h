@@ -117,7 +117,7 @@ bool sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::free(void* p)
 
 //メモリ確保とコンストラクタ呼び出し
 template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newMoveObj(value_type&& org)//※ムーブ版
+typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newMoveObj(typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type&& org)//※ムーブ版
 {
 	void* p = alloc();
 	if (!p)
@@ -125,7 +125,7 @@ typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAl
 	return new(p)value_type(std::move(org));
 }
 template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newCopyObj(value_type& org)//※コピー版
+typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newCopyObj(const typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type& org)//※コピー版
 {
 	void* p = alloc();
 	if (!p)

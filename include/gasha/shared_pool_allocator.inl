@@ -18,6 +18,8 @@
 
 #include <gasha/shared_pool_allocator.h>//マルチスレッド共有プールアロケータ【宣言部】
 
+#include <utility>//C++11 std::forward
+
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
 
@@ -33,23 +35,23 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※既定の型
 template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE>
 template<typename...Tx>
-typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newObj(const Tx&... args)
+typename sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::value_type* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newObj(Tx&&... args)
 {
 	void* p = alloc();
 	if (!p)
 		return nullptr;
-	return new(p)value_type(args...);
+	return new(p)value_type(std::forward<Tx>(args)...);
 }
 //※型指定
 template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE>
 template<typename ObjType, typename...Tx>
-ObjType* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newObj(const Tx&... args)
+ObjType* sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::newObj(Tx&&... args)
 {
 	static_assert(sizeof(ObjType) <= VALUE_SIZE, "sizeof(ObjType) is too large.");
 	void* p = alloc();
 	if (!p)
 		return nullptr;
-	return new(p)ObjType(args...);
+	return new(p)ObjType(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し

@@ -256,10 +256,18 @@ namespace dynamic_array
 			inline iterator& operator--();
 			inline iterator operator++(int);
 			inline iterator operator--(int);
+			inline const iterator& operator++() const { return const_cast<iterator*>(this)->operator++(); }
+			inline const iterator& operator--() const { return const_cast<iterator*>(this)->operator--(); }
+			inline const iterator operator++(int) const { return const_cast<iterator*>(this)->operator++(0); }
+			inline const iterator operator--(int) const { return const_cast<iterator*>(this)->operator--(0); }
 			inline iterator& operator+=(const difference_type rhs);
 			inline iterator& operator+=(const size_type rhs){ return operator+=(static_cast<difference_type>(rhs)); }
 			inline iterator& operator-=(const difference_type rhs);
 			inline iterator& operator-=(const size_type rhs){ return operator-=(static_cast<difference_type>(rhs)); }
+			inline const iterator& operator+=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator+=(const size_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator-=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator-=(rhs); }
+			inline const iterator& operator-=(const size_type rhs) const  { return const_cast<iterator*>(this)->operator-=(rhs); }
 			inline iterator operator+(const difference_type rhs) const;
 			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline iterator operator-(const difference_type rhs) const;
@@ -282,15 +290,15 @@ namespace dynamic_array
 			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
-			iterator& operator=(const iterator&& rhs);
-			iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(iterator&& rhs);
+			iterator& operator=(reverse_iterator&& rhs);
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
 			iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			iterator(const iterator&& obj);
-			iterator(const reverse_iterator&& obj);
+			iterator(iterator&& obj);
+			iterator(reverse_iterator&& obj);
 			//コピーコンストラクタ
 			iterator(const iterator& obj);
 			iterator(const reverse_iterator& obj);
@@ -356,10 +364,18 @@ namespace dynamic_array
 			inline reverse_iterator& operator--();
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator++() const { return const_cast<reverse_iterator*>(this)->operator++(); }
+			inline const reverse_iterator& operator--() const { return const_cast<reverse_iterator*>(this)->operator--(); }
+			inline const reverse_iterator operator++(int) const { return const_cast<reverse_iterator*>(this)->operator++(0); }
+			inline const reverse_iterator operator--(int) const { return const_cast<reverse_iterator*>(this)->operator--(0); }
 			inline reverse_iterator& operator+=(const difference_type rhs);
 			inline reverse_iterator& operator+=(const size_type rhs){ return operator+=(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator& operator-=(const difference_type rhs);
 			inline reverse_iterator& operator-=(const size_type rhs){ return operator-=(static_cast<difference_type>(rhs)); }
+			inline const reverse_iterator& operator+=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator+=(const size_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator-=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
+			inline const reverse_iterator& operator-=(const size_type rhs) const  { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
 			inline reverse_iterator operator+(const difference_type rhs) const;
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
@@ -386,15 +402,15 @@ namespace dynamic_array
 			void addIndexAndUpdate(const difference_type add) const;
 		public:
 			//ムーブオペレータ
-			reverse_iterator& operator=(const reverse_iterator&& rhs);
-			reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(reverse_iterator&& rhs);
+			reverse_iterator& operator=(iterator&& rhs);
 			//コピーオペレータ
 			reverse_iterator& operator=(const reverse_iterator& rhs);
 			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			reverse_iterator(const reverse_iterator&& obj);
-			reverse_iterator(const iterator&& obj);
+			reverse_iterator(reverse_iterator&& obj);
+			reverse_iterator(iterator&& obj);
 			//コピーコンストラクタ
 			reverse_iterator(const reverse_iterator& obj);
 			reverse_iterator(const iterator& obj);
@@ -560,7 +576,7 @@ namespace dynamic_array
 		size_type resize(const int size, const value_type& new_value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		size_type resize(const int size, const Tx&... args);
+		size_type resize(const int size, Tx&&... args);
 		
 		//使用中のサイズを変更（新しいサイズを返す）
 		//※新しい値の代入も削除された要素のデストラクタ呼び出しも行わず、
@@ -581,14 +597,14 @@ namespace dynamic_array
 		//※コンストラクタ呼び出し版
 		//※既存の要素を上書きする際は、先にデストラクタを呼び出す
 		template<typename... Tx>
-		size_type assign(const int size, const Tx&... args);
+		size_type assign(const int size, Tx&&... args);
 		
 		//末尾に要素を追加
 		//※オブジェクト渡し
 		//※オブジェクトのコピーが発生する点に注意（少し遅くなる）
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
-		value_type* push_back(const value_type&& src);//ムーブ版
+		value_type* push_back(value_type&& src);//ムーブ版
 		value_type* push_back(const value_type& src);//コピー版
 		
 		//末尾に要素を追加
@@ -597,7 +613,7 @@ namespace dynamic_array
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で排他ロック（ライトロック）の取得と解放を行う必要がある
 		template<typename... Tx>
-		value_type* push_back(const Tx&... args);
+		value_type* push_back(Tx&&... args);
 		
 		//末尾の要素を削除
 		//※オブジェクトのデストラクタが呼び出される
@@ -631,7 +647,7 @@ namespace dynamic_array
 		iterator insert(iterator pos, const int num, value_type& value);
 		//※コンストラクタ呼び出し版
 		template<typename... Tx>
-		iterator insert(iterator pos, const int num, const Tx&... args);
+		iterator insert(iterator pos, const int num, Tx&&... args);
 	
 	private:
 		//要素の削除
@@ -798,13 +814,13 @@ template<typename VALUE_TYPE>
 using simpleDArray = dynamic_array::simpleContainer<VALUE_TYPE>;
 
 //動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_dArray(ope_type) \
-	template class dynamic_array::container<ope_type>;
+#define INSTANCING_dArray(OPE_TYPE) \
+	template class dynamic_array::container<OPE_TYPE>;
 
 //シンプル動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleDArray(value_type) \
-	template class dynamic_array::simpleContainer<value_type>; \
-	template class dynamic_array::container<dynamic_array::simpleContainer<value_type>::ope>;
+#define INSTANCING_simpleDArray(VALUE_TYPE) \
+	template class dynamic_array::simpleContainer<VALUE_TYPE>; \
+	template class dynamic_array::container<dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

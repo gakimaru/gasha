@@ -88,13 +88,13 @@ public:
 	//メモリ確保とコンストラクタ呼び出し
 	//※既定の型
 	template<typename...Tx>
-	value_type* newObj(const Tx&... args);
+	value_type* newObj(Tx&&... args);
 	//※型指定
 	template<typename ObjType, typename...Tx>
-	ObjType* newObj(const Tx&... args);
+	ObjType* newObj(Tx&&... args);
 	//※ムーブ／コピー
 	value_type* newMoveObj(value_type&& org);//※ムーブ版
-	value_type* newCopyObj(value_type& org);//※コピー版
+	value_type* newCopyObj(const value_type& org);//※コピー版
 
 	//メモリ解放とデストラクタ呼び出し
 	//※型指定

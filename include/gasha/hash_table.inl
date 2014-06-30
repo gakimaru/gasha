@@ -621,7 +621,7 @@ namespace hash_table
 	//キー割り当てして値を初期化（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const Tx&... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, Tx&&... args)
 	{
 		value_type* assigned_value = _assign(key);
 		if (!assigned_value)
@@ -633,20 +633,20 @@ namespace hash_table
 	//キー割り当てして値を初期化
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const Tx&... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, Tx&&... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
 		return _emplace(key, args...);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const char* key, const Tx&... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const char* key, Tx&&... args)
 	{
 		return emplace(calcCRC32(key), args...);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const std::string& key, const Tx&... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const std::string& key, Tx&&... args)
 	{
 		return emplace(calcCRC32(key.c_str()), args...);
 	}
@@ -654,7 +654,7 @@ namespace hash_table
 	//値を初期化して自動的にキー割り当て
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplaceAuto(const Tx&... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplaceAuto(Tx&&... args)
 	{
 		value_type value(args...);
 		return insertAuto(value);

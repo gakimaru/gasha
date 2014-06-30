@@ -26,6 +26,8 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
+#include <utility>//C++11 std::forwad
+
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
 
@@ -367,14 +369,14 @@ namespace dynamic_array
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, const Tx&... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, Tx&&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		if (_size > m_size)
 		{
 			value_type* value = _refElement(m_size);
 			for (index_type index = m_size; index < _size; ++index, ++value)
-				new(value)value_type(args...);//コンストラクタ呼び出し
+				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		}
 		else if (_size < m_size)
 		{
@@ -393,7 +395,7 @@ namespace dynamic_array
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, const Tx&... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, Tx&&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		{
@@ -408,7 +410,7 @@ namespace dynamic_array
 		{
 			value_type* value = _refFront();
 			for (index_type index = 0; index < _size; ++index, ++value)
-				new(value)value_type(args...);//コンストラクタ呼び出し
+				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		}
 		if (m_size < _size)
 			m_size = _size;
@@ -419,12 +421,12 @@ namespace dynamic_array
 	//※パラメータ渡し
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const Tx&... args)
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(Tx&&... args)
 	{
 		value_type* obj = refNew();//サイズチェック含む
 		if (!obj)
 			return nullptr;
-		new(obj)value_type(args...);//コンストラクタ呼び出し
+		new(obj)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		++m_size;
 		return obj;
 	}
@@ -433,7 +435,7 @@ namespace dynamic_array
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, const Tx&... args)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, Tx&&... args)
 	{
 		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 		{
@@ -451,7 +453,7 @@ namespace dynamic_array
 		//挿入
 		value_type* new_value = _refElement(index);
 		for (size_type i = 0; i < _num; ++i, ++new_value)
-			new(new_value)value_type(args...);
+			new(new_value)value_type(std::forward<Tx>(args)...);
 		//終了
 		iterator now(*this, index);
 		return now;

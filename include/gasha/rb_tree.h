@@ -133,6 +133,21 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace rb_tree
 {
+	//----------------------------------------
+	//デバッグ用補助関数
+#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
+	template<typename... Tx>
+	inline int printf_dbg_add(const char* fmt, Tx&&... args);
+#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
+	inline int printf_dbg_add(const char* fmt, ...){ return 0; }
+#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
+#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
+	template<typename... Tx>
+	inline int printf_dbg_remove(const char* fmt, Tx&&... args);
+#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
+	inline int printf_dbg_remove(const char* fmt, ...){ return 0; }
+#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
+	
 	//--------------------
 	//赤黒木操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
@@ -237,21 +252,27 @@ namespace rb_tree
 		}
 		inline static bool eq(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) == 0; }
 		inline static bool eq(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) == 0; }
+		inline static bool eq(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) == 0; }
 		inline static bool eq(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) == 0; }
 		inline static bool ne(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) != 0; }
 		inline static bool ne(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) != 0; }
+		inline static bool ne(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) != 0; }
 		inline static bool ne(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) != 0; }
 		inline static bool gt(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) > 0; }
 		inline static bool gt(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) > 0; }
+		inline static bool gt(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) > 0; }
 		inline static bool gt(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) > 0; }
 		inline static bool ge(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) >= 0; }
 		inline static bool ge(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) >= 0; }
+		inline static bool ge(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) >= 0; }
 		inline static bool ge(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) >= 0; }
 		inline static bool lt(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) < 0; }
 		inline static bool lt(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) < 0; }
+		inline static bool lt(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) < 0; }
 		inline static bool lt(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) < 0; }
 		inline static bool le(const node_type& lhs, const node_type& rhs){ return compare(lhs, rhs) <= 0; }
 		inline static bool le(const node_type& lhs, const key_type rhs){ return compare(lhs, rhs) <= 0; }
+		inline static bool le(const key_type lhs, const node_type& rhs){ return compare(lhs, rhs) <= 0; }
 		inline static bool le(const key_type lhs, const key_type rhs){ return compare(lhs, rhs) <= 0; }
 
 		//色判定
@@ -311,7 +332,7 @@ namespace rb_tree
 		//※要素が減らない
 		info_t* top();
 		//スタックの現在の深さを取得
-		int getDepth() const;
+		inline int getDepth() const;
 		//スタックの現在の深さを更新
 		void setDepth(const int depth);
 		//スタックの現在の深さをリセット
@@ -321,11 +342,11 @@ namespace rb_tree
 		//※小側を-1、大側を+1として計算
 		std::int64_t calcBreadth();
 		//ムーブオペレータ
-		stack_t& operator=(const stack_t&& rhs);
+		stack_t& operator=(stack_t&& rhs);
 		//コピーオペレータ
 		stack_t& operator=(const stack_t& rhs);
 		//ムーブコンストラクタ
-		stack_t(const stack_t&& obj);
+		stack_t(stack_t&& obj);
 		//コピーコンストラクタ
 		stack_t(const stack_t& obj);
 		//デフォルトコンストラクタ
@@ -487,16 +508,24 @@ namespace rb_tree
 			inline iterator& operator--();
 			inline iterator operator++(int);
 			inline iterator operator--(int);
+			inline const iterator& operator++() const { return const_cast<iterator*>(this)->operator++(); }
+			inline const iterator& operator--() const { return const_cast<iterator*>(this)->operator--(); }
+			inline const iterator operator++(int) const { return const_cast<iterator*>(this)->operator++(0); }
+			inline const iterator operator--(int) const { return const_cast<iterator*>(this)->operator--(0); }
 		#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline iterator& operator+=(const difference_type rhs);
 			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline iterator& operator-=(const difference_type rhs);
 			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const iterator& operator+=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator+=(const size_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator-=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator-=(rhs); }
+			inline const iterator& operator-=(const size_type rhs) const  { return const_cast<iterator*>(this)->operator-=(rhs); }
 			inline iterator operator+(const difference_type rhs) const;
 			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline iterator operator-(const difference_type rhs) const;
 			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
-			difference_type operator-(const iterator& rhs) const;
+			difference_type operator-(const iterator& rhs) const;//【注意】低速処理
 		#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -515,22 +544,22 @@ namespace rb_tree
 			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
-			iterator& operator=(const iterator&& rhs);
-			iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(iterator&& rhs);
+			iterator& operator=(reverse_iterator&& rhs);
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
 			iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			iterator(const iterator&& obj);
-			iterator(const reverse_iterator&& obj);
+			iterator(iterator&& obj);
+			iterator(reverse_iterator&& obj);
 			//コピーコンストラクタ
 			iterator(const iterator& obj);
 			iterator(const reverse_iterator& obj);
 			//コンストラクタ
 			iterator(const container& con, const bool is_end);
 			iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
-			iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
+			iterator(const stack_type& stack, const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_stack(),
@@ -595,16 +624,24 @@ namespace rb_tree
 			inline reverse_iterator& operator--();
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator++() const { return const_cast<reverse_iterator*>(this)->operator++(); }
+			inline const reverse_iterator& operator--() const { return const_cast<reverse_iterator*>(this)->operator--(); }
+			inline const reverse_iterator operator++(int) const { return const_cast<reverse_iterator*>(this)->operator++(0); }
+			inline const reverse_iterator operator--(int) const { return const_cast<reverse_iterator*>(this)->operator--(0); }
 		#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline reverse_iterator& operator+=(const difference_type rhs);
 			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator& operator-=(const difference_type rhs);
 			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const reverse_iterator& operator+=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator+=(const size_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator-=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
+			inline const reverse_iterator& operator-=(const size_type rhs) const  { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
 			inline reverse_iterator operator+(const difference_type rhs) const;
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
 			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
-			difference_type operator-(const reverse_iterator& rhs);
+			difference_type operator-(const reverse_iterator& rhs);//【注意】低速処理
 		#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -627,22 +664,22 @@ namespace rb_tree
 			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
-			reverse_iterator& operator=(const reverse_iterator&& rhs);
-			reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(reverse_iterator&& rhs);
+			reverse_iterator& operator=(iterator&& rhs);
 			//コピーオペレータ
 			reverse_iterator& operator=(const reverse_iterator& rhs);
 			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			reverse_iterator(const reverse_iterator&& obj);
-			reverse_iterator(const iterator&& obj);
+			reverse_iterator(reverse_iterator&& obj);
+			reverse_iterator(iterator&& obj);
 			//コピーコンストラクタ
 			reverse_iterator(const reverse_iterator& obj);
 			reverse_iterator(const iterator& obj);
 			//コンストラクタ
 			reverse_iterator(const container& con, const bool is_end);
 			reverse_iterator(stack_type&& stack, const container& con, value_type* value, const bool is_end);
-			reverse_iterator(stack_type& stack, const container& con, value_type* value, const bool is_end);
+			reverse_iterator(const stack_type& stack, const container& con, value_type* value, const bool is_end);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_stack(),
@@ -805,7 +842,7 @@ namespace rb_tree
 		inline iterator equal_range(const node_type&node);
 	public:
 		//ムーブコンストラクタ
-		container(const container&& con);
+		container(container&& con);
 		//コピーコンストラクタ
 		container(const container& con);
 		//デフォルトコンストラクタ
@@ -821,35 +858,112 @@ namespace rb_tree
 	//シンプル赤黒木コンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	//プロトタイプ：
-	//  key_type& GET_KEY_FUNC(const node_type&)
-	//  node_type*& REF_CHILD_L_PTR_FUNC(node_type&)
-	//  node_type*& REF_CHILD_S_PTR_FUNC(node_type&)
-	//  bool& REF_IS_BLACK_FUNC(node_type&)
-	template<typename NODE_TYPE, class GET_KEY_FUNC, class REF_CHILD_L_PTR_FUNC, class REF_CHILD_S_PTR_FUNC, class REF_IS_BLACK_FUNC>
-	struct simpleContainer
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	class simpleContainer
 	{
-		//赤黒木操作用構造体
-		struct ope : public baseOpe<ope, NODE_TYPE>
+	public:
+		typedef VALUE_TYPE core_value_type;//値型
+		typedef KEY_TYPE core_key_type;//キー型
+
+		//データノード型
+		//※元の値型に対するプロキシーとして振る舞う
+		struct node
 		{
-			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
-			typedef typename baseOpe<ope, NODE_TYPE>::key_type key_type;
-			typedef typename baseOpe<ope, NODE_TYPE>::color_t color_t;
+			core_value_type m_value;//値
+			core_key_type m_key;//キー
+			mutable const node* m_childS;//小（左）側の子ノード
+			mutable const node* m_childL;//大（右）側の子ノード
+			mutable bool m_isBlack;//ノードは黒か？
+
+			//キャストオペレータ
+			inline operator const core_value_type&() const { return m_value; }
+			inline operator core_value_type&(){ return m_value; }
+			inline operator const core_value_type*() const { return &m_value; }
+			inline operator core_value_type*(){ return &m_value; }
+			inline operator core_key_type() const { return m_key; }
+			//アクセッサ
+			inline const core_value_type& value() const { return m_value; }
+			inline core_value_type& value(){ return m_value; }
+			inline const core_value_type* pointer() const { return &m_value; }
+			inline core_value_type* pointer(){ return &m_value; }
+			inline const core_key_type& key() const { return m_key; }
+			inline core_key_type& key(){ return m_key; }
+			//基本オペレータ
+			inline const core_value_type& operator*() const { return m_value; }
+			inline core_value_type& operator*(){ return m_value; }
+			inline const core_value_type* operator->() const { return &m_value; }
+			inline core_value_type* operator->(){ return &m_value; }
+			//比較オペレータ（テンプレート）
+			inline bool operator==(const core_key_type rhs) const { return m_key == rhs; }//container::find(), std::find()に必要
+			inline bool operator!=(const core_key_type rhs) const { return m_key != rhs; }
+			inline bool operator<(const core_key_type rhs) const { return m_key < rhs; }//container::binarySearch(), std::binary_search(), std::lower_bound(), std::upper_bound() に必要
+			inline bool operator>(const core_key_type rhs) const { return m_key > rhs; }
+			inline bool operator<=(const core_key_type rhs) const { return m_key <= rhs; }
+			inline bool operator>=(const core_key_type rhs) const { return m_key >= rhs; }
+			//比較オペレータ（自身の型との比較）
+			//【注意】明示的なインスタンス化の際には、VALUE_TYPE に対して下記6つの比較演算子を全て実装しておく必要がある点に注意。
+			//※gasha/type_traits.h の operatorCRTP クラスを使用すると少しだけ簡単に定義可能。
+			inline bool operator==(const node& rhs) const { return m_key == rhs.m_key; }
+			inline bool operator!=(const node& rhs) const { return m_key != rhs.m_key; }
+			inline bool operator<(const node& rhs) const { return m_key < rhs.m_key; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
+			inline bool operator>(const node& rhs) const { return m_key > rhs.m_key; }
+			inline bool operator<=(const node& rhs) const { return m_key <= rhs.m_key; }
+			inline bool operator>=(const node& rhs) const { return m_key >= rhs.m_key; }
+			//フレンド比較演算子（静的関数になる） ※左辺値が自身の型以外の二項演算子
+			friend inline bool operator==(const core_key_type lhs, const node& rhs){ return lhs == rhs.m_key; }
+			friend inline bool operator!=(const core_key_type lhs, const node& rhs){ return lhs != rhs.m_key; }
+			friend inline bool operator<(const core_key_type lhs, const node& rhs){ return lhs < rhs.m_key; }//std::binary_search(), std::upper_bound() に必要
+			friend inline bool operator>(const core_key_type lhs, const node& rhs){ return lhs > rhs.m_key; }
+			friend inline bool operator<=(const core_key_type lhs, const node& rhs){ return lhs <= rhs.m_key; }
+			friend inline bool operator>=(const core_key_type lhs, const node& rhs){ return lhs >= rhs.m_key; }
+
+			//明示的なコンストラクタ呼び出し
+			template<typename... Tx>
+			inline void constructor(Tx&&... args);
+			//明示的なデストラクタ呼び出し
+			inline void destructor();
+			
+			//キーと値を更新
+			inline void emplace(core_key_type key, core_value_type&& value);
+			inline void emplace(const core_key_type key, const core_value_type& value);
+			template<typename... Tx>
+			inline void emplace(const core_key_type key, Tx&&... args);
+
+			//ムーブオペレータ
+			inline node& operator=(core_value_type&& value);
+			//コピーオペレータ
+			inline node& operator=(const core_value_type& value);
+			//ムーブコンストラクタ
+			inline node(core_key_type key, core_value_type&& value);
+			//コピーコンストラクタ
+			inline node(const core_key_type key, const core_value_type& value);
+			//デフォルトコンストラクタ
+			inline node();
+			//デストラクタ
+			inline ~node();
+		};
+
+		//赤黒木操作用構造体
+		struct ope : public baseOpe<ope, node, core_key_type>
+		{
+			typedef typename baseOpe<ope, node>::node_type node_type;
+			typedef typename baseOpe<ope, node>::key_type key_type;
+			typedef typename baseOpe<ope, node>::color_t color_t;
 
 			//子ノードを取得
-			inline static const node_type* getChildL(const node_type& node){ node_type& ref_child_l = REF_CHILD_L_PTR(const_cast<node_type*>(node)); return ref_child_l; }//大（右）側
-			inline static const node_type* getChildS(const node_type& node){ node_type& ref_child_s = REF_CHILD_S_PTR(const_cast<node_type*>(node)); return ref_child_s; }//小（左）側
+			inline static const node_type* getChildS(const node_type& node){ return node.m_childS; }//小（左）側
+			inline static const node_type* getChildL(const node_type& node){ return node.m_childL; }//大（右）側
 			//子ノードを変更
-			inline static void setChildL(node_type& node, const node_type* child){ node_type& ref_child_l = REF_CHILD_L_PTR(const_cast<node_type*>(node)); ref_child_l = const_cast<node_type*>(child); }//大（右）側
-			inline static void setChildS(node_type& node, const node_type* child){ node_type& ref_child_s = REF_CHILD_S_PTR(const_cast<node_type*>(node)); ref_child_s = const_cast<node_type*>(child); }//小（左）側
+			inline static void setChildS(node_type& node, const node_type* child){ node.m_childS = child; }//小（左）側
+			inline static void setChildL(node_type& node, const node_type* child){ node.m_childL = child; }//大（右）側
 			
 			//ノードの色を取得
-			inline static color_t getColor(const node_type& node){ bool& ref_is_black = REF_IS_BLACK_FUNC(const_cast<node_type*>(node)); return ref_is_black ? color_t::BLACK : color_t::RED; }
+			inline static color_t getColor(const node_type& node){ return node.m_isBlack ? color_t::BLACK : color_t::RED; }
 			//ノードの色を変更
-			inline static void setColor(node_type& node, const color_t color){ bool& ref_is_black = REF_IS_BLACK_FUNC(const_cast<node_type*>(node)); ref_is_black = (color == color_t::BLACK); }
+			inline static void setColor(node_type& node, const color_t color){ node.m_isBlack = (color == color_t::BLACK); }
 			
 			//キーを取得
-			inline static key_type getKey(const node_type& node){ return GET_KEY_FUNC(node); }
+			inline static key_type getKey(const node_type& node){ return node.m_key; }
 		};
 
 		//基本型定義
@@ -863,7 +977,7 @@ namespace rb_tree
 			using container<ope_type>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//ムーブコンストラクタ
-			inline con(const con&& con) :
+			inline con(con&& con) :
 				container<ope_type>(std::move(con))
 			{}
 			//コピーコンストラクタ
@@ -899,8 +1013,19 @@ template<class OPE_TYPE>
 using rbTree = rb_tree::container<OPE_TYPE>;
 
 //シンプル赤黒木コンテナ
-template<typename NODE_TYPE, class GET_KEY_FUNC, class REF_CHILD_L_PTR_FUNC, class REF_CHILD_S_PTR_FUNC, class REF_IS_BLACK_FUNC>
-using simpleRBTree = rb_tree::simpleContainer<NODE_TYPE, GET_KEY_FUNC, REF_CHILD_L_PTR_FUNC, REF_CHILD_S_PTR_FUNC, REF_IS_BLACK_FUNC>;
+template<typename VALUE_TYPE, typename KEY_TYPE>
+using simpleRBTree = rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>;
+
+//赤黒木コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_rbTree(OPE_TYPE) \
+	template class rb_tree::stack_t<OPE_TYPE>; \
+	template class rb_tree::container<OPE_TYPE>;
+
+//シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleRBTree(VALUE_TYPE, KEY_TYPE) \
+	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
+	template class rb_tree::stack_t<rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
+	template class rb_tree::container<rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

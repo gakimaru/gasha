@@ -50,7 +50,7 @@ namespace binary_heap
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -59,7 +59,7 @@ namespace binary_heap
 	}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -88,14 +88,14 @@ namespace binary_heap
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -161,7 +161,7 @@ namespace binary_heap
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -169,7 +169,7 @@ namespace binary_heap
 		return *this;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -195,13 +195,13 @@ namespace binary_heap
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -325,7 +325,7 @@ namespace binary_heap
 		
 	//プッシュ（本体）：ムーブ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;

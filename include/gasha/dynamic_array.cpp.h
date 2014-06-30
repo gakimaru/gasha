@@ -57,7 +57,7 @@ namespace dynamic_array
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -65,7 +65,7 @@ namespace dynamic_array
 		return *this;
 	}
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -91,13 +91,13 @@ namespace dynamic_array
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -166,7 +166,7 @@ namespace dynamic_array
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -174,7 +174,7 @@ namespace dynamic_array
 		return *this;
 	}
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -200,13 +200,13 @@ namespace dynamic_array
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -371,7 +371,7 @@ namespace dynamic_array
 	//末尾に要素を追加
 	//※オブジェクト渡し
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const typename container<OPE_TYPE>::value_type&& src)//ムーブ版
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(typename container<OPE_TYPE>::value_type&& src)//ムーブ版
 	{
 		value_type* obj = refNew();//サイズチェック含む
 		if (!obj)

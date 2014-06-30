@@ -347,16 +347,24 @@ namespace linked_list
 			inline iterator& operator--();
 			inline iterator operator++(int);
 			inline iterator operator--(int);
+			inline const iterator& operator++() const { return const_cast<iterator*>(this)->operator++(); }
+			inline const iterator& operator--() const { return const_cast<iterator*>(this)->operator--(); }
+			inline const iterator operator++(int) const { return const_cast<iterator*>(this)->operator++(0); }
+			inline const iterator operator--(int) const { return const_cast<iterator*>(this)->operator--(0); }
 		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline iterator& operator+=(const difference_type rhs);
 			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline iterator& operator-=(const difference_type rhs);
 			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const iterator& operator+=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator+=(const size_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator-=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator-=(rhs); }
+			inline const iterator& operator-=(const size_type rhs) const  { return const_cast<iterator*>(this)->operator-=(rhs); }
 			inline iterator operator+(const difference_type rhs) const;
 			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline iterator operator-(const difference_type rhs) const;
 			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
-			difference_type operator-(const iterator& rhs) const;
+			difference_type operator-(const iterator& rhs) const;//【注意】低速処理
 		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -376,15 +384,15 @@ namespace linked_list
 			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
-			iterator& operator=(const iterator&& rhs);
-			iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(iterator&& rhs);
+			iterator& operator=(reverse_iterator&& rhs);
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
 			iterator& operator=(const reverse_iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			iterator(const iterator&& obj);
-			iterator(const reverse_iterator&& obj);
+			iterator(iterator&& obj);
+			iterator(reverse_iterator&& obj);
 			//コピーコンストラクタ
 			iterator(const iterator& obj);
 			iterator(const reverse_iterator& obj);
@@ -448,16 +456,24 @@ namespace linked_list
 			inline reverse_iterator& operator--();
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator++() const { return const_cast<reverse_iterator*>(this)->operator++(); }
+			inline const reverse_iterator& operator--() const { return const_cast<reverse_iterator*>(this)->operator--(); }
+			inline const reverse_iterator operator++(int) const { return const_cast<reverse_iterator*>(this)->operator++(0); }
+			inline const reverse_iterator operator--(int) const { return const_cast<reverse_iterator*>(this)->operator--(0); }
 		#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 			inline reverse_iterator& operator+=(const difference_type rhs);
 			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator& operator-=(const difference_type rhs);
 			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const reverse_iterator& operator+=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator+=(const size_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator-=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
+			inline const reverse_iterator& operator-=(const size_type rhs) const  { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
 			inline reverse_iterator operator+(const difference_type rhs) const;
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
 			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
-			difference_type operator-(const reverse_iterator& rhs) const;
+			difference_type operator-(const reverse_iterator& rhs) const;//【注意】低速処理
 		#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -481,15 +497,15 @@ namespace linked_list
 			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
-			reverse_iterator& operator=(const reverse_iterator&& rhs);
-			reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(reverse_iterator&& rhs);
+			reverse_iterator& operator=(iterator&& rhs);
 			//コピーオペレータ
 			reverse_iterator& operator=(const reverse_iterator& rhs);
 			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			reverse_iterator(const reverse_iterator&& obj);
-			reverse_iterator(const iterator&& obj);
+			reverse_iterator(reverse_iterator&& obj);
+			reverse_iterator(iterator&& obj);
 			//コピーコンストラクタ
 			reverse_iterator(const reverse_iterator& obj);
 			reverse_iterator(const iterator& obj);
@@ -691,7 +707,7 @@ namespace linked_list
 
 	public:
 		//ムーブコンストラクタ
-		container(const container&& con);
+		container(container&& con);
 		//コピーコンストラクタ
 		container(const container& con);
 		//デフォルトコンストラクタ
@@ -775,7 +791,7 @@ namespace linked_list
 
 			//明示的なコンストラクタ呼び出し
 			template<typename... Tx>
-			inline void constructor(const Tx&... args);
+			inline void constructor(Tx&&... args);
 			//明示的なデストラクタ呼び出し
 			inline void destructor();
 
@@ -820,7 +836,7 @@ namespace linked_list
 			using container<ope_type>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//ムーブコンストラクタ
-			inline con(const con&& con):
+			inline con(con&& con):
 				container<ope_type>(std::move(con))
 			{}
 			//コピーコンストラクタ
@@ -856,17 +872,17 @@ template<class OPE_TYPE>
 using lList = linked_list::container<OPE_TYPE>;
 
 //シンプル双方向連結リストコンテナ
-template<typename NODE_TYPE>
-using simpleLList = linked_list::simpleContainer<NODE_TYPE>;
+template<typename VALUE_TYPE>
+using simpleLList = linked_list::simpleContainer<VALUE_TYPE>;
 
 //双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_lList(ope_type) \
-	template class linked_list::container<ope_type>;
+#define INSTANCING_lList(OPE_TYPE) \
+	template class linked_list::container<OPE_TYPE>;
 
 //シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleLList(value_type) \
-	template class linked_list::simpleContainer<value_type>; \
-	template class linked_list::container<linked_list::simpleContainer<value_type>::ope>;
+#define INSTANCING_simpleLList(VALUE_TYPE) \
+	template class linked_list::simpleContainer<VALUE_TYPE>; \
+	template class linked_list::container<linked_list::simpleContainer<VALUE_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

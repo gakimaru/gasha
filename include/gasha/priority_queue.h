@@ -211,14 +211,14 @@ namespace priority_queue
 	//※コンテナのデフォルトは二分ヒープ（binary_heap::container）。
 	//　同じインターフェースを持ったクラスなら、置き換えて使用可能。
 	//※std::priority_queueとはあまり互換性がなく、イテレータにも対応しない
-	//※イテレータが必要なら、containerAdapter::container_type にキャストして
+	//※イテレータが必要なら、container::container_type にキャストして
 	//　コンテナを取り出せば操作可能。
 	//※データのコピーを避けて処理効率を向上させるために、
 	//　enqueueBegin()～enqueueEnd()、dequeueBegin()～dequeueEnd()
 	//　というメソッドを用意している。内部のバッファを直接参照するので高速。
 	//　なお、begin～end の間はロックが行われる点に注意。
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE = binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE> >
-	class containerAdapter
+	class container
 	{
 	public:
 		//型
@@ -233,7 +233,7 @@ namespace priority_queue
 		{
 		public:
 			//型
-			typedef containerAdapter container_adapter_type;//コンテナアダプター型
+			typedef container container_adapter_type;//コンテナアダプター型
 			typedef typename container_adapter_type::node_type node_type;//ノード型
 			typedef typename container_adapter_type::status_t status_t;//ステータス型
 			typedef typename container_adapter_type::priority_type priority_type;//優先度型
@@ -244,7 +244,7 @@ namespace priority_queue
 		public:
 			//エンキュー開始
 			template<typename... Tx>
-			node_type* enqueueBegin(const priority_type priority, const Tx&... args);
+			node_type* enqueueBegin(const priority_type priority, Tx&&... args);
 			
 			//エンキュー終了
 			node_type* enqueueEnd();
@@ -315,7 +315,7 @@ namespace priority_queue
 		void checkAndResetSeqNo();
 	private:
 		//エンキュー（本体）：ムーブ
-		node_type* _enqueueCopying(const node_type&& obj);
+		node_type* _enqueueCopying(node_type&& obj);
 		
 		//エンキュー（本体）：コピー
 		node_type* _enqueueCopying(const node_type& obj);
@@ -327,12 +327,12 @@ namespace priority_queue
 		//　（シーケンス番号をセットするために1回テンポラリにコピーし、プッシュ時にさらにコピーする。）
 		//※ムーブコンストラクタとムーブオペレータを使用してコピーする点に注意
 		//※処理中、ロックを取得する
-		inline node_type* enqueueCopying(const node_type&& obj);
+		inline node_type* enqueueCopying(node_type&& obj);
 		inline node_type* enqueueCopying(const node_type& obj);
 	private:
 		//エンキュー（本体）
 		template<typename... Tx>
-		node_type* _enqueue(const priority_type priority, const Tx&... args);
+		node_type* _enqueue(const priority_type priority, Tx&&... args);
 	public:
 		//エンキュー
 		//※パラメータ渡し
@@ -340,11 +340,11 @@ namespace priority_queue
 		//※オブジェクトには、シーケンス番号が書き込まれる
 		//※処理中、ロックを取得する
 		template<typename... Tx>
-		node_type* enqueue(const priority_type priority, const Tx&... args);
+		node_type* enqueue(const priority_type priority, Tx&&... args);
 	private:
 		//エンキュー開始（本体）
 		template<typename... Tx>
-		node_type* _enqueueBegin(const priority_type priority, const Tx&... args);
+		node_type* _enqueueBegin(const priority_type priority, Tx&&... args);
 	public:
 		//エンキュー開始
 		//※空きキュー取得
@@ -352,7 +352,7 @@ namespace priority_queue
 		//※この時点で、優先度とシーケンス番号が書き込まれる
 		//※処理が成功すると、ロックを取得した状態になる（enqueueEndで解放する）
 		template<typename... Tx>
-		node_type* enqueueBegin(const priority_type priority, const Tx&... args);
+		node_type* enqueueBegin(const priority_type priority, Tx&&... args);
 	private:
 		//エンキュー終了（本体）
 		node_type* _enqueueEnd();
@@ -424,9 +424,9 @@ namespace priority_queue
 		inline void clear();
 	public:
 		//コンストラクタ
-		inline containerAdapter();
+		inline container();
 		//デストラクタ
-		~containerAdapter();
+		~container();
 	private:
 		//フィールド
 		container_type m_container;//コンテナ
@@ -466,15 +466,15 @@ namespace priority_queue
 		DECLARE_OPE_TYPES(ope);
 
 		//優先度付きキューコンテナアダプタ
-		class con : public containerAdapter<ope_type, _TABLE_SIZE>
+		class con : public container<ope_type, _TABLE_SIZE>
 		{
 		public:
 		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
-			using containerAdapter<ope_type, _TABLE_SIZE>::containerAdapter;//継承コンストラクタ
+			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デフォルトコンスタラクタ
 			inline con() :
-				containerAdapter<ope_type, _TABLE_SIZE>()
+				container<ope_type, _TABLE_SIZE>()
 			{}
 		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デストラクタ
@@ -498,7 +498,7 @@ using pQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYP
 
 //優先度付きキューコンテナアダプタ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using pQueue = priority_queue::containerAdapter<OPE_TYPE, _TABLE_SIZE>;
+using pQueue = priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル優先度付きキューコンテナアダプタ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>

@@ -148,7 +148,7 @@ namespace singly_linked_list
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const iterator&& rhs)
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_value = rhs.m_value;
@@ -157,7 +157,7 @@ namespace singly_linked_list
 	}
 #ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_value = rhs.m_value;
@@ -204,14 +204,14 @@ namespace singly_linked_list
 #endif//GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 #ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_value(obj.m_value),
 		m_isEnd(false)
@@ -364,7 +364,7 @@ namespace singly_linked_list
 	}
 	//ムーブオペレータ
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator&& rhs)
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_value = rhs.m_value;
@@ -372,7 +372,7 @@ namespace singly_linked_list
 		return *this;
 	}
 	template<class OPE_TYPE>
-	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator&& rhs)
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_value = rhs.m_value;
@@ -430,13 +430,13 @@ namespace singly_linked_list
 	}
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator&& obj) :
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_value(obj.m_value),
 		m_isEnd(obj.m_isEnd)
 	{}
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator&& obj) :
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_value(obj.m_value),
 		m_isEnd(false)
@@ -525,7 +525,7 @@ namespace singly_linked_list
 
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
-	container<OPE_TYPE>::container(const container&& con) :
+	container<OPE_TYPE>::container(container&& con) :
 		m_first(con.m_first),
 		m_last(con.m_last)
 	{}

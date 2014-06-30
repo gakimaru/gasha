@@ -26,6 +26,8 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
+#include <utility>//C++11 std::forward
+
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
 
@@ -424,7 +426,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, const Tx&... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::resize(const int size, Tx&&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		if (_size > m_size)
@@ -432,7 +434,7 @@ namespace ring_buffer
 			for (index_type index = m_size; index < _size; ++index)
 			{
 				value_type* value = _refElement(index);
-				new(value)value_type(args...);//コンストラクタ呼び出し
+				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 			}
 		}
 		else if (_size < m_size)
@@ -452,7 +454,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, const Tx&... args)
+	typename container<OPE_TYPE>::size_type container<OPE_TYPE>::assign(const int size, Tx&&... args)
 	{
 		const size_type _size = size < 0 ? m_maxSize : static_cast<size_type>(size) < m_maxSize ? static_cast<size_type>(size) : m_maxSize;
 		{
@@ -468,7 +470,7 @@ namespace ring_buffer
 			for (index_type index = 0; index < _size; ++index)
 			{
 				value_type* value = _refElement(index);
-				new(value)value_type(args...);//コンストラクタ呼び出し
+				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 			}
 		}
 		if (m_size < _size)
@@ -480,12 +482,12 @@ namespace ring_buffer
 	//※パラメータ渡し
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(const Tx&... args)
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_front(Tx&&... args)
 	{
 		value_type* obj = refFrontNew();//サイズチェック含む
 		if (!obj)
 			return nullptr;
-		new(obj)value_type(args...);//コンストラクタ呼び出し
+		new(obj)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		++m_size;
 		m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
 		return obj;
@@ -495,12 +497,12 @@ namespace ring_buffer
 	//※パラメータ渡し
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(const Tx&... args)
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::push_back(Tx&&... args)
 	{
 		value_type* obj = refBackNew();//サイズチェック含む
 		if (!obj)
 			return nullptr;
-		new(obj)value_type(args...);//コンストラクタ呼び出し
+		new(obj)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		++m_size;
 		return obj;
 	}
@@ -509,7 +511,7 @@ namespace ring_buffer
 	//※コンストラクタ呼び出し版
 	template<class OPE_TYPE>
 	template<typename... Tx>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, const Tx&... args)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const int num, Tx&&... args)
 	{
 		if (pos.isNotEnabled() || num == 0 || m_size == m_maxSize)
 		{
@@ -529,7 +531,7 @@ namespace ring_buffer
 		for (size_type i = 0; i < _num; ++i)
 		{
 			value_type* new_value = _refElement(_index);
-			new(new_value)value_type(args...);
+			new(new_value)value_type(std::forward<Tx>(args)...);
 			++_index;
 		}
 		//終了

@@ -24,7 +24,7 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
-#include <utility>//C++11 std::move
+#include <utility>//C++11 std::move, std::forward
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -824,9 +824,9 @@ namespace singly_linked_list
 	//明示的なコンストラクタ呼び出し
 	template<typename VALUE_TYPE>
 	template<typename... Tx>
-	inline void simpleContainer<VALUE_TYPE>::node::constructor(const Tx&... args)
+	inline void simpleContainer<VALUE_TYPE>::node::constructor(Tx&&... args)
 	{
-		new(&m_value)core_value_type(args...);
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
 	}
 
 	//明示的なデストラクタ呼び出し

@@ -18,11 +18,16 @@
 
 #include <gasha/rb_tree.h>//赤黒木コンテナ【宣言部】
 
+#include <utility>//C++11 std::forward
 #include <memory.h>//memcpy()
 
 #ifdef GASHA_ASSERTION_IS_ENABLED
 #include <assert.h>//assert()
 #endif//GASHA_ASSERTION_IS_ENABLED
+
+#if defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD) || defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE)
+#include <stdio.h>//printf()
+#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD, GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -32,22 +37,28 @@ namespace rb_tree
 	//デバッグ用補助関数
 #ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 	template<typename... Tx>
-	inline int printf_dbg_add(const char* fmt, const Tx&... args)
+	inline int printf_dbg_add(const char* fmt, Tx&&... args)
 	{
-		return printf(fmt, args...);
+		return printf(fmt, std::forward<Tx>(args)...);
 	}
-#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
-	inline int printf_dbg_add(const char* fmt, ...){ return 0; }
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 #ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	template<typename... Tx>
-	inline int printf_dbg_remove(const char* fmt, const Tx&... args)
+	inline int printf_dbg_remove(const char* fmt, Tx&&... args)
 	{
-		return printf(fmt, args...);
+		return printf(fmt, std::forward<Tx>(args)...);
 	}
-#else//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
-	inline int printf_dbg_remove(const char* fmt, ...){ return 0; }
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
+
+	//--------------------
+	//赤黒木処理用スタッククラス
+	
+	//スタックの現在の深さを取得
+	template<class OPE_TYPE>
+	inline int stack_t<OPE_TYPE>::getDepth() const
+	{
+		return m_depth;
+	}
 
 	//--------------------
 	//赤黒木操作関数：最小ノード探索
@@ -103,8 +114,8 @@ namespace rb_tree
 		}
 		else//if(!child_node_l)//子がない場合
 		{
-			const typename stack_t<OPE_TYPE>::stack_info_type* stack_node = nullptr;
-			while (stack_node = stack.pop())//親ノードを取得
+			const typename stack_t<OPE_TYPE>::info_t* stack_node = nullptr;
+			while ((stack_node = stack.pop()))//親ノードを取得
 			{
 				if (stack_node->m_isLarge == false)//小（左）側の子の親なら終了
 					return stack_node->m_nodeRef;
@@ -128,8 +139,8 @@ namespace rb_tree
 		}
 		else//if(!child_node_s)//子がない場合
 		{
-			const typename stack_t<OPE_TYPE>::stack_info_type* stack_node = nullptr;
-			while (stack_node = stack.pop())//親ノードを取得
+			const typename stack_t<OPE_TYPE>::info_t* stack_node = nullptr;
+			while ((stack_node = stack.pop()))//親ノードを取得
 			{
 				if (stack_node->m_isLarge == true)//大（右）側の子の親なら終了
 					return stack_node->m_nodeRef;
@@ -169,7 +180,7 @@ namespace rb_tree
 			}
 			else if (cmp < 0)//指定のキーより小さい
 			{
-				if (search_type == FOR_NEAREST_SMALLER && (!nearest_node || nearest_node && OPE_TYPE::le(*nearest_node, *curr_node)))
+				if (search_type == FOR_NEAREST_SMALLER && (!nearest_node || (nearest_node && OPE_TYPE::le(*nearest_node, *curr_node))))
 				{
 					nearest_node = curr_node;//最近ノードを記録
 					nearest_stack_depth = stack.getDepth();//最近ノード検出時のスタック位置を記録
@@ -182,7 +193,7 @@ namespace rb_tree
 			}
 			else//if (cmp > 0)//指定のキーより大きい
 			{
-				if (search_type == FOR_NEAREST_LARGER && (!nearest_node || nearest_node && OPE_TYPE::ge(*nearest_node, *curr_node)))
+				if (search_type == FOR_NEAREST_LARGER && (!nearest_node || (nearest_node && OPE_TYPE::ge(*nearest_node, *curr_node))))
 				{
 					nearest_node = curr_node;//最近ノードを記録
 					nearest_stack_depth = stack.getDepth();//最近ノード検出時のスタック位置を記録
@@ -355,7 +366,7 @@ namespace rb_tree
 		typename OPE_TYPE::node_type* parent_node = nullptr;//削除ノードの親ノード
 		bool curr_is_large = false;//削除ノードの親ノードからの連結方向
 		{
-			typename stack_t<OPE_TYPE>::stack_info_type* parent_info = stack.top();//親ノード参照情報を取得
+			typename stack_t<OPE_TYPE>::info_t* parent_info = stack.top();//親ノード参照情報を取得
 			if (parent_info)
 			{
 				parent_node = const_cast<typename OPE_TYPE::node_type*>(parent_info->m_nodeRef);//親ノードを取得
@@ -429,13 +440,13 @@ namespace rb_tree
 			//            .---------------[replacing_node]--------------.              
 			//         [(SLS)]                                        [(L)]            
 			//-------------------------------------------------------------------------
-			typename stack_t<OPE_TYPE>::stack_info_type* remove_info = stack.push(removing_node, false);//スタックに削除ノードを追加
+			typename stack_t<OPE_TYPE>::info_t* remove_info = stack.push(removing_node, false);//スタックに削除ノードを追加
 			descendant_node = const_cast<typename OPE_TYPE::node_type*>(getLargestNode<OPE_TYPE>(child_node_s, stack));//最大子孫ノードを取得
 			replacing_node = descendant_node;//削除ノードと置き換えるノードをセット
 			if (replacing_node != child_node_s)
 			{
 				//【ケース①：前ノード（最大子孫ノード）が削除ノードの小（左）側の子の最大子孫】
-				typename stack_t<OPE_TYPE>::stack_info_type* descendant_parent_info = stack.top();//最大子孫ノードの親ノードを取得
+				typename stack_t<OPE_TYPE>::info_t* descendant_parent_info = stack.top();//最大子孫ノードの親ノードを取得
 				typename OPE_TYPE::node_type* descendant_parent_node = const_cast<typename OPE_TYPE::node_type*>(descendant_parent_info->m_nodeRef);//最大子孫ノードの親ノードを取得
 				OPE_TYPE::setChildL(*descendant_parent_node, OPE_TYPE::getChildS(*replacing_node));//最大子孫ノードの親ノードの大（右）側の子ノードを変更
 				OPE_TYPE::setChildS(*replacing_node, child_node_s);//置き換えノードの小（左）側の子ノードを変更
@@ -527,7 +538,7 @@ namespace rb_tree
 			bool is_balanced = false;//平衡状態検出フラグ
 			while (true)
 			{
-				typename stack_t<OPE_TYPE>::stack_info_type* parent_info = stack.pop();//スタックから親ノード情報取得
+				typename stack_t<OPE_TYPE>::info_t* parent_info = stack.pop();//スタックから親ノード情報取得
 				if (!parent_info)
 					break;
 				typename OPE_TYPE::node_type* parent_node = const_cast<typename OPE_TYPE::node_type*>(parent_info->m_nodeRef);//親ノード取得
@@ -1082,7 +1093,7 @@ namespace rb_tree
 				bool curr_is_large = false;//親ノードからの連結方向
 				while (true)
 				{
-					typename stack_t<OPE_TYPE>::stack_info_type* parent_info = stack.pop();//親ノード情報を取得
+					typename stack_t<OPE_TYPE>::info_t* parent_info = stack.pop();//親ノード情報を取得
 					if (!parent_info)
 						break;
 					parent_node = const_cast<typename OPE_TYPE::node_type*>(parent_info->m_nodeRef);//親ノードを取得
@@ -1350,7 +1361,7 @@ namespace rb_tree
 									rotateL<OPE_TYPE>(parent_node);//親ノードを左回転処理
 									OPE_TYPE::setRed(*parent_node);//削除側ノードを赤に
 									OPE_TYPE::setBlack(*sibling_node);//親ノードを黒に
-									typename stack_t<OPE_TYPE>::stack_info_type* ancestor_info = stack.top();//スタックから現在の親情報を取得
+									typename stack_t<OPE_TYPE>::info_t* ancestor_info = stack.top();//スタックから現在の親情報を取得
 									const bool parent_is_large = ancestor_info ? ancestor_info->m_isLarge : false;//親の親からの連結方向
 									if (ancestor_info)
 									{
@@ -1516,7 +1527,7 @@ namespace rb_tree
 									rotateR<OPE_TYPE>(parent_node);//親ノードを右回転処理
 									OPE_TYPE::setRed(*parent_node);//削除側ノードを赤に
 									OPE_TYPE::setBlack(*sibling_node);//親ノードを黒に
-									typename stack_t<OPE_TYPE>::stack_info_type* ancestor_info = stack.top();//スタックから現在の親情報を取得
+									typename stack_t<OPE_TYPE>::info_t* ancestor_info = stack.top();//スタックから現在の親情報を取得
 									const bool parent_is_large = ancestor_info ? ancestor_info->m_isLarge : false;//親の親からの連結方向
 									if (ancestor_info)
 									{
@@ -1565,14 +1576,14 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index) const
 	{
-		iterator ite(m_con->m_root, false);
+		iterator ite(*m_con, false);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index)
 	{
-		iterator ite(m_con->m_root, false);
+		iterator ite(*m_con, false);
 		ite += index;
 		return ite;
 	}
@@ -1720,14 +1731,14 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index) const
 	{
-		reverse_iterator ite(m_con->m_root, false);
+		reverse_iterator ite(*m_con, false);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index)
 	{
-		reverse_iterator ite(m_con->m_root, false);
+		reverse_iterator ite(*m_con, false);
 		ite += index;
 		return ite;
 	}
@@ -1953,7 +1964,7 @@ namespace rb_tree
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type) const
 	{
 		const iterator ite;
-		return _find(ite, node_type::getKey(node), type);
+		return _find(ite, OPE_TYPE::getKey(node), type);
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::key_type key, const match_type_t type)
@@ -1965,19 +1976,19 @@ namespace rb_tree
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const char* key, const match_type_t type)
 	{
 		iterator ite;
-		return _find(ite, key, type);
+		return _find(ite, calcCRC32(key), type);
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const std::string& key, const match_type_t type)
 	{
 		iterator ite;
-		return _find(ite, key, type);
+		return _find(ite, calcCRC32(key.c_str()), type);
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type)
 	{
 		iterator ite;
-		return _find(ite, node, type);
+		return _find(ite, OPE_TYPE::getKey(node), type);
 	}
 	//キーが一致するノードの数を返す
 	template<class OPE_TYPE>
@@ -2050,6 +2061,103 @@ namespace rb_tree
 		iterator ite;
 		return _equal_range(ite, ope_type::getKey(node));
 	}
+
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline container<OPE_TYPE>::container() :
+		m_root(nullptr)
+	{}
+
+	//----------------------------------------
+	//シンプル双方向連結リストコンテナ
+
+	//明示的なコンストラクタ呼び出し
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(Tx&&... args)
+	{
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+
+	//明示的なデストラクタ呼び出し
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::destructor()
+	{
+		m_value.~core_value_type();//デストラクタ呼び出し
+		operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+	}
+
+	//キーと値を更新
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(core_key_type key, core_value_type&& value)
+	{
+		m_key = key;
+		m_value = std::move(value);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const core_key_type key, const core_value_type& value)
+	{
+		m_key = key;
+		m_value = value;
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const core_key_type key, Tx&&... args)
+	{
+		m_key = key;
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+
+	//ムーブオペレータ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline typename simpleContainer<VALUE_TYPE, KEY_TYPE>::node& simpleContainer<VALUE_TYPE, KEY_TYPE>::node::operator=(typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type&& value)
+	{
+		m_value = std::move(value);
+		return *this;
+	}
+
+	//コピーオペレータ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline typename simpleContainer<VALUE_TYPE, KEY_TYPE>::node& simpleContainer<VALUE_TYPE, KEY_TYPE>::node::operator=(const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type& value)
+	{
+		m_value = value;
+		return *this;
+	}
+
+	//ムーブコンストラクタ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_key_type key, typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_key(key),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+
+	//コピーコンストラクタ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_key_type key, const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type& value) :
+		m_value(value),
+		m_key(key),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+
+	//デフォルトコンストラクタ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node() :
+		m_value(),
+		m_key(0),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+
+	//デストラクタ
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::~node()
+	{}
 
 }//namespace rb_tree
 

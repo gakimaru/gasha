@@ -263,11 +263,11 @@ namespace hash_table
 			void update(const index_type index, const index_type primary_index, const key_type key, const value_type* value, const bool is_deleted);
 
 			//ムーブオペレータ
-			set& operator=(const set&& rhs);
+			set& operator=(set&& rhs);
 			//コピーオペレータ
 			set& operator=(const set& rhs);;
 			//ムーブコンストラクタ
-			set(const set&& obj);
+			set(set&& obj);
 			//コピーコンストラクタ
 			set(const set& obj);
 			//コストラクタ
@@ -344,12 +344,26 @@ namespace hash_table
 		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 			inline iterator operator--(int);
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline const iterator& operator++() const { return const_cast<iterator*>(this)->operator++(); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator& operator--() const { return const_cast<iterator*>(this)->operator--(); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline const iterator operator++(int) const { return const_cast<iterator*>(this)->operator++(0); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator operator--(int) const { return const_cast<iterator*>(this)->operator--(0); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
 			inline iterator& operator+=(const difference_type rhs);
 			inline iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 			inline iterator& operator-=(const difference_type rhs);
 			inline iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
+			inline const iterator& operator+=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+			inline const iterator& operator+=(const size_type rhs) const { return const_cast<iterator*>(this)->operator+=(rhs); }
+		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
+			inline const iterator& operator-=(const difference_type rhs) const { return const_cast<iterator*>(this)->operator-=(rhs); }
+			inline const iterator& operator-=(const size_type rhs) const  { return const_cast<iterator*>(this)->operator-=(rhs); }
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			inline iterator operator+(const difference_type rhs) const;
 			inline iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
@@ -384,9 +398,9 @@ namespace hash_table
 			void updateBackward(const difference_type step) const;
 		public:
 			//ムーブオペレータ
-			iterator& operator=(const iterator&& rhs);
+			iterator& operator=(iterator&& rhs);
 		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-			iterator& operator=(const reverse_iterator&& rhs);
+			iterator& operator=(reverse_iterator&& rhs);
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コピーオペレータ
 			iterator& operator=(const iterator& rhs);
@@ -395,9 +409,9 @@ namespace hash_table
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 		public:
 			//ムーブコンストラクタ
-			iterator(const iterator&& obj);
+			iterator(iterator&& obj);
 		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-			iterator(const reverse_iterator&& obj);
+			iterator(reverse_iterator&& obj);
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
 			inline iterator(const iterator& obj);
@@ -472,11 +486,19 @@ namespace hash_table
 			inline reverse_iterator& operator--();
 			inline reverse_iterator operator++(int);
 			inline reverse_iterator operator--(int);
+			inline const reverse_iterator& operator++() const { return const_cast<reverse_iterator*>(this)->operator++(); }
+			inline const reverse_iterator& operator--() const { return const_cast<reverse_iterator*>(this)->operator--(); }
+			inline const reverse_iterator operator++(int) const { return const_cast<reverse_iterator*>(this)->operator++(0); }
+			inline const reverse_iterator operator--(int) const { return const_cast<reverse_iterator*>(this)->operator--(0); }
 		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
 			inline reverse_iterator& operator+=(const difference_type rhs);
 			inline reverse_iterator& operator+=(const size_type rhs) { return operator+=(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator& operator-=(const difference_type rhs);
 			inline reverse_iterator& operator-=(const size_type rhs) { return operator-=(static_cast<difference_type>(rhs)); }
+			inline const reverse_iterator& operator+=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator+=(const size_type rhs) const { return const_cast<reverse_iterator*>(this)->operator+=(rhs); }
+			inline const reverse_iterator& operator-=(const difference_type rhs) const { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
+			inline const reverse_iterator& operator-=(const size_type rhs) const  { return const_cast<reverse_iterator*>(this)->operator-=(rhs); }
 			inline reverse_iterator operator+(const difference_type rhs) const;
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
@@ -512,15 +534,15 @@ namespace hash_table
 			inline iterator base();
 		public:
 			//ムーブオペレータ
-			reverse_iterator& operator=(const reverse_iterator&& rhs);
-			reverse_iterator& operator=(const iterator&& rhs);
+			reverse_iterator& operator=(reverse_iterator&& rhs);
+			reverse_iterator& operator=(iterator&& rhs);
 			//コピーオペレータ
 			reverse_iterator& operator=(const reverse_iterator& rhs);
 			reverse_iterator& operator=(const iterator& rhs);
 		public:
 			//ムーブコンストラクタ
-			reverse_iterator(const reverse_iterator&& obj);
-			reverse_iterator(const iterator&& obj);
+			reverse_iterator(reverse_iterator&& obj);
+			reverse_iterator(iterator&& obj);
 			//コピーコンストラクタ
 			reverse_iterator(const reverse_iterator& obj);
 			reverse_iterator(const iterator& obj);
@@ -719,24 +741,24 @@ namespace hash_table
 		//キー割り当てして値を初期化（本体）
 		//※コンストラクタが呼び出される
 		template<typename... Tx>
-		value_type* _emplace(const key_type key, const Tx&... args);
+		value_type* _emplace(const key_type key, Tx&&... args);
 	public:
 		//キー割り当てして値を初期化
 		//※コンストラクタが呼び出される
 		//※処理中、排他ロック（ライトロック）を取得する
 		template<typename... Tx>
-		inline value_type* emplace(const key_type key, const Tx&... args);
+		inline value_type* emplace(const key_type key, Tx&&... args);
 		template<typename... Tx>
-		inline value_type* emplace(const char* key, const Tx&... args);
+		inline value_type* emplace(const char* key, Tx&&... args);
 		template<typename... Tx>
-		inline value_type* emplace(const std::string& key, const Tx&... args);
+		inline value_type* emplace(const std::string& key, Tx&&... args);
 		
 		//値を初期化して自動的にキー割り当て
 		//※オブジェクトのコピーが発生する点に注意
 		//※操作用クラス baseOpe の派生クラスで、getKey() を実装する必要あり
 		//※処理中、ライトロックを取得する
 		template<typename... Tx>
-		inline value_type* emplaceAuto(const Tx&... args);
+		inline value_type* emplaceAuto(Tx&&... args);
 	private:
 		//インデックスを指定して削除
 		void _eraseByIndex(const index_type index);

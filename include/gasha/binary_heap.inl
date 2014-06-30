@@ -20,7 +20,7 @@
 
 #include <gasha/utility.h>//汎用ユーティリティ（値の交換を使用）
 
-#include <utility>//C++11 std::move
+#include <utility>//C++11 std::move, std::forward
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -452,11 +452,11 @@ namespace binary_heap
 	//プッシュ開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushBegin(const Tx&... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushBegin(Tx&&... args)
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
-		node_type* node = m_container.pushBegin(args...);//プッシュ開始
+		node_type* node = m_container.pushBegin(std::forward<Tx>(args)...);//プッシュ開始
 		if (node)
 			m_status = status_t::PUSH_BEGINNING;//ステータス変更
 		return node;
@@ -502,7 +502,7 @@ namespace binary_heap
 	//プッシュ
 	//※オブジェクト渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)//ムーブ
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)//ムーブ
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		return _pushCopying(std::move(src));
@@ -517,11 +517,11 @@ namespace binary_heap
 	//プッシュ（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_push(const Tx&... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_push(Tx&&... args)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
-		node_type* obj = pushBegin(args...);
+		node_type* obj = pushBegin(std::forward<Tx>(args)...);
 		if (!obj)
 			return nullptr;
 		return pushEnd();
@@ -531,23 +531,23 @@ namespace binary_heap
 	//※パラメータ渡し
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::push(const Tx&... args)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::push(Tx&&... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
-		return _push(args...);
+		return _push(std::forward<Tx>(args)...);
 	}
 
 	//プッシュ開始（本体）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushBegin(const Tx&... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushBegin(Tx&&... args)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
 		node_type* obj = refNew();
 		if (!obj)
 			return nullptr;
-		obj = new(obj)node_type(args...);//コンストラクタ呼び出し
+		obj = new(obj)node_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		if (obj)
 			m_status = PUSH_BEGINNING;
 		return obj;
@@ -556,10 +556,10 @@ namespace binary_heap
 	//プッシュ開始
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushBegin(const Tx&... args)
+	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushBegin(Tx&&... args)
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-		node_type* obj = _pushBegin(args...);//プッシュ開始
+		node_type* obj = _pushBegin(std::forward<Tx>(args)...);//プッシュ開始
 		if (!obj)
 			m_lock.unlock();//プッシュ失敗時はロック解放
 		return obj;
