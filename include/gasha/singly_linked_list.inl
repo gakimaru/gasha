@@ -24,6 +24,15 @@
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
 
+#include <utility>//C++11 std::move
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
+//【VC++】例外を無効化した状態で new 演算子を使用すると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace singly_linked_list
@@ -195,8 +204,8 @@ namespace singly_linked_list
 		if (!before_target && !first)
 			return nullptr;
 		typename OPE_TYPE::node_type* prev = before_target;
-		typename OPE_TYPE::node_type& node = *prev ? *OPE_TYPE::getNext(*prev) : *first;
-		typename OPE_TYPE::node_type* next = OPE_TYPE::getNext(*node);
+		typename OPE_TYPE::node_type& node = prev ? *const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(*prev)) : *first;
+		typename OPE_TYPE::node_type* next = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(node));
 		if (prev)
 			OPE_TYPE::setNext(*prev, next);
 		else
@@ -287,12 +296,12 @@ namespace singly_linked_list
 	//----------------------------------------
 	//片方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first)
+	bool isUnordered(const typename OPE_TYPE::node_type* first)
 	{
 		return GASHA_ singlyLinkedListIsUnordered(first, OPE_TYPE::getNext);
 	}
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
+	bool isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
 	{
 		return GASHA_ singlyLinkedListIsUnordered(first, OPE_TYPE::getNext, predicate);
 	}
@@ -300,12 +309,12 @@ namespace singly_linked_list
 	//----------------------------------------
 	//片方向連結リスト操作関数：整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first)
+	bool isOrdered(const typename OPE_TYPE::node_type* first)
 	{
 		return GASHA_ singlyLinkedListIsOrdered(first, OPE_TYPE::getNext);
 	}
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
+	bool isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate)
 	{
 		return GASHA_ singlyLinkedListIsOrdered(first, OPE_TYPE::getNext, predicate);
 	}
@@ -640,14 +649,14 @@ namespace singly_linked_list
 	{
 		if (pos.isNotExist() && !pos.isBeforeBegin())
 			return nullptr;
-		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
+		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), &*pos, m_first, m_last);
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::insert(typename container<OPE_TYPE>::iterator pos, const typename container<OPE_TYPE>::node_type& node)
 	{
 		if (pos.isNotExist() && !pos.isBeforeBegin())
 			return nullptr;
-		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
+		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), &*pos, m_first, m_last);
 	}
 	//指定の位置の前にノードを挿入（連結に追加）
 	template<class OPE_TYPE>
@@ -679,7 +688,8 @@ namespace singly_linked_list
 	{
 		if (!m_first || (start_before.isNotExist() && !start_before.isBeforeBegin()) || end.isNotEnabled())
 			return nullptr;
-		return removeNodeAfter<ope_type>(start_before, *end, m_first, m_last);
+		node_type* before_target = start_before.isBeforeBegin() ? nullptr : &*start_before;
+		return removeNodeAfter<ope_type>(before_target, m_first, m_last);
 	}
 	//指定位置のノードを削除（連結解除）
 	template<class OPE_TYPE>
@@ -702,14 +712,14 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::sort()
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
+		insertionSort<ope_type>(m_first, m_last, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline void container<OPE_TYPE>::sort(PREDICATE predicate)
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, predicate);
+		insertionSort<ope_type>(m_first, m_last, predicate);
 	}
 
 #ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_STABLE_SORT
@@ -717,14 +727,14 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::stableSort()
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
+		insertionSort<ope_type>(m_first, m_last, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline void container<OPE_TYPE>::stableSort(PREDICATE predicate)
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, predicate);
+		insertionSort<ope_type>(m_first, m_last, predicate);
 	}
 #endif//GASHA_SINGLY_LINKED_LIST_ENABLE_STABLE_SORT
 
@@ -732,14 +742,14 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::isOrdered() const
 	{
-		return isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
+		return singly_linked_list::isOrdered<ope_type>(m_first, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	bool container<OPE_TYPE>::isOrdered(PREDICATE predicate) const
 	{
-		return isOrdered<OPE_TYPE>(m_first, predicate);
+		return singly_linked_list::isOrdered<ope_type>(m_first, predicate);
 	}
 
 	//線形探索
@@ -748,8 +758,8 @@ namespace singly_linked_list
 	template<typename V>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
 	{
-		const node_type* found_node = linearSearchValue(m_first, value, typename ope_type::predicateForFind());
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, typename ope_type::predicateForFind());
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数＋値指定版
@@ -757,8 +767,8 @@ namespace singly_linked_list
 	template<typename V, class PREDICATE>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
 	{
-		const node_type* found_node = linearSearchValue(m_first, value, predicate);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, predicate);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数指定版
@@ -766,8 +776,8 @@ namespace singly_linked_list
 	template<class PREDICATE>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
 	{
-		const node_type* found_node = linearSearch(m_first, predicate);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = linearSearch<ope_type>(m_first, predicate);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 #ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
@@ -777,8 +787,8 @@ namespace singly_linked_list
 	template<typename V>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
 	{
-		const node_type* found_node = binarySearchValue(m_first, value, typename ope_type::comparisonForSearch());
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = singly_linked_list::binarySearchValue<ope_type>(m_first, value, typename ope_type::comparisonForSearch());
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数＋値指定版
@@ -786,8 +796,8 @@ namespace singly_linked_list
 	template<typename V, class COMPARISON>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
 	{
-		const node_type* found_node = binarySearchValue(m_first, value, comparison);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = singly_linked_list::binarySearchValue<ope_type>(m_first, value, comparison);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 	//※比較関数指定版
@@ -795,8 +805,8 @@ namespace singly_linked_list
 	template<class COMPARISON>
 	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
 	{
-		const node_type* found_node = binarySearch(m_first, comparison);
-		iterator found(*this, found_node, found_node == nullptr);
+		const node_type* found_node = singly_linked_list::binarySearch<ope_type>(m_first, comparison);
+		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
 #endif//GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
@@ -808,9 +818,73 @@ namespace singly_linked_list
 		m_last(nullptr)
 	{}
 
+	//----------------------------------------
+	//シンプル片方向連結リストコンテナ
+
+	//明示的なコンストラクタ呼び出し
+	template<typename VALUE_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE>::node::constructor(const Tx&... args)
+	{
+		new(&m_value)core_value_type(args...);
+	}
+
+	//明示的なデストラクタ呼び出し
+	template<typename VALUE_TYPE>
+	inline void simpleContainer<VALUE_TYPE>::node::destructor()
+	{
+		m_value.~core_value_type();//デストラクタ呼び出し
+		operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+	}
+
+	//ムーブオペレータ
+	template<typename VALUE_TYPE>
+	inline typename simpleContainer<VALUE_TYPE>::node& simpleContainer<VALUE_TYPE>::node::operator=(typename simpleContainer<VALUE_TYPE>::core_value_type&& value)
+	{
+		m_value = std::move(value);
+		return *this;
+	}
+
+	//コピーオペレータ
+	template<typename VALUE_TYPE>
+	inline typename simpleContainer<VALUE_TYPE>::node& simpleContainer<VALUE_TYPE>::node::operator=(const typename simpleContainer<VALUE_TYPE>::core_value_type& value)
+	{
+		m_value = value;
+		return *this;
+	}
+
+	//ムーブコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node(typename simpleContainer<VALUE_TYPE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_next(nullptr)
+	{}
+
+	//コピーコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node(const typename simpleContainer<VALUE_TYPE>::core_value_type& value) :
+		m_value(value),
+		m_next(nullptr)
+	{}
+
+	//デフォルトコンストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::node() :
+		m_value(),
+		m_next(nullptr)
+	{}
+
+	//デストラクタ
+	template<typename VALUE_TYPE>
+	inline simpleContainer<VALUE_TYPE>::node::~node()
+	{}
+
 }//namespace singly_linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//__SINGLY_LINKED_LIST_INL_
 

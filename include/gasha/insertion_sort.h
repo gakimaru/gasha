@@ -226,7 +226,7 @@ std::size_t singlyLinkedListInsertionSort(T*& first, T*& last, GET_NEXT_FUNC get
 			remove_node_after_func(now, first, last);//nextを連結から外す
 			insert_node_after_func(*next, min_before, first, last);
 			++swapped_count;
-			next = const_cast<T*>(get_func_fun(*now));
+			next = const_cast<T*>(get_next_func(*now));
 		}
 		else
 		{

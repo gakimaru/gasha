@@ -284,15 +284,15 @@ namespace singly_linked_list
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first);
+	bool isUnordered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
+	bool isUnordered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
 	//----------------------------------------
 	//双方向連結リスト操作関数：整列状態確認
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first);
+	bool isOrdered(const typename OPE_TYPE::node_type* first);
 	template<class OPE_TYPE, class PREDICATE>
-	std::size_t isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
+	bool isOrdered(const typename OPE_TYPE::node_type* first, PREDICATE predicate);
 	//----------------------------------------
 	//双方向連結リスト操作関数：非整列要素数計上
 	template<class OPE_TYPE, class PREDICATE>
@@ -564,11 +564,15 @@ namespace singly_linked_list
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		const node_type* at(const index_type index) const { return getForwardNode<ope_type>(m_first, index); }
+		const node_type* at(const index_type index) const { std::size_t _index = static_cast<std::size_t>(index); return getForwardNode<ope_type>(*m_first, _index); }
 		inline node_type* at(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->at(index)); }
 		inline const node_type* operator[](const index_type index) const { return at(index); }
 		inline node_type* operator[](const index_type index){ return at(index); }
 	#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
+	public:
+		//キャストオペレータ
+		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
+		inline operator lock_type&() const { return m_lock; }//ロックオブジェクト ※mutable
 	public:
 		//メソッド：ロック取得系
 		//単一ロック取得
@@ -788,20 +792,99 @@ namespace singly_linked_list
 	//シンプル片方向連結リストコンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	//プロトタイプ：
-	//  node_type*& REF_NEXT_PTR_FUNC(node_type&)
-	template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC>
-	struct simpleContainer
+	template<typename VALUE_TYPE>
+	class simpleContainer
 	{
-		//片方向連結リスト操作用構造体
-		struct ope : public baseOpe<ope, NODE_TYPE>
+	public:
+		typedef VALUE_TYPE core_value_type;//値型
+
+		//データノード型
+		//※元の値型に対するプロキシーとして振る舞う
+		struct node
 		{
-			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
+			core_value_type m_value;//値
+			mutable const node* m_next;//次のノード
+
+			//キャストオペレータ
+			inline operator const core_value_type&() const { return m_value; }
+			inline operator core_value_type&(){ return m_value; }
+			inline operator const core_value_type*() const { return &m_value; }
+			inline operator core_value_type*(){ return &m_value; }
+			//アクセッサ
+			inline const core_value_type& value() const { return m_value; }
+			inline core_value_type& value(){ return m_value; }
+			inline const core_value_type* pointer() const { return &m_value; }
+			inline core_value_type* pointer(){ return &m_value; }
+			//基本オペレータ
+			inline const core_value_type& operator*() const { return m_value; }
+			inline core_value_type& operator*(){ return m_value; }
+			inline const core_value_type* operator->() const { return &m_value; }
+			inline core_value_type* operator->(){ return &m_value; }
+			//比較オペレータ（テンプレート）
+			template<class V>
+			inline bool operator==(const V& rhs) const { return m_value == rhs; }//container::find(), std::find()に必要
+			template<class V>
+			inline bool operator!=(const V& rhs) const { return m_value != rhs; }
+			template<class V>
+			inline bool operator<(const V& rhs) const { return m_value < rhs; }//container::binarySearch(), std::binary_search(), std::lower_bound(), std::upper_bound() に必要
+			template<class V>
+			inline bool operator>(const V& rhs) const { return m_value > rhs; }
+			template<class V>
+			inline bool operator<=(const V& rhs) const { return m_value <= rhs; }
+			template<class V>
+			inline bool operator>=(const V& rhs) const { return m_value >= rhs; }
+			//比較オペレータ（自身の型との比較）
+			//【注意】明示的なインスタンス化の際には、VALUE_TYPE に対して下記6つの比較演算子を全て実装しておく必要がある点に注意。
+			//※gasha/type_traits.h の operatorCRTP クラスを使用すると少しだけ簡単に定義可能。
+			inline bool operator==(const node& rhs) const { return m_value == rhs.m_value; }
+			inline bool operator!=(const node& rhs) const { return m_value != rhs.m_value; }
+			inline bool operator<(const node& rhs) const { return m_value < rhs.m_value; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
+			inline bool operator>(const node& rhs) const { return m_value > rhs.m_value; }
+			inline bool operator<=(const node& rhs) const { return m_value <= rhs.m_value; }
+			inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
+			//フレンド比較演算子（静的関数になる） ※左辺値が自身の型以外の二項演算子
+			template<class V>
+			friend inline bool operator==(const V& lhs, const node& rhs){ return lhs == rhs.m_value; }
+			template<class V>
+			friend inline bool operator!=(const V& lhs, const node& rhs){ return lhs != rhs.m_value; }
+			template<class V>
+			friend inline bool operator<(const V& lhs, const node& rhs){ return lhs < rhs.m_value; }//std::binary_search(), std::upper_bound() に必要
+			template<class V>
+			friend inline bool operator>(const V& lhs, const node& rhs){ return lhs > rhs.m_value; }
+			template<class V>
+			friend inline bool operator<=(const V& lhs, const node& rhs){ return lhs <= rhs.m_value; }
+			template<class V>
+			friend inline bool operator>=(const V& lhs, const node& rhs){ return lhs >= rhs.m_value; }
+
+			//明示的なコンストラクタ呼び出し
+			template<typename... Tx>
+			inline void constructor(const Tx&... args);
+			//明示的なデストラクタ呼び出し
+			inline void destructor();
+
+			//ムーブオペレータ
+			inline node& operator=(core_value_type&& value);
+			//コピーオペレータ
+			inline node& operator=(const core_value_type& value);
+			//ムーブコンストラクタ
+			inline node(core_value_type&& value);
+			//コピーコンストラクタ
+			inline node(const core_value_type& value);
+			//デフォルトコンストラクタ
+			inline node();
+			//デストラクタ
+			inline ~node();
+		};
+	
+		//片方向連結リスト操作用構造体
+		struct ope : public baseOpe<ope, node>
+		{
+			typedef typename baseOpe<ope, node>::node_type node_type;
 
 			//次ノードを取得
-			inline static const node_type* getNext(const node_type& node){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); return ref_next; }
+			inline static const node_type* getNext(const node_type& node){ return node.m_next; }
 			//次ノードを変更
-			inline static void setNext(node_type& node, const node_type* next){ node_type*& ref_next = REF_NEXT_PTR_FUNC(const_cast<node_type*>(node)); ref_next = const_cast<node_type*>(next); }
+			inline static void setNext(node_type& node, const node_type* next){ node.m_next = next; }
 		};
 
 		//基本型定義
@@ -851,8 +934,17 @@ template<class OPE_TYPE>
 using slList = singly_linked_list::container<OPE_TYPE>;
 
 //シンプル片方向連結リストコンテナ
-template<typename NODE_TYPE, class REF_NEXT_PTR_FUNC>
-using simpleSLList = singly_linked_list::simpleContainer<NODE_TYPE, REF_NEXT_PTR_FUNC>;
+template<typename VALUE_TYPE>
+using simpleSLList = singly_linked_list::simpleContainer<VALUE_TYPE>;
+
+//片方向連結リストコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_slList(ope_type) \
+	template class singly_linked_list::container<ope_type>;
+
+//シンプル片方向連結リストコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleSLList(value_type) \
+	template class singly_linked_list::simpleContainer<value_type>; \
+	template class singly_linked_list::container<singly_linked_list::simpleContainer<value_type>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

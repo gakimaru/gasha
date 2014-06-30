@@ -795,6 +795,15 @@ using rBuff = ring_buffer::container<OPE_TYPE>;
 template<typename VALUE_TYPE>
 using simpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 
+//リングバッファコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_rBuff(ope_type) \
+	template class ring_buffer::container<ope_type>;
+
+//シンプルリングバッファコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleRBuff(value_type) \
+	template class ring_buffer::simpleContainer<value_type>; \
+	template class ring_buffer::container<ring_buffer::simpleContainer<value_type>::ope>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元

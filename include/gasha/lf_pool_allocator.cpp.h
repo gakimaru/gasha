@@ -19,8 +19,11 @@
 #include <gasha/lf_pool_allocator.inl>//ロックフリープールアロケータ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
-#include <assert.h>//assert()
 #include <stdio.h>//printf()
+
+#ifdef GASHA_ASSERTION_IS_ENABLED
+#include <assert.h>//assert()
+#endif//GASHA_ASSERTION_IS_ENABLED
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -125,18 +128,18 @@ typename lfPoolAllocator<T, _POOL_SIZE>::index_type lfPoolAllocator<T, _POOL_SIZ
 	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_pool)) / VALUE_SIZE);
 	if (index >= POOL_SIZE)//範囲外のインデックスなら終了
 	{
-	#ifdef GASHA_ASSERTION_ENABLED
+	#ifdef GASHA_ASSERTION_IS_ENABLED
 		static const bool IS_INVALID_POINTER_OF_POOL = false;
 		assert(IS_INVALID_POINTER_OF_POOL);
-	#endif//GASHA_ASSERTION_ENABLED
+	#endif//GASHA_ASSERTION_IS_ENABLED
 		return INVALID_INDEX;
 	}
 	if (m_using[index].load() == 0)//インデックスが既に未使用状態なら終了
 	{
-	#ifdef GASHA_ASSERTION_ENABLED
+	#ifdef GASHA_ASSERTION_IS_ENABLED
 		static const bool IS_ALREADY_DELETE_POINTER = false;
 		assert(IS_ALREADY_DELETE_POINTER);
-	#endif//GASHA_ASSERTION_ENABLED
+	#endif//GASHA_ASSERTION_IS_ENABLED
 		return INVALID_INDEX;
 	}
 	return index;

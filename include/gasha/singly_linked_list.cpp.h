@@ -32,7 +32,7 @@ namespace singly_linked_list
 	{
 		if (!m_value && !rhs.m_value)
 			return 0;
-		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && !rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
 			return 0;
 		difference_type diff = 0;
 		node_type* value = rhs.m_value;
@@ -283,7 +283,7 @@ namespace singly_linked_list
 	{
 		if (!m_value && !rhs.m_value)
 			return 0;
-		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && !rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
+		if (m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN) && rhs.m_value == reinterpret_cast<node_type*>(BEFORE_BEGIN))
 			return 0;
 		difference_type diff = 0;
 		node_type* value = m_value;
@@ -504,7 +504,7 @@ namespace singly_linked_list
 	}
 	template<class OPE_TYPE>
 	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, typename container<OPE_TYPE>::value_type* value, const bool is_end) :
-		m_con(con),
+		m_con(&con),
 		m_value(value),
 		m_isEnd(is_end)
 	{}

@@ -20,6 +20,10 @@
 
 #include <utility>//C++11 std::move
 
+#ifdef GASHA_ASSERTION_IS_ENABLED
+#include <assert.h>//assert()
+#endif//GASHA_ASSERTION_IS_ENABLED
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace rb_tree
@@ -31,7 +35,9 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type* node, const bool is_large)
 	{
+	#ifdef GASHA_ASSERTION_IS_ENABLED
 		assert(m_depth < DEPTH_MAX);
+	#endif//GASHA_ASSERTION_IS_ENABLED
 		info_t* stack_node = &m_array[m_depth++];
 		stack_node->m_nodeRef = node;
 		stack_node->m_isLarge = is_large;

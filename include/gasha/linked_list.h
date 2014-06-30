@@ -761,17 +761,17 @@ namespace linked_list
 			inline bool operator>=(const node& rhs) const { return m_value >= rhs.m_value; }
 			//フレンド比較演算子（静的関数になる） ※左辺値が自身の型以外の二項演算子
 			template<class V>
-			friend inline bool operator==(const V& lhs, const node& rhs){ return lhs == rhs; }
+			friend inline bool operator==(const V& lhs, const node& rhs){ return lhs == rhs.m_value; }
 			template<class V>
-			friend inline bool operator!=(const V& lhs, const node& rhs){ return lhs != rhs; }
+			friend inline bool operator!=(const V& lhs, const node& rhs){ return lhs != rhs.m_value; }
 			template<class V>
-			friend inline bool operator<(const V& lhs, const node& rhs){ return lhs < rhs; }//std::binary_search(), std::upper_bound() に必要
+			friend inline bool operator<(const V& lhs, const node& rhs){ return lhs < rhs.m_value; }//std::binary_search(), std::upper_bound() に必要
 			template<class V>
-			friend inline bool operator>(const V& lhs, const node& rhs){ return lhs > rhs; }
+			friend inline bool operator>(const V& lhs, const node& rhs){ return lhs > rhs.m_value; }
 			template<class V>
-			friend inline bool operator<=(const V& lhs, const node& rhs){ return lhs <= rhs; }
+			friend inline bool operator<=(const V& lhs, const node& rhs){ return lhs <= rhs.m_value; }
 			template<class V>
-			friend inline bool operator>=(const V& lhs, const node& rhs){ return lhs >= rhs; }
+			friend inline bool operator>=(const V& lhs, const node& rhs){ return lhs >= rhs.m_value; }
 
 			//明示的なコンストラクタ呼び出し
 			template<typename... Tx>
@@ -798,15 +798,15 @@ namespace linked_list
 		{
 			typedef typename baseOpe<ope, node>::node_type node_type;
 
-			//前ノードを取得
-			inline static const node_type* getPrev(const node_type& node){ return node.m_prev; }
-			//前ノードを変更
-			inline static void setPrev(node_type& node, const node_type* prev){ node.m_prev = prev; }
-			
 			//次ノードを取得
 			inline static const node_type* getNext(const node_type& node){ return node.m_next; }
 			//次ノードを変更
 			inline static void setNext(node_type& node, const node_type* next){ node.m_next = next; }
+			
+			//前ノードを取得
+			inline static const node_type* getPrev(const node_type& node){ return node.m_prev; }
+			//前ノードを変更
+			inline static void setPrev(node_type& node, const node_type* prev){ node.m_prev = prev; }
 		};
 
 		//基本型定義
@@ -859,11 +859,11 @@ using lList = linked_list::container<OPE_TYPE>;
 template<typename NODE_TYPE>
 using simpleLList = linked_list::simpleContainer<NODE_TYPE>;
 
-//双方向連結リストコンテナインスタンス化
+//双方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define INSTANCING_lList(ope_type) \
 	template class linked_list::container<ope_type>;
 
-//シンプル双方向連結リストコンテナインスタンス化
+//シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define INSTANCING_simpleLList(value_type) \
 	template class linked_list::simpleContainer<value_type>; \
 	template class linked_list::container<linked_list::simpleContainer<value_type>::ope>;

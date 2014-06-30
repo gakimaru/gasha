@@ -16,7 +16,9 @@
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
+#ifdef GASHA_ASSERTION_IS_ENABLED
 #include <assert.h>//assert()
+#endif//GASHA_ASSERTION_IS_ENABLED
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -169,7 +171,9 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 			if (new_size >= 1)
 			{
 				stack_p = &stack[stack_curr++];
+			#ifdef GASHA_ASSERTION_IS_ENABLED
 				assert(stack_curr <= STACK_DEPTH_MAX);
+			#endif//GASHA_ASSERTION_IS_ENABLED
 				stack_p->array = new_array;
 				stack_p->size = new_size;
 			}
@@ -266,7 +270,9 @@ std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
 					{
 					#pragma omp critical
 						{ queue_write_tmp = queue_write++; }
+					#ifdef GASHA_ASSERTION_IS_ENABLED
 						assert(queue_write_tmp >= queue_read ? queue_write_tmp - queue_read < size : size - queue_write_tmp + queue_read < size);
+					#endif//GASHA_ASSERTION_IS_ENABLED
 						queue_p = &queue[queue_write_tmp % size];
 						queue_p->array = new_array;
 						queue_p->size = new_size;

@@ -797,6 +797,15 @@ using dArray = dynamic_array::container<OPE_TYPE>;
 template<typename VALUE_TYPE>
 using simpleDArray = dynamic_array::simpleContainer<VALUE_TYPE>;
 
+//動的配列コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_dArray(ope_type) \
+	template class dynamic_array::container<ope_type>;
+
+//シンプル動的配列コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleDArray(value_type) \
+	template class dynamic_array::simpleContainer<value_type>; \
+	template class dynamic_array::container<dynamic_array::simpleContainer<value_type>::ope>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元

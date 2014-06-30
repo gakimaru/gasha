@@ -675,9 +675,9 @@ namespace linked_list
 	inline void container<OPE_TYPE>::sort()
 	{
 	#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
-		shellSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
+		shellSort<ope_type>(m_first, m_last, typename ope_type::predicateForSort());
 	#else//GASHA_LINKED_LIST_USE_SHELL_SORT
-		insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
+		insertionSort<ope_type>(m_first, m_last, typename ope_type::predicateForSort());
 	#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
 	}
 	//※プレディケート関数指定版
@@ -686,9 +686,9 @@ namespace linked_list
 	inline void container<OPE_TYPE>::sort(PREDICATE predicate)
 	{
 	#ifdef GASHA_LINKED_LIST_USE_SHELL_SORT
-		shellSort<OPE_TYPE>(m_first, m_last, predicate);
+		shellSort<ope_type>(m_first, m_last, predicate);
 	#else//GASHA_LINKED_LIST_USE_SHELL_SORT
-		insertionSort<OPE_TYPE>(m_first, m_last, predicate);
+		insertionSort<ope_type>(m_first, m_last, predicate);
 	#endif//GASHA_LINKED_LIST_USE_SHELL_SORT
 	}
 
@@ -697,14 +697,14 @@ namespace linked_list
 	template<class OPE_TYPE>
 	inline void container<OPE_TYPE>::stableSort()
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, typename ope_type::predicateForSort());
+		insertionSort<ope_type>(m_first, m_last, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline void container<OPE_TYPE>::stableSort(PREDICATE predicate)
 	{
-		insertionSort<OPE_TYPE>(m_first, m_last, predicate);
+		insertionSort<ope_type>(m_first, m_last, predicate);
 	}
 #endif//GASHA_LINKED_LIST_ENABLE_STABLE_SORT
 
@@ -712,14 +712,14 @@ namespace linked_list
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::isOrdered() const
 	{
-		return linked_list::isOrdered<OPE_TYPE>(m_first, typename ope_type::predicateForSort());
+		return linked_list::isOrdered<ope_type>(m_first, typename ope_type::predicateForSort());
 	}
 	//※プレディケート関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
 	inline bool container<OPE_TYPE>::isOrdered(PREDICATE predicate) const
 	{
-		return linked_list::isOrdered<OPE_TYPE>(m_first, predicate);
+		return linked_list::isOrdered<ope_type>(m_first, predicate);
 	}
 
 	//線形探索
