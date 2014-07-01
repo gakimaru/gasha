@@ -156,7 +156,7 @@ namespace dynamic_array
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
-		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(m_index) - static_cast<difference_type>(rhs.m_index);
 	}
@@ -307,7 +307,7 @@ namespace dynamic_array
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
-		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(rhs.m_index) - static_cast<difference_type>(m_index);
 	}

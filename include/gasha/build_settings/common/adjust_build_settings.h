@@ -12,6 +12,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------------
+//【全体設定：SSE命令設定】
+
 #ifdef GASHA_IS_X86//x86,x64系CPUの場合のみ設定可
 
 	#if !defined(GASHA_USE_SSE) && (defined(GASHA_USE_SSE2) || defined(GASHA_USE_SSE3) || defined(GASHA_USE_SSE4_1) || defined(GASHA_USE_SSE4_2) || defined(GASHA_USE_AVX) || defined(GASHA_USE_AVX2))
@@ -60,6 +63,10 @@
 		#undef GASHA_USE_SSE4_1
 	#endif//GASHA_USE_SSE4_1
 
+	#ifdef GASHA_USE_SSE4_2
+		#undef GASHA_USE_SSE4_2
+	#endif//GASHA_USE_SSE4_2
+
 	#ifdef GASHA_USE_POPCNT
 		#undef GASHA_USE_POPCNT
 	#endif//GASHA_USE_POPCNT
@@ -85,6 +92,13 @@
 	#endif//GASHA_USE_FMA3
 
 #endif//GASHA_IS_X86
+
+//--------------------------------------------------------------------------------
+//【CRC32設定】
+
+#if defined(GASHA_CRC32_USE_SSE) && (!defined(GASHA_CRC32_IS_CRC32C) || !defined(GASHA_USE_SSE4_2))
+	#undef GASHA_CRC32_USE_SSE
+#endif//GASHA_CRC32_USE_SSE
 
 #endif//GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 

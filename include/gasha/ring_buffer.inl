@@ -156,7 +156,7 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
-		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || m_logicalIndex < rhs.m_logicalIndex)
+		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(m_logicalIndex) - static_cast<difference_type>(rhs.m_logicalIndex);
 	}
@@ -312,7 +312,7 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
-		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex < m_logicalIndex)
+		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(rhs.m_logicalIndex) - static_cast<difference_type>(m_logicalIndex);
 	}

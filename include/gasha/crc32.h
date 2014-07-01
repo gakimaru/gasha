@@ -17,10 +17,6 @@
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
 
-#if defined(GASHA_USE_SSE4_2) && defined(GASHA_CRC32_IS_CRC32C)
-#define CALC_RUNTIME_CRC32_BY_SSE//ランタイムCRC32の算出にSSE命令を使用する（CRC-32Cを算出する）
-#endif
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------
@@ -151,29 +147,29 @@ crc32_t calcCRC32_sse(const char* data, const std::size_t len);//SSE命令版
 //【ランタイム関数版】文字列のCRC32計算
 inline crc32_t calcCRC32(const char* str)
 {
-#ifdef CALC_RUNTIME_CRC32_BY_SSE
+#ifdef GASHA_CRC32_USE_SSE
 	return calcCRC32_sse(str);
-#else//CALC_RUNTIME_CRC32_BY_SSE
+#else//GASHA_CRC32_USE_SSE
 #ifdef GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_table(str);
 #else//GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_loop(str);
 #endif//GASHA_CRC32_USE_STATIC_TABLE
-#endif//CALC_RUNTIME_CRC32_BY_SSE
+#endif//GASHA_CRC32_USE_SSE
 }
 //--------------------
 //【ランタイム関数版】指定長データのCRC32計算
 inline crc32_t calcCRC32(const char* data, const std::size_t len)
 {
-#ifdef CALC_RUNTIME_CRC32_BY_SSE
+#ifdef GASHA_CRC32_USE_SSE
 	return calcCRC32_sse(data, len);
-#else//CALC_RUNTIME_CRC32_BY_SSE
+#else//GASHA_CRC32_USE_SSE
 #ifdef GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_table(data, len);
 #else//GASHA_CRC32_USE_STATIC_TABLE
 	return calcCRC32_loop(data, len);
 #endif//GASHA_CRC32_USE_STATIC_TABLE
-#endif//CALC_RUNTIME_CRC32_BY_SSE
+#endif//GASHA_CRC32_USE_SSE
 }
 
 //--------------------
