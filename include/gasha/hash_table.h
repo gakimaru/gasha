@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // hash_table.h
-// ハッシュテーブルコンテナ【宣言部】※データのメモリ管理を行わない擬似コンテナ
+// 開番地法ハッシュテーブルコンテナ【宣言部】※データのメモリ管理を行わない擬似コンテナ
 //
 // ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
 //
@@ -128,7 +128,7 @@ namespace hash_table
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
+	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
 	struct baseOpe
 	{
 		//定数
@@ -139,12 +139,16 @@ namespace hash_table
 		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限
 		static const std::size_t INDEX_STEP_BASE = 5;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
 
-		static const replaceAttr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
-
 		//型
 		typedef OPE_TYPE ope_type;//データ操作型
 		typedef VALUE_TYPE value_type;//値型
 		typedef KEY_TYPE key_type;//キー型
+		typedef hash_table::replaceAttr_t replaceAttr_t;//置換属性
+
+		//定数
+		//※デフォルト
+		//※変更したい場合は、派生クラスで定数を再定義する
+		static const replaceAttr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
 
 		//キーを取得
 		//※ダミー関数
@@ -252,8 +256,8 @@ namespace hash_table
 			bool m_isDeleted;//削除済み
 
 			//オペレータ
-			inline const_reference operator*() const { return m_value; }
-			inline reference operator*(){ return m_value; }
+			inline const_reference operator*() const { return *m_value; }
+			inline reference operator*(){ return *m_value; }
 			inline const_pointer operator->() const { return m_value; }
 			inline pointer operator->(){ return m_value; }
 
@@ -317,8 +321,8 @@ namespace hash_table
 			inline operator key_type() const { return getKey(); }
 		public:
 			//基本オペレータ
-			inline const set& operator*() const { return getSet(); }
-			inline set& operator*(){ return getSet(); }
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
 		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
@@ -414,12 +418,13 @@ namespace hash_table
 			iterator(reverse_iterator&& obj);
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コピーコンストラクタ
-			inline iterator(const iterator& obj);
+			iterator(const iterator& obj);
 		#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 			iterator(const reverse_iterator& obj);
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 			//コンストラクタ
-			inline iterator(const container& con, const bool is_end);
+			iterator(const container& con, const bool is_end);
+			iterator(const container& con, const index_type index);
 			//デフォルトコンストラクタ
 			inline iterator() :
 				m_con(nullptr),
@@ -548,6 +553,7 @@ namespace hash_table
 			reverse_iterator(const iterator& obj);
 			//コンストラクタ
 			reverse_iterator(const container& con, const bool is_end);
+			reverse_iterator(const container& con, const index_type index);
 			//デフォルトコンストラクタ
 			inline reverse_iterator() :
 				m_con(nullptr),
@@ -806,19 +812,20 @@ namespace hash_table
 		mutable lock_type m_lock;//ロックオブジェクト
 	};
 	//----------------------------------------
-	//シンプルハッシュテーブルコンテナ
+	//シンプル開番地法ハッシュテーブルコンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
-	struct simpleContainer
+	template<typename VALUE_TYPE, typename KEY_TYPE, std::size_t _TABLE_SIZE>
+	class simpleContainer
 	{
-		//ハッシュテーブル操作用構造体
-		struct ope : public baseOpe<ope, VALUE_TYPE>{};
+	public:
+		//開番地法ハッシュテーブル操作用構造体
+		struct ope : public baseOpe<ope, VALUE_TYPE, KEY_TYPE>{};
 
 		//基本型定義
 		DECLARE_OPE_TYPES(ope);
 
-		//ハッシュテーブルコンテナ
+		//開番地法ハッシュテーブルコンテナ
 		class con : public container<ope_type, _TABLE_SIZE>
 		{
 		public:
@@ -845,17 +852,26 @@ namespace hash_table
 //クラスの別名
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
-//ハッシュテーブル操作用テンプレート構造体
+//開番地法ハッシュテーブル操作用テンプレート構造体
 template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
 using hashTbl_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _KEY_MIN, _KEY_MAX, _INVALID_KEY>;
 
-//ハッシュテーブルコンテナ
+//開番地法ハッシュテーブルコンテナ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 using hashTbl = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 
-//シンプルハッシュテーブルコンテナ
-template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
-using simpleHashTbl = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>;
+//シンプル開番地法ハッシュテーブルコンテナ
+template<typename VALUE_TYPE, typename KEY_TYPE, std::size_t _TABLE_SIZE>
+using simpleHashTbl = hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>;
+
+//開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_hashTbl(OPE_TYPE, _TABLE_SIZE) \
+	template class hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleHashTbl(VALUE_TYPE, KEY_TYPE, _TABLE_SIZE) \
+	template class hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>; \
+	template class hash_table::container<hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

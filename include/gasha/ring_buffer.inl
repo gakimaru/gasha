@@ -156,7 +156,7 @@ namespace ring_buffer
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || m_logicalIndex < rhs.m_logicalIndex)
 			return 0;
-		return static_cast<difference_type>(m_logicalIndex - rhs.m_logicalIndex);
+		return static_cast<difference_type>(m_logicalIndex) - static_cast<difference_type>(rhs.m_logicalIndex);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -310,7 +310,7 @@ namespace ring_buffer
 	{
 		if (m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex == INVALID_INDEX || rhs.m_logicalIndex < m_logicalIndex)
 			return 0;
-		return static_cast<difference_type>(rhs.m_logicalIndex - m_logicalIndex);
+		return static_cast<difference_type>(rhs.m_logicalIndex) - static_cast<difference_type>(m_logicalIndex);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>

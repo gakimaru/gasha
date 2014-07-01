@@ -156,7 +156,7 @@ namespace dynamic_array
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
 			return 0;
-		return static_cast<difference_type>(m_index - rhs.m_index);
+		return static_cast<difference_type>(m_index) - static_cast<difference_type>(rhs.m_index);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>
@@ -305,7 +305,7 @@ namespace dynamic_array
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
 			return 0;
-		return static_cast<difference_type>(rhs.m_index - m_index);
+		return static_cast<difference_type>(rhs.m_index) - static_cast<difference_type>(m_index);
 	}
 	//アクセッサ
 	template<class OPE_TYPE>

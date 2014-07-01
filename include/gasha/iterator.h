@@ -160,6 +160,44 @@ void reverseForEach(const T* array, const std::size_t size, FUNCTOR functor)
 	reverseForEach(begin, end, functor);
 }
 
+//----------------------------------------
+//iterator for-each
+//※値ではなく、イテレータ自体の参照を返す
+template<class ITERATOR, class FUNCTOR>
+void iteratorForEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
+{
+	for (; begin != end; ++begin)
+	{
+		functor(begin);
+	}
+}
+template<class CONTAINER, class FUNCTOR>
+void iteratorForEach(CONTAINER& container, FUNCTOR functor)
+{
+	typename CONTAINER::iterator begin = container.begin();
+	typename CONTAINER::iterator end = container.end();
+	iteratorForEach(begin, end, functor);
+}
+//----------------------------------------
+//iterator reverse for-each
+//※値ではなく、イテレータ自体の参照を返す
+template<class ITERATOR, class FUNCTOR>
+void iteratorReverseForEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
+{
+	while (begin != end)
+	{
+		--begin;
+		functor(begin);
+	}
+}
+template<class CONTAINER, class FUNCTOR>
+void iteratorReverseForEach(CONTAINER& container, FUNCTOR functor)
+{
+	typename CONTAINER::reverse_iterator rbegin = container.rbegin();
+	typename CONTAINER::reverse_iterator rend = container.rend();
+	iteratorforEach(rbegin, rend, functor);//リバースイテレータ＋forEachで処理
+}
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//__ITERATOR_H_

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // hash_table.cpp.h
-// ハッシュテーブルコンテナ【関数定義部】
+// 開番地法ハッシュテーブルコンテナ【関数定義部】
 //
 // ※コンテナクラスの実体化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
@@ -124,6 +124,10 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
+		if (step == 0)
+			return;
+		if (step < 0)
+			return updateBackward(-step);
 		difference_type _step = step;
 		const index_type prev_index = m_set.m_index;
 		index_type index = prev_index;
@@ -138,6 +142,8 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
+		if (step <= 0)
+			return updateForward(-step);
 		difference_type _step = step;
 		index_type index = m_set.m_index;
 		if (_step > 0 && m_isEnd)
@@ -265,6 +271,14 @@ namespace hash_table
 				m_isEnd = true;
 		}
 	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const container& con, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) :
+		m_con(&con),
+		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
+		m_isEnd(false)
+	{
+		update(index);
+	}
 
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 	//----------------------------------------
@@ -303,6 +317,10 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
+		if (step == 0)
+			return;
+		if (step < 0)
+			return updateBackward(-step);
 		difference_type _step = step;
 		const index_type prev_index = m_set.m_index;
 		index_type index = prev_index;
@@ -317,6 +335,8 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
 	{
+		if (step <= 0)
+			return updateForward(-step);
 		difference_type _step = step;
 		index_type index = m_set.m_index;
 		if (_step > 0 && m_isEnd)
@@ -436,6 +456,14 @@ namespace hash_table
 				m_isEnd = true;
 		}
 	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const container& con, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) :
+		m_con(&con),
+		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
+		m_isEnd(false)
+	{
+		update(index);
+	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
 
 	//----------------------------------------
@@ -542,8 +570,8 @@ namespace hash_table
 	{
 		const index_type index = _findIndex(key);
 		if (index == INVALID_INDEX)
-			return iterator(*this, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false);
-		return iterator(*this, index, m_keyTable[index], reinterpret_cast<const value_type*>(m_table[index]), m_deleted[index]);
+			return iterator(*this, INVALID_INDEX);
+		return iterator(*this, index);
 	}
 	
 	//キー割り当て（本体）
@@ -553,7 +581,7 @@ namespace hash_table
 		if (m_usingCount == TABLE_SIZE && m_deletedCount == 0)
 			return nullptr;
 		index_type index = _findIndexCommon(key);
-		if (ope_type::REPLACE_ATTR == ope_type::NEVER_REPLACE && index != INVALID_INDEX)//同じキーが既に割り当て済みなら割り当て失敗
+		if (ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE && index != INVALID_INDEX)//同じキーが既に割り当て済みなら割り当て失敗
 			return nullptr;
 		int find_cycle = 0;
 		if (index != INVALID_INDEX)

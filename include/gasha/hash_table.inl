@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // hash_table.inl
-// ハッシュテーブルコンテナ【インライン関数／テンプレート関数定義部】
+// 開番地法ハッシュテーブルコンテナ【インライン関数／テンプレート関数定義部】
 //
 // ※コンテナクラスの操作が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
@@ -39,14 +39,16 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index) const
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
+		iterator ite(*this);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index)
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
+		iterator ite(*this);
 		ite += index;
 		return ite;
 	}
@@ -58,7 +60,7 @@ namespace hash_table
 		return !isEnabled() || !rhs.isEnabled() ? false :
 			m_isEnd && rhs.m_isEnd ? true :
 			m_isEnd || rhs.m_isEnd ? false :
-			m_set.m_index == rhs.index;
+			m_set.m_index == rhs.m_set.m_index;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator!=(const iterator& rhs) const
@@ -170,7 +172,7 @@ namespace hash_table
 	{
 		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || m_set.m_index < rhs.m_set.m_index)
 			return 0;
-		return m_set.m_index - rhs.m_set.m_index;
+		return static_cast<difference_type>(m_set.m_index) - static_cast<difference_type>(rhs.m_set.m_index);
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
@@ -244,14 +246,16 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index) const
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
+		reverse_iterator ite(*this);
 		ite += index;
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index)
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
+		reverse_iterator ite(*this);
 		ite += index;
 		return ite;
 	}
@@ -368,7 +372,7 @@ namespace hash_table
 	{
 		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || rhs.m_set.m_index < m_set.m_index)
 			return 0;
-		return rhs.m_set.m_index - m_set.m_index;
+		return static_cast<difference_type>(rhs.m_set.m_index) - static_cast<difference_type>(m_set.m_index);
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
