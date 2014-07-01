@@ -803,6 +803,10 @@ namespace linked_list
 			inline node(core_value_type&& value);
 			//コピーコンストラクタ
 			inline node(const core_value_type& value);
+			//コンストラクタ
+			//※VC++ではデフォルトコンストラクタと競合するので実装しない
+			//template<typename... Tx>
+			//inline node(Tx&&... args);
 			//デフォルトコンストラクタ
 			inline node();
 			//デストラクタ
@@ -882,7 +886,7 @@ using simpleLList = linked_list::simpleContainer<VALUE_TYPE>;
 //シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define INSTANCING_simpleLList(VALUE_TYPE) \
 	template class linked_list::simpleContainer<VALUE_TYPE>; \
-	template class linked_list::container<linked_list::simpleContainer<VALUE_TYPE>::ope>;
+	template class linked_list::container<typename linked_list::simpleContainer<VALUE_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

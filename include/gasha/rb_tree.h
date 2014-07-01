@@ -702,25 +702,25 @@ namespace rb_tree
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		inline const node_type* at(const key_type key) const;
-		inline node_type* at(const key_type key){ return const_cast<node_type*>(const_cast<const container*>(this)->at(key)); }
-		inline const node_type* operator[](const key_type key) const { return at(key); }
-		inline node_type* operator[](const key_type key){ return at(key); }
+		inline const node_type* at(const key_type key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* at(const key_type key){ return findValue(key, FOR_MATCH); }
+		inline const node_type* operator[](const key_type key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* operator[](const key_type key){ return findValue(key, FOR_MATCH); }
 		//※文字列キーはCRC32に変換して扱う
-		inline const node_type* at(const char* key) const { return at(calcCRC32(key)); }
-		inline node_type* at(const char* key){ return at(calcCRC32(key)); }
-		inline const node_type* operator[](const char* key) const { return at(calcCRC32(key)); }
-		inline node_type* operator[](const char* key){ return at(calcCRC32(key)); }
+		inline const node_type* at(const char* key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* at(const char* key){ return findValue(key, FOR_MATCH); }
+		inline const node_type* operator[](const char* key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* operator[](const char* key){ return findValue(key, FOR_MATCH); }
 		//※std::stringの場合も同様
-		inline const node_type* at(const std::string& key) const { return at(calcCRC32(key.c_str())); }
-		inline node_type* at(const std::string& key){ return at(calcCRC32(key.c_str())); }
-		inline const node_type* operator[](const std::string& key) const { return at(calcCRC32(key.c_str())); }
-		inline node_type* operator[](const std::string& key){ return at(calcCRC32(key.c_str())); }
+		inline const node_type* at(const std::string& key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* at(const std::string& key){ return findValue(key, FOR_MATCH); }
+		inline const node_type* operator[](const std::string& key) const { return findValue(key, FOR_MATCH); }
+		inline node_type* operator[](const std::string& key){ return findValue(key, FOR_MATCH); }
 		//※ノード型からキーを取得して探索することにも対応
-		inline const node_type* at(const node_type& node) const { return at(ope_type::getKey(node)); }
-		inline node_type* at(const node_type& node){ return at(ope_type::getKey(node)); }
-		inline const node_type* operator[](const node_type& node) const { return at(ope_type::getKey(node)); }
-		inline node_type* operator[](const node_type& node){ return at(ope_type::getKey(node)); }
+		inline const node_type* at(const node_type& node) const { return findValue(node, FOR_MATCH); }
+		inline node_type* at(const node_type& node){ return findValue(node, FOR_MATCH); }
+		inline const node_type* operator[](const node_type& node) const { return findValue(node, FOR_MATCH); }
+		inline node_type* operator[](const node_type& node){ return findValue(node, FOR_MATCH); }
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//ロックオブジェクト
@@ -806,12 +806,28 @@ namespace rb_tree
 		//探索系メソッド
 		//※lower_bound(), upper_bound()には非対応
 		//※代わりに、find_nearestに対応
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
+	private:
+		//キーを探索（共通）
+		//※キーが一致する範囲の先頭の値を返す
+		const node_type* _findValue(const key_type key, const match_type_t type) const;
+	public:
+		//キーを探索
+		//※キーが一致する範囲の先頭の値を返す
+		inline const node_type* findValue(const key_type key, const match_type_t type = FOR_MATCH) const;
+		inline const node_type* findValue(const char* key, const match_type_t type = FOR_MATCH) const;
+		inline const node_type* findValue(const std::string& key, const match_type_t type = FOR_MATCH) const;
+		inline const node_type* findValue(const node_type& value, const match_type_t type = FOR_MATCH) const;
+		inline node_type* findValue(const key_type key, const match_type_t type = FOR_MATCH);
+		inline node_type* findValue(const char* key, const match_type_t type = FOR_MATCH);
+		inline node_type* findValue(const std::string& key, const match_type_t type = FOR_MATCH);
+		inline node_type* findValue(const node_type& value, const match_type_t type = FOR_MATCH);
 	private:
 		//キーを探索（共通）
 		//※キーが一致する範囲の先頭のイテレータを返す
-		inline const iterator& _find(const iterator& ite, const key_type key, const match_type_t type) const;
+		void _find(iterator& ite, const key_type key, const match_type_t type) const;
 	public:
 		//キーを探索
 		//※キーが一致する範囲の先頭のイテレータを返す
@@ -832,7 +848,7 @@ namespace rb_tree
 	private:
 		//キーが一致する範囲を返す
 		//※キーが一致する範囲の末尾（の次）のイテレータを返す
-		const iterator& _equal_range(const iterator& ite, const key_type key) const;
+		void _equal_range(iterator& ite, const key_type key) const;
 	public:
 		//キーが一致する範囲を返す
 		//※キーが一致する範囲の末尾（の次）のイテレータを返す
@@ -843,7 +859,7 @@ namespace rb_tree
 		inline iterator equal_range(const key_type key);
 		inline iterator equal_range(const char* key);
 		inline iterator equal_range(const std::string& key);
-		inline iterator equal_range(const node_type&node);
+		inline iterator equal_range(const node_type& node);
 	public:
 		//ムーブコンストラクタ
 		container(container&& con);
@@ -862,7 +878,7 @@ namespace rb_tree
 	//シンプル赤黒木コンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
 	class simpleContainer
 	{
 	public:
@@ -884,7 +900,7 @@ namespace rb_tree
 			inline operator core_value_type&(){ return m_value; }
 			inline operator const core_value_type*() const { return &m_value; }
 			inline operator core_value_type*(){ return &m_value; }
-			inline operator core_key_type() const { return m_key; }
+			//inline operator core_key_type() const { return m_key; }
 			//アクセッサ
 			inline const core_value_type& value() const { return m_value; }
 			inline core_value_type& value(){ return m_value; }
@@ -905,8 +921,6 @@ namespace rb_tree
 			inline bool operator<=(const core_key_type rhs) const { return m_key <= rhs; }
 			inline bool operator>=(const core_key_type rhs) const { return m_key >= rhs; }
 			//比較オペレータ（自身の型との比較）
-			//【注意】明示的なインスタンス化の際には、VALUE_TYPE に対して下記6つの比較演算子を全て実装しておく必要がある点に注意。
-			//※gasha/type_traits.h の operatorCRTP クラスを使用すると少しだけ簡単に定義可能。
 			inline bool operator==(const node& rhs) const { return m_key == rhs.m_key; }
 			inline bool operator!=(const node& rhs) const { return m_key != rhs.m_key; }
 			inline bool operator<(const node& rhs) const { return m_key < rhs.m_key; }//container::sort(), container::stable_sort(), std::sort(), std::stable_sort() に必要
@@ -923,24 +937,47 @@ namespace rb_tree
 
 			//明示的なコンストラクタ呼び出し
 			template<typename... Tx>
-			inline void constructor(Tx&&... args);
+			inline void constructor(const core_key_type key, Tx&&... args);
+			template<typename... Tx>
+			inline void constructor(const char* key, Tx&&... args);
+			template<typename... Tx>
+			inline void constructor(const std::string& key, Tx&&... args);
 			//明示的なデストラクタ呼び出し
 			inline void destructor();
 			
 			//キーと値を更新
-			inline void emplace(core_key_type key, core_value_type&& value);
+			inline void emplace(const core_key_type key, core_value_type&& value);
+			inline void emplace(const char* key, core_value_type&& value);
+			inline void emplace(const std::string&key, core_value_type&& value);
 			inline void emplace(const core_key_type key, const core_value_type& value);
+			inline void emplace(const char* key, const core_value_type& value);
+			inline void emplace(const std::string& key, const core_value_type& value);
 			template<typename... Tx>
 			inline void emplace(const core_key_type key, Tx&&... args);
+			template<typename... Tx>
+			inline void emplace(const char* key, Tx&&... args);
+			template<typename... Tx>
+			inline void emplace(const std::string& key, Tx&&... args);
 
 			//ムーブオペレータ
 			inline node& operator=(core_value_type&& value);
 			//コピーオペレータ
 			inline node& operator=(const core_value_type& value);
 			//ムーブコンストラクタ
-			inline node(core_key_type key, core_value_type&& value);
+			inline node(const core_key_type key, core_value_type&& value);
+			inline node(const char* key, core_value_type&& value);
+			inline node(const std::string& key, core_value_type&& value);
 			//コピーコンストラクタ
 			inline node(const core_key_type key, const core_value_type& value);
+			inline node(const char* key, const core_value_type& value);
+			inline node(const std::string& key, const core_value_type& value);
+			//コンストラクタ
+			template<typename... Tx>
+			inline node(const core_key_type key, Tx&&... args);
+			template<typename... Tx>
+			inline node(const char* key, Tx&&... args);
+			template<typename... Tx>
+			inline node(const std::string& key, Tx&&... args);
 			//デフォルトコンストラクタ
 			inline node();
 			//デストラクタ
@@ -1008,7 +1045,7 @@ namespace rb_tree
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
 //赤黒木操作用テンプレート構造体
-template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, std::size_t _STACK_DEPTH_MAX = 40>
+template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, std::size_t _STACK_DEPTH_MAX = 40>
 using rbTree_baseOpe = rb_tree::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _STACK_DEPTH_MAX>;
 
 //赤黒木コンテナ
@@ -1016,7 +1053,7 @@ template<class OPE_TYPE>
 using rbTree = rb_tree::container<OPE_TYPE>;
 
 //シンプル赤黒木コンテナ
-template<typename VALUE_TYPE, typename KEY_TYPE>
+template<typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
 using simpleRBTree = rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>;
 
 //赤黒木コンテナの明示的なインスタンス化用マクロ
@@ -1025,10 +1062,14 @@ using simpleRBTree = rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>;
 	template class rb_tree::container<OPE_TYPE>;
 
 //シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleRBTree(VALUE_TYPE, KEY_TYPE) \
+#define INSTANCING_simpleRBTree(VALUE_TYPE) \
+	template class rb_tree::simpleContainer<VALUE_TYPE>; \
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
+#define INSTANCING_simpleRBTree_withKey(VALUE_TYPE, KEY_TYPE) \
 	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
-	template class rb_tree::stack_t<rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
-	template class rb_tree::container<rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

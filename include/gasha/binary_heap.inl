@@ -125,15 +125,19 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index) const
 	{
-		iterator ite(*m_con, false);
-		ite.update(index);
+		//iterator ite(*m_con, false);
+		//ite.update(index);
+		iterator ite(*this);
+		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::iterator::operator[](const int index)
 	{
-		iterator ite(*m_con, false);
-		ite.update(index);
+		//iterator ite(*m_con, false);
+		//ite.update(index);
+		iterator ite(*this);
+		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
@@ -142,7 +146,7 @@ namespace binary_heap
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator==(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
 	{
 		return !isEnabled() || !rhs.isEnabled() ? false :
-			m_index == rhs.index;
+			m_index == rhs.m_index;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::operator!=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
@@ -243,7 +247,7 @@ namespace binary_heap
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
 			return 0;
-		return m_index - rhs.m_index;
+		return static_cast<difference_type>(m_index) - static_cast<difference_type>(rhs.m_index);
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
@@ -260,7 +264,7 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::iterator::isEnd() const//終端か？
 	{
-		return m_index == m_con->m_size;
+		return m_index == m_con->m_used;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::iterator::getIndex() const//インデックス
@@ -287,15 +291,19 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index) const
 	{
-		reverse_iterator ite(*m_con, false);
-		ite.update(m_con->m_used - index);
+		//reverse_iterator ite(*m_con, false);
+		//ite.update(m_con->m_used - index);
+		reverse_iterator ite(*this);
+		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator[](const int index)
 	{
-		reverse_iterator ite(*m_con, false);
-		ite.update(m_con->m_used - index);
+		//reverse_iterator ite(*m_con, false);
+		//ite.update(m_con->m_used - index);
+		reverse_iterator ite(*this);
+		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
@@ -397,7 +405,7 @@ namespace binary_heap
 	{
 		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
 			return 0;
-		return rhs.m_index - m_index;
+		return static_cast<difference_type>(rhs.m_index) - static_cast<difference_type>(m_index);
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
@@ -577,14 +585,14 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::upHeap(typename container<OPE_TYPE, _TABLE_SIZE>::node_type* obj)
 	{
-		return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
+		return binary_heap::upHeap<ope_type>(_refTop(), m_used, obj, typename ope_type::less());
 	}
 
 	//ノードを下方に移動
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::downHeap(typename container<OPE_TYPE, _TABLE_SIZE>::node_type* obj)
 	{
-		return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, ope_type::less());
+		return binary_heap::downHeap<ope_type>(_refTop(), m_used, obj, typename ope_type::less());
 	}
 
 	//デフォルトコンストラクタ

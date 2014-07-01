@@ -129,7 +129,7 @@ namespace hash_table
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE>
+	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
 	struct baseOpe
 	{
 		//型
@@ -577,25 +577,25 @@ namespace hash_table
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）または
 		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		value_type* at(const key_type key){ return findValue(key); }
-		const value_type* at(const key_type key) const { return findValue(key); }
-		value_type* operator[](const key_type key){ return findValue(key); }
-		const value_type* operator[](const key_type key) const { return findValue(key); }
+		inline value_type* at(const key_type key){ return findValue(key); }
+		inline const value_type* at(const key_type key) const { return findValue(key); }
+		inline value_type* operator[](const key_type key){ return findValue(key); }
+		inline const value_type* operator[](const key_type key) const { return findValue(key); }
 		//※文字列キーはCRC32に変換して扱う
-		value_type* at(const char* key){ return findValue(key); }
-		const value_type* at(const char* key) const { return findValue(key); }
-		value_type* operator[](const char* key){ return findValue(key); }
-		const value_type* operator[](const char* key) const { return findValue(key); }
+		inline value_type* at(const char* key){ return findValue(key); }
+		inline const value_type* at(const char* key) const { return findValue(key); }
+		inline value_type* operator[](const char* key){ return findValue(key); }
+		inline const value_type* operator[](const char* key) const { return findValue(key); }
 		//※std::stringの場合も同様
-		value_type* at(const std::string& key){ return findValue(key); }
-		const value_type* at(const std::string& key) const { return findValue(key); }
-		value_type* operator[](const std::string& key){ return findValue(key); }
-		const value_type* operator[](const std::string& key) const { return findValue(key); }
+		inline value_type* at(const std::string& key){ return findValue(key); }
+		inline const value_type* at(const std::string& key) const { return findValue(key); }
+		inline value_type* operator[](const std::string& key){ return findValue(key); }
+		inline const value_type* operator[](const std::string& key) const { return findValue(key); }
 		//※ノード型からキーを取得して探索することにも対応
-		value_type* at(const value_type& value){ return findValue(value); }
-		const value_type* at(const value_type& value) const { return findValue(value); }
-		value_type* operator[](const value_type& value){ return findValue(value); }
-		const value_type* operator[](const value_type& value) const { return findValue(value); }
+		inline value_type* at(const value_type& value){ return findValue(value); }
+		inline const value_type* at(const value_type& value) const { return findValue(value); }
+		inline value_type* operator[](const value_type& value){ return findValue(value); }
+		inline const value_type* operator[](const value_type& value) const { return findValue(value); }
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
@@ -671,10 +671,13 @@ namespace hash_table
 		inline index_type calcIndexStep(const key_type key) const;//キーからインデックスの歩幅（第二ハッシュ）を計算
 		inline index_type calcIndex(const key_type key) const;//キーからインデックス（第一ハッシュ）を計算
 		inline index_type calcNextIndex(const key_type key, const index_type index) const;//次のインデックスを計算（指定のインデックスに歩幅を加算）
+	
+		//探索系メソッド
+		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
+		//　一連の処理ブロックの前後で共有ロック（リードロック）または
+		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 	public:
-		//メソッド：インデックスを取得
-		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロック全体の前後で共有ロック（リードロック）の取得と解放を行う必要がある
+		//インデックスを取得
 		index_type getFirstIndex() const;
 		index_type getLastIndex() const;
 		index_type getNextIndex(const index_type index) const;
@@ -692,9 +695,6 @@ namespace hash_table
 		const value_type* _findValue(const key_type key) const;
 	public:
 		//キーで検索して値を取得
-		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）または
-		//　排他ロック（ライトロック）の取得と解放を行う必要がある
 		inline const value_type* findValue(const key_type key) const;
 		inline const value_type* findValue(const char* key) const;
 		inline const value_type* findValue(const std::string& key) const;
@@ -703,19 +703,20 @@ namespace hash_table
 		inline value_type* findValue(const char* key);
 		inline value_type* findValue(const std::string& key);
 		inline value_type* findValue(const value_type& value);
+	private:
+		//キーで検索してイテレータを取得（本体）
+		void _find(iterator& ite, const key_type key) const;
 	public:
 		//キーで検索してイテレータを取得
-		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
-		//　一連の処理ブロックの前後で共有ロック（リードロック）または
-		//　排他ロック（ライトロック）の取得と解放を行う必要がある
-		const iterator find(const key_type key) const;
+		inline const iterator find(const key_type key) const;
 		inline const iterator find(const char* key) const;
 		inline const iterator find(const std::string& key) const;
 		inline const iterator find(const value_type& value) const;
 		inline iterator find(const key_type key);
 		inline iterator find(const char* key);
 		inline iterator find(const std::string& key);
-		inline iterator find(const value_type value);
+		inline iterator find(const value_type& value);
+	
 	private:
 		//キー割り当て（本体）
 		//※割り当てた配列要素（データテーブル）のポインタを返す
@@ -816,7 +817,7 @@ namespace hash_table
 	//シンプル開番地法ハッシュテーブルコンテナ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	template<typename VALUE_TYPE, typename KEY_TYPE, std::size_t _TABLE_SIZE>
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE, typename KEY_TYPE = std::uint32_t>
 	class simpleContainer
 	{
 	public:
@@ -855,24 +856,27 @@ namespace hash_table
 
 //開番地法ハッシュテーブル操作用テンプレート構造体
 template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
-using hashTbl_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE>;
+using hTable_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE>;
 
 //開番地法ハッシュテーブルコンテナ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using hashTbl = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+using hTable = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル開番地法ハッシュテーブルコンテナ
-template<typename VALUE_TYPE, typename KEY_TYPE, std::size_t _TABLE_SIZE>
-using simpleHashTbl = hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>;
+template<typename VALUE_TYPE, std::size_t _TABLE_SIZE, typename KEY_TYPE = std::uint32_t>
+using simpleHTable = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>;
 
 //開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_hashTbl(OPE_TYPE, _TABLE_SIZE) \
+#define INSTANCING_hTable(OPE_TYPE, _TABLE_SIZE) \
 	template class hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleHashTbl(VALUE_TYPE, KEY_TYPE, _TABLE_SIZE) \
-	template class hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>; \
-	template class hash_table::container<hash_table::simpleContainer<VALUE_TYPE, KEY_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+#define INSTANCING_simpleHTable(VALUE_TYPE, _TABLE_SIZE) \
+	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
+	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+#define INSTANCING_simpleHTable_withKey(VALUE_TYPE, _TABLE_SIZE, KEY_TYPE) \
+	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
+	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

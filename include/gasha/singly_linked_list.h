@@ -892,6 +892,10 @@ namespace singly_linked_list
 			inline node(core_value_type&& value);
 			//コピーコンストラクタ
 			inline node(const core_value_type& value);
+			//コンストラクタ
+			//※VC++ではデフォルトコンストラクタと競合するので実装しない
+			//template<typename... Tx>
+			//inline node(Tx&&... args);
 			//デフォルトコンストラクタ
 			inline node();
 			//デストラクタ
@@ -966,7 +970,7 @@ using simpleSLList = singly_linked_list::simpleContainer<VALUE_TYPE>;
 //シンプル片方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define INSTANCING_simpleSLList(VALUE_TYPE) \
 	template class singly_linked_list::simpleContainer<VALUE_TYPE>; \
-	template class singly_linked_list::container<singly_linked_list::simpleContainer<VALUE_TYPE>::ope>;
+	template class singly_linked_list::container<typename singly_linked_list::simpleContainer<VALUE_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

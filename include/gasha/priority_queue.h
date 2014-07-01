@@ -178,7 +178,7 @@ namespace priority_queue
 			struct less{
 				inline bool operator()(const node_type& lhs, const node_type& rhs) const
 				{
-					return adapter_ope_type::less()(lhs, rhs);
+					return typename adapter_ope_type::less()(lhs, rhs);
 				}
 			};
 			
@@ -273,7 +273,7 @@ namespace priority_queue
 			~uniqueOperation();
 		private:
 			//フィールド
-			container_adapter_type& m_containerAdapter;//コンテナアダプタ
+			container_adapter_type& m_container;//コンテナアダプタ
 			status_t m_status;//ステータス
 		};
 	public:
@@ -301,7 +301,7 @@ namespace priority_queue
 		inline uniqueOperation operationunique(){ uniqueOperation operation(*this); return operation; }
 	public:
 		//メソッド：基本情報系
-		inline size_type max_size() const { return m_container.max_aize(); }//最大要素数を取得
+		inline size_type max_size() const { return m_container.max_size(); }//最大要素数を取得
 		inline size_type capacity() const { return m_container.capacity(); }//最大要素数を取得
 		inline size_type size() const { return m_container.size(); }//使用中の要素数を取得
 		inline size_type remain() const { return m_container.remain(); }//残りの要素数を取得
@@ -400,6 +400,7 @@ namespace priority_queue
 		//デキュー取り消し
 		//※dequeueBeginで取得したロックを解放する
 		bool dequeueCancel();
+	public:
 		//先頭（根）キューを参照
 		//※デキューしない
 		const node_type* top() const;
@@ -438,28 +439,83 @@ namespace priority_queue
 	//シンプル優先度付きキューコンテナアダプタ
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
-	//プロトタイプ：
-	//  int& REF_PRIORITY_FUNC(const value_type&)
-	//  int& REF_SEQ_NO_FUNC(const std::uint32&)
-	template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>
-	struct simpleContainerAdapter
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	class simpleContainer
 	{
-		//優先度付きキュー操作用構造体
-		struct ope : public baseOpe<ope, NODE_TYPE>
+	public:
+		typedef VALUE_TYPE core_value_type;//値型
+		typedef std::int32_t core_priority_type;//優先度型
+		typedef std::uint32_t core_seq_no_type;//シーケンス番号型
+
+		//データノード型
+		//※元の値型に対するプロキシーとして振る舞う
+		struct node
 		{
-			typedef typename baseOpe<ope, NODE_TYPE>::node_type node_type;
-			typedef typename baseOpe<ope, NODE_TYPE>::priority_type priority_type;
-			typedef typename baseOpe<ope, NODE_TYPE>::seq_no_type seq_no_type;
+			core_value_type m_value;//値
+			core_priority_type m_priority;//優先度
+			core_seq_no_type m_seqNo;//シーケンス番号
+
+			//キャストオペレータ
+			inline operator const core_value_type&() const { return m_value; }
+			inline operator core_value_type&(){ return m_value; }
+			inline operator const core_value_type*() const { return &m_value; }
+			inline operator core_value_type*(){ return &m_value; }
+			//inline operator core_priority_type() const { return m_priority; }
+			//inline operator core_seq_no_type() const { return m_seqNo; }
+			//アクセッサ
+			inline const core_value_type& value() const { return m_value; }
+			inline core_value_type& value(){ return m_value; }
+			inline const core_value_type* pointer() const { return &m_value; }
+			inline core_value_type* pointer(){ return &m_value; }
+			inline const core_priority_type& priority() const { return m_priority; }
+			inline const core_seq_no_type& seqNo() const { return m_seqNo; }
+			//基本オペレータ
+			inline const core_value_type& operator*() const { return m_value; }
+			inline core_value_type& operator*(){ return m_value; }
+			inline const core_value_type* operator->() const { return &m_value; }
+			inline core_value_type* operator->(){ return &m_value; }
+		#if 1//※とくに必要なインターフェースではないが、あっても問題ない
+			//比較オペレータ（自身の型との比較）
+			inline bool operator==(const node& rhs) const { return m_priority == rhs.m_priority && m_seqNo == m_seqNo; }
+			inline bool operator!=(const node& rhs) const { return m_priority != rhs.m_priority || m_seqNo != m_seqNo; }
+			inline bool operator<(const node& rhs) const { return m_priority < rhs.m_priority || (m_priority == rhs.m_priority && m_seqNo < m_seqNo); }
+			inline bool operator>(const node& rhs) const { return m_priority > rhs.m_priority || (m_priority == rhs.m_priority && m_seqNo > m_seqNo); }
+			inline bool operator<=(const node& rhs) const { return m_priority <= rhs.m_priority || (m_priority == rhs.m_priority && m_seqNo <= m_seqNo); }
+			inline bool operator>=(const node& rhs) const { return m_priority >= rhs.m_priority || (m_priority == rhs.m_priority && m_seqNo >= m_seqNo); }
+		#endif
+			//ムーブオペレータ
+			inline node& operator=(core_value_type&& value);
+			//コピーオペレータ
+			inline node& operator=(const core_value_type& value);
+			//ムーブコンストラクタ
+			inline node(const core_priority_type priority, core_value_type&& value);
+			//コピーコンストラクタ
+			inline node(const core_priority_type priority, const core_value_type& value);
+			//コンストラクタ
+			template<typename... Tx>
+			inline node(const core_priority_type priority, Tx&&... args);
+			//デフォルトコンストラクタ
+			inline node();
+			//デストラクタ
+			inline ~node();
+		};
+
+		//優先度付きキュー操作用構造体
+		struct ope : public baseOpe<ope, node, core_priority_type, core_seq_no_type>
+		{
+			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::node_type node_type;
+			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::priority_type priority_type;
+			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::seq_no_type seq_no_type;
 			
 			//優先度を取得
-			inline static priority_type getPriority(const node_type& node){ priority_type& ref_priority = REF_PRIORTIY_FUNC(const_cast<node_type*>(node)); return ref_priority; }
+			inline static priority_type getPriority(const node_type& node){ return node.m_priority; }
 			//優先度を更新
-			inline static void setPriority(node_type& node, const priority_type priority){ priority_type& ref_priority = REF_PRIORTIY_FUNC(const_cast<node_type*>(node)); ref_priority = priority; }
+			inline static void setPriority(node_type& node, const priority_type priority){ node.m_priority = priority; }
 			
 			//シーケンス番号を取得
-			inline static seq_no_type getSeqNo(const node_type& node){ seq_no_type& ref_seq_no = REF_SEQ_NO_FUNC(const_cast<node_type*>(node)); return ref_seq_no; }
+			inline static seq_no_type getSeqNo(const node_type& node){ return node.m_seqNo; }
 			//シーケンス番号を更新
-			inline static void setSeqNo(node_type& node, const seq_no_type seq_no){ seq_no_type& ref_seq_no = REF_SEQ_NO_FUNC(const_cast<node_type*>(node)); ref_seq_no = seq_no; }
+			inline static void setSeqNo(node_type& node, const seq_no_type seq_no){ node.m_seqNo = seq_no; }
 		};
 
 		//基本型定義
@@ -493,7 +549,7 @@ namespace priority_queue
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
 //優先度付きキュー操作用テンプレート構造体
-template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE, typename SEQ_NO_TYPE>
+template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
 using pQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
 
 //優先度付きキューコンテナアダプタ
@@ -501,8 +557,19 @@ template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 using pQueue = priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル優先度付きキューコンテナアダプタ
-template<typename NODE_TYPE, std::size_t _TABLE_SIZE, class REF_PRIORTIY_FUNC, class REF_SEQ_NO_FUNC>
-using simplePQueue = priority_queue::simpleContainerAdapter<NODE_TYPE, _TABLE_SIZE, REF_PRIORTIY_FUNC, REF_SEQ_NO_FUNC>;
+template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
+using simplePQueue = priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
+
+//優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
+#define INSTANCING_pQueue_withBHeap(OPE_TYPE, _TABLE_SIZE) \
+	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>; \
+	template class priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプル優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
+#define INSTANCING_simplePQueue(NODE_TYPE, _TABLE_SIZE) \
+	template class priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
+	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>; \
+	template class priority_queue::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

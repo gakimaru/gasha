@@ -48,16 +48,18 @@ namespace dynamic_array
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index) const
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
 		//ite.update(index);
+		iterator ite(*this);
 		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int index)
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
 		//ite.update(index);
+		iterator ite(*this);
 		ite.addIndexAndUpdate(index);
 		return ite;
 	}
@@ -197,16 +199,18 @@ namespace dynamic_array
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index) const
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
 		//ite.update(m_con->m_size - index);
+		reverse_iterator ite(*this);
 		ite.addIndexAndUpdate(index);
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int index)
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
 		//ite.update(m_con->m_size - index);
+		reverse_iterator ite(*this);
 		ite.addIndexAndUpdate(index);
 		return ite;
 	}

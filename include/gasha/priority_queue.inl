@@ -36,7 +36,7 @@ namespace priority_queue
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
-		node_type* node = m_containerAdapter.enqueueBegin(priority, std::forward<Tx>(args)...);//エンキュー開始
+		node_type* node = m_container.enqueueBegin(priority, std::forward<Tx>(args)...);//エンキュー開始
 		if (node)
 			m_status = status_t::PUSH_BEGINNING;//ステータス変更
 		return node;
@@ -45,7 +45,7 @@ namespace priority_queue
 	//ムーブコンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	inline container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::uniqueOperation(typename container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation&& obj) :
-		m_containerAdapter(obj.m_containerAdapter),
+		m_container(obj.m_container),
 		m_status(obj.m_status)
 	{
 		obj.m_status = status_t::IDLE;
@@ -54,7 +54,7 @@ namespace priority_queue
 	//コンストラクタ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE>
 	inline container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::uniqueOperation(typename container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::uniqueOperation::container_adapter_type& container_adapter) :
-		m_containerAdapter(container_adapter),
+		m_container(container_adapter),
 		m_status(status_t::IDLE)
 	{}
 
@@ -175,6 +175,63 @@ namespace priority_queue
 	{
 		ope_type::resetSeqNo(m_seqNo);
 	}
+
+	//----------------------------------------
+	//シンプル優先度付きキューコンテナ
+
+	//ムーブオペレータ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node& simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::operator=(typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_value_type&& value)
+	{
+		m_value = std::move(value);
+		return *this;
+	}
+
+	//コピーオペレータ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node& simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::operator=(const typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_value_type& value)
+	{
+		m_value = value;
+		return *this;
+	}
+
+	//ムーブコンストラクタ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::node(const typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_priority_type priority, typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_priority(priority),
+		m_seqNo(0)
+	{}
+
+	//コピーコンストラクタ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::node(const typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_priority_type priority, const typename simpleContainer<VALUE_TYPE, _TABLE_SIZE>::core_value_type& value) :
+		m_value(value),
+		m_priority(priority),
+		m_seqNo(0)
+	{}
+
+	//コンストラクタ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	template<typename... Tx>
+	inline simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::node(const core_priority_type priority, Tx&&... args) :
+		m_value(std::forward<Tx>(args)...),
+		m_priority(priority),
+		m_seqNo(0)
+	{}
+
+	//デフォルトコンストラクタ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::node() :
+		m_value(),
+		m_priority(0),
+		m_seqNo(0)
+	{}
+
+	//デストラクタ
+	template<typename VALUE_TYPE, std::size_t _TABLE_SIZE>
+	inline simpleContainer<VALUE_TYPE, _TABLE_SIZE>::node::~node()
+	{}
 
 }//namespace priority_queue
 

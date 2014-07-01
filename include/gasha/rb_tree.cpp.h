@@ -638,15 +638,29 @@ namespace rb_tree
 		m_root = nullptr;
 		return root;
 	}
-		
+
+	//キーを探索（共通）
+	template<class OPE_TYPE>
+	const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::_findValue(const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
+	{
+		stack_type stack;
+		return searchNode<ope_type>(m_root, key, stack, type);
+	}
+
+	//キーを探索（共通）
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_find(typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
+	{
+		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
+	}
+
 	//キーが一致する範囲を返す
 	template<class OPE_TYPE>
-	const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::_equal_range(const typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key) const
+	void container<OPE_TYPE>::_equal_range(typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key) const
 	{
 		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, FOR_MATCH));
 		while (ite.m_value && ope_type::getKey(*ite) == key)
 			++ite;
-		return ite;
 	}
 	
 	//ムーブコンストラクタ

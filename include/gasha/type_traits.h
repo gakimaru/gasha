@@ -39,6 +39,7 @@ template<typename T> inline std::size_t extent1of(const T& data){ return 0; }
 template<typename T> inline std::size_t extent2of(const T& data){ return 0; }
 template<typename T> inline std::size_t extent3of(const T& data){ return 0; }
 template<typename T> inline std::size_t extent4of(const T& data){ return 0; }
+template<typename T> inline std::size_t extent5of(const T& data){ return 0; }
 
 //一次配列用
 template<typename T, std::size_t N1> inline std::size_t rankof(const T(&data)[N1]){ return 1; }
@@ -48,6 +49,7 @@ template<typename T, std::size_t N1> inline std::size_t extent1of(const T(&data)
 //template<typename T, std::size_t N1> inline std::size_t extent2of(const T(&data)[N1]){ return 0; }//※不要
 //template<typename T, std::size_t N1> inline std::size_t extent3of(const T(&data)[N1]){ return 0; }//※不要
 //template<typename T, std::size_t N1> inline std::size_t extent4of(const T(&data)[N1]){ return 0; }//※不要
+//template<typename T, std::size_t N1> inline std::size_t extent5of(const T(&data)[N1]){ return 0; }//※不要
 
 //二次配列用
 template<typename T, std::size_t N1, std::size_t N2> inline std::size_t rankof(const T(&data)[N1][N2]){ return 2; }
@@ -57,6 +59,7 @@ template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extentof
 template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent2of(const T(&data)[N1][N2]){ return N2; }
 //template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent3of(const T(&data)[N1][N2]){ return 0; }//※不要
 //template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent4of(const T(&data)[N1][N2]){ return 0; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent5of(const T(&data)[N1][N2]){ return 0; }//※不要
 
 //三次配列用
 template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t rankof(const T(&data)[N1][N2][N3]){ return 3; }
@@ -66,6 +69,7 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std:
 //template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent2of(const T(&data)[N1][N2][N3]){ return N2; }//※不要
 template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent3of(const T(&data)[N1][N2][N3]){ return N3; }
 //template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent4of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent5of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
 
 //四次配列用
 template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t rankof(const T(&data)[N1][N2][N3][N4]){ return 4; }
@@ -75,6 +79,17 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t
 //template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4]){ return N2; }//※不要
 //template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4]){ return N3; }//※不要
 template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4]){ return N4; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4]){ return 0; }
+
+//五次配列用
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t rankof(const T(&data)[N1][N2][N3][N4][N5]){ return 5; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3][N4][N5]){ return sizeof(T); }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extentof(const T(&data)[N1][N2][N3][N4][N5]){ return N1 * N2 * N3 * N4 * N5; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent1of(const T(&data)[N1][N2][N3][N4][N5]){ return N1; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4][N5]){ return N2; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4][N5]){ return N3; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4][N5]){ return N4; }//※不要
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4][N5]){ return N5; }
 
 //--------------------------------------------------------------------------------
 //ポインター型情報

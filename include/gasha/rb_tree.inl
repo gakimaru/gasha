@@ -1887,14 +1887,6 @@ namespace rb_tree
 
 	//----------------------------------------
 	//コンテナ本体のメソッド
-
-	//アクセッサ
-	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::at(const typename container<OPE_TYPE>::key_type key) const
-	{
-		stack_type stack;
-		return searchNode<ope_type>(m_root, key, stack, FOR_MATCH);
-	}
 	
 	//ノード数を取得
 	template<class OPE_TYPE>
@@ -1972,65 +1964,106 @@ namespace rb_tree
 		return removeNode<ope_type>(*node, m_root);
 	}
 
-	//キーを探索（共通）
-	//※キーが一致する範囲の先頭のイテレータを返す
+	//キーを探索
 	template<class OPE_TYPE>
-	inline const typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::_find(const typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
+	inline const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
 	{
-		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
-		return ite;
+		return _findValue(key, type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const char* key, const match_type_t type) const
+	{
+		return _findValue(GASHA_ calcCRC32(key), type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const std::string& key, const match_type_t type) const
+	{
+		return _findValue(GASHA_ calcCRC32(key.c_str()), type);
+	}
+	template<class OPE_TYPE>
+	inline const typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const typename container<OPE_TYPE>::node_type& node, const match_type_t type) const
+	{
+		return _findValue(OPE_TYPE::getKey(node), type);
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const typename container<OPE_TYPE>::key_type key, const match_type_t type)
+	{
+		return const_cast<node_type*>(_findValue(key, type));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const char* key, const match_type_t type)
+	{
+		return const_cast<node_type*>(_findValue(GASHA_ calcCRC32(key), type));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const std::string& key, const match_type_t type)
+	{
+		return const_cast<node_type*>(_findValue(GASHA_ calcCRC32(key.c_str()), type));
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::findValue(const typename container<OPE_TYPE>::node_type& node, const match_type_t type)
+	{
+		return const_cast<node_type*>(_findValue(OPE_TYPE::getKey(node), type));
 	}
 
 	//キーを探索
-	//※キーが一致する範囲の先頭のイテレータを返す
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
 	{
-		const iterator ite(*this, false);
-		return _find(ite, key, type);
+		iterator ite(*this, true);
+		_find(ite, key, type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const char* key, const match_type_t type) const
 	{
-		const iterator ite(*this, false);
-		return _find(ite, calcCRC32(key), type);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key), type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const std::string& key, const match_type_t type) const
 	{
-		const iterator ite(*this, false);
-		return _find(ite, calcCRC32(key.c_str()), type);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key.c_str()), type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type) const
 	{
-		const iterator ite(*this, false);
-		return _find(ite, OPE_TYPE::getKey(node), type);
+		iterator ite(*this, true);
+		_find(ite, OPE_TYPE::getKey(node), type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::key_type key, const match_type_t type)
 	{
-		iterator ite(*this, false);
-		return _find(ite, key, type);
+		iterator ite(*this, true);
+		_find(ite, key, type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const char* key, const match_type_t type)
 	{
-		iterator ite(*this, false);
-		return _find(ite, calcCRC32(key), type);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key), type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const std::string& key, const match_type_t type)
 	{
-		iterator ite(*this, false);
-		return _find(ite, calcCRC32(key.c_str()), type);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key.c_str()), type);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(const typename container<OPE_TYPE>::node_type& node, const match_type_t type)
 	{
-		iterator ite(*this, false);
-		return _find(ite, OPE_TYPE::getKey(node), type);
+		iterator ite(*this, true);
+		_find(ite, OPE_TYPE::getKey(node), type);
+		return ite;
 	}
+	
 	//キーが一致するノードの数を返す
 	template<class OPE_TYPE>
 	inline std::size_t container<OPE_TYPE>::count(const key_type key) const
@@ -2040,12 +2073,12 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	inline std::size_t container<OPE_TYPE>::count(const char* key) const
 	{
-		return countNodes<ope_type>(m_root, calcCRC32(key));
+		return countNodes<ope_type>(m_root, GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE>
 	inline std::size_t container<OPE_TYPE>::count(const std::string& key) const
 	{
-		return countNodes<ope_type>(m_root, calcCRC32(key.c_str()));
+		return countNodes<ope_type>(m_root, GASHA_ calcCRC32(key.c_str()));
 	}
 	template<class OPE_TYPE>
 	inline std::size_t container<OPE_TYPE>::count(const typename container<OPE_TYPE>::node_type& node) const
@@ -2057,50 +2090,58 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::key_type key) const
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, key);
+		iterator ite(*this, true);
+		_equal_range(ite, key);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const char* key) const
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, calcCRC32(key));
+		iterator ite(*this, true);
+		_equal_range(ite, GASHA_ calcCRC32(key));
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const std::string& key) const
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, calcCRC32(key.c_str()));
+		iterator ite(*this, true);
+		_equal_range(ite, GASHA_ calcCRC32(key.c_str()));
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const node_type& node) const
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, ope_type::getKey(node));
+		iterator ite(*this, true);
+		_equal_range(ite, ope_type::getKey(node));
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::key_type key)
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, key);
+		iterator ite(*this, true);
+		_equal_range(ite, key);
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const char* key)
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, calcCRC32(key));
+		iterator ite(*this, true);
+		_equal_range(ite, GASHA_ calcCRC32(key));
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const std::string& key)
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, calcCRC32(key.c_str()));
+		iterator ite(*this, true);
+		_equal_range(ite, GASHA_ calcCRC32(key.c_str()));
+		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::equal_range(const typename container<OPE_TYPE>::node_type&node)
 	{
-		iterator ite(*this, false);
-		return _equal_range(ite, ope_type::getKey(node));
+		iterator ite(*this, true);
+		_equal_range(ite, ope_type::getKey(node));
+		return ite;
 	}
 
 	//デフォルトコンストラクタ
@@ -2110,13 +2151,28 @@ namespace rb_tree
 	{}
 
 	//----------------------------------------
-	//シンプル双方向連結リストコンテナ
+	//シンプル赤黒木コンテナ
 
 	//明示的なコンストラクタ呼び出し
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
-	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(Tx&&... args)
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const core_key_type key, Tx&&... args)
 	{
+		m_key = key;
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const char* key, Tx&&... args)
+	{
+		m_key = GASHA_ calcCRC32(key);
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const std::string& key, Tx&&... args)
+	{
+		m_key = GASHA_ calcCRC32(key.c_str());
 		new(&m_value)core_value_type(std::forward<Tx>(args)...);
 	}
 
@@ -2130,9 +2186,21 @@ namespace rb_tree
 
 	//キーと値を更新
 	template<typename VALUE_TYPE, typename KEY_TYPE>
-	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(core_key_type key, core_value_type&& value)
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const core_key_type key, core_value_type&& value)
 	{
 		m_key = key;
+		m_value = std::move(value);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const char* key, core_value_type&& value)
+	{
+		m_key = GASHA_ calcCRC32(key);
+		m_value = std::move(value);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const std::string& key, core_value_type&& value)
+	{
+		m_key = GASHA_ calcCRC32(key.c_str());
 		m_value = std::move(value);
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
@@ -2142,10 +2210,36 @@ namespace rb_tree
 		m_value = value;
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const char* key, const core_value_type& value)
+	{
+		m_key = GASHA_ calcCRC32(key);
+		m_value = value;
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const std::string& key, const core_value_type& value)
+	{
+		m_key = GASHA_ calcCRC32(key.c_str());
+		m_value = value;
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const core_key_type key, Tx&&... args)
 	{
 		m_key = key;
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const char* key, Tx&&... args)
+	{
+		m_key = GASHA_ calcCRC32(key);
+		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+	}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const std::string& key, Tx&&... args)
+	{
+		m_key = GASHA_ calcCRC32(key.c_str());
 		new(&m_value)core_value_type(std::forward<Tx>(args)...);
 	}
 
@@ -2174,12 +2268,73 @@ namespace rb_tree
 		m_childL(nullptr),
 		m_isBlack(false)
 	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const char* key, typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_key(GASHA_ calcCRC32(key)),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const std::string& key, typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type&& value) :
+		m_value(std::move(value)),
+		m_key(GASHA_ calcCRC32(key.c_str())),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
 
 	//コピーコンストラクタ
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_key_type key, const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type& value) :
 		m_value(value),
 		m_key(key),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const char* key, const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type& value) :
+		m_value(value),
+		m_key(GASHA_ calcCRC32(key)),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const std::string& key, const typename simpleContainer<VALUE_TYPE, KEY_TYPE>::core_value_type& value) :
+		m_value(value),
+		m_key(GASHA_ calcCRC32(key.c_str())),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+
+	//コンストラクタ呼
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const core_key_type key, Tx&&... args) :
+		m_value(std::forward<Tx>(args)...),
+		m_key(key),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const char* key, Tx&&... args) :
+		m_value(std::forward<Tx>(args)...),
+		m_key(GASHA_ calcCRC32(key)),
+		m_childS(nullptr),
+		m_childL(nullptr),
+		m_isBlack(false)
+	{}
+	template<typename VALUE_TYPE, typename KEY_TYPE>
+	template<typename... Tx>
+	inline simpleContainer<VALUE_TYPE, KEY_TYPE>::node::node(const std::string& key, Tx&&... args) :
+		m_value(std::forward<Tx>(args)...),
+		m_key(GASHA_ calcCRC32(key.c_str())),
 		m_childS(nullptr),
 		m_childL(nullptr),
 		m_isBlack(false)

@@ -818,7 +818,7 @@ using simpleRBuff = ring_buffer::simpleContainer<VALUE_TYPE>;
 //シンプルリングバッファコンテナの明示的なインスタンス化用マクロ
 #define INSTANCING_simpleRBuff(VALUE_TYPE) \
 	template class ring_buffer::simpleContainer<VALUE_TYPE>; \
-	template class ring_buffer::container<ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
+	template class ring_buffer::container<typename ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

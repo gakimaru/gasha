@@ -844,6 +844,16 @@ namespace linked_list
 		m_prev(nullptr)
 	{}
 	
+	//コンストラクタ呼び出し
+	//※VC++ではデフォルトコンストラクタと競合するので実装しない
+	//template<typename VALUE_TYPE>
+	//template<typename... Tx>
+	//inline simpleContainer<VALUE_TYPE>::node::node(Tx&&... args) :
+	//	m_value(std::forward<Tx>(args)...),
+	//	m_next(nullptr),
+	//	m_prev(nullptr)
+	//{}
+
 	//デフォルトコンストラクタ
 	template<typename VALUE_TYPE>
 	inline simpleContainer<VALUE_TYPE>::node::node() :

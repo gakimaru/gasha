@@ -482,12 +482,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const char* key) const
 	{
-		return _findIndexCommon(calcCRC32(key));
+		return _findIndexCommon(GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const std::string& key) const
 	{
-		return _findIndexCommon(calcCRC32(key.c_str()));
+		return _findIndexCommon(GASHA_ calcCRC32(key.c_str()));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
@@ -504,12 +504,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const char* key) const
 	{
-		return _findValue(calcCRC32(key));
+		return _findValue(GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const std::string& key) const
 	{
-		return _findValue(calcCRC32(key.c_str()));
+		return _findValue(GASHA_ calcCRC32(key.c_str()));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
@@ -524,12 +524,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const char* key)
 	{
-		return const_cast<value_type*>(_findValue(calcCRC32(key)));
+		return const_cast<value_type*>(_findValue(GASHA_ calcCRC32(key)));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const std::string& key)
 	{
-		return const_cast<value_type*>(_findValue(calcCRC32(key.c_str())));
+		return const_cast<value_type*>(_findValue(GASHA_ calcCRC32(key.c_str())));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
@@ -539,39 +539,60 @@ namespace hash_table
 
 	//キーで検索してイテレータを取得
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	{
+		iterator ite(*this, true);
+		_find(ite, key);
+		return ite;
+	}
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const char* key) const
 	{
-		return find(calcCRC32(key));
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key));
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const std::string& key) const
 	{
-		return find(calcCRC32(key.c_str()));
+		iterator ite(*this, INVALID_INDEX);
+		_find(ite, GASHA_ calcCRC32(key.c_str()));
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
 	{
-		return find(ope_type::getKey(value));
+		iterator ite(*this, true);
+		_find(ite, ope_type::getKey(value));
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const key_type key)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
 	{
-		return const_cast<const container*>(this)->find(key);
+		iterator ite(*this, INVALID_INDEX);
+		_find(ite, key);
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const char* key)
 	{
-		return const_cast<const container*>(this)->find(key);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key));
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const std::string& key)
 	{
-		return const_cast<const container*>(this)->find(key);
+		iterator ite(*this, true);
+		_find(ite, GASHA_ calcCRC32(key.c_str()));
+		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type value)
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
 	{
-		return const_cast<const container*>(this)->find(value);
+		iterator ite(*this, true);
+		_find(ite, ope_type::getKey(value));
+		return ite;
 	}
 
 	//キー割り当て
@@ -584,12 +605,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const char* key)
 	{
-		return assign(calcCRC32(key));
+		return assign(GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const std::string& key)
 	{
-		return assign(calcCRC32(key.c_str()));
+		return assign(GASHA_ calcCRC32(key.c_str()));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const value_type& value)
@@ -607,12 +628,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insert(const char* key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
 	{
-		return insert(calcCRC32(key), value);
+		return insert(GASHA_ calcCRC32(key), value);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::insert(const std::string& key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
 	{
-		return insert(calcCRC32(key.c_str()), value);
+		return insert(GASHA_ calcCRC32(key.c_str()), value);
 	}
 
 	//値を挿入（コピー）し、キーは自動割り当て
@@ -646,13 +667,13 @@ namespace hash_table
 	template<typename... Tx>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const char* key, Tx&&... args)
 	{
-		return emplace(calcCRC32(key), args...);
+		return emplace(GASHA_ calcCRC32(key), args...);
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	template<typename... Tx>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::emplace(const std::string& key, Tx&&... args)
 	{
-		return emplace(calcCRC32(key.c_str()), args...);
+		return emplace(GASHA_ calcCRC32(key.c_str()), args...);
 	}
 
 	//値を初期化して自動的にキー割り当て
@@ -674,12 +695,12 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::erase(const char* key)
 	{
-		return erase(calcCRC32(key));
+		return erase(GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline bool container<OPE_TYPE, _TABLE_SIZE>::erase(const std::string& key)
 	{
-		return erase(calcCRC32(key.c_str()));
+		return erase(GASHA_ calcCRC32(key.c_str()));
 	}
 
 	//キーを削除

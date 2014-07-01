@@ -309,12 +309,12 @@ namespace binary_heap
 
 	//最大の深さを取得
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	int container<OPE_TYPE, _TABLE_SIZE>::depth_max() const
+	int container<OPE_TYPE, _TABLE_SIZE>::maxDepth() const
 	{
 		if (m_used == 0)
 			return -1;
 		int depth = 0;
-		int used = m_used >> 1;
+		std::size_t used = m_used >> 1;
 		while (used != 0)
 		{
 			++depth;

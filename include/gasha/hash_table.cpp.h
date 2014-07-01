@@ -566,12 +566,12 @@ namespace hash_table
 	
 	//キーで検索してイテレータを取得
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	void container<OPE_TYPE, _TABLE_SIZE>::_find(iterator& ite, const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
 	{
 		const index_type index = _findIndex(key);
 		if (index == INVALID_INDEX)
-			return iterator(*this, INVALID_INDEX);
-		return iterator(*this, index);
+			return;
+		ite.update(index);
 	}
 	
 	//キー割り当て（本体）

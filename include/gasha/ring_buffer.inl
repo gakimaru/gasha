@@ -48,16 +48,18 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int logical_index) const
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
 		//ite.update(logical_index);
+		iterator ite(*this);
 		ite.addIndexAndUpdate(logical_index);
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::iterator::operator[](const int logical_index)
 	{
-		iterator ite(*m_con, false);
+		//iterator ite(*m_con, false);
 		//ite.update(logical_index);
+		iterator ite(*this);
 		ite.addIndexAndUpdate(logical_index);
 		return ite;
 	}
@@ -202,16 +204,18 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int logical_index) const
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
 		//ite.update(m_con->m_size - logical_index);
+		reverse_iterator ite(*this);
 		ite.addIndexAndUpdate(logical_index);
 		return ite;
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::reverse_iterator container<OPE_TYPE>::reverse_iterator::operator[](const int logical_index)
 	{
-		reverse_iterator ite(*m_con, false);
+		//reverse_iterator ite(*m_con, false);
 		//ite.update(m_con->m_size - logical_index);
+		reverse_iterator ite(*this);
 		ite.addIndexAndUpdate(logical_index);
 		return ite;
 	}

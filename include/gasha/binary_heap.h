@@ -293,7 +293,7 @@ namespace binary_heap
 			inline bool isExist() const;
 			inline bool isNotExist() const { return !isExist(); }
 			inline bool isEnabled() const;
-			inline bool isNotEnabled() const;
+			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
 			inline index_type getIndex() const;//インデックス
 			inline const value_type* getValue() const;//現在の値
@@ -567,7 +567,7 @@ namespace binary_heap
 		inline node_type* _refNew(){ return _refNode(m_used); }//新規ノード参照
 		//inline index_type _adjIndex(const index_type index) const { return index >= 0 && index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
 		inline index_type _adjIndex(const index_type index) const { return index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
-		inline index_type refIndex(const node_type* node) const{ return node - _refTop(); }//ノードをインデックスに変換 ※範囲チェックなし
+		inline index_type _refIndex(const node_type* node) const{ return node - _refTop(); }//ノードをインデックスに変換 ※範囲チェックなし
 		inline index_type _calcParent(const index_type index) const;//親インデックス計算 ※範囲チェックなし
 		inline index_type _calcChildL(const index_type index) const;//左側の子インデックス計算 ※範囲チェックなし
 		inline index_type _calcChildR(const index_type index) const;//右側の子インデックス計算 ※範囲チェックなし
@@ -586,19 +586,19 @@ namespace binary_heap
 		inline node_type* refTop(){ return const_cast<node_type*>(const_cast<const container*>(this)->refTop()); }//先頭ノード参照
 		inline node_type* refBottom(){ return const_cast<node_type*>(const_cast<const container*>(this)->refBottom()); }//終端ノード参照
 		inline node_type* refNew(){ return const_cast<node_type*>(const_cast<const container*>(this)->refNew()); }//新規ノード参照
-		inline index_type ref_index(const node_type* node) const{ return _adjIndex(refIndex(node)); }//ノードをインデックスに変換
+		inline index_type refIndex(const node_type* node) const{ return _adjIndex(_refIndex(node)); }//ノードをインデックスに変換
 		inline index_type calcParent(const index_type index) const { return _adjIndex(_calcParent(index)); }//親インデックス計算
 		inline index_type calcChildL(const index_type index) const { return _adjIndex(_calcChildL(index)); }//左側の子インデックス計算
 		inline index_type calcChildR(const index_type index) const { return _adjIndex(_calcChildR(index)); }//右側の子インデックス計算
 		inline index_type calc_child(const int index, const bool is_right) const { return is_right ? calcChildR(index) : calcChildL(index); }//子インデックス計算
-		inline const node_type* ref_parent(const node_type* node) const { return refNode(_calcParent(refIndex(node))); }//親ノード参照
-		inline const node_type* refChildL(const node_type* node) const { return refNode(_calcChildL(refIndex(node))); }//左側の子ノード参照
-		inline const node_type* refChildR(const node_type* node) const { return refNode(_calcChildR(refIndex(node))); }//右側の子ノード参照
+		inline const node_type* refParent(const node_type* node) const { return refNode(_calcParent(_refIndex(node))); }//親ノード参照
+		inline const node_type* refChildL(const node_type* node) const { return refNode(_calcChildL(_refIndex(node))); }//左側の子ノード参照
+		inline const node_type* refChildR(const node_type* node) const { return refNode(_calcChildR(_refIndex(node))); }//右側の子ノード参照
 		inline const node_type* refChild(const node_type* node, const bool is_right) const { return is_right ? refChildR(node) : refChildL(node); }//子ノード参照
-		inline node_type* ref_parent(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->ref_parent(index)); }//親ノード参照
-		inline node_type* refChildL(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildL(index)); }//左側の子ノード参照
-		inline node_type* refChildR(const index_type index){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildR(index)); }//左側の子ノード参照
-		inline node_type* refChild(const index_type index, const bool is_right){ return const_cast<node_type*>(const_cast<const container*>(this)->refChild(index, is_right)); }//子ノード参照
+		inline node_type* refParent(const node_type* node){ return const_cast<node_type*>(const_cast<const container*>(this)->refParent(node)); }//親ノード参照
+		inline node_type* refChildL(const node_type* node){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildL(node)); }//左側の子ノード参照
+		inline node_type* refChildR(const node_type* node){ return const_cast<node_type*>(const_cast<const container*>(this)->refChildR(node)); }//左側の子ノード参照
+		inline node_type* refChild(const node_type* node, const bool is_right){ return const_cast<node_type*>(const_cast<const container*>(this)->refChild(node, is_right)); }//子ノード参照
 	public:
 		//メソッド：基本情報系
 		inline size_type max_size() const { return TABLE_SIZE; }//最大要素数を取得
@@ -616,7 +616,7 @@ namespace binary_heap
 		inline node_type* top(){ return refTop(); }//先頭ノード参照
 	public:
 		//最大の深さを取得
-		int depth_max() const;
+		int maxDepth() const;
 	private:
 		//プッシュ（本体）：ムーブ
 		node_type* _pushCopying(node_type&& src);
@@ -736,8 +736,9 @@ namespace binary_heap
 	//※操作用構造体の定義を省略してコンテナを使用するためのクラス。
 	//※最も基本的な操作用構造体とそれに基づくコンテナ型を自動定義する。
 	template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
-	struct simpleContainer
+	class simpleContainer
 	{
+	public:
 		//二分ヒープ操作用構造体
 		struct ope : public baseOpe<ope, NODE_TYPE>{};
 
@@ -783,7 +784,16 @@ using bHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
 
 //シンプル二分ヒープコンテナ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
-using simpleHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
+using simpleBHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
+
+//二分ヒープコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
+	template class binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプル二分ヒープコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
+	template class binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
+	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

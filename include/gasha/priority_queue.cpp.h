@@ -35,7 +35,7 @@ namespace priority_queue
 	{
 		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return nullptr;
-		node_type* node = m_containerAdapter.enqueueEnd();//エンキュー終了
+		node_type* node = m_container.enqueueEnd();//エンキュー終了
 		m_status = status_t::PUSH_ENDED;//ステータス変更
 		return node;
 	}
@@ -46,7 +46,7 @@ namespace priority_queue
 	{
 		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return nullptr;
-		m_containerAdapter.enqueueCancel();//エンキュー取り消し
+		m_container.enqueueCancel();//エンキュー取り消し
 		m_status = status_t::PUSH_CANCELLED;//ステータス変更
 		return true;
 	}
@@ -57,7 +57,7 @@ namespace priority_queue
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
-		node_type* node = m_containerAdapter.dequeueBegin();//デキュー開始
+		node_type* node = m_container.dequeueBegin();//デキュー開始
 		if (node)
 			m_status = status_t::POP_BEGINNING;//ステータス変更
 		return node;
@@ -69,7 +69,7 @@ namespace priority_queue
 	{
 		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
-		const bool result = m_containerAdapter.dequeueEnd();//デキュー終了
+		const bool result = m_container.dequeueEnd();//デキュー終了
 		m_status = status_t::POP_ENDED;//ステータス変更
 		return result;
 	}
@@ -80,7 +80,7 @@ namespace priority_queue
 	{
 		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
-		m_containerAdapter.dequeueCancel();//デキュー取り消し
+		m_container.dequeueCancel();//デキュー取り消し
 		m_status = status_t::POP_CANCELLED;//ステータス変更
 		return true;
 	}
