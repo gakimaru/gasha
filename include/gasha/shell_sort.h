@@ -162,7 +162,7 @@ iteratorSortingFuncSet(iteratorShellSort);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 //・T* GET_NEXT_FUNC(T& node)//次のノードを返す
 //・T* GET_PREV_FUNC(T& node)//前のノードを返す
-//・void INSERT_NODE_BEFORE_FUNC(T& new_node, T& target_node, T*& first_ref, T*& last_ref)//target_nodeの前にnew_nodeを連結する
+//・void INSERT_NODE_BEFORE_FUNC(T& new_node, T* target_node, T*& first_ref, T*& last_ref)//target_nodeの前にnew_nodeを連結する(target_nodeがnullptrだと末尾に連結)
 //・void REMOVE_NODE_FUNC(T& target_node, T*& first_ref, T*& last_ref)//target_nodeを連結から解除する
 template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
 std::size_t linkedListShellSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate)
@@ -207,7 +207,7 @@ std::size_t linkedListShellSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func
 						prev = const_cast<T*>(get_prev_func(*prev));
 				}
 				remove_node_func(*next, first, last);
-				insert_node_before_func(*next, *min, first, last);
+				insert_node_before_func(*next, min, first, last);
 				++swapped_count;
 				next = now;
 				for (int i = 0; i < h && next; ++i)

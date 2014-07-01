@@ -120,6 +120,10 @@ private:
 	//std::atomic<std::size_t> m_freeCount[POOL_SIZE];//フリー回数（デバッグ用）※必須の情報ではない
 };
 
+//明示的なインスタンス化用マクロ
+#define INSTANCING_lfPoolAllocator(T, _POOL_SIZE) \
+	template class lfPoolAllocator<T, _POOL_SIZE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元

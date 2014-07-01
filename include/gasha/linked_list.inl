@@ -133,30 +133,34 @@ namespace linked_list
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの次に連結
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* insertNodeAfter(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type& target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
+	typename OPE_TYPE::node_type* insertNodeAfter(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
 	{
-		typename OPE_TYPE::node_type* next = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(target));
+		if (!target)
+			return insertNodeBeginning<OPE_TYPE>(node, first, last);
+		typename OPE_TYPE::node_type* next = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(*target));
 		if (!next)
 			last = &node;
 		else
 			OPE_TYPE::setPrev(*next, &node);
-		OPE_TYPE::setPrev(node, &target);
-		OPE_TYPE::setNext(target, &node);
+		OPE_TYPE::setPrev(node, target);
+		OPE_TYPE::setNext(*target, &node);
 		OPE_TYPE::setNext(node, next);
 		return &node;
 	}
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの前に連結
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type& target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
+	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
 	{
-		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getPrev(target));
+		if (!target)
+			return insertNodeEnd<OPE_TYPE>(node, first, last);
+		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getPrev(*target));
 		if (!prev)
 			first = &node;
 		else
 			OPE_TYPE::setNext(*prev, &node);
-		OPE_TYPE::setNext(node, &target);
-		OPE_TYPE::setPrev(target, &node);
+		OPE_TYPE::setNext(node, target);
+		OPE_TYPE::setPrev(*target, &node);
 		OPE_TYPE::setPrev(node, prev);
 		return &node;
 	}
@@ -220,11 +224,13 @@ namespace linked_list
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの範囲を連結から外す
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type& end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
+	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type* end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
 	{
+		if (&start == end)
+			return nullptr;
 		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getPrev(start));
-		typename OPE_TYPE::node_type* next = &end;
-		typename OPE_TYPE::node_type* _end = next ? const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getPrev(end)) : last;
+		typename OPE_TYPE::node_type* next = end;
+		typename OPE_TYPE::node_type* _end = next ? const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getPrev(*next)) : last;
 		if (prev)
 			OPE_TYPE::setNext(*prev, next);
 		else
@@ -234,7 +240,8 @@ namespace linked_list
 		else
 			last = prev;
 		OPE_TYPE::setPrev(start, nullptr);
-		OPE_TYPE::setNext(*_end, nullptr);
+		if (_end)
+			OPE_TYPE::setNext(*_end, nullptr);
 		return &start;
 	}
 
@@ -634,7 +641,7 @@ namespace linked_list
 	{
 		if (pos.isNotExist())
 			return nullptr;
-		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
+		return insertNodeAfter<ope_type>(*const_cast<node_type*>(&node), &*pos, m_first, m_last);
 	}
 
 	//指定の位置の前にノードを挿入（連結に追加）
@@ -643,7 +650,7 @@ namespace linked_list
 	{
 		if (pos.isNotExist())
 			return nullptr;
-		return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last);
+		return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), &*pos, m_first, m_last);
 	}
 
 	//指定ノードを削除（連結解除）
@@ -671,7 +678,7 @@ namespace linked_list
 	{
 		if (!m_first || start.isNotExist() || end.isNotEnabled())
 			return nullptr;
-		return removeNodes<ope_type>(*start, *end, m_first, m_last);
+		return removeNodes<ope_type>(*start, end.getValue(), m_first, m_last);
 	}
 
 	//ソート

@@ -108,6 +108,8 @@ ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON compariso
 		{
 			begin = mid + static_cast<typename ITERATOR::difference_type>(1);
 			range -= (range_half + 1);
+			if (begin == end)
+				break;
 		}
 	}
 	if (found != end && found != begin)//見つかった地点が先頭でなければ、一つ前を調べる
@@ -159,6 +161,8 @@ const T* linkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_func, GET
 		{
 			first = get_next_func(*mid);
 			range -= (range_half + 1);
+			if (!first)
+				break;
 		}
 	}
 	if (found && found != first)//見つかった地点が先頭でなければ、一つ前を調べる
@@ -210,6 +214,8 @@ const T* singlyLinkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_fun
 		{
 			first = get_next_func(*mid);
 			range -= (range_half + 1);
+			if (!first)
+				break;
 		}
 	}
 	if (found && mid_prev)//見つかった地点が先頭でなければ、一つ前を調べる

@@ -93,10 +93,6 @@ namespace singly_linked_list
 	}
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードの前ノードを取得
-	//【注意】低速処理（backwardを指定することで高速化可能）
-	//※もし、targetの直前もしくはそれより前のノードが分かっているなら、
-	//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
-	//　nullptrを指定した場合、firstからtargetまで辿る。
 	template<class OPE_TYPE>
 	const typename OPE_TYPE::node_type* getPrevNode(const typename OPE_TYPE::node_type& target, const typename OPE_TYPE::node_type* first, const typename OPE_TYPE::node_type* backward)
 	{
@@ -113,10 +109,6 @@ namespace singly_linked_list
 	}
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードの前方のノードを取得
-	//【注意】低速処理（backwardを指定することで高速化可能）
-	//※もし、targetの直前もしくはそれより前のノードが分かっているなら、
-	//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
-	//　nullptrを指定した場合、firstからtargetまで辿る。
 	template<class OPE_TYPE>
 	const typename OPE_TYPE::node_type* getBackwardNode(const typename OPE_TYPE::node_type& target, std::size_t& step, const typename OPE_TYPE::node_type* first, const typename OPE_TYPE::node_type* backward)
 	{
@@ -133,12 +125,8 @@ namespace singly_linked_list
 	template<class OPE_TYPE>
 	typename OPE_TYPE::node_type* insertNodeAfter(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
 	{
-		if (target == nullptr)
-		{
-			OPE_TYPE::setNext(node, first);
-			first = &node;
-			return &node;
-		}
+		if (!target)
+			return insertNodeBeginning<OPE_TYPE>(node, first, last);
 		typename OPE_TYPE::node_type* next = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(*target));
 		if (!next)
 			last = &node;
@@ -148,19 +136,17 @@ namespace singly_linked_list
 	}
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードの前に連結
-	//【注意】低速処理（backwardを指定することで高速化可能）
-	//※もし、targetの直前もしくはそれより前のノードが分かっているなら、
-	//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
-	//　nullptrを指定した場合、firstからtargetまで辿る。
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type& target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, const typename OPE_TYPE::node_type* backward)
+	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, const typename OPE_TYPE::node_type* backward)
 	{
-		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(getPrevNode<OPE_TYPE>(target, first, backward));
+		if (!target)
+			return insertNodeEnd<OPE_TYPE>(node, first, last);
+		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(getPrevNode<OPE_TYPE>(*target, first, backward));
 		if (!prev)
 			first = &node;
 		else
 			OPE_TYPE::setNext(*prev, &node);
-		OPE_TYPE::setNext(node, &target);
+		OPE_TYPE::setNext(node, target);
 		return &node;
 	}
 	//--------------------
@@ -216,11 +202,41 @@ namespace singly_linked_list
 		return &node;
 	}
 	//--------------------
+	//片方向連結リスト操作関数：指定ノードの次のノードからの範囲を連結から外す
+	template<class OPE_TYPE>
+	typename OPE_TYPE::node_type* removeNodesAfter(typename OPE_TYPE::node_type* before_target, typename OPE_TYPE::node_type* end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last)
+	{
+		if (!before_target && !first)
+			return nullptr;
+		if (before_target == end && before_target)
+			return nullptr;
+		typename OPE_TYPE::node_type* prev = before_target;
+		typename OPE_TYPE::node_type& node = prev ? *const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(*prev)) : *first;
+		typename OPE_TYPE::node_type* next = end;
+		typename OPE_TYPE::node_type* _end = nullptr;
+		if (end)
+		{
+			_end = &node;
+			while (_end)
+			{
+				typename OPE_TYPE::node_type* _end_next = const_cast<typename OPE_TYPE::node_type*>(OPE_TYPE::getNext(*_end));
+				if (_end_next == next)
+					break;
+				_end = _end_next;
+			}
+		}
+		if (prev)
+			OPE_TYPE::setNext(*prev, next);
+		else
+			first = next;
+		if (!next)
+			last = prev;
+		if (_end)
+			OPE_TYPE::setNext(*_end, nullptr);
+		return &node;
+	}
+	//--------------------
 	//片方向連結リスト操作関数：指定ノードを連結から外す
-	//【注意】低速処理（backwardを指定することで高速化可能）
-	//※もし、nodeの直前もしくはそれより前のノードが分かっているなら、
-	//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
-	//　nullptrを指定した場合、firstからnodeまで辿る。
 	template<class OPE_TYPE>
 	typename OPE_TYPE::node_type* removeNode(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, typename OPE_TYPE::node_type* backward)
 	{
@@ -237,23 +253,22 @@ namespace singly_linked_list
 	}
 	//--------------------
 	//片方向連結リスト操作関数：指定ノードの範囲を連結から外す
-	//【注意】低速処理（backwardを指定することで高速化可能）
-	//※もし、startの直前もしくはそれより前のノードが分かっているなら、
-	//　それを backward に指定するこで検索範囲が短縮され、処理効率が向上する。
-	//　nullptrを指定した場合、firstからstartまで辿る。
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type& end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, typename OPE_TYPE::node_type* backward)
+	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type* end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last, typename OPE_TYPE::node_type* backward)
 	{
+		if (&start == end)
+			return nullptr;
 		typename OPE_TYPE::node_type* prev = const_cast<typename OPE_TYPE::node_type*>(getPrevNode<OPE_TYPE>(start, first, backward));
-		typename OPE_TYPE::node_type* next = &end;
-		typename OPE_TYPE::node_type* _end = next ? const_cast<typename OPE_TYPE::node_type*>(getPrevNode<OPE_TYPE>(end, first, &start)) : last;
+		typename OPE_TYPE::node_type* next = end;
+		typename OPE_TYPE::node_type* _end = next ? const_cast<typename OPE_TYPE::node_type*>(getPrevNode<OPE_TYPE>(*next, first, &start)) : last;
 		if (prev)
 			OPE_TYPE::setNext(*prev, next);
 		else
 			first = next;
 		if (!next)
 			last = prev;
-		OPE_TYPE::setNext(*_end, nullptr);
+		if (_end)
+			OPE_TYPE::setNext(*_end, nullptr);
 		return &start;
 	}
 
@@ -668,7 +683,7 @@ namespace singly_linked_list
 	{
 		if (pos.isNotExist())
 			return nullptr;
-		return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), *pos, m_first, m_last, backward);
+		return insertNodeBefore<ope_type>(*const_cast<node_type*>(&node), &*pos, m_first, m_last, backward);
 	}
 	//指定ノードを削除（連結解除）
 	template<class OPE_TYPE>
@@ -693,7 +708,7 @@ namespace singly_linked_list
 		if (!m_first || (start_before.isNotExist() && !start_before.isBeforeBegin()) || end.isNotEnabled())
 			return nullptr;
 		node_type* before_target = start_before.isBeforeBegin() ? nullptr : &*start_before;
-		return removeNodeAfter<ope_type>(before_target, m_first, m_last);
+		return removeNodesAfter<ope_type>(before_target, &*end, m_first, m_last);
 	}
 	//指定位置のノードを削除（連結解除）
 	template<class OPE_TYPE>
@@ -709,7 +724,7 @@ namespace singly_linked_list
 	{
 		if (!m_first || start.isNotExist() || end.isNotEnabled())
 			return nullptr;
-		return removeNodes<ope_type>(*start, *end, m_first, m_last, backward);
+		return removeNodes<ope_type>(*start, &*end, m_first, m_last, backward);
 	}
 
 	//ソート

@@ -220,12 +220,14 @@ namespace linked_list
 	std::size_t countNodes(const typename OPE_TYPE::node_type& target);
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの次に連結
+	//※targetにnullptrを指定すると、先頭に連結する。（末尾ではないので注意）
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* insertNodeAfter(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type& target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
+	typename OPE_TYPE::node_type* insertNodeAfter(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの前に連結
+	//※targetにnullptrを指定すると、末尾に連結する。（先頭ではないので注意）
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type& target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
+	typename OPE_TYPE::node_type* insertNodeBefore(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type* target, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	//--------------------
 	//双方向連結リスト操作関数：先頭に連結
 	template<class OPE_TYPE>
@@ -240,8 +242,9 @@ namespace linked_list
 	typename OPE_TYPE::node_type* removeNode(typename OPE_TYPE::node_type& node, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	//--------------------
 	//双方向連結リスト操作関数：指定ノードの範囲を連結から外す
+	//※endにnullptrを指定すると、末尾まで削除する。
 	template<class OPE_TYPE>
-	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type& end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
+	typename OPE_TYPE::node_type* removeNodes(typename OPE_TYPE::node_type& start, typename OPE_TYPE::node_type* end, typename OPE_TYPE::node_type*& first, typename OPE_TYPE::node_type*& last);
 	//----------------------------------------
 	//双方向連結リスト操作関数：線形探索
 	template<class OPE_TYPE, typename V>

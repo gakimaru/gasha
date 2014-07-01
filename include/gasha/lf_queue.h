@@ -135,6 +135,12 @@ private:
 	std::atomic<typename queue_ptr_t::tag_type> m_tag;//ABA問題対策用のタグ
 };
 
+//明示的なインスタンス化用マクロ
+#define INSTANCING_lfQueue(T, _POOL_SIZE) \
+	template class lfQueue<T, _POOL_SIZE, TEST_TAGGED_PTR_TAG_SIZE, TEST_TAGGED_PTR_TAG_SHIFT>;
+#define INSTANCING_lfQueue_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
+	template class lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元

@@ -120,6 +120,12 @@ private:
 	lock_type m_lock;//ロックオブジェクト
 };
 
+//明示的なインスタンス化用マクロ
+#define INSTANCING_sharedPoolAllocator(T, _POOL_SIZE) \
+	template class sharedPoolAllocator<T, _POOL_SIZE>;
+#define INSTANCING_sharedPoolAllocator_withLock(T, _POOL_SIZE, LOCK_TYPE) \
+	template class sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元

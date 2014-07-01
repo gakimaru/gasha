@@ -31,27 +31,35 @@ namespace linked_list
 	{
 		if (!m_value && !rhs.m_value)
 			return 0;
-		difference_type diff = 0;
-		node_type* value = rhs.m_value;
+		if (!m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_value && !rhs.m_isEnd)
+			return 0;
 		if (!rhs.m_isEnd)
 		{
-			while (value && value != m_value)
+			difference_type diff = 0;
+			const node_type* value = rhs.m_value;
+			const node_type* end = m_value;
+			while (value && value != end)
 			{
 				value = const_cast<node_type*>(getNextNode<ope_type>(*value));
 				++diff;
 			}
-			if (value == m_value)
+			if (value == end)
 				return diff;
 		}
-		diff = 0;
-		value = m_value;
-		while (value && value != rhs.m_value)
 		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(*value));
-			--diff;
+			difference_type diff = 0;
+			const node_type* value = m_value;
+			const node_type* end = rhs.m_value;
+			while (value && value != end)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value));
+				--diff;
+			}
+			if (value == end)
+				return diff;
 		}
-		if (value == m_value)
-			return diff;
 		return 0;
 	}
 	//参照を更新
@@ -232,27 +240,35 @@ namespace linked_list
 	{
 		if (!m_value && !rhs.m_value)
 			return 0;
-		difference_type diff = 0;
-		node_type* value = m_value;
-		if (!m_isEnd)
+		if (!m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_value && !rhs.m_isEnd)
+			return 0;
+		if (!rhs.m_isEnd)
 		{
-			while (value && value != rhs.m_value)
+			difference_type diff = 0;
+			const node_type* value = rhs.m_value;
+			const node_type* end = m_value;
+			while (value && value != end)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(*value));
+				value = const_cast<node_type*>(getPrevNode<ope_type>(*value));
 				++diff;
 			}
-			if (value == m_value)
+			if (value == end)
 				return diff;
 		}
-		diff = 0;
-		value = rhs.m_value;
-		while (value && value != m_value)
 		{
-			value = const_cast<node_type*>(getNextNode<ope_type>(*value));
-			--diff;
+			difference_type diff = 0;
+			const node_type* value = m_value;
+			const node_type* end = rhs.m_value;
+			while (value && value != end)
+			{
+				value = const_cast<node_type*>(getPrevNode<ope_type>(*value));
+				--diff;
+			}
+			if (value == end)
+				return diff;
 		}
-		if (value == m_value)
-			return diff;
 		return 0;
 	}
 	//参照を更新

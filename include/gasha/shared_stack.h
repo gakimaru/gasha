@@ -99,6 +99,12 @@ private:
 	lock_type m_lock;//ロックオブジェクト
 };
 
+//明示的なインスタンス化用マクロ
+#define INSTANCING_sharedStack(T, _POOL_SIZE) \
+	template class sharedStack<T, _POOL_SIZE>;
+#define INSTANCING_sharedStack_withLock(T, _POOL_SIZE, LOCK_TYPE) \
+	template class sharedStack<T, _POOL_SIZE, LOCK_TYPE>;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を退避
