@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __BUIILD_SETTINGS_H_
-#define __BUIILD_SETTINGS_H_
+#ifndef GASHA_INCLUDED_BUIILD_SETTINGS_H
+#define GASHA_INCLUDED_BUIILD_SETTINGS_H
 
 //--------------------------------------------------------------------------------
 // build_settings.h
@@ -33,6 +33,6 @@ bool diagnoseBuildSettings(char* message, std::size_t& size);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__BUIILD_SETTINGS_H_
+#endif//GASHA_INCLUDED_BUIILD_SETTINGS_H
 
 // End of file

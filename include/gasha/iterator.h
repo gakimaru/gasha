@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __ITERATOR_H_
-#define __ITERATOR_H_
+#ifndef GASHA_INCLUDED_ITERATOR_H
+#define GASHA_INCLUDED_ITERATOR_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -200,6 +200,6 @@ void iteratorReverseForEach(CONTAINER& container, FUNCTOR functor)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__ITERATOR_H_
+#endif//GASHA_INCLUDED_ITERATOR_H
 
 // End of file

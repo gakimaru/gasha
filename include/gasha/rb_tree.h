@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RB_TREE_H_
-#define __RB_TREE_H_
+#ifndef GASHA_INCLUDED_RB_TREE_H
+#define GASHA_INCLUDED_RB_TREE_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -1045,6 +1045,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__RB_TREE_H_
+#endif//GASHA_INCLUDED_RB_TREE_H
 
 // End of file

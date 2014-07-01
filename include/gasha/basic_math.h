@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __BASIC_MATH_H_
-#define __BASIC_MATH_H_
+#ifndef GASHA_INCLUDED_BASIC_MATH_H
+#define GASHA_INCLUDED_BASIC_MATH_H
 
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ含む】
@@ -468,6 +468,6 @@ template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 0>{
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__BASIC_MATH_H_
+#endif//GASHA_INCLUDED_BASIC_MATH_H
 
 // End of file

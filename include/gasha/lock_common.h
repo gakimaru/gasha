@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCK_COMMON_H_
-#define __LOCK_COMMON_H_
+#ifndef GASHA_INCLUDED_LOCK_COMMON_H
+#define GASHA_INCLUDED_LOCK_COMMON_H
 
 //--------------------------------------------------------------------------------
 // lock_common.h
@@ -46,6 +46,6 @@ const defer_lock_t defer_lock;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__LOCK_COMMON_H_
+#endif//GASHA_INCLUDED_LOCK_COMMON_H
 
 // End of file

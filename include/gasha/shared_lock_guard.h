@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_LOCK_GUARD_H_
-#define __SHARED_LOCK_GUARD_H_
+#ifndef GASHA_INCLUDED_SHARED_LOCK_GUARD_H
+#define GASHA_INCLUDED_SHARED_LOCK_GUARD_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -62,6 +62,6 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHARED_LOCK_GUARD_H_
+#endif//GASHA_INCLUDED_SHARED_LOCK_GUARD_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __DUMMY_SHARED_LOCK_H_
-#define __DUMMY_SHARED_LOCK_H_
+#ifndef GASHA_INCLUDED_DUMMY_SHARED_LOCK_H
+#define GASHA_INCLUDED_DUMMY_SHARED_LOCK_H
 
 //--------------------------------------------------------------------------------
 // dummy_shared_lock.h
@@ -113,6 +113,6 @@ public:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__DUMMY_SHARED_LOCK_H_
+#endif//GASHA_INCLUDED_DUMMY_SHARED_LOCK_H
 
 // End of file

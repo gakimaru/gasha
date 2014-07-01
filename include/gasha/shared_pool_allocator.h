@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_POOL_ALLOCATOR_H_
-#define __SHARED_POOL_ALLOCATOR_H_
+#ifndef GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_H
+#define GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -135,6 +135,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/shared_pool_allocator.cpp.h>
 #endif//GASHA_SHARED_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__SHARED_POOL_ALLOCATOR_H_
+#endif//GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_H
 
 // End of file

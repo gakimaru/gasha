@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_STACK_CPP__H_
-#define __SHARED_STACK_CPP__H_
+#ifndef GASHA_INCLUDED_SHARED_STACK_CPP_H
+#define GASHA_INCLUDED_SHARED_STACK_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -129,6 +129,6 @@ sharedStack<T, POOL_SIZE, LOCK_TYPE>::~sharedStack()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHARED_STACK_CPP__H_
+#endif//GASHA_INCLUDED_SHARED_STACK_CPP_H
 
 // End of file

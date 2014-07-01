@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __BINARY_HEAP_INL_
-#define __BINARY_HEAP_INL_
+#ifndef GASHA_INCLUDED_BINARY_HEAP_INL
+#define GASHA_INCLUDED_BINARY_HEAP_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -601,6 +601,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__BINARY_HEAP_INL_
+#endif//GASHA_INCLUDED_BINARY_HEAP_INL
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SEARCH_BASIC_H_
-#define __SEARCH_BASIC_H_
+#ifndef GASHA_INCLUDED_SEARCH_BASIC_H
+#define GASHA_INCLUDED_SEARCH_BASIC_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -510,6 +510,6 @@ struct compare_to{
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SEARCH_BASIC_H_
+#endif//GASHA_INCLUDED_SEARCH_BASIC_H
 
 // End of file

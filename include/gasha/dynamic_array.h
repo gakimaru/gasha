@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __DYNAMIC_ARRAY_H_
-#define __DYNAMIC_ARRAY_H_
+#ifndef GASHA_INCLUDED_DYNAMIC_ARRAY_H
+#define GASHA_INCLUDED_DYNAMIC_ARRAY_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -837,6 +837,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__DYNAMIC_ARRAY_H_
+#endif//GASHA_INCLUDED_DYNAMIC_ARRAY_H
 
 // End of file

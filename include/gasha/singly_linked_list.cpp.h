@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SINGLY_LINKED_LIST_CPP_H_
-#define __SINGLY_LINKED_LIST_CPP_H_
+#ifndef GASHA_INCLUDED_SINGLY_LINKED_LIST_CPP_H
+#define GASHA_INCLUDED_SINGLY_LINKED_LIST_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -554,6 +554,6 @@ namespace singly_linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SINGLY_LINKED_LIST_CPP_H_
+#endif//GASHA_INCLUDED_SINGLY_LINKED_LIST_CPP_H
 
 // End of file

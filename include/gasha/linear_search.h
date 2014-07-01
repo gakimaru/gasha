@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LINERAR_SEARCH_H_
-#define __LINERAR_SEARCH_H_
+#ifndef GASHA_INCLUDED_LINERAR_SEARCH_H
+#define GASHA_INCLUDED_LINERAR_SEARCH_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -104,6 +104,6 @@ singlyLinkedListSearchFuncSetByPredicate(singlyLinkedListLinearSearch);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__LINERAR_SEARCH_H_
+#endif//GASHA_INCLUDED_LINERAR_SEARCH_H
 
 // End of file

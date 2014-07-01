@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __IS_ORDERED_H_
-#define __IS_ORDERED_H_
+#ifndef GASHA_INCLUDED_IS_ORDERED_H
+#define GASHA_INCLUDED_IS_ORDERED_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -305,6 +305,6 @@ singlyLinkedListSumupUnorderedFuncSet(singlyLinkedListSumupUnordered);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__IS_ORDERED_H_
+#endif//GASHA_INCLUDED_IS_ORDERED_H
 
 // End of file

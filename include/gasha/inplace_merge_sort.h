@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __INPLACE_MERGE_SORT_H_
-#define __INPLACE_MERGE_SORT_H_
+#ifndef GASHA_INCLUDED_INPLACE_MERGE_SORT_H
+#define GASHA_INCLUDED_INPLACE_MERGE_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -209,6 +209,6 @@ sortingFuncSet(inplaceMergeSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__INPLACE_MERGE_SORT_H_
+#endif//GASHA_INCLUDED_INPLACE_MERGE_SORT_H
 
 // End of file

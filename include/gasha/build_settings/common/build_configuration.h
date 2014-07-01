@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __BUILD_CONFIGURATION_H_
-#define __BUILD_CONFIGURATION_H_
+#ifndef GASHA_INCLUDED_BUILD_CONFIGURATION_H
+#define GASHA_INCLUDED_BUILD_CONFIGURATION_H
 
 //--------------------------------------------------------------------------------
 // build_configuration.h
@@ -123,6 +123,6 @@
 	#define GASHA_IS_STRIPPED_SYMBOLS//シンボル情報なし
 #endif//GASHA_BUILD_CONFIG_IS_RELEASE
 
-#endif//__BUILD_CONFIGURATION_H_
+#endif//GASHA_INCLUDED_BUILD_CONFIGURATION_H
 
 // End of file

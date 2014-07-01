@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LANGUAGE_AUTO_SETTINGS_H_
-#define __LANGUAGE_AUTO_SETTINGS_H_
+#ifndef GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_
+#define GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_
 
 //--------------------------------------------------------------------------------
 // language_auto_settings.h
@@ -240,6 +240,18 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//【C++11仕様】委譲コンストラクタ
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
+		#define GASHA_HAS_DELEGATING_CONSTRUCTORS
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 7)
+		#define GASHA_HAS_DELEGATING_CONSTRUCTORS
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
 //【C++11仕様】継承コンストラクタ
 #ifdef GASHA_IS_VC
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
@@ -249,6 +261,30 @@
 #ifdef GASHA_IS_GCC
 	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 8)
 		#define GASHA_HAS_INHERITING_CONSTRUCTORS
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】一様初期化
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
+		#define GASHA_HAS_UNIFORM_INITIALIZATION
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 6)
+		#define GASHA_HAS_UNIFORM_INITIALIZATION
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
+//【C++11仕様】初期化リスト
+#ifdef GASHA_IS_VC
+	#if _MSC_VER >= 1800//VC++12.0(2013)以降
+		#define GASHA_HAS_INITIALIZER_LIST
+	#endif//_MSC_VER
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 4)
+		#define GASHA_HAS_INITIALIZER_LIST
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -269,7 +305,7 @@
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
-		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
 		#define GASHA_HAS_STATIC_ASSERT_PROXY
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
@@ -277,7 +313,7 @@
 	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 3)
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//GASHA_HAS_CPP11
-		#define static_assert(expr, msg) typedef char __STATIC_ASSERT_TYPE[(expr) ? 1 : -1]
+		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
 		#define GASHA_HAS_STATIC_ASSERT_PROXY
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
@@ -391,6 +427,6 @@
 	#define GASHA_HAS_ALWAYS_INLINE_PROXY
 #endif//GASHA_IS_GCC
 
-#endif//__LANGUAGE_AUTO_SETTINGS_H_
+#endif//GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LW_SPIN_LOCK_H_
-#define __LW_SPIN_LOCK_H_
+#ifndef GASHA_INCLUDED_LW_SPIN_LOCK_H
+#define GASHA_INCLUDED_LW_SPIN_LOCK_H
 
 //--------------------------------------------------------------------------------
 // lw_spin_lock.h
@@ -84,6 +84,6 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__LW_SPIN_LOCK_H_
+#endif//GASHA_INCLUDED_LW_SPIN_LOCK_H
 
 // End of file

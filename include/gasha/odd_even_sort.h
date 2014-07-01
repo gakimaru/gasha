@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __ODD_EVENT_SORT_H_
-#define __ODD_EVENT_SORT_H_
+#ifndef GASHA_INCLUDED_ODD_EVENT_SORT_H
+#define GASHA_INCLUDED_ODD_EVENT_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -91,6 +91,6 @@ sortingFuncSet(oddEvenSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__ODD_EVENT_SORT_H_
+#endif//GASHA_INCLUDED_ODD_EVENT_SORT_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_POOL_ALLOCATOR_INL_
-#define __SHARED_POOL_ALLOCATOR_INL_
+#ifndef GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_INL
+#define GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -73,6 +73,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__SHARED_POOL_ALLOCATOR_INL_
+#endif//GASHA_INCLUDED_SHARED_POOL_ALLOCATOR_INL
 
 // End of file

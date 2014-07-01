@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RADIX_SORT_H_
-#define __RADIX_SORT_H_
+#ifndef GASHA_INCLUDED_RADIX_SORT_H
+#define GASHA_INCLUDED_RADIX_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -14,11 +14,11 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
+#include <gasha/limits.h>//限界値
 
-#include <climits>//***_MAX
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
-#include <malloc.h>//_aligned_malloc(), _aligned_free()
 #include <utility>//C++11 std::move
+#include <malloc.h>//_aligned_malloc(), _aligned_free()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -61,50 +61,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //キーの最大値取得
 template<typename KEY_TYPE>
 struct _radix_key{
-	typedef
-		typename std::conditional <
-			std::is_same<KEY_TYPE, unsigned char>::value,
-			std::integral_constant<unsigned char, UCHAR_MAX>,
-			typename std::conditional <
-				std::is_same<KEY_TYPE, signed char>::value,
-				std::integral_constant<signed char, SCHAR_MAX>,
-				typename std::conditional <
-					std::is_same<KEY_TYPE, unsigned short>::value,
-					std::integral_constant<unsigned short, USHRT_MAX>,
-					typename std::conditional <
-						std::is_same<KEY_TYPE, signed short>::value,
-						std::integral_constant<signed short, SHRT_MAX>,
-						typename std::conditional <
-							std::is_same<KEY_TYPE, unsigned int>::value,
-							std::integral_constant<unsigned int, UINT_MAX>,
-							typename std::conditional <
-								std::is_same<KEY_TYPE, signed int>::value,
-								std::integral_constant<signed int, INT_MAX>,
-								typename std::conditional <
-									std::is_same<KEY_TYPE, unsigned long>::value,
-									std::integral_constant<unsigned long, ULONG_MAX>,
-									typename std::conditional <
-										std::is_same<KEY_TYPE, signed long>::value,
-										std::integral_constant<signed long, LONG_MAX>,
-										typename std::conditional <
-											std::is_same<KEY_TYPE, unsigned long long>::value,
-											std::integral_constant<unsigned long long, ULLONG_MAX>,
-											typename std::conditional <
-												std::is_same<KEY_TYPE, signed long long>::value,
-												std::integral_constant<signed long long, LLONG_MAX>,
-												std::integral_constant<std::size_t, UINT_MAX>
-											>::type
-										>::type
-									>::type
-								>::type
-							>::type
-						>::type
-					>::type
-				>::type
-			>::type
-		>::type
-			max_t;
-	static const KEY_TYPE MAX = max_t::value;
+	static const KEY_TYPE MAX = GASHA_ numeric_limits<KEY_TYPE>::MAX;
 };
 //キーを取得　※キーが符号付型の場合
 template<class T, class GET_KEY_FUNCTOR>
@@ -585,6 +542,6 @@ distributedSortingFuncSet(radixSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__RADIX_SORT_H_
+#endif//GASHA_INCLUDED_RADIX_SORT_H
 
 // End of file

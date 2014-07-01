@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __ADJUST_BUILD_SETTINGS_H_
-#define __ADJUST_BUILD_SETTINGS_H_
+#ifndef GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
+#define GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 
 //--------------------------------------------------------------------------------
 // adjust_build_settings.h
@@ -86,6 +86,6 @@
 
 #endif//GASHA_IS_X86
 
-#endif//__ADJUST_BUILD_SETTINGS_H_
+#endif//GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 
 // End of file

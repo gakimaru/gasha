@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __UTILITY_H_
-#define __UTILITY_H_
+#ifndef GASHA_INCLUDED_UTILITY_H
+#define GASHA_INCLUDED_UTILITY_H
 
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ】
@@ -283,6 +283,6 @@ inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, typename ITERATOR
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__UTILITY_H_
+#endif//GASHA_INCLUDED_UTILITY_H
 
 // End of file

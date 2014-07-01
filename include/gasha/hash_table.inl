@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __HASH_TABLE_INL_
-#define __HASH_TABLE_INL_
+#ifndef GASHA_INCLUDED_HASH_TABLE_INL
+#define GASHA_INCLUDED_HASH_TABLE_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -464,7 +464,7 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
 	{
-		return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key);
+		return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key);
 	}
 	//次のインデックスを計算（指定のインデックスに歩幅を加算）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -723,6 +723,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__HASH_TABLE_INL_
+#endif//GASHA_INCLUDED_HASH_TABLE_INL
 
 // End of file

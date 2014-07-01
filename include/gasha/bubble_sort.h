@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __BUBBLE_SORT_H_
-#define __BUBBLE_SORT_H_
+#ifndef GASHA_INCLUDED_BUBBLE_SORT_H
+#define GASHA_INCLUDED_BUBBLE_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -85,6 +85,6 @@ sortingFuncSet(bubbleSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__BUBBLE_SORT_H_
+#endif//GASHA_INCLUDED_BUBBLE_SORT_H
 
 // End of file

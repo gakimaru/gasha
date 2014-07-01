@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCKFREE_POOL_ALLOCATOR_H_
-#define __LOCKFREE_POOL_ALLOCATOR_H_
+#ifndef GASHA_INCLUDED_LOCKFREE_POOL_ALLOCATOR_H
+#define GASHA_INCLUDED_LOCKFREE_POOL_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -135,6 +135,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/lf_pool_allocator.cpp.h>
 #endif//GASHA_LF_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__LOCKFREE_POOL_ALLOCATOR_H_
+#endif//GASHA_INCLUDED_LOCKFREE_POOL_ALLOCATOR_H
 
 // End of file

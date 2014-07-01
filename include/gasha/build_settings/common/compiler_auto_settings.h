@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __COMPILER_AUTO_SETTINGS_H_
-#define __COMPILER_AUTO_SETTINGS_H_
+#ifndef GASHA_INCLUDED_COMPILER_AUTO_SETTINGS_H_
+#define GASHA_INCLUDED_COMPILER_AUTO_SETTINGS_H_
 
 //--------------------------------------------------------------------------------
 // compiler_auto_settings.h
@@ -70,6 +70,6 @@
 	#define GASHA_CPP_VER 0
 #endif//__cplusplus
 
-#endif//__COMPILER_AUTO_SETTINGS_H_
+#endif//GASHA_INCLUDED_COMPILER_AUTO_SETTINGS_H_
 
 // End of file

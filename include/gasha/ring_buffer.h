@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RING_BUFFER_H_
-#define __RING_BUFFER_H_
+#ifndef GASHA_INCLUDED_RING_BUFFER_H
+#define GASHA_INCLUDED_RING_BUFFER_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -828,13 +828,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
 #ifdef GASHA_RING_BUFFER_ALLWAYS_TOGETHER_INL
 #include <gasha/ring_buffer.inl>
-#endif//GASHA_RING__BUFFER_ALLWAYS_TOGETHER_INL
+#endif//GASHA_RING_BUFFER_ALLWAYS_TOGETHER_INL
 
 //.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_RING_BUFFER_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/ring_buffer.cpp.h>
 #endif//GASHA_RING_BUFFER_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__RING_BUFFER_H_
+#endif//GASHA_INCLUDED_RING_BUFFER_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __PLATFORM_AUTO_SETTINGS_H_
-#define __PLATFORM_AUTO_SETTINGS_H_
+#ifndef GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_H
+#define GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_H
 
 //--------------------------------------------------------------------------------
 // platform_atuo_settings.h
@@ -66,29 +66,28 @@
 	#define GASHA_PLATFORM_ARCHITECTURE_NAME "x64"//プラットフォームアーキテクチャ名
 	#define GASHA_IS_64BIT//プラットフォーム：64bit
 	#define GASHA_PLATFORM_ARCHITECTURE_BITS 64//プラットフォームアーキテクチャ（ビット長）
-	#ifndef __LITTLE_ENDIAN__	
-		#define __LITTLE_ENDIAN__//リトルエンディアン
-	#endif//__LITTLE_ENDIAN__	
+	//#define GASHA_IS_LITTLE_ENDIAN//リトルエンディアン
 #elif defined(__i386__) || defined(_M_IX86)
 	#define GASHA_IS_X86//プラットフォームアーキテクチャ：x86系
 	#define GASHA_PLATFORM_ARCHITECTURE_NAME "x86"//プラットフォームアーキテクチャ名
 	#define GASHA_IS_32BIT//プラットフォーム：32bit
 	#define GASHA_PLATFORM_ARCHITECTURE_BITS 32//プラットフォームアーキテクチャ（ビット長）
-	#ifndef __LITTLE_ENDIAN__	
-		#define __LITTLE_ENDIAN__//リトルエンディアン
-	#endif//__LITTLE_ENDIAN__	
+	//#define GASHA_IS_LITTLE_ENDIAN//リトルエンディアン
 #endif//__x86_64__/__i386__
 
 //エンディアン判定
-#ifdef __BIG_ENDIAN__
+#if defined(__BIG_ENDIAN__) || defined(GASHA_IS_BIG_ENDIAN)
 	#define GASHA_IS_BIG_ENDIAN//プラットフォーム：ビッグエンディアン
 	#define GASHA_ENDIAN_NAME "big"//エンディアン名
 #endif//__BIG_ENDIAN__ 
-#ifdef __LITTLE_ENDIAN__
+#if defined(__LITTLE_ENDIAN__) || defined(GASHA_IS_LITTLE_ENDIAN)
 	#define GASHA_IS_LITTLE_ENDIAN//プラットフォーム：リトルエンディアン
 	#define GASHA_ENDIAN_NAME "little"//エンディアン名
 #endif//__LITTLE_ENDIAN__ 
+#if !defined(GASHA_ENDIAN_NAME)
+	#define GASHA_ENDIAN_NAME "(unknown)"//エンディアン名
+#endif//GASHA_ENDIAN_NAME
 
-#endif//__PLATFORM_AUTO_SETTINGS_H_
+#endif//GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_H
 
 // End of file

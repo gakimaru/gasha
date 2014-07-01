@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __PRIORITY_QUEUE_CPP_H_
-#define __PRIORITY_QUEUE_CPP_H_
+#ifndef GASHA_INCLUDED_PRIORITY_QUEUE_CPP_H
+#define GASHA_INCLUDED_PRIORITY_QUEUE_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -286,6 +286,6 @@ namespace priority_queue
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__PRIORITY_QUEUE_CPP_H_
+#endif//GASHA_INCLUDED_PRIORITY_QUEUE_CPP_H
 
 // End of file

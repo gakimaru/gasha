@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __CPUID_H_
-#define __CPUID_H_
+#ifndef GASHA_INCLUDED_CPUID_H
+#define GASHA_INCLUDED_CPUID_H
 
 //--------------------------------------------------------------------------------
 // cpuid.h
@@ -29,6 +29,6 @@ std::uint64_t _xgetbv(const std::uint32_t xcr);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__CPUID_H_
+#endif//GASHA_INCLUDED_CPUID_H
 
 // End of file

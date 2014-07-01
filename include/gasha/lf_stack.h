@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCKFREE_STACK_H_
-#define __LOCKFREE_STACK_H_
+#ifndef GASHA_INCLUDED_LOCKFREE_STACK_H
+#define GASHA_INCLUDED_LOCKFREE_STACK_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -144,6 +144,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/lf_stack.cpp.h>
 #endif//GASHA_LF_STACK_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__LOCKFREE_STACK_H_
+#endif//GASHA_INCLUDED_LOCKFREE_STACK_H
 
 // End of file

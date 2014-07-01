@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RING_BUFFER_CPP_H_
-#define __RING_BUFFER_CPP_H_
+#ifndef GASHA_INCLUDED_RING_BUFFER_CPP_H
+#define GASHA_INCLUDED_RING_BUFFER_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -600,6 +600,6 @@ namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__RING_BUFFER_CPP_H_
+#endif//GASHA_INCLUDED_RING_BUFFER_CPP_H
 
 // End of file

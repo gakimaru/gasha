@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __INSERTION_SORT_H_
-#define __INSERTION_SORT_H_
+#ifndef GASHA_INCLUDED_INSERTION_SORT_H
+#define GASHA_INCLUDED_INSERTION_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -240,6 +240,6 @@ singlyLinkedListSortingFuncSet(singlyLinkedListInsertionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__INSERTION_SORT_H_
+#endif//GASHA_INCLUDED_INSERTION_SORT_H
 
 // End of file

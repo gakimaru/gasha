@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHEAR_SORT_H_
-#define __SHEAR_SORT_H_
+#ifndef GASHA_INCLUDED_SHEAR_SORT_H
+#define GASHA_INCLUDED_SHEAR_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -225,6 +225,6 @@ sortingFuncSet(shearSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHEAR_SORT_H_
+#endif//GASHA_INCLUDED_SHEAR_SORT_H
 
 // End of file

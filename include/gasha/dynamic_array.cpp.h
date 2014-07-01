@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __DYNAMIC_ARRAY_CPP_H_
-#define __DYNAMIC_ARRAY_CPP_H_
+#ifndef GASHA_INCLUDED_DYNAMIC_ARRAY_CPP_H
+#define GASHA_INCLUDED_DYNAMIC_ARRAY_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -583,6 +583,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__DYNAMIC_ARRAY_CPP_H_
+#endif//GASHA_INCLUDED_DYNAMIC_ARRAY_CPP_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LINKED_LIST_H_
-#define __LINKED_LIST_H_
+#ifndef GASHA_INCLUDED_LINKED_LIST_H
+#define GASHA_INCLUDED_LINKED_LIST_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -899,6 +899,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/linked_list.cpp.h>
 #endif//GASHA_LINKED_LIST_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__LINKED_LIST_H_
+#endif//GASHA_INCLUDED_LINKED_LIST_H
 
 // End of file

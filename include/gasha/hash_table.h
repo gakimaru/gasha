@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __HASH_TABLE_H_
-#define __HASH_TABLE_H_
+#ifndef GASHA_INCLUDED_HASH_TABLE_H
+#define GASHA_INCLUDED_HASH_TABLE_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -29,6 +29,7 @@
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
 #include <gasha/basic_math.h>//基本算術（素数計算）
+#include <gasha/limits.h>//限界値
 #include <gasha/crc32.h>//CRC32
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
@@ -113,9 +114,9 @@ namespace hash_table
 	//--------------------
 	//開番地法ハッシュテーブル操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public hash_table::baseOpe<派生構造体名, 要素の型, キーの型, キーの最小値= 0u, キーの最大値 = 0xffffffffu, 不正なキー = 0xffffffffu>
+	//  //struct 派生構造体名 : public hash_table::baseOpe<派生構造体名, 要素の型>
 	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
-	//	struct ope : public hash_table::baseOpe<ope, data_t, crc32_t, 500>
+	//	struct ope : public hash_table::baseOpe<ope, data_t, crc32_t>
 	//	{
 	//		//データ置換属性 ※必要に応じて定義
 	//		static const replaceAttr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
@@ -128,26 +129,25 @@ namespace hash_table
 	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
 	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
+	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE>
 	struct baseOpe
 	{
-		//定数
-		static const KEY_TYPE KEY_MIN = _KEY_MIN;//キーの最小値
-		static const KEY_TYPE KEY_MAX = _KEY_MAX;//キーの最大値
-		static const KEY_TYPE INVALID_KEY = _INVALID_KEY;//不正なキー
-		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
-		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限
-		static const std::size_t INDEX_STEP_BASE = 5;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
-
 		//型
 		typedef OPE_TYPE ope_type;//データ操作型
 		typedef VALUE_TYPE value_type;//値型
 		typedef KEY_TYPE key_type;//キー型
+		typedef typename GASHA_ numeric_limits<key_type>::range_type key_range_type;//キーの範囲型
 		typedef hash_table::replaceAttr_t replaceAttr_t;//置換属性
-
+		
 		//定数
 		//※デフォルト
 		//※変更したい場合は、派生クラスで定数を再定義する
+		static const KEY_TYPE KEY_MIN = GASHA_ numeric_limits<KEY_TYPE>::MIN;//キーの最小値
+		static const KEY_TYPE KEY_MAX = GASHA_ numeric_limits<KEY_TYPE>::MAX - 1;//キーの最大値
+		static const KEY_TYPE INVALID_KEY = GASHA_ numeric_limits<KEY_TYPE>::MAX;//不正なキー
+		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
+		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限
+		static const std::size_t INDEX_STEP_BASE = 5;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
 		static const replaceAttr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
 
 		//キーを取得
@@ -187,6 +187,7 @@ namespace hash_table
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::value_type value_type; \
 		typedef typename ope_type::key_type key_type; \
+		typedef typename ope_type::key_range_type key_range_type; \
 		typedef value_type& reference; \
 		typedef const value_type& const_reference; \
 		typedef value_type* pointer; \
@@ -220,26 +221,26 @@ namespace hash_table
 	public:
 		//メタ関数
 		//キー範囲定数計算（２バリエーション）
-		template <bool COND, typename size_type, typename key_type, key_type KEY_MIN, key_type KEY_MAX>
+		template <bool COND, key_type KEY_MIN, key_type KEY_MAX>
 		struct calcKeyRangeImpl{
-			static const key_type value = KEY_MAX - KEY_MIN + 1;
+			static const key_range_type value = static_cast<key_range_type>(KEY_MAX) - static_cast<key_range_type>(KEY_MIN)+1;
 		};
-		template <typename size_type, typename key_type, key_type KEY_MIN, key_type KEY_MAX>
-		struct calcKeyRangeImpl<true, size_type, key_type, KEY_MIN, KEY_MAX>{
-			static const key_type value = 0;
+		template <key_type KEY_MIN, key_type KEY_MAX>
+		struct calcKeyRangeImpl<true, KEY_MIN, KEY_MAX>{
+			static const key_range_type value = 0;
 		};
 		//インデックス計算関数（２バリエーション）
-		template <bool COND, typename size_type, typename index_type, typename key_type, size_type TABLE_SIZE, key_type KEY_MIN, key_type KEY_RANGE>
+		template <bool COND, size_type TABLE_SIZE, key_type KEY_MIN, key_range_type KEY_RANGE>
 		struct calcIndexImpl{
 			inline static index_type calc(const key_type key){ return (key - KEY_MIN) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズより大きい場合
 		};
-		template <typename size_type, typename index_type, typename key_type, size_type TABLE_SIZE, key_type KEY_MIN, key_type KEY_RANGE>
-		struct calcIndexImpl<true, size_type, index_type, key_type, TABLE_SIZE, KEY_MIN, KEY_RANGE>{
+		template <size_type TABLE_SIZE, key_type KEY_MIN, key_range_type KEY_RANGE>
+		struct calcIndexImpl<true, TABLE_SIZE, KEY_MIN, KEY_RANGE>{
 			inline static index_type calc(const key_type key){ return (key - KEY_MIN) * (TABLE_SIZE / KEY_RANGE) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズ以下の場合
 		};
 	public:
 		//定数
-		static const key_type KEY_RANGE = calcKeyRangeImpl<((KEY_MIN == 0u && KEY_MAX == 0xffffffffu) || KEY_MIN >= KEY_MAX), size_type, key_type, KEY_MIN, KEY_MAX>::value;//キーの範囲
+		static const key_range_type KEY_RANGE = calcKeyRangeImpl<(KEY_MIN >= KEY_MAX), KEY_MIN, KEY_MAX>::value;//キーの範囲
 		//静的アサーション
 		static_assert(TABLE_SIZE > INDEX_STEP_BASE, "hash_table::container: TABLE_SIZE is required larger than INDEX_STEP_BASE.");
 		static_assert(GASHA_ isStaticPrime<INDEX_STEP_BASE>::value == true, "hash_table::container: INDEX_STEP_BASE is required prime.");
@@ -659,7 +660,7 @@ namespace hash_table
 		inline int getFindingCycleLimit() const { return FINDING_CYCLE_LIMIT; }//検索時の巡回回数の制限を取得
 		inline key_type getKeyMin() const { return KEY_MIN; }//キーの最小値を取得
 		inline key_type getKeyMax() const { return KEY_MAX; }//キーの最大値を取得
-		inline key_type getKeyRange() const { return KEY_RANGE; }//キーの範囲を取得
+		inline key_range_type getKeyRange() const { return KEY_RANGE; }//キーの範囲を取得
 		inline index_type getIndexStepBase() const { return INDEX_STEP_BASE; }//検索巡回時のインデックスの歩幅の基準値（実際のステップ数は、この値を係数にキーから算出する）
 		inline int getUsingCount() const { return m_usingCount; }//使用中データ数を取得
 		inline int getDeletedCount() const { return m_deletedCount; }//削除済みデータ数を取得
@@ -853,8 +854,8 @@ namespace hash_table
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
 //開番地法ハッシュテーブル操作用テンプレート構造体
-template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t, KEY_TYPE _KEY_MIN = 0u, KEY_TYPE _KEY_MAX = 0xffffffffu, KEY_TYPE _INVALID_KEY = 0xffffffffu>
-using hashTbl_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE, _KEY_MIN, _KEY_MAX, _INVALID_KEY>;
+template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
+using hashTbl_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE>;
 
 //開番地法ハッシュテーブルコンテナ
 template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -888,6 +889,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__HASH_TABLE_H_
+#endif//GASHA_INCLUDED_HASH_TABLE_H
 
 // End of file

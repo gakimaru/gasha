@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_QUEUE_INL_
-#define __SHARED_QUEUE_INL_
+#ifndef GASHA_INCLUDED_SHARED_QUEUE_INL
+#define GASHA_INCLUDED_SHARED_QUEUE_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -29,6 +29,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHARED_QUEUE_INL_
+#endif//GASHA_INCLUDED_SHARED_QUEUE_INL
 
 // End of file

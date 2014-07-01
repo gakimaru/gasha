@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCKFREE_QUEUE_H_
-#define __LOCKFREE_QUEUE_H_
+#ifndef GASHA_INCLUDED_LOCKFREE_QUEUE_H
+#define GASHA_INCLUDED_LOCKFREE_QUEUE_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -150,6 +150,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/lf_queue.cpp.h>
 #endif//GASHA_LF_QUEUE_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__LOCKFREE_QUEUE_H_
+#endif//GASHA_INCLUDED_LOCKFREE_QUEUE_H
 
 // End of file

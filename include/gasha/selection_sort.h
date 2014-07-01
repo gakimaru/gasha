@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SELECTION_SORT_H_
-#define __SELECTION_SORT_H_
+#ifndef GASHA_INCLUDED_SELECTION_SORT_H
+#define GASHA_INCLUDED_SELECTION_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -81,6 +81,6 @@ sortingFuncSet(selectionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SELECTION_SORT_H_
+#endif//GASHA_INCLUDED_SELECTION_SORT_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RB_TREE_CPP_H_
-#define __RB_TREE_CPP_H_
+#ifndef GASHA_INCLUDED_RB_TREE_CPP_H
+#define GASHA_INCLUDED_RB_TREE_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -670,6 +670,6 @@ namespace rb_tree
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__RB_TREE_CPP_H_
+#endif//GASHA_INCLUDED_RB_TREE_CPP_H
 
 // End of file

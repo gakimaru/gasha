@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SORT_BASIC_H_
-#define __SORT_BASIC_H_
+#ifndef GASHA_INCLUDED_SORT_BASIC_H
+#define GASHA_INCLUDED_SORT_BASIC_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -187,6 +187,6 @@ struct less{
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SORT_BASIC_H_
+#endif//GASHA_INCLUDED_SORT_BASIC_H
 
 // End of file

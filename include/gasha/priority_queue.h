@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __PRIORITY_QUEUE_H_
-#define __PRIORITY_QUEUE_H_
+#ifndef GASHA_INCLUDED_PRIORITY_QUEUE_H
+#define GASHA_INCLUDED_PRIORITY_QUEUE_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -516,6 +516,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
 
-#endif//__PRIORITY_QUEUE_H_
+#endif//GASHA_INCLUDED_PRIORITY_QUEUE_H
 
 // End of file

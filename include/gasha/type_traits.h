@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __TYPE_TRAITS_H_
-#define __TYPE_TRAITS_H_
+#ifndef GASHA_INCLUDED_TYPE_TRAITS_H
+#define GASHA_INCLUDED_TYPE_TRAITS_H
 
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ】
@@ -110,6 +110,6 @@ public:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__TYPE_TRAITS_H_
+#endif//GASHA_INCLUDED_TYPE_TRAITS_H
 
 // End of file

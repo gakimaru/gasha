@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __HASH_TABLE_CPP_H_
-#define __HASH_TABLE_CPP_H_
+#ifndef GASHA_INCLUDED_HASH_TABLE_CPP_H
+#define GASHA_INCLUDED_HASH_TABLE_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -725,6 +725,6 @@ namespace hash_table
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__HASH_TABLE_CPP_H_
+#endif//GASHA_INCLUDED_HASH_TABLE_CPP_H
 
 // End of file

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef _BINARY_SEARCH_H_
-#define _BINARY_SEARCH_H_
+#ifndef GASHA_INCLUDED_BINARY_SEARCH_H
+#define GASHA_INCLUDED_BINARY_SEARCH_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -223,6 +223,6 @@ singlyLinkedListSearchFuncSetByComparison(singlyLinkedListBinarySearch);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//_BINARY_SEARCH_H_
+#endif//GASHA_INCLUDED_BINARY_SEARCH_H
 
 // End of file

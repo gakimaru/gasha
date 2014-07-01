@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SINGLY_LINKED_LIST_INL_
-#define __SINGLY_LINKED_LIST_INL_
+#ifndef GASHA_INCLUDED_SINGLY_LINKED_LIST_INL
+#define GASHA_INCLUDED_SINGLY_LINKED_LIST_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -890,6 +890,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__SINGLY_LINKED_LIST_INL_
+#endif//GASHA_INCLUDED_SINGLY_LINKED_LIST_INL
 
 // End of file

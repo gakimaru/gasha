@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __INTRO_SORT_H_
-#define __INTRO_SORT_H_
+#ifndef GASHA_INCLUDED_INTRO_SORT_H
+#define GASHA_INCLUDED_INTRO_SORT_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -311,6 +311,6 @@ iteratorSortingFuncSet(iteratorIntroSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__INTRO_SORT_H_
+#endif//GASHA_INCLUDED_INTRO_SORT_H
 
 // End of file

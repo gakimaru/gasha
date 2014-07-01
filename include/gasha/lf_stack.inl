@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCKFREE_STACK_INL_
-#define __LOCKFREE_STACK_INL_
+#ifndef GASHA_INCLUDED_LOCKFREE_STACK_INL
+#define GASHA_INCLUDED_LOCKFREE_STACK_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -29,6 +29,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__LOCKFREE_STACK_INL_
+#endif//GASHA_INCLUDED_LOCKFREE_STACK_INL
 
 // End of file

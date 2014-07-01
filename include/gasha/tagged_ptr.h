@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __TAGGED_PTR_H_
-#define __TAGGED_PTR_H_
+#ifndef GASHA_INCLUDED_TAGGED_PTR_H
+#define GASHA_INCLUDED_TAGGED_PTR_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -142,6 +142,6 @@ struct taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__TAGGED_PTR_H_
+#endif//GASHA_INCLUDED_TAGGED_PTR_H
 
 // End of file

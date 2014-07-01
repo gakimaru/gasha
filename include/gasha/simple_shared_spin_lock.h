@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SIMPLE_SHARED_SPIN_LOCK_H_
-#define __SIMPLE_SHARED_SPIN_LOCK_H_
+#ifndef GASHA_INCLUDED_SIMPLE_SHARED_SPIN_LOCK_H
+#define GASHA_INCLUDED_SIMPLE_SHARED_SPIN_LOCK_H
 
 //--------------------------------------------------------------------------------
 // simple_shared_spin_lock.h
@@ -103,6 +103,6 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SIMPLE_SHARED_SPIN_LOCK_H_
+#endif//GASHA_INCLUDED_SIMPLE_SHARED_SPIN_LOCK_H
 
 // End of file

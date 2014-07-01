@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __RING_BUFFER_INL_
-#define __RING_BUFFER_INL_
+#ifndef GASHA_INCLUDED_RING_BUFFER_INL
+#define GASHA_INCLUDED_RING_BUFFER_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -665,6 +665,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//__RING_BUFFER_INL_
+#endif//GASHA_INCLUDED_RING_BUFFER_INL
 
 // End of file

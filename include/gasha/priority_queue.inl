@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __PRIORITY_QUEUE_INL_
-#define __PRIORITY_QUEUE_INL_
+#ifndef GASHA_INCLUDED_PRIORITY_QUEUE_INL
+#define GASHA_INCLUDED_PRIORITY_QUEUE_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -180,6 +180,6 @@ namespace priority_queue
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__PRIORITY_INL_
+#endif//GASHA_INCLUDED_PRIORITY_QUEUE_INL
 
 // End of file

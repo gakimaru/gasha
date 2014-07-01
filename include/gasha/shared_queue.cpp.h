@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __SHARED_QUEUE_CPP_H_
-#define __SHARED_QUEUE_CPP_H_
+#ifndef GASHA_INCLUDED_SHARED_QUEUE_CPP_H
+#define GASHA_INCLUDED_SHARED_QUEUE_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -137,6 +137,6 @@ sharedQueue<T, POOL_SIZE, LOCK_TYPE>::~sharedQueue()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__SHARED_QUEUE_CPP_H_
+#endif//GASHA_INCLUDED_SHARED_QUEUE_CPP_H
 
 // End of file

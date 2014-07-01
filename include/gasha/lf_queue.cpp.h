@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef __LOCKFREE_QUEUE_CPP_H_
-#define __LOCKFREE_QUEUE_CPP_H_
+#ifndef GASHA_INCLUDED_LOCKFREE_QUEUE_CPP_H
+#define GASHA_INCLUDED_LOCKFREE_QUEUE_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
@@ -261,6 +261,6 @@ lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_V
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//__LOCKFREE_QUEUE_CPP_H_
+#endif//GASHA_INCLUDED_LOCKFREE_QUEUE_CPP_H
 
 // End of file
