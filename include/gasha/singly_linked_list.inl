@@ -822,7 +822,7 @@ namespace singly_linked_list
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearch(COMPARISON comparison)
 	{
 		const node_type* found_node = singly_linked_list::binarySearch<ope_type>(m_first, comparison);
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);

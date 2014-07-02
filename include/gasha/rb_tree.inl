@@ -1705,6 +1705,11 @@ namespace rb_tree
 		return m_isEnd;
 	}
 	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::key_type container<OPE_TYPE>::iterator::getKey() const//現在のキー
+	{
+		return ope_type::getKey(*m_value);
+	}
+	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::iterator::getValue() const//現在の値（ノード）
 	{
 		return m_value;
@@ -1860,6 +1865,11 @@ namespace rb_tree
 	inline bool container<OPE_TYPE>::reverse_iterator::isEnd() const//終端か？
 	{
 		return m_isEnd;
+	}
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::key_type container<OPE_TYPE>::reverse_iterator::getKey() const//現在のキー
+	{
+		return ope_type::getKey(*m_value);
 	}
 	template<class OPE_TYPE>
 	inline const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::reverse_iterator::getValue() const//現在の値（ノード）

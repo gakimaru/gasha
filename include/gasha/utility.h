@@ -77,10 +77,8 @@ inline T1& minObj(T1&& obj1, T2&& obj2, T3&& obj3, Tx&&... nx){ return GASHA_ mi
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
-//データ型に応じた処理クラス
-//----------------------------------------
+//型に応じた処理クラス
 //※直接使用しない
-//----------------------------------------
 template<class T>
 struct _swapArithmetic{
 	inline static void exec(T& val1, T& val2)
@@ -127,9 +125,7 @@ struct _swapObjects<T*>{
 
 //----------------------------------------
 //値の交換
-//----------------------------------------
 //※直接使用する関数
-//----------------------------------------
 template<class T>
 inline void swapValues(T& val1, T& val2)
 {
@@ -141,10 +137,8 @@ inline void swapValues(T& val1, T& val2)
 
 //----------------------------------------
 //値の交換
-//----------------------------------------
 //※イテレータ対応版
 //※直接使用する関数
-//----------------------------------------
 template<class ITERATOR>
 inline void iteratorSwapValues(ITERATOR val1, ITERATOR val2)
 {
@@ -166,10 +160,8 @@ inline void iteratorSwapValues(ITERATOR val1, ITERATOR val2)
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
-//データ型に応じた処理クラス
-//----------------------------------------
+//型に応じた処理クラス
 //※直接使用しない
-//----------------------------------------
 template<class T>
 struct _rotateArithmetic{
 	inline static void exec(T* val1, T* val2, int step)
@@ -236,9 +228,7 @@ struct _rotateObjects<T*>{
 
 //----------------------------------------
 //値のローテーション
-//----------------------------------------
 //※直接使用する関数
-//----------------------------------------
 template<class T>
 inline void rotateValues(T* val1, T* val2, int step)
 {
@@ -250,11 +240,8 @@ inline void rotateValues(T* val1, T* val2, int step)
 
 //----------------------------------------
 //値のローテーション
-//----------------------------------------
 //※イテレータ対応版
 //※直接使用する関数
-//----------------------------------------
-//データのローテーション
 template<class ITERATOR>
 inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, typename ITERATOR::difference_type step)
 {

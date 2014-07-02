@@ -799,7 +799,7 @@ namespace singly_linked_list
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison);
+		iterator binarySearch(COMPARISON comparison);
 	#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド

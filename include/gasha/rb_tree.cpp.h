@@ -136,34 +136,36 @@ namespace rb_tree
 			return 0;
 		if (!m_value && !rhs.m_value)
 			return 0;
+		if (!m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_value && !rhs.m_isEnd)
+			return 0;
 		stack_t<OPE_TYPE> stack;
-		difference_type diff = 0;
-		if (rhs.m_value)
+		if (!rhs.m_isEnd)
 		{
 			stack.reset();
+			difference_type diff = 0;
 			const node_type* value = searchNode<ope_type>(m_con->m_root, *rhs.m_value, stack);
-			if (!rhs.m_isEnd)
-			{
-				while (value && value != m_value)
-				{
-					value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
-					++diff;
-				}
-				if (value == m_value)
-					return diff;
-			}
-			diff = 0;
-		}
-		if (m_value)
-		{
-			stack.reset();
-			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
-			while (value && value != rhs.m_value)
+			const node_type* end = m_value;
+			while (value && value != end)
 			{
 				value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
 				++diff;
 			}
-			if (value == m_value)
+			if (value == end)
+				return diff;
+		}
+		{
+			stack.reset();
+			difference_type diff = 0;
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
+			const node_type* end = rhs.m_value;
+			while (value && value != end)
+			{
+				value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
+				--diff;
+			}
+			if (value == end)
 				return diff;
 		}
 		return 0;
@@ -172,10 +174,11 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
 	{
-		if (!m_con->m_root || !m_value)
+		if (!m_con->m_root)
 			return;
 		value_type* prev = m_value;
-		m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
+		if (m_value)
+			m_value = const_cast<value_type*>(getNextNode<ope_type>(*m_value, m_stack));
 		m_isEnd = (prev && !m_value);
 	}
 	template<class OPE_TYPE>
@@ -386,34 +389,36 @@ namespace rb_tree
 			return 0;
 		if (!m_value && !rhs.m_value)
 			return 0;
+		if (!m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_value && !rhs.m_isEnd)
+			return 0;
 		stack_t<OPE_TYPE> stack;
-		difference_type diff = 0;
-		if (m_value)
+		if (!rhs.m_isEnd)
 		{
 			stack.reset();
-			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
-			if (!m_isEnd)
-			{
-				while (value && value != rhs.m_value)
-				{
-					value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
-					++diff;
-				}
-				if (value == m_value)
-					return diff;
-			}
-			diff = 0;
-		}
-		if (rhs.m_value)
-		{
-			stack.reset();
+			difference_type diff = 0;
 			const node_type* value = searchNode<ope_type>(m_con->m_root, *rhs.m_value, stack);
-			while (value && value != m_value)
+			const node_type* end = m_value;
+			while (value && value != end)
 			{
-				value = const_cast<node_type*>(getNextNode<ope_type>(*value, stack));
+				value = const_cast<node_type*>(getPrevNode<ope_type>(*value, stack));
+				++diff;
+			}
+			if (value == end)
+				return diff;
+		}
+		{
+			stack.reset();
+			difference_type diff = 0;
+			const node_type* value = searchNode<ope_type>(m_con->m_root, *m_value, stack);
+			const node_type* end = rhs.m_value;
+			while (value && value != end)
+			{
+				value = const_cast<node_type*>(getPrevNode<ope_type>(*value, stack));
 				--diff;
 			}
-			if (value == m_value)
+			if (value == end)
 				return diff;
 		}
 		return 0;
@@ -422,10 +427,11 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const
 	{
-		if (!m_con->m_root || !m_value)
+		if (!m_con->m_root)
 			return;
 		value_type* prev = m_value;
-		m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
+		if (m_value)
+			m_value = const_cast<value_type*>(getPrevNode<ope_type>(*m_value, m_stack));
 		m_isEnd = (prev && !m_value);
 	}
 	template<class OPE_TYPE>
@@ -652,6 +658,7 @@ namespace rb_tree
 	void container<OPE_TYPE>::_find(typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key, const match_type_t type) const
 	{
 		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, type));
+		ite.m_isEnd = (ite.m_value == nullptr);
 	}
 
 	//キーが一致する範囲を返す
@@ -659,6 +666,7 @@ namespace rb_tree
 	void container<OPE_TYPE>::_equal_range(typename container<OPE_TYPE>::iterator& ite, const typename container<OPE_TYPE>::key_type key) const
 	{
 		ite.m_value = const_cast<node_type*>(searchNode<ope_type>(m_root, key, ite.m_stack, FOR_MATCH));
+		ite.m_isEnd = (ite.m_value == nullptr);
 		while (ite.m_value && ope_type::getKey(*ite) == key)
 			++ite;
 	}

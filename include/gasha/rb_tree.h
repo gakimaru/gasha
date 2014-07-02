@@ -533,6 +533,7 @@ namespace rb_tree
 			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
+			inline key_type getKey() const;//現在のキー
 			inline const value_type* getValue() const;//現在の値（ノード）
 			inline value_type* getValue();//現在の値（ノード）
 		private:
@@ -649,6 +650,7 @@ namespace rb_tree
 			inline bool isEnabled() const;
 			inline bool isNotEnabled() const { return !isEnabled(); }
 			inline bool isEnd() const;//終端か？
+			inline key_type getKey() const;//現在のキー
 			inline const value_type* getValue() const;//現在の値（ノード）
 			inline value_type* getValue();//現在の値（ノード）
 		public:
