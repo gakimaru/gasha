@@ -245,7 +245,7 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
 	{
-		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || m_index < rhs.m_index)
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(m_index) - static_cast<difference_type>(rhs.m_index);
 	}
@@ -403,7 +403,7 @@ namespace binary_heap
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
 	{
-		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX || rhs.m_index < m_index)
+		if (m_index == INVALID_INDEX || rhs.m_index == INVALID_INDEX)
 			return 0;
 		return static_cast<difference_type>(rhs.m_index) - static_cast<difference_type>(m_index);
 	}
@@ -529,7 +529,7 @@ namespace binary_heap
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
-		node_type* obj = pushBegin(std::forward<Tx>(args)...);
+		node_type* obj = _pushBegin(std::forward<Tx>(args)...);
 		if (!obj)
 			return nullptr;
 		return pushEnd();

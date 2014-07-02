@@ -121,18 +121,18 @@ namespace priority_queue
 
 		//シーケンス番号を比較
 		//※デフォルト
-		//※lhsの方が小さいければ true を返す
+		//※rhsの方が小さいければ true を返す（優先度の逆順判定）
 		inline static bool lessSeqNo(const seq_no_type lhs, const seq_no_type rhs)
 		{
-			return lhs < rhs;
+			return lhs > rhs;
 		}
 
 		//優先度とシーケンス番号を比較する
-		//※lhsの方が優先度が高ければ true を返す
-		//※優先度が同じなら、シー件番号が小さければ true を返す
+		//※lhsの方が優先度が低ければ true を返す（優先度の逆順判定）
+		//※優先度が同じなら、rhsの方のシーケンス番号が小さければ true を返す
 		inline static bool lessPriorityAndSeqNo(const int compare_priority, const seq_no_type lhs, const seq_no_type rhs)
 		{
-			return compare_priority > 0 ? true : compare_priority == 0 ? ope_type::lessSeqNo(lhs, rhs) : false;
+			return compare_priority < 0 ? true : compare_priority == 0 ? ope_type::lessSeqNo(lhs, rhs) : false;
 		}
 
 		//ノード比較用プレディケート関数オブジェクト
@@ -289,16 +289,16 @@ namespace priority_queue
 	public:
 		//メソッド：ロック取得系
 		//単一ロック取得
-		inline GASHA_ unique_lock<lock_type> lockUnique(){ GASHA_ unique_lock<lock_type> lock(*this); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique() const { GASHA_ unique_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped() const { GASHA_ lock_guard<lock_type> lock(*this); return lock; }
 	public:
 		//単一操作オブジェクト
-		inline uniqueOperation operationunique(){ uniqueOperation operation(*this); return operation; }
+		inline uniqueOperation operationUnique(){ uniqueOperation operation(*this); return operation; }
 	public:
 		//メソッド：基本情報系
 		inline size_type max_size() const { return m_container.max_size(); }//最大要素数を取得

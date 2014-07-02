@@ -130,7 +130,7 @@ namespace priority_queue
 	typename container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::node_type* container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::enqueueBegin(const typename container<OPE_TYPE, _TABLE_SIZE, CONTAINER_TYPE>::priority_type priority, Tx&&... args)
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
-		node_type* obj = _enqueueBegin(std::forward<Tx>(args)...);//エンキュー開始
+		node_type* obj = _enqueueBegin(priority, std::forward<Tx>(args)...);//エンキュー開始
 		if (!obj)
 			m_lock.unlock();//プッシュ失敗時はロック解放
 		return obj;

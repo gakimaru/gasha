@@ -524,13 +524,16 @@ namespace binary_heap
 	public:
 		//メソッド：ロック取得系
 		//単一ロック取得
-		inline GASHA_ unique_lock<lock_type> lockUnique(){ GASHA_ unique_lock<lock_type> lock(*this); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique() const { GASHA_ unique_lock<lock_type> lock(*this); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
-		inline GASHA_ lock_guard<lock_type> lockScoped(){ GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+		inline GASHA_ lock_guard<lock_type> lockScoped() const { GASHA_ lock_guard<lock_type> lock(*this); return lock; }
+	public:
+		//単一操作オブジェクト
+		inline uniqueOperation operationUnique(){ uniqueOperation operation(*this); return operation; }
 	public:
 		//メソッド：イテレータ取得系
 		//※自動的なロック取得は行わないので、マルチスレッドで利用する際は、
@@ -551,9 +554,6 @@ namespace binary_heap
 		inline reverse_iterator rbegin() { reverse_iterator ite(*this, false); return ite; }
 		inline reverse_iterator rend() { reverse_iterator ite(*this, true); return ite; }
 	#endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
-	public:
-		//単一操作オブジェクト
-		inline uniqueOperation operationunique(){ uniqueOperation operation(*this); return operation; }
 	private:
 		//メソッド：要素アクセス系（独自拡張版）
 		//※範囲チェックなし（非公開）

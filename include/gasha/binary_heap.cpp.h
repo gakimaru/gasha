@@ -404,7 +404,7 @@ namespace binary_heap
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return false;
-		const node_type* obj = popBegin();
+		const node_type* obj = _popBegin();
 		if (!obj)
 			return false;
 		dst = *obj;
