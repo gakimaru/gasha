@@ -51,11 +51,12 @@ CXXFLAGS := \
 	-Wno-switch \
 	-Wno-unknown-pragmas \
 	-Wno-unused-local-typedefs \
-	-msse4.2 \
+	-mavx \
+	-fabi-version=0 \
 	-fopenmp \
 
 #【補足】C++コンパイルオプションの警告オプション
-# 以下、Wallに含まれるもの
+# 以下、-Wallに含まれるもの
 #  -Wcomment
 #  -Wformat
 #  -Wimplicit-int                        ←C++には不要
@@ -73,6 +74,9 @@ CXXFLAGS := \
 #  -Wunknown-pragmas ←この警告を出したくない
 #  以下、GCC4.8追加(?)
 #  -Wunused-local-typedefs ←この警告を出したくない
+# -wavx ... AVX有効化
+# -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
+# -fopenmp ... OpenMP有効化
 
 # C++コンパイルオプション（ビルド設定別）
 ifeq ($(BUILD_TYPE),Release)

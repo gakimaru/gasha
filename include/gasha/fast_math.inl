@@ -96,8 +96,12 @@ template<>
 inline float operator/<float>(const float lvalue, const fast_div<float>&& rvalue)
 {
 #ifdef GASHA_FAST_DIV_FLOAT_USE_SSE
+	const __m128 div_m128 = _mm_set_ss(rvalue);//SSEレジスタに除数を代入
+	__m128 rcp_div_m128 = _mm_rcp_ss(div_m128);//逆数の近似値を取得
+	rcp_div_m128 = _mm_mul_ss(rcp_div_m128, _mm_sub_ss(_mm_set_ss(2.f), _mm_mul_ss(div_m128, rcp_div_m128)));//ニュートン法で逆数の精度を高める
+	const __m128 result_m128 = _mm_mul_ss(_mm_set_ss(lvalue), rcp_div_m128);//逆数を乗算
 	float result;
-	_mm_store_ss(&result, _mm_set1_ps(lvalue) / std::move(fast_div<__m128>(_mm_set1_ps(rvalue))));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_DIV_FLOAT_USE_SSE
 	return lvalue / static_cast<float>(rvalue);
@@ -158,8 +162,11 @@ template<>
 inline float operator/<float>(const float lvalue, const fastest_div<float>&& rvalue)
 {
 #ifdef GASHA_FAST_DIV_FLOAT_USE_SSE
+	const __m128 div_m128 = _mm_set_ss(rvalue);//SSEレジスタに除数を代入
+	__m128 rcp_div_m128 = _mm_rcp_ss(div_m128);//逆数の近似値を取得
+	const __m128 result_m128 = _mm_mul_ss(_mm_set_ss(lvalue), rcp_div_m128);//逆数を乗算
 	float result;
-	_mm_store_ss(&result, _mm_set1_ps(lvalue) / std::move(fastest_div<__m128>(_mm_set1_ps(rvalue))));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_DIV_FLOAT_USE_SSE
 	return lvalue / static_cast<float>(rvalue);
@@ -224,8 +231,13 @@ template<>
 inline float operator/<float>(const float lvalue, const semifast_div<float>&& rvalue)
 {
 #ifdef GASHA_FAST_DIV_FLOAT_USE_SSE
+	const __m128 div_m128 = _mm_set_ss(rvalue);//SSEレジスタに除数を代入
+	__m128 rcp_div_m128 = _mm_rcp_ss(div_m128);//逆数の近似値を取得
+	rcp_div_m128 = _mm_mul_ss(rcp_div_m128, _mm_sub_ss(_mm_set_ss(2.f), _mm_mul_ss(div_m128, rcp_div_m128)));//ニュートン法で逆数の精度を高める
+	rcp_div_m128 = _mm_mul_ss(rcp_div_m128, _mm_sub_ss(_mm_set_ss(2.f), _mm_mul_ss(div_m128, rcp_div_m128)));//2回目
+	const __m128 result_m128 = _mm_mul_ss(_mm_set_ss(lvalue), rcp_div_m128);//逆数を乗算
 	float result;
-	_mm_store_ss(&result, _mm_set1_ps(lvalue) / std::move(semifast_div<__m128>(_mm_set1_ps(rvalue))));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_DIV_FLOAT_USE_SSE
 	return lvalue / static_cast<float>(rvalue);
@@ -282,8 +294,10 @@ template<>
 inline float operator/<float>(const float lvalue, const sse_div<float>&& rvalue)
 {
 #ifdef GASHA_FAST_DIV_FLOAT_USE_SSE
+	const __m128 div_m128 = _mm_set_ss(rvalue);//SSEレジスタに除数を代入
+	const __m128 result_m128 = _mm_div_ss(_mm_set_ss(lvalue), div_m128);//除算
 	float result;
-	_mm_store_ss(&result, _mm_set1_ps(lvalue) / std::move(sse_div<__m128>(_mm_set1_ps(rvalue))));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_DIV_FLOAT_USE_SSE
 	return lvalue / static_cast<float>(rvalue);
@@ -368,8 +382,11 @@ template<>
 inline float fast_sqrt<float>(const float value)
 {
 #ifdef GASHA_FAST_SQRT_FLOAT_USE_SSE
+	__m128 value_m128 = _mm_set_ss(value);
+	__m128 rcp_sqrt_m128 = _mm_rsqrt_ss(value_m128);//平方根の逆数の近似値を取得
+	const __m128 result_m128 = _mm_mul_ss(value_m128, rcp_sqrt_m128);//逆数を乗算
 	float result;
-	_mm_store_ss(&result, fast_sqrt(_mm_set1_ps(value)));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_SQRT_FLOAT_USE_SSE
 	return std::sqrt(value);
@@ -416,8 +433,12 @@ template<>
 inline float semifast_sqrt<float>(const float value)
 {
 #ifdef GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
+	__m128 value_m128 = _mm_set_ss(value);
+	__m128 rcp_sqrt_m128 = _mm_rsqrt_ss(value_m128);//平方根の逆数の近似値を取得
+	rcp_sqrt_m128 = _mm_mul_ss(_mm_mul_ss(rcp_sqrt_m128, _mm_sub_ss(_mm_set_ss(3.f), _mm_mul_ss(value_m128, _mm_mul_ss(rcp_sqrt_m128, rcp_sqrt_m128)))), _mm_set_ss(0.5f));//ニュートン法で逆数の精度を高める
+	const __m128 result_m128 = _mm_mul_ss(value_m128, rcp_sqrt_m128);//逆数を乗算
 	float result;
-	_mm_store_ss(&result, semifast_sqrt(_mm_set1_ps(value)));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
 	return std::sqrt(value);
@@ -452,8 +473,9 @@ template<>
 inline float sse_sqrt<float>(const float value)
 {
 #ifdef GASHA_FAST_SQRT_FLOAT_USE_SSE
+	const __m128 result_m128 = _mm_sqrt_ss(_mm_set_ss(value));//逆数を乗算
 	float result;
-	_mm_store_ss(&result, sse_sqrt(_mm_set1_ps(value)));
+	_mm_store_ss(&result, result_m128);
 	return result;
 #else//GASHA_FAST_SQRT_FLOAT_USE_SSE
 	return std::sqrt(value);
