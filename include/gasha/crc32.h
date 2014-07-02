@@ -134,14 +134,12 @@ crc32_t calcCRC32_recursive(const char* str);//再帰処理版
 crc32_t calcCRC32_recursive(const char* data, const std::size_t len);//再帰処理版
 crc32_t calcCRC32_loop(const char* str);//ループ処理版
 crc32_t calcCRC32_loop(const char* data, const std::size_t len);//ループ処理版
-#ifdef GASHA_CRC32_USE_STATIC_TABLE
+//※事前計算済み多項式テーブルが使用できない場合、通常版として処理する
 crc32_t calcCRC32_table(const char* str);//事前計算済み多項式テーブル処理版
 crc32_t calcCRC32_table(const char* data, const std::size_t len);//事前計算済み多項式テーブル処理版
-#endif//GASHA_CRC32_USE_STATIC_TABLE
-#ifdef GASHA_USE_SSE4_2
+//※SSE命令が使用できない場合、事前テーブル版、もしくは、通常版として処理する
 crc32_t calcCRC32_sse(const char* str);//SSE命令版
 crc32_t calcCRC32_sse(const char* data, const std::size_t len);//SSE命令版
-#endif//GASHA_USE_SSE4_2
 
 //--------------------
 //【ランタイム関数版】文字列のCRC32計算

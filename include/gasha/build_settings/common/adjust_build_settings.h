@@ -94,7 +94,31 @@
 #endif//GASHA_IS_X86
 
 //--------------------------------------------------------------------------------
-//【CRC32設定】
+//【算術設定：高速算術】
+//※ライブラリの再ビルド必要
+
+#if defined(GASHA_FAST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_FAST_DIV_FLOAT_USE_SSE
+#endif//GASHA_FAST_DIV_FLOAT_USE_SSE
+
+#if defined(GASHA_FASTEST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_FASTEST_DIV_FLOAT_USE_SSE
+#endif//GASHA_FASTEST_DIV_FLOAT_USE_SSE
+
+#if defined(GASHA_SEMIFAST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_SEMIFAST_DIV_FLOAT_USE_SSE
+#endif//GASHA_SEMIFAST_DIV_FLOAT_USE_SSE
+
+#if defined(GASHA_FAST_SQRT_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_FAST_SQRT_FLOAT_USE_SSE
+#endif//GASHA_FAST_SQRT_FLOAT_USE_SSE
+
+#if defined(GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
+#endif//GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
+
+//--------------------------------------------------------------------------------
+//【算術設定：CRC32】
 
 #if defined(GASHA_CRC32_USE_SSE) && (!defined(GASHA_CRC32_IS_CRC32C) || !defined(GASHA_USE_SSE4_2))
 	#undef GASHA_CRC32_USE_SSE
