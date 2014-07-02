@@ -167,13 +167,6 @@ namespace hash_table
 		return ite;
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
-	{
-		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || m_set.m_index < rhs.m_set.m_index)
-			return 0;
-		return static_cast<difference_type>(m_set.m_index) - static_cast<difference_type>(rhs.m_set.m_index);
-	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -367,13 +360,6 @@ namespace hash_table
 		ite -= rhs;
 		return ite;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
-	{
-		if (m_set.m_index == INVALID_INDEX || rhs.m_set.m_index == INVALID_INDEX || rhs.m_set.m_index < m_set.m_index)
-			return 0;
-		return static_cast<difference_type>(rhs.m_set.m_index) - static_cast<difference_type>(m_set.m_index);
-	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//アクセッサ
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -464,7 +450,8 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
 	{
-		return calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), TABLE_SIZE, KEY_MIN, KEY_RANGE >::calc(key);
+		typedef calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, key_range_type, TABLE_SIZE, KEY_MIN, KEY_RANGE> calc_type;
+		return calc_type::calc(key);
 	}
 	//次のインデックスを計算（指定のインデックスに歩幅を加算）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -489,11 +476,6 @@ namespace hash_table
 	{
 		return _findIndexCommon(GASHA_ calcCRC32(key.c_str()));
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
-	{
-		return _findIndexCommon(ope_type::getKey(value));
-	}
 
 	//キーで検索して値を取得
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -512,11 +494,6 @@ namespace hash_table
 		return _findValue(GASHA_ calcCRC32(key.c_str()));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
-	{
-		return _findValue(ope_type::getKey(value));
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
 	{
 		return const_cast<value_type*>(_findValue(key));
@@ -530,11 +507,6 @@ namespace hash_table
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const std::string& key)
 	{
 		return const_cast<value_type*>(_findValue(GASHA_ calcCRC32(key.c_str())));
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
-	{
-		return const_cast<value_type*>(_findValue(ope_type::getKey(value)));
 	}
 
 	//キーで検索してイテレータを取得
@@ -560,13 +532,6 @@ namespace hash_table
 		return ite;
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline const typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value) const
-	{
-		iterator ite(*this, true);
-		_find(ite, ope_type::getKey(value));
-		return ite;
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
 	{
 		iterator ite(*this, INVALID_INDEX);
@@ -587,13 +552,6 @@ namespace hash_table
 		_find(ite, GASHA_ calcCRC32(key.c_str()));
 		return ite;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::iterator container<OPE_TYPE, _TABLE_SIZE>::find(const typename container<OPE_TYPE, _TABLE_SIZE>::value_type& value)
-	{
-		iterator ite(*this, true);
-		_find(ite, ope_type::getKey(value));
-		return ite;
-	}
 
 	//キー割り当て
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
@@ -605,17 +563,14 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const char* key)
 	{
-		return assign(GASHA_ calcCRC32(key));
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _assign(GASHA_ calcCRC32(key));
 	}
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const std::string& key)
 	{
-		return assign(GASHA_ calcCRC32(key.c_str()));
-	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::assign(const value_type& value)
-	{
-		return assign(ope_type::getKey(value));
+		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
+		return _assign(GASHA_ calcCRC32(key.c_str()));
 	}
 
 	//キー割り当てして値を挿入（コピー）

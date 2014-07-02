@@ -91,6 +91,45 @@ namespace hash_table
 	//----------------------------------------
 	//イテレータのメソッド
 	
+#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+	//演算オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	{
+		if (!m_set.m_value && !rhs.m_set.m_value)
+			return 0;
+		if (!m_set.m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_set.m_value && !rhs.m_isEnd)
+			return 0;
+		if (!rhs.m_isEnd)
+		{
+			difference_type diff = 0;
+			index_type index = rhs.m_set.m_index;
+			const index_type end = m_set.m_index;
+			while (index != INVALID_INDEX && index != end)
+			{
+				index = m_con->getNextIndex(index);
+				++diff;
+			}
+			if (index == end)
+				return diff;
+		}
+		{
+			difference_type diff = 0;
+			index_type index = m_set.m_index;
+			const index_type end = rhs.m_set.m_index;
+			while (index != INVALID_INDEX && index != end)
+			{
+				index = m_con->getNextIndex(index);
+				--diff;
+			}
+			if (index == end)
+				return diff;
+		}
+		return 0;
+	}
+#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::iterator::update(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
@@ -284,6 +323,45 @@ namespace hash_table
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
+	//演算オペレータ
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	{
+		if (!m_set.m_value && !rhs.m_set.m_value)
+			return 0;
+		if (!m_set.m_value && !m_isEnd)
+			return 0;
+		if (!rhs.m_set.m_value && !rhs.m_isEnd)
+			return 0;
+		if (!rhs.m_isEnd)
+		{
+			difference_type diff = 0;
+			index_type index = rhs.m_set.m_index;
+			const index_type end = m_set.m_index;
+			while (index != INVALID_INDEX && index != end)
+			{
+				index = m_con->getPrevIndex(index);
+				++diff;
+			}
+			if (index == end)
+				return diff;
+		}
+		{
+			difference_type diff = 0;
+			index_type index = m_set.m_index;
+			const index_type end = rhs.m_set.m_index;
+			while (index != INVALID_INDEX && index != end)
+			{
+				index = m_con->getPrevIndex(index);
+				--diff;
+			}
+			if (index == end)
+				return diff;
+		}
+		return 0;
+	}
+#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::update(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
@@ -578,7 +656,9 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_assign(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
 	{
-		if (m_usingCount == TABLE_SIZE && m_deletedCount == 0)
+		if (m_usingCount == TABLE_SIZE && m_deletedCount == 0 && ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE)
+			return nullptr;
+		if ((KEY_MIN != 0 || KEY_MAX != 0) && (key < KEY_MIN || key > KEY_MAX))
 			return nullptr;
 		index_type index = _findIndexCommon(key);
 		if (ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE && index != INVALID_INDEX)//同じキーが既に割り当て済みなら割り当て失敗

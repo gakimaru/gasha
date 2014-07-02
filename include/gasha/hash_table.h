@@ -142,11 +142,14 @@ namespace hash_table
 		//定数
 		//※デフォルト
 		//※変更したい場合は、派生クラスで定数を再定義する
-		static const KEY_TYPE KEY_MIN = GASHA_ numeric_limits<KEY_TYPE>::MIN;//キーの最小値
-		static const KEY_TYPE KEY_MAX = GASHA_ numeric_limits<KEY_TYPE>::MAX - 1;//キーの最大値
-		static const KEY_TYPE INVALID_KEY = GASHA_ numeric_limits<KEY_TYPE>::MAX;//不正なキー
-		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
-		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限
+		static const key_type INVALID_KEY = GASHA_ numeric_limits<key_type>::MAX;//不正なキー ※範囲外の値を指定
+		static const key_type KEY_MIN = GASHA_ numeric_limits<key_type>::MIN;//キーの最小値 ※範囲外のキーは登録不可
+		static const key_type KEY_MAX = GASHA_ numeric_limits<key_type>::MAX - 1;//キーの最大値 ※範囲外のキーは登録不可
+		                                                                         //※キーの最小値と最大値が共に0の場合、範囲チェックしない
+		                                                                         //※キーの最小値と最大値の幅よりテーブルサイズが大きい場合、テーブルサイズ全域に均等に分布するように配置し、キー重複時の再衝突の機会を減らす。
+		                                                                         //※キーの最小値と最大値が幅がテーブルサイズより大きい場合、もしくは幅が0の場合、分布の計算はしない
+		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合(0～100) ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
+		static const std::size_t FINDING_CYCLE_LIMIT = 0;//検索時の巡回回数の制限 ※0で無制限 ※追加・削除時にも影響する
 		static const std::size_t INDEX_STEP_BASE = 5;//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
 		static const replaceAttr_t REPLACE_ATTR = NEVER_REPLACE;//キーが重複するデータは登録できない（置換しない）
 
@@ -223,20 +226,20 @@ namespace hash_table
 		//キー範囲定数計算（２バリエーション）
 		template <bool COND, key_type KEY_MIN, key_type KEY_MAX>
 		struct calcKeyRangeImpl{
-			static const key_range_type value = static_cast<key_range_type>(KEY_MAX) - static_cast<key_range_type>(KEY_MIN)+1;
+			static const key_range_type value = static_cast<key_range_type>(KEY_MAX)-static_cast<key_range_type>(KEY_MIN)+1;
 		};
 		template <key_type KEY_MIN, key_type KEY_MAX>
 		struct calcKeyRangeImpl<true, KEY_MIN, KEY_MAX>{
 			static const key_range_type value = 0;
 		};
 		//インデックス計算関数（２バリエーション）
-		template <bool COND, size_type TABLE_SIZE, key_type KEY_MIN, key_range_type KEY_RANGE>
+		template <bool COND, typename SIZE_TYPE, typename INDEX_TYPE, typename KEY_TYPE, typename KEY_RANGE_TYPE, SIZE_TYPE TABLE_SIZE, KEY_TYPE KEY_MIN, KEY_RANGE_TYPE KEY_RANGE>
 		struct calcIndexImpl{
-			inline static index_type calc(const key_type key){ return (key - KEY_MIN) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズより大きい場合
+			inline static INDEX_TYPE calc(const KEY_TYPE key){ return (key - KEY_MIN) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズより大きいか範囲が0の場合
 		};
-		template <size_type TABLE_SIZE, key_type KEY_MIN, key_range_type KEY_RANGE>
-		struct calcIndexImpl<true, TABLE_SIZE, KEY_MIN, KEY_RANGE>{
-			inline static index_type calc(const key_type key){ return (key - KEY_MIN) * (TABLE_SIZE / KEY_RANGE) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズ以下の場合
+		template <typename SIZE_TYPE, typename INDEX_TYPE, typename KEY_TYPE, typename KEY_RANGE_TYPE, SIZE_TYPE TABLE_SIZE, KEY_TYPE KEY_MIN, KEY_RANGE_TYPE KEY_RANGE>
+		struct calcIndexImpl<true, SIZE_TYPE, INDEX_TYPE, KEY_TYPE, KEY_RANGE_TYPE, TABLE_SIZE, KEY_MIN, KEY_RANGE>{
+			inline static INDEX_TYPE calc(const KEY_TYPE key){ return (key - KEY_MIN) * (TABLE_SIZE / KEY_RANGE) % TABLE_SIZE; }//キーからインデックスを計算 ※キーの範囲がテーブルサイズ以下の場合
 		};
 	public:
 		//定数
@@ -244,6 +247,7 @@ namespace hash_table
 		//静的アサーション
 		static_assert(TABLE_SIZE > INDEX_STEP_BASE, "hash_table::container: TABLE_SIZE is required larger than INDEX_STEP_BASE.");
 		static_assert(GASHA_ isStaticPrime<INDEX_STEP_BASE>::value == true, "hash_table::container: INDEX_STEP_BASE is required prime.");
+		static_assert(KEY_MIN <= KEY_MAX, "hash_table::container: KEY_MIN > KEY_MAX is not allowed.");
 	public:
 		//--------------------
 		//イテレータ用の型
@@ -319,7 +323,7 @@ namespace hash_table
 			inline operator reference(){ return *getValue(); }
 			inline operator const_pointer() const { return getValue(); }
 			inline operator pointer(){ return getValue(); }
-			inline operator key_type() const { return getKey(); }
+			//inline operator key_type() const { return getKey(); }
 		public:
 			//基本オペレータ
 			inline const_reference operator*() const { return *getValue(); }
@@ -376,7 +380,7 @@ namespace hash_table
 			inline iterator operator-(const difference_type rhs) const;
 			inline iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
 		#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-			inline difference_type operator-(const iterator& rhs) const;
+			difference_type operator-(const iterator& rhs) const;
 		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -465,11 +469,11 @@ namespace hash_table
 			inline operator reference(){ return *getValue(); }
 			inline operator const_pointer() const { return getValue(); }
 			inline operator pointer(){ return getValue(); }
-			inline operator key_type() const { return getKey(); }
+			//inline operator key_type() const { return getKey(); }
 		public:
 			//基本オペレータ
-			inline const set& operator*() const { return getSet(); }
-			inline set& operator*(){ return getSet(); }
+			inline const_reference operator*() const { return *getValue(); }
+			inline reference operator*(){ return *getValue(); }
 			inline const_pointer operator->() const { return getValue(); }
 			inline pointer operator->(){ return getValue(); }
 		#ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
@@ -509,7 +513,7 @@ namespace hash_table
 			inline reverse_iterator operator+(const size_type rhs) const { return operator+(static_cast<difference_type>(rhs)); }
 			inline reverse_iterator operator-(const difference_type rhs) const;
 			inline reverse_iterator operator-(const size_type rhs) const { return operator-(static_cast<difference_type>(rhs)); }
-			inline difference_type operator-(const reverse_iterator& rhs) const;
+			difference_type operator-(const reverse_iterator& rhs) const;
 		#endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 		public:
 			//アクセッサ
@@ -591,11 +595,6 @@ namespace hash_table
 		inline const value_type* at(const std::string& key) const { return findValue(key); }
 		inline value_type* operator[](const std::string& key){ return findValue(key); }
 		inline const value_type* operator[](const std::string& key) const { return findValue(key); }
-		//※ノード型からキーを取得して探索することにも対応
-		inline value_type* at(const value_type& value){ return findValue(value); }
-		inline const value_type* at(const value_type& value) const { return findValue(value); }
-		inline value_type* operator[](const value_type& value){ return findValue(value); }
-		inline const value_type* operator[](const value_type& value) const { return findValue(value); }
 	public:
 		//キャストオペレータ
 		inline operator lock_type&(){ return m_lock; }//共有ロックオブジェクト
@@ -648,7 +647,6 @@ namespace hash_table
 		inline size_type bucket(const key_type key) const { return _findIndex(key); }//キーに対応するインデックスを取得
 		inline size_type bucket(const char* key) const { return _findIndex(key); }//キーに対応するインデックスを取得
 		inline size_type bucket(const std::string key) const { return _findIndex(key); }//キーに対応するインデックスを取得
-		inline size_type bucket(const value_type& value) const { return _findIndex(value); }//キーに対応するインデックスを取得
 		inline size_type bucket_size(const index_type index) const { return m_using[index] && !m_deleted[index] ? 1 : 0; }//特定バケット内の要素数を取得
 	public:
 		//メソッド：基本情報系（拡張）
@@ -689,7 +687,6 @@ namespace hash_table
 		inline index_type _findIndex(const key_type key) const;
 		inline index_type _findIndex(const char* key) const;
 		inline index_type _findIndex(const std::string& key) const;
-		inline index_type _findIndex(const value_type& value) const;
 	private:
 		//キーで検索して値を取得（本体）
 		const value_type* _findValue(const key_type key) const;
@@ -698,11 +695,9 @@ namespace hash_table
 		inline const value_type* findValue(const key_type key) const;
 		inline const value_type* findValue(const char* key) const;
 		inline const value_type* findValue(const std::string& key) const;
-		inline const value_type* findValue(const value_type& value) const;
 		inline value_type* findValue(const key_type key);
 		inline value_type* findValue(const char* key);
 		inline value_type* findValue(const std::string& key);
-		inline value_type* findValue(const value_type& value);
 	private:
 		//キーで検索してイテレータを取得（本体）
 		void _find(iterator& ite, const key_type key) const;
@@ -711,11 +706,9 @@ namespace hash_table
 		inline const iterator find(const key_type key) const;
 		inline const iterator find(const char* key) const;
 		inline const iterator find(const std::string& key) const;
-		inline const iterator find(const value_type& value) const;
 		inline iterator find(const key_type key);
 		inline iterator find(const char* key);
 		inline iterator find(const std::string& key);
-		inline iterator find(const value_type& value);
 	
 	private:
 		//キー割り当て（本体）
@@ -728,7 +721,6 @@ namespace hash_table
 		inline value_type* assign(const key_type key);
 		inline value_type* assign(const char* key);
 		inline value_type* assign(const std::string& key);
-		inline value_type* assign(const value_type& value);
 	private:
 		//キー割り当てして値を挿入（コピー）（本体）
 		//※オブジェクトのコピーが発生する点に注意

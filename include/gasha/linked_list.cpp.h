@@ -25,6 +25,7 @@ namespace linked_list
 	//----------------------------------------
 	//イテレータのメソッド
 	
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//演算オペレータ
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
@@ -62,6 +63,7 @@ namespace linked_list
 		}
 		return 0;
 	}
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
@@ -234,6 +236,7 @@ namespace linked_list
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+#ifdef GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//演算オペレータ
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
@@ -271,6 +274,7 @@ namespace linked_list
 		}
 		return 0;
 	}
+#endif//GASHA_LINKED_LIST_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const

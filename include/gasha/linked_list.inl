@@ -791,6 +791,7 @@ namespace linked_list
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
 		return found;
 	}
+#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 	//デフォルトコンストラクタ
 	template<class OPE_TYPE>
@@ -798,7 +799,6 @@ namespace linked_list
 		m_first(nullptr),
 		m_last(nullptr)
 	{}
-#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 	
 	//----------------------------------------
 	//シンプル双方向連結リストコンテナ

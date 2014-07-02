@@ -195,7 +195,7 @@ void iteratorReverseForEach(CONTAINER& container, FUNCTOR functor)
 {
 	typename CONTAINER::reverse_iterator rbegin = container.rbegin();
 	typename CONTAINER::reverse_iterator rend = container.rend();
-	iteratorforEach(rbegin, rend, functor);//リバースイテレータ＋forEachで処理
+	iteratorForEach(rbegin, rend, functor);//リバースイテレータ＋forEachで処理
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
