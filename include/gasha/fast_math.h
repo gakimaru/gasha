@@ -5,13 +5,15 @@
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ含む】
 // fast_math.h
-// 高速算術用【宣言部】
+// 高速算術【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
+
+#include <gasha/basic_math.h>//基本算術
 
 #ifdef GASHA_USE_SSE
 #include <xmmintrin.h>//SSE1
@@ -20,6 +22,10 @@
 #ifdef GASHA_USE_SSE2
 #include <emmintrin.h>//SSE2
 #endif//GASHA_USE_SSE2
+
+#ifdef GASHA_USE_SSE4_1
+#include <smmintrin.h>//SSE4.1
+#endif//GASHA_USE_SSE4_1
 
 #ifdef GASHA_USE_AVX
 #include <immintrin.h>//AVX
@@ -30,7 +36,7 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//高速演算
+//高速四則演算
 //--------------------------------------------------------------------------------
 
 //クラス宣言
@@ -380,13 +386,275 @@ struct dummyArith;
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
+#define GASHA_FAST_ARITH_CLASS_FLOAT2(CLASS_NAME) \
+	template <> \
+	struct CLASS_NAME<float[2]> \
+	{ \
+		typedef float value_type[2]; \
+		typedef CLASS_NAME<value_type> result_type; \
+		typedef fastArith<value_type> fastArith_type; \
+		typedef fastestArith<value_type> fastestArith_type; \
+		typedef semifastArith<value_type> semifastArith_type; \
+		typedef sseArith<value_type> sseArith_type; \
+		typedef normalArith<value_type> normalArith_type; \
+		typedef dummyArith<value_type> dummyArith_type; \
+		value_type m_val; \
+		inline operator const value_type&() const { return m_val; } \
+		inline operator value_type&(){ return m_val; } \
+		inline float operator[](const int index) const { return m_val[index]; } \
+		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
+		inline value_type& operator*(){ return static_cast<value_type&>(*this); } \
+		inline CLASS_NAME& operator=(const value_type val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const value_type val); \
+		inline CLASS_NAME(const fastArith<value_type>&& val); \
+		inline CLASS_NAME(const fastArith<value_type>& val); \
+		inline CLASS_NAME(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME(const fastestArith<value_type>& val); \
+		inline CLASS_NAME(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME(const semifastArith<value_type>& val); \
+		inline CLASS_NAME(const sseArith<value_type>&& val); \
+		inline CLASS_NAME(const sseArith<value_type>& val); \
+		inline CLASS_NAME(const normalArith<value_type>&& val); \
+		inline CLASS_NAME(const normalArith<value_type>& val); \
+		inline CLASS_NAME(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(); \
+		inline ~CLASS_NAME(); \
+	};
+#define GASHA_FAST_ARITH_CLASS_FLOAT3(CLASS_NAME) \
+	template <> \
+	struct CLASS_NAME<float[3]> \
+	{ \
+		typedef float value_type[3]; \
+		typedef CLASS_NAME<value_type> result_type; \
+		typedef fastArith<value_type> fastArith_type; \
+		typedef fastestArith<value_type> fastestArith_type; \
+		typedef semifastArith<value_type> semifastArith_type; \
+		typedef sseArith<value_type> sseArith_type; \
+		typedef normalArith<value_type> normalArith_type; \
+		typedef dummyArith<value_type> dummyArith_type; \
+		value_type m_val; \
+		inline operator const value_type&() const { return m_val; } \
+		inline operator value_type&(){ return m_val; } \
+		inline float operator[](const int index) const { return m_val[index]; } \
+		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
+		inline value_type& operator*(){ return static_cast<value_type&>(*this); } \
+		inline CLASS_NAME& operator=(const value_type val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const value_type val); \
+		inline CLASS_NAME(const fastArith<value_type>&& val); \
+		inline CLASS_NAME(const fastArith<value_type>& val); \
+		inline CLASS_NAME(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME(const fastestArith<value_type>& val); \
+		inline CLASS_NAME(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME(const semifastArith<value_type>& val); \
+		inline CLASS_NAME(const sseArith<value_type>&& val); \
+		inline CLASS_NAME(const sseArith<value_type>& val); \
+		inline CLASS_NAME(const normalArith<value_type>&& val); \
+		inline CLASS_NAME(const normalArith<value_type>& val); \
+		inline CLASS_NAME(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(); \
+		inline ~CLASS_NAME(); \
+	};
+#define GASHA_FAST_ARITH_CLASS_FLOAT4(CLASS_NAME) \
+	template <> \
+	struct CLASS_NAME<float[4]> \
+	{ \
+		typedef float value_type[4]; \
+		typedef CLASS_NAME<value_type> result_type; \
+		typedef fastArith<value_type> fastArith_type; \
+		typedef fastestArith<value_type> fastestArith_type; \
+		typedef semifastArith<value_type> semifastArith_type; \
+		typedef sseArith<value_type> sseArith_type; \
+		typedef normalArith<value_type> normalArith_type; \
+		typedef dummyArith<value_type> dummyArith_type; \
+		value_type m_val; \
+		inline operator const value_type&() const { return m_val; } \
+		inline operator value_type&(){ return m_val; } \
+		inline float operator[](const int index) const { return m_val[index]; } \
+		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
+		inline value_type& operator*(){ return static_cast<value_type&>(*this); } \
+		inline CLASS_NAME& operator=(const value_type val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const value_type val); \
+		inline CLASS_NAME(const fastArith<value_type>&& val); \
+		inline CLASS_NAME(const fastArith<value_type>& val); \
+		inline CLASS_NAME(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME(const fastestArith<value_type>& val); \
+		inline CLASS_NAME(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME(const semifastArith<value_type>& val); \
+		inline CLASS_NAME(const sseArith<value_type>&& val); \
+		inline CLASS_NAME(const sseArith<value_type>& val); \
+		inline CLASS_NAME(const normalArith<value_type>&& val); \
+		inline CLASS_NAME(const normalArith<value_type>& val); \
+		inline CLASS_NAME(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(); \
+		inline ~CLASS_NAME(); \
+	};
+#define GASHA_FAST_ARITH_CLASS_SSE_FLOAT3(CLASS_NAME) \
+	template <> \
+	struct CLASS_NAME<float[3]> \
+	{ \
+		typedef float value_type[3]; \
+		typedef __m128 sse_type; \
+		typedef CLASS_NAME<value_type> result_type; \
+		typedef fastArith<value_type> fastArith_type; \
+		typedef fastestArith<value_type> fastestArith_type; \
+		typedef semifastArith<value_type> semifastArith_type; \
+		typedef sseArith<value_type> sseArith_type; \
+		typedef normalArith<value_type> normalArith_type; \
+		typedef dummyArith<value_type> dummyArith_type; \
+		union \
+		{ \
+			sse_type m_val; \
+			value_type m_array; \
+			float m_array4[4]; \
+		}; \
+		inline operator const value_type&() const { return m_array; } \
+		inline operator value_type&(){ return m_array; } \
+		inline operator sse_type() const { return m_val; } \
+		inline float operator[](const int index) const { return m_array[index]; } \
+		inline const value_type& operator*() const { return m_array; } \
+		inline value_type& operator*(){ return m_array; } \
+		inline CLASS_NAME& operator=(const value_type val); \
+		inline CLASS_NAME& operator=(const sse_type&& val); \
+		inline CLASS_NAME& operator=(const sse_type& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const value_type val); \
+		inline CLASS_NAME(const sse_type&& val); \
+		inline CLASS_NAME(const sse_type& val); \
+		inline CLASS_NAME(const fastArith<value_type>&& val); \
+		inline CLASS_NAME(const fastArith<value_type>& val); \
+		inline CLASS_NAME(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME(const fastestArith<value_type>& val); \
+		inline CLASS_NAME(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME(const semifastArith<value_type>& val); \
+		inline CLASS_NAME(const sseArith<value_type>&& val); \
+		inline CLASS_NAME(const sseArith<value_type>& val); \
+		inline CLASS_NAME(const normalArith<value_type>&& val); \
+		inline CLASS_NAME(const normalArith<value_type>& val); \
+		inline CLASS_NAME(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(); \
+		inline ~CLASS_NAME(); \
+	};
+#define GASHA_FAST_ARITH_CLASS_SSE_FLOAT4(CLASS_NAME) \
+	template <> \
+	struct CLASS_NAME<float[4]> \
+	{ \
+		typedef float value_type[4]; \
+		typedef __m128 sse_type; \
+		typedef CLASS_NAME<value_type> result_type; \
+		typedef fastArith<value_type> fastArith_type; \
+		typedef fastestArith<value_type> fastestArith_type; \
+		typedef semifastArith<value_type> semifastArith_type; \
+		typedef sseArith<value_type> sseArith_type; \
+		typedef normalArith<value_type> normalArith_type; \
+		typedef dummyArith<value_type> dummyArith_type; \
+		union \
+		{ \
+			sse_type m_val; \
+			value_type m_array; \
+		}; \
+		inline operator const value_type&() const { return m_array; } \
+		inline operator value_type&(){ return m_array; } \
+		inline operator sse_type() const { return m_val; } \
+		inline float operator[](const int index) const { return m_array[index]; } \
+		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
+		inline value_type& operator*(){ return static_cast<value_type&>(*this); } \
+		inline CLASS_NAME& operator=(const value_type val); \
+		inline CLASS_NAME& operator=(const sse_type&& val); \
+		inline CLASS_NAME& operator=(const sse_type& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const value_type val); \
+		inline CLASS_NAME(const sse_type&& val); \
+		inline CLASS_NAME(const sse_type& val); \
+		inline CLASS_NAME(const fastArith<value_type>&& val); \
+		inline CLASS_NAME(const fastArith<value_type>& val); \
+		inline CLASS_NAME(const fastestArith<value_type>&& val); \
+		inline CLASS_NAME(const fastestArith<value_type>& val); \
+		inline CLASS_NAME(const semifastArith<value_type>&& val); \
+		inline CLASS_NAME(const semifastArith<value_type>& val); \
+		inline CLASS_NAME(const sseArith<value_type>&& val); \
+		inline CLASS_NAME(const sseArith<value_type>& val); \
+		inline CLASS_NAME(const normalArith<value_type>&& val); \
+		inline CLASS_NAME(const normalArith<value_type>& val); \
+		inline CLASS_NAME(const dummyArith<value_type>&& val); \
+		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(); \
+		inline ~CLASS_NAME(); \
+	};
 
 #ifdef GASHA_FAST_ARITH_USE_SSE
 #define GASHA_FAST_ARITH_CLASS_SSE(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_M128(CLASS_NAME);
+	GASHA_FAST_ARITH_CLASS_SSE_M128(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_FLOAT2(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_SSE_FLOAT3(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_SSE_FLOAT4(CLASS_NAME);
 #else//GASHA_FAST_ARITH_USE_SSE
-#define GASHA_FAST_ARITH_CLASS_SSE(CLASS_NAME)
+#define GASHA_FAST_ARITH_CLASS_SSE(CLASS_NAME) \
+	GASHA_FAST_ARITH_CLASS_FLOAT2(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_FLOAT3(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_FLOAT4(CLASS_NAME);
 #endif//GASHA_FAST_ARITH_USE_SSE
 
 #ifdef GASHA_FAST_ARITH_USE_SSE2
@@ -478,20 +746,95 @@ struct dummyArith
 	dummyArith() = delete;
 	inline ~dummyArith(){}
 };
+template <>
+struct dummyArith<float[2]>
+{
+	typedef float value_type[2];
+	typedef value_type result_type;
+	typedef fastArith<value_type> fastArith_type;
+	typedef fastestArith<value_type> fastestArith_type;
+	typedef semifastArith<value_type> semifastArith_type;
+	typedef sseArith<value_type> sseArith_type;
+	typedef normalArith<value_type> normalArith_type;
+	typedef dummyArith<value_type> dummyArith_type;
+	const float(&m_val)[2];
+	inline operator const value_type&() const { return m_val; }
+	inline float operator[](const int index) const { return m_val[index]; }
+	inline const value_type& operator*() const { return static_cast<const value_type&>(*this); }
+	inline dummyArith(const float(&val)[2]) : m_val(val){}
+	dummyArith() = delete;
+	inline ~dummyArith(){}
+};
+template <>
+struct dummyArith<float[3]>
+{
+	typedef float value_type[3];
+	typedef value_type result_type;
+	typedef fastArith<value_type> fastArith_type;
+	typedef fastestArith<value_type> fastestArith_type;
+	typedef semifastArith<value_type> semifastArith_type;
+	typedef sseArith<value_type> sseArith_type;
+	typedef normalArith<value_type> normalArith_type;
+	typedef dummyArith<value_type> dummyArith_type;
+	const float(&m_val)[3];
+	inline operator const value_type&() const { return m_val; }
+	inline float operator[](const int index) const { return m_val[index]; }
+	inline const value_type& operator*() const { return static_cast<const value_type&>(*this); }
+	inline dummyArith(const float(&val)[3]) : m_val(val){}
+	dummyArith() = delete;
+	inline ~dummyArith(){}
+};
+template <>
+struct dummyArith<float[4]>
+{
+	typedef float value_type[4];
+	typedef value_type result_type;
+	typedef fastArith<value_type> fastArith_type;
+	typedef fastestArith<value_type> fastestArith_type;
+	typedef semifastArith<value_type> semifastArith_type;
+	typedef sseArith<value_type> sseArith_type;
+	typedef normalArith<value_type> normalArith_type;
+	typedef dummyArith<value_type> dummyArith_type;
+	const float (&m_val)[4];
+	inline operator const value_type&() const { return m_val; }
+	inline float operator[](const int index) const { return m_val[index]; }
+	inline const value_type& operator*() const { return static_cast<const value_type&>(*this); }
+	inline dummyArith(const float(&val)[4]) : m_val(val){}
+	dummyArith() = delete;
+	inline ~dummyArith(){}
+};
 
 //----------------------------------------
 //高速演算クラスの別名
 using fastArith_f = fastArith<float>;
+using fastArith_2f = fastArith<float[2]>;
+using fastArith_3f = fastArith<float[3]>;
+using fastArith_4f = fastArith<float[4]>;
 using fastArith_d = fastArith<double>;
 using fastestArith_f = fastestArith<float>;
+using fastestArith_2f = fastestArith<float[2]>;
+using fastestArith_3f = fastestArith<float[3]>;
+using fastestArith_4f = fastestArith<float[4]>;
 using fastestArith_d = fastestArith<double>;
 using semifastArith_f = semifastArith<float>;
+using semifastArith_2f = semifastArith<float[2]>;
+using semifastArith_3f = semifastArith<float[3]>;
+using semifastArith_4f = semifastArith<float[4]>;
 using semifastArith_d = semifastArith<double>;
 using sseArith_f = sseArith<float>;
+using sseArith_2f = sseArith<float[2]>;
+using sseArith_3f = sseArith<float[3]>;
+using sseArith_4f = sseArith<float[4]>;
 using sseArith_d = sseArith<double>;
 using normalArith_f = normalArith<float>;
+using normalArith_2f = normalArith<float[2]>;
+using normalArith_3f = normalArith<float[3]>;
+using normalArith_4f = normalArith<float[4]>;
 using normalArith_d = normalArith<double>;
 using dummyArith_f = dummyArith<float>;
+using dummyArith_2f = dummyArith<float[2]>;
+using dummyArith_3f = dummyArith<float[3]>;
+using dummyArith_4f = dummyArith<float[4]>;
 using dummyArith_d = dummyArith<double>;
 
 //----------------------------------------
@@ -966,9 +1309,12 @@ template<> inline __m256 operator/(const dummyArith<__m256>&& lvalue, const dumm
 template<> inline __m256d operator/(const dummyArith<__m256d>&& lvalue, const dummyArith<__m256d>&& rvalue);
 #endif//GASHA_FAST_ARITH_USE_AVX
 
+//--------------------------------------------------------------------------------
+//高速平方根
+//--------------------------------------------------------------------------------
+
 //----------------------------------------
 //高速平方根
-template<typename T> inline T sqrt(const T value);
 template<typename T> inline fastArith<T> sqrt(const fastArith<T>&& value);
 template<typename T> inline fastArith<T> sqrt(const fastArith<T>& value){ return sqrt(std::move(value)); }
 template<typename T> inline fastestArith<T> sqrt(const fastestArith<T>&& value);
@@ -1025,6 +1371,83 @@ template<> inline sseArith<__m256d> sqrt(const sseArith<__m256d>&& value);
 template<> inline normalArith<__m256d> sqrt(const normalArith<__m256d>&& value);
 template<> inline __m256d sqrt(const dummyArith<__m256d>&& value);
 #endif//GASHA_FAST_ARITH_USE_AVX
+
+//--------------------------------------------------------------------------------
+//高速ベクトル演算
+//--------------------------------------------------------------------------------
+
+#define GASHA_FAST_VECTOR_SET(CLASS_NAME) \
+	template<typename T, std::size_t N> inline T norm(const CLASS_NAME<T[N]>& vec); \
+	template<typename T, std::size_t N> inline T normSq(const CLASS_NAME<T[N]>& vec); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> merge(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> difference(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline T length(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline T lengthSq(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const float scalar); \
+	template<typename T, std::size_t N> inline float dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline float normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2);
+
+GASHA_FAST_VECTOR_SET(fastArith);
+GASHA_FAST_VECTOR_SET(fastestArith);
+GASHA_FAST_VECTOR_SET(semifastArith);
+GASHA_FAST_VECTOR_SET(sseArith);
+GASHA_FAST_VECTOR_SET(normalArith);
+template<typename T, std::size_t N> inline T norm(const dummyArith<T[N]>& vec);
+template<typename T, std::size_t N> inline T normSq(const dummyArith<T[N]>& vec);
+template<typename T, std::size_t N> inline void merge(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline void difference(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline T length(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline T lengthSq(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyArith<T[N]>& vec);
+template<typename T, std::size_t N> inline void mul(T (&result)[N], const dummyArith<T[N]>& vec, const float scalar);
+template<typename T, std::size_t N> inline float dot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline float normalizedDot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+template<typename T, std::size_t N> inline void cross(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+
+//----------------------------------------
+//高速ベクトル演算：特殊化
+
+#ifdef GASHA_FAST_ARITH_USE_SSE4_1
+
+//SSE命令専用関数
+inline __m128 m128_norm(const __m128 vec_m128);//ノルム
+inline __m128 m128_normSq(const __m128 vec_m128);//ノルムの二乗
+inline __m128 m128_merge(const __m128 vec1_m128, const __m128 vec2_m128);//合成（加算）
+inline __m128 m128_difference(const __m128 vec1_m128, const __m128 vec2_m128);//二点間の差（減算）
+inline __m128 m128_length(const __m128 vec1_m128, const __m128 vec2_m128);//二点間の長さ
+inline __m128 m128_lengthSq(const __m128 vec1_m128, const __m128 vec2_m128);//二点間の長さの二乗
+inline __m128 m128_normalize(const __m128 vec_m128);//正規化
+inline __m128 m128_mul(const __m128 vec_m128, const float scalar);//スカラー倍
+inline __m128 m128_dot(const __m128 vec1_m128, const __m128 vec2_m128);//内積
+inline __m128 m128_normalizedDot(const __m128 vec1_m128, const __m128 vec2_m128);//正規化して内積
+inline __m128 m128_cross(const __m128 vec1_m128, const __m128 vec2_m128);//外積
+
+#define GASHA_FAST_VECTOR_SET_SPECIALIZATION(CLASS_NAME, T, N) \
+	template<> inline T norm<T, N>(const CLASS_NAME<T[N]>& vec); \
+	template<> inline T normSq<T, N>(const CLASS_NAME<T[N]>& vec); \
+	template<> inline CLASS_NAME<T[N]> merge<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline CLASS_NAME<T[N]> difference<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline T length<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline T lengthSq<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline CLASS_NAME<T[N]> normalize<T, N>(const CLASS_NAME<T[N]>& vec); \
+	template<> inline CLASS_NAME<T[N]> mul<T, N>(const CLASS_NAME<T[N]>& vec, const float scalar); \
+	template<> inline float dot<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline float normalizedDot<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
+	template<> inline CLASS_NAME<T[N]> cross<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2);
+
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastArith, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestArith, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(semifastArith, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseArith, float, 3);
+
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastArith, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestArith, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(semifastArith, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseArith, float, 4);
+
+#endif//GASHA_FAST_ARITH_USE_SSE4_1
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

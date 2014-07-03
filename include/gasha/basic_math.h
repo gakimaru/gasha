@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ含む】
 // basic_math.h
-// 基本算術用
+// 基本算術【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -13,6 +13,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <cstddef>//std::size_t
 #include <type_traits>//C++11 std::conditional, std:integral_constant
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -22,7 +23,47 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
-//べき乗（power）：テンプレートクラス版
+//【ランタイム版】べき乗（power）
+//----------------------------------------
+//※浮動小数点も使用可。
+//※指数はint型固定。
+//※コンパイル時に計算結果が算出されるかどうかはコンパイラ次第。
+//※指数に負の数を指定するとコンパイルエラー。
+//※関数の再帰呼び出しを静的に展開するので、指数が小さければ関数が消滅して高速になる（はず）。
+//※引数が定数なら、コンパイル時に計算が済む可能性も高い。
+//----------------------------------------
+
+//※直接使用する関数
+template<typename T, int E>
+inline T pow(const T n);
+
+//※再帰終端用のオーバーロード関数（関数テンプレートは部部特殊化できないため、各型のバリエーションを用意）
+template<> inline char pow<char, 0>(const char n);//再帰終端用
+template<> inline unsigned char pow<unsigned char, 0>(const unsigned char n){ return 1; }//再帰終端用
+template<> inline short pow<short, 0>(const short n){ return 1; }//再帰終端用
+template<> inline unsigned short pow<unsigned short, 0>(const unsigned short n){ return 1; }//再帰終端用
+template<> inline int pow<int, 0>(const int n){ return 1; }//再帰終端用
+template<> inline unsigned int pow<unsigned int, 0>(const unsigned int n){ return 1; }//再帰終端用
+template<> inline long pow<long, 0>(const long n){ return 1; }//再帰終端用
+template<> inline unsigned long pow<unsigned long, 0>(const unsigned long n){ return 1; }//再帰終端用
+template<> inline long long pow<long long, 0>(const long long n){ return 1; }//再帰終端用
+template<> inline unsigned long long pow<unsigned long long, 0>(const unsigned long long n){ return 1; }//再帰終端用
+template<> inline float pow<float, 0>(const float n){ return 1.f; }//再帰終端用
+template<> inline double pow<double, 0>(const double n){ return 1.; }//再帰終端用
+
+//----------------------------------------
+//【ランタイム版】負の指数のべき乗（negative power）
+//----------------------------------------
+//※浮動小数点も使用可。
+//※指数はint型固定。
+//※コンパイル時に計算結果が算出されるかどうかはコンパイラ次第。
+//※指数に正の数また0を指定するとコンパイルエラー。
+//----------------------------------------
+template<typename T, int E>
+inline T negaPow(const T n);
+
+//----------------------------------------
+//【メタプログラミング版】べき乗（power）
 //----------------------------------------
 //※整数専用。
 //※指数はint型固定。
@@ -45,54 +86,6 @@ struct staticPow<T, N, 0>
 	static const T value = 1;
 };
 
-//----------------------------------------
-//べき乗（power）：テンプレート関数版
-//----------------------------------------
-//※浮動小数点も使用可。
-//※指数はint型固定。
-//※コンパイル時に計算結果が算出されるかどうかはコンパイラ次第。
-//※指数に負の数を指定するとコンパイルエラー。
-//※関数の再帰呼び出しを静的に展開するので、指数が小さければ関数が消滅して高速になる（はず）。
-//※引数が定数なら、コンパイル時に計算が済む可能性も高い。
-//----------------------------------------
-
-//※直接使用する関数
-template<typename T, int E>
-inline T pow(const T n)
-{
-	static_assert(E > 0, "E is only supported greater than 0.");
-	return n * GASHA_ pow<T, E - 1>(n);
-}
-
-//※再帰終端用のオーバーロード関数（関数テンプレートは部部特殊化できないため、各型のバリエーションを用意）
-template<> inline char pow<char, 0>(const char n){ return 1; }//再帰終端用
-template<> inline unsigned char pow<unsigned char, 0>(const unsigned char n){ return 1; }//再帰終端用
-template<> inline short pow<short, 0>(const short n){ return 1; }//再帰終端用
-template<> inline unsigned short pow<unsigned short, 0>(const unsigned short n){ return 1; }//再帰終端用
-template<> inline int pow<int, 0>(const int n){ return 1; }//再帰終端用
-template<> inline unsigned int pow<unsigned int, 0>(const unsigned int n){ return 1; }//再帰終端用
-template<> inline long pow<long, 0>(const long n){ return 1; }//再帰終端用
-template<> inline unsigned long pow<unsigned long, 0>(const unsigned long n){ return 1; }//再帰終端用
-template<> inline long long pow<long long, 0>(const long long n){ return 1; }//再帰終端用
-template<> inline unsigned long long pow<unsigned long long, 0>(const unsigned long long n){ return 1; }//再帰終端用
-template<> inline float pow<float, 0>(const float n){ return 1.f; }//再帰終端用
-template<> inline double pow<double, 0>(const double n){ return 1.; }//再帰終端用
-
-//----------------------------------------
-//負の指数のべき乗（negative power）：テンプレート関数版
-//----------------------------------------
-//※浮動小数点も使用可。
-//※指数はint型固定。
-//※コンパイル時に計算結果が算出されるかどうかはコンパイラ次第。
-//※指数に正の数また0を指定するとコンパイルエラー。
-//----------------------------------------
-template<typename T, int E>
-inline T negaPow(const T n)
-{
-	static_assert(E <= 0, "E is only supported less than 0.");
-	return static_cast<T>(1) / GASHA_ pow<T, -E>(n);
-}
-
 //--------------------------------------------------------------------------------
 //素数計算
 //--------------------------------------------------------------------------------
@@ -111,10 +104,7 @@ unsigned int makePrimeLT(const unsigned int n);
 
 //----------------------------------------
 //【ランタイム版】指定の値と同じか、それより小さい最初の素数を算出
-inline unsigned int makePrimeLE(const unsigned int n)
-{
-	return isPrime(n) ? n : GASHA_ makePrimeLT(n);
-}
+inline unsigned int makePrimeLE(const unsigned int n);
 
 //----------------------------------------
 //【ランタイム版】指定の値より大きい最初の素数を算出
@@ -122,10 +112,7 @@ unsigned int makePrimeGT(const unsigned int n);
 
 //----------------------------------------
 //【ランタイム版】指定の値と同じか、それより大きい最初の素数を算出
-inline unsigned int makePrimeGE(const unsigned int n)
-{
-	return isPrime(n) ? n : GASHA_ makePrimeGT(n);
-}
+inline unsigned int makePrimeGE(const unsigned int n);
 
 //----------------------------------------
 //【メタプログラミング版】
@@ -377,23 +364,11 @@ int calcLSB(const unsigned int value);
 
 //----------------------------------------
 //【ランタイム版】指定の値以上（Greater than or Equal）で最も小さい2のべき乗を算出
-inline unsigned int calcNearPow2GE(const unsigned int value)
-{
-	if (value == 0)
-		return 0;
-	const unsigned int msb = GASHA_ calcMSB(value - 1) + 1;
-	return msb == 32 ? 0 : 1 << msb;
-}
+inline unsigned int calcNearPow2GE(const unsigned int value);
 
 //----------------------------------------
 //【ランタイム版】指定の値以下（Less than or Equal）で最も大きい2のべき乗を算出
-inline unsigned int calcNearPow2LE(const unsigned int value)
-{
-	if (value == 0)
-		return 0;
-	const unsigned int msb = GASHA_ calcMSB(value);
-	return msb == 32 ? 0 : 1 << msb;
-}
+inline unsigned int calcNearPow2LE(const unsigned int value);
 
 //----------------------------------------
 //【メタプログラミング版】
@@ -447,14 +422,7 @@ template<>                 struct calcStaticNearPow2LE<0>{ static const int valu
 //----------------------------------------
 //【ランタイム版】アラインメント調整
 template<unsigned int ALIGN>
-inline unsigned int adjustAlign(const unsigned int value)
-{
-	static_assert(countStaticBits<ALIGN>::value == 1, "ALIGN is only supported power of 2.");//2のべき乗（=ビット数が1の値）でなければNG
-	static const unsigned int ALIGN_1 = ALIGN - 1;
-	//if ((value | ALIGN_1) == 0xffffffff)
-	//	return 0;//value & ~ALIGN_1;
-	return (value + ALIGN_1) & ~ALIGN_1;
-}
+inline unsigned int adjustAlign(const unsigned int value);
 template<> inline unsigned int adjustAlign<1>(const unsigned int value){ return value; }
 template<> inline unsigned int adjustAlign<0>(const unsigned int value){ return value; }
 
@@ -466,7 +434,85 @@ template<unsigned int VAL, unsigned int ALIGN> struct adjustStaticAlign{ static 
 template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 1>{ static const unsigned int value = VAL; };
 template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 0>{ static const unsigned int value = VAL; };
 
+//--------------------------------------------------------------------------------
+//平方根
+//※fast_math.hをインクルードすることで、高速演算を利用可能
+//--------------------------------------------------------------------------------
+
+template<typename T> inline T sqrt(const T value);
+
+//--------------------------------------------------------------------------------
+//ベクトル演算
+//※fast_math.hをインクルードすることで、高速演算を利用可能
+//--------------------------------------------------------------------------------
+
+//----------------------------------------
+//ノルム
+//※平方根適用
+template<typename T, std::size_t N>
+inline T norm(const T (&vec)[N]);
+
+//----------------------------------------
+//ノルムの二乗
+template<typename T, std::size_t N>
+inline T normSq(const T (&vec)[N]);
+
+//----------------------------------------
+//合成（加算）
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void merge(T (&result)[N], const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//二点間の差（減算）
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void difference(T (&result)[N], const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//二点間の長さ
+//※平方根適用
+template<typename T, std::size_t N>
+inline T length(const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//二点間の長さの二乗
+template<typename T, std::size_t N>
+inline T lengthSq(const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//正規化
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void normalize(T (&result)[N], const T (&vec)[N]);
+
+//----------------------------------------
+//スカラー倍
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void mul(T (&result)[N], const T (&vec)[N], const float scalar);
+
+//----------------------------------------
+//内積
+template<typename T, std::size_t N>
+inline float dot(const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//正規化して内積
+template<typename T, std::size_t N>
+inline float normalizedDot(const T (&vec1)[N], const T (&vec2)[N]);
+
+//----------------------------------------
+//外積
+//※3D専用
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void cross(T (&result)[N], const T (&vec1)[N], const T (&vec2)[N]);
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
+#include <gasha/basic_math.inl>
 
 #endif//GASHA_INCLUDED_BASIC_MATH_H
 
