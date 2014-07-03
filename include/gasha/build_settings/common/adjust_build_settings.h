@@ -95,27 +95,24 @@
 
 //--------------------------------------------------------------------------------
 //【算術設定：高速算術】
-//※ライブラリの再ビルド必要
+//※ライブラリの再ビルド不要
 
-#if defined(GASHA_FAST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
-	#undef GASHA_FAST_DIV_FLOAT_USE_SSE
-#endif//GASHA_FAST_DIV_FLOAT_USE_SSE
+#if defined(GASHA_FAST_ARITH_USE_SSE) && !defined(GASHA_USE_SSE)
+	#undef GASHA_FAST_ARITH_USE_SSE
+#endif//GASHA_FAST_ARITH_USE_SSE
 
-#if defined(GASHA_FASTEST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
-	#undef GASHA_FASTEST_DIV_FLOAT_USE_SSE
-#endif//GASHA_FASTEST_DIV_FLOAT_USE_SSE
+#if defined(GASHA_FAST_ARITH_USE_SSE2) && !defined(GASHA_USE_SSE2)
+	#undef GASHA_FAST_ARITH_USE_SSE2
+#endif//GASHA_FAST_ARITH_USE_SSE2
 
-#if defined(GASHA_SEMIFAST_DIV_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
-	#undef GASHA_SEMIFAST_DIV_FLOAT_USE_SSE
-#endif//GASHA_SEMIFAST_DIV_FLOAT_USE_SSE
+#if defined(GASHA_FAST_ARITH_USE_AVX) && !defined(GASHA_USE_AVX)
+	#undef GASHA_FAST_ARITH_USE_AVX
+#endif//GASHA_FAST_ARITH_USE_AVX
 
-#if defined(GASHA_FAST_SQRT_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
-	#undef GASHA_FAST_SQRT_FLOAT_USE_SSE
-#endif//GASHA_FAST_SQRT_FLOAT_USE_SSE
-
-#if defined(GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE) && !defined(GASHA_USE_SSE)
-	#undef GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
-#endif//GASHA_SEMIFAST_SQRT_FLOAT_USE_SSE
+#if defined(GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION) && !defined(GASHA_FAST_ARITH_USE_SSE)
+//#if defined(GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION) && (!defined(GASHA_FAST_ARITH_USE_SSE) && !defined(GASHA_FAST_ARITH_USE_***))//その他のSIMD演算に対応するなら条件を追加する
+	#undef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION
+#endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION
 
 //--------------------------------------------------------------------------------
 //【算術設定：CRC32】
