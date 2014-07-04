@@ -101,7 +101,7 @@ inline unsigned int adjustAlign(const unsigned int value)
 }
 
 //--------------------------------------------------------------------------------
-//平方根
+//テンプレート平方根
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
@@ -109,7 +109,7 @@ inline unsigned int adjustAlign(const unsigned int value)
 template<typename T> inline T sqrt(const T value){ return std::sqrt(value); }
 
 //--------------------------------------------------------------------------------
-//ベクトル演算
+//テンプレートベクトル演算
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
@@ -243,6 +243,181 @@ inline void cross(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 	result[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
 	result[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
 	result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
+}
+
+//--------------------------------------------------------------------------------
+//テンプレート行列
+//--------------------------------------------------------------------------------
+
+//----------
+//行列の加算
+template<typename T, std::size_t N, std::size_t M>
+void add(T(&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+{
+	for (int n = 0; n < N; ++n)
+		for (int m = 0; m < M; ++m)
+			mat_result[n][m] = mat1[n][m] + mat2[n][m];
+}
+//※ループアンローリング版
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N, std::size_t NOW_M>
+struct _addRU{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+	{
+		mat_result[NOW_N][NOW_M] = mat1[NOW_N][NOW_M] + mat2[NOW_N][NOW_M];
+		_addRU<T, N, M, NOW_N, NOW_M - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N>
+struct _addRU<T, N, M, NOW_N, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+	{
+		mat_result[NOW_N][0] = mat1[NOW_N][0] + mat2[NOW_N][0];
+		_addRU<T, N, M, NOW_N - 1, M - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M>
+struct _addRU<T, N, M, 0, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+	{
+		mat_result[0][0] = mat1[0][0] + mat2[0][0];
+	}
+};
+template<typename T, std::size_t N, std::size_t M>
+void addRU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+{
+	_addRU<T, N, M, N - 1, M - 1>::calc(mat_result, mat1, mat2);
+}
+
+//----------
+//行列の減算
+template<typename T, std::size_t N, std::size_t M>
+void sub(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+{
+	for (int n = 0; n < N; ++n)
+		for (int m = 0; m < M; ++m)
+			mat_result[n][m] = mat1[n][m] - mat2[n][m];
+}
+//※ループアンローリング版
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N, std::size_t NOW_M>
+struct _subRU{
+	inline static void calc(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
+	{
+		mat_result[NOW_N][NOW_M] = mat1[NOW_N][NOW_M] - mat2[NOW_N][NOW_M];
+		_subRU<T, N, M, NOW_N, NOW_M - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N>
+struct _subRU<T, N, M, NOW_N, 0>{
+	inline static void calc(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
+	{
+		mat_result[NOW_N][0] = mat1[NOW_N][0] - mat2[NOW_N][0];
+		_subRU<T, N, M, NOW_N - 1, M - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M>
+struct _subRU<T, N, M, 0, 0>{
+	inline static void calc(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
+	{
+		mat_result[0][0] = mat1[0][0] - mat2[0][0];
+	}
+};
+template<typename T, std::size_t N, std::size_t M>
+void subRU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
+{
+	_subRU<T, N, M, N - 1, M - 1>::calc(mat_result, mat1, mat2);
+}
+
+//----------
+//行列のスカラー倍
+template<typename T, std::size_t N, std::size_t M>
+void mul(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+{
+	for (int n = 0; n < N; ++n)
+		for (int m = 0; m < M; ++m)
+			mat_result[n][m] = mat[n][m] * scalar;
+}
+//※ループアンローリング版
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N, std::size_t NOW_M>
+struct _mulRU1{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+	{
+		mat_result[NOW_N][NOW_M] = mat[NOW_N][NOW_M] * scalar;
+		_mulRU1<T, N, M, NOW_N, NOW_M - 1>::calc(mat_result, mat, scalar);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NOW_N>
+struct _mulRU1<T, N, M, NOW_N, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+	{
+		mat_result[NOW_N][0] = mat[NOW_N][0] * scalar;
+		_mulRU1<T, N, M, NOW_N - 1, M - 1>::calc(mat_result, mat, scalar);
+	}
+};
+template <typename T, std::size_t N, std::size_t M>
+struct _mulRU1<T, N, M, 0, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+	{
+		mat_result[0][0] = mat[0][0] * scalar;
+	}
+};
+template<typename T, std::size_t N, std::size_t M>
+void mulRU(T(&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+{
+	_mulRU1<T, N, M, N - 1, M - 1>::calc(mat_result, mat, scalar);
+}
+
+//----------
+//行列の乗算
+template<typename T, std::size_t N, std::size_t M, std::size_t NM>
+void mul(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T(&mat2)[NM][M])
+{
+	for (int n = 0; n < N; ++n)
+		for (int m = 0; m < M; ++m)
+			mat_result[n][m] = static_cast<T>(0);
+	for (int n = 0; n < N; ++n)
+		for (int m = 0; m < M; ++m)
+			for (int nm = 0; nm < NM; ++nm)
+				mat_result[n][m] += (mat1[n][nm] * mat2[nm][m]);
+}
+//※ループアンローリング版
+template<typename T, std::size_t N, std::size_t M, std::size_t NM, std::size_t NOW_N, std::size_t NOW_M, std::size_t NOW_NM>
+struct _mulRU2{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M])
+	{
+		mat_result[NOW_N][NOW_M] += (mat1[NOW_N][NOW_NM] * mat2[NOW_NM][NOW_M]);
+		_mulRU2<T, N, M, NM, NOW_N, NOW_M, NOW_NM - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NM, std::size_t NOW_N, std::size_t NOW_M>
+struct _mulRU2<T, N, M, NM, NOW_N, NOW_M, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M])
+	{
+		mat_result[NOW_N][NOW_M] += (mat1[NOW_N][0] * mat2[0][NOW_M]);
+		_mulRU2<T, N, M, NM, NOW_N, NOW_M - 1, NM - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NM, std::size_t NOW_N>
+struct _mulRU2<T, N, M, NM, NOW_N, 0, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M])
+	{
+		mat_result[NOW_N][0] += (mat1[NOW_N][0] * mat2[0][0]);
+		_mulRU2<T, N, M, NM, NOW_N - 1, M - 1, NM - 1>::calc(mat_result, mat1, mat2);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NM>
+struct _mulRU2<T, N, M, NM, 0, 0, 0>{
+	inline static void calc(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M])
+	{
+		mat_result[0][0] += (mat1[0][0] * mat2[0][0]);
+	}
+};
+template<typename T, std::size_t N, std::size_t M, std::size_t NM>
+void mulRU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M])
+{
+	for (int i = 0; i < N; ++i)
+		for (int j = 0; j < M; ++j)
+			mat_result[i][j] = static_cast<T>(0);
+	_mulRU2<T, N, M, NM, N - 1, M - 1, NM - 1>::calc(mat_result, mat1, mat2);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

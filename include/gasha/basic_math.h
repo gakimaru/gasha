@@ -435,15 +435,15 @@ template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 1>{
 template<unsigned int VAL>                     struct adjustStaticAlign<VAL, 0>{ static const unsigned int value = VAL; };
 
 //--------------------------------------------------------------------------------
-//平方根
-//※fast_math.hをインクルードすることで、高速演算を利用可能
+//テンプレート平方根
+//※fast_math.hをインクルードすることで、float型の時に特殊化して、高速演算を利用可能
 //--------------------------------------------------------------------------------
 
 template<typename T> inline T sqrt(const T value);
 
 //--------------------------------------------------------------------------------
-//ベクトル演算
-//※fast_math.hをインクルードすることで、高速演算を利用可能
+//テンプレートベクトル演算
+//※fast_math.hをインクルードすることで、float×3,float×4の時に特殊化して、高速演算を利用可能
 //--------------------------------------------------------------------------------
 
 //----------------------------------------
@@ -515,10 +515,46 @@ inline T normalizedDot(const T (&vec1)[N], const T (&vec2)[N]);
 template<typename T, std::size_t N>
 inline void cross(T (&result)[N], const T (&vec1)[N], const T (&vec2)[N]);
 
+//--------------------------------------------------------------------------------
+//テンプレート行列
+//※fast_math.hをインクルードすることで、float×4×4の時に特殊化して、高速演算を利用可能
+//--------------------------------------------------------------------------------
+
+//----------
+//行列の加算
+template<typename T, std::size_t N, std::size_t M>
+void add(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
+//※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
+template<typename T, std::size_t N, std::size_t M>
+void addRU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
+//----------
+//行列の減算
+template<typename T, std::size_t N, std::size_t M>
+void sub(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
+//※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
+template<typename T, std::size_t N, std::size_t M>
+void subRU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M]);
+//----------
+//行列のスカラー倍
+template<typename T, std::size_t N, std::size_t M>
+void mul(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar);
+//※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
+template<typename T, std::size_t N, std::size_t M>
+void mulRU(T(&mat_result)[N][M], const T(&mat)[N][M], const T scalar);
+//----------
+//行列の乗算
+template<typename T, std::size_t N, std::size_t M, std::size_t NM>
+void mul(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M]);
+//※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
+template<typename T, std::size_t N, std::size_t M, std::size_t NM>
+void mulRU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
+#ifdef GASHA_BASIC_MATH_ALLWAYS_TOGETHER_INL
 #include <gasha/basic_math.inl>
+#endif//GASHA_BASIC_MATH_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_BASIC_MATH_H
 

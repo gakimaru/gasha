@@ -16,7 +16,6 @@
 #include <gasha/fast_math.h>//高速算術【宣言部】
 
 #include <cmath>//std::sqrt()
-#include <memory.h>//memcpy(), memset()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -54,6 +53,68 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	template <typename T> inline CLASS_NAME<T>::CLASS_NAME(const dummyA<T>& val) : m_val(val.m_val){} \
 	template <typename T> inline CLASS_NAME<T>::CLASS_NAME() : m_val(static_cast<T>(0)){} \
 	template <typename T> inline CLASS_NAME<T>::~CLASS_NAME(){} \
+
+#define GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME) \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(){ for (int i = 0; i < N; ++i) m_val[i] = static_cast<T>(0); } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::~CLASS_NAME(){} \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(){ for (int i = 0; i < N; ++i) for (int j = 0; i < M; ++i) m_val[i][j] = static_cast<T>(0); } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::~CLASS_NAME(){} \
 
 #define GASHA_FAST_ARITH_CLASS_SSE_FLOAT_INSTANCING(CLASS_NAME) \
 	inline CLASS_NAME<float>& CLASS_NAME<float>::operator=(const float val){ m_val = _mm_set_ss(val); return *this; } \
@@ -251,38 +312,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<__m256d>::CLASS_NAME() : m_val(_mm256_setzero_pd()){} \
 	inline CLASS_NAME<__m256d>::~CLASS_NAME(){} \
 
-#define GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, TYPE, SIZE) \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const TYPE val[SIZE]){ memcpy(m_val, val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastestA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastestA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const semiA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const semiA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const sseA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const sseA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const normA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const normA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const dummyA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const dummyA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const TYPE val[SIZE]){ memcpy(m_val, val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastestA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastestA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const semiA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const semiA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const sseA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const sseA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const normA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const normA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const dummyA<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const dummyA<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(){ memset(m_val, 0, sizeof(value_type)); } \
-	inline CLASS_NAME<TYPE[SIZE]>::~CLASS_NAME(){} \
-
 #define GASHA_FAST_ARITH_CLASS_SSE_FLOAT3_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float val[3]){ m_val = _mm_loadu_ps(val); return *this; } \
+	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float (&&val)[3]){ m_val = _mm_loadu_ps(val); return *this; } \
+	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float (&val)[3]){ m_val = _mm_loadu_ps(val); return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const __m128&& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const __m128& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastA<float[3]>&& val){ m_val = val.m_val; return *this; } \
@@ -297,7 +329,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const normA<float[3]>& val){ m_val = val.m_val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyA<float[3]>&& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyA<float[3]>& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const float val[3]) : m_val(_mm_loadu_ps(val)){} \
+	inline CLASS_NAME<float[3]>::CLASS_NAME(const float (&&val)[3]) : m_val(_mm_loadu_ps(val)){} \
+	inline CLASS_NAME<float[3]>::CLASS_NAME(const float (&val)[3]) : m_val(_mm_loadu_ps(val)){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const __m128&& val) : m_val(val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const __m128& val) : m_val(val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastA<float[3]>&& val) : m_val(val.m_val){} \
@@ -316,7 +349,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[3]>::~CLASS_NAME(){} \
 
 #define GASHA_FAST_ARITH_CLASS_SSE_FLOAT4_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const float val[4]){ m_val = _mm_loadu_ps(val); return *this; } \
+	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const float (&&val)[4]){ m_val = _mm_loadu_ps(val); return *this; } \
+	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const float (&val)[4]){ m_val = _mm_loadu_ps(val); return *this; } \
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const __m128&& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const __m128& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const fastA<float[4]>&& val){ m_val = val.m_val; return *this; } \
@@ -331,7 +365,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const normA<float[4]>& val){ m_val = val.m_val; return *this; } \
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const dummyA<float[4]>&& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
 	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const dummyA<float[4]>& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const float val[4]) : m_val(_mm_loadu_ps(val)){} \
+	inline CLASS_NAME<float[4]>::CLASS_NAME(const float (&&val)[4]) : m_val(_mm_loadu_ps(val)){} \
+	inline CLASS_NAME<float[4]>::CLASS_NAME(const float (&val)[4]) : m_val(_mm_loadu_ps(val)){} \
 	inline CLASS_NAME<float[4]>::CLASS_NAME(const __m128&& val) : m_val(val){} \
 	inline CLASS_NAME<float[4]>::CLASS_NAME(const __m128& val) : m_val(val){} \
 	inline CLASS_NAME<float[4]>::CLASS_NAME(const fastA<float[4]>&& val) : m_val(val.m_val){} \
@@ -349,43 +384,72 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[4]>::CLASS_NAME() : m_val(_mm_setzero_ps()){} \
 	inline CLASS_NAME<float[4]>::~CLASS_NAME(){} \
 
+#define GASHA_FAST_ARITH_CLASS_SSE_FLOAT4X4_INSTANCING(CLASS_NAME) \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const float(&&val)[4][4]){ for (int i = 0; i < 4; ++ i) m_val[i] = _mm_loadu_ps(val[i]); return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const float(&val)[4][4]){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val[i]); return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const __m128(&&val)[4]){ for (int i = 0; i < 4; ++i) m_val[i] = val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const __m128(&val)[4]){ for (int i = 0; i < 4; ++i) m_val[i] = val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const fastA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const fastA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const fastestA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const fastestA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const semiA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const semiA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const sseA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const sseA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const normA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const normA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const dummyA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val.m_val[i]); return *this; } \
+	inline CLASS_NAME<float[4][4]>& CLASS_NAME<float[4][4]>::operator=(const dummyA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val.m_val[i]); return *this; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const float(&&val)[4][4]){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val[i]); } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const float(&val)[4][4]){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val[i]); } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const __m128(&&val)[4]){ for (int i = 0; i < 4; ++i) m_val[i] = val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const __m128(&val)[4]){ for (int i = 0; i < 4; ++i) m_val[i] = val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const fastA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const fastA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const fastestA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const fastestA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const semiA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const semiA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const sseA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const sseA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const normA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const normA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = val.m_val[i]; } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const dummyA<float[4][4]>&& val){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val.m_val[i]); } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(const dummyA<float[4][4]>& val){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_loadu_ps(val.m_val[i]); } \
+	inline CLASS_NAME<float[4][4]>::CLASS_NAME(){ for (int i = 0; i < 4; ++i) m_val[i] = _mm_setzero_ps(); } \
+	inline CLASS_NAME<float[4][4]>::~CLASS_NAME(){} \
+
 #ifdef GASHA_FAST_ARITH_USE_SSE
 #define GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_SSE_M128_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 2); \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT3_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_FLOAT4_INSTANCING(CLASS_NAME);
+	GASHA_FAST_ARITH_CLASS_SSE_FLOAT4_INSTANCING(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_SSE_FLOAT4X4_INSTANCING(CLASS_NAME)
 #else//GASHA_FAST_ARITH_USE_SSE
-#define GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME) \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 3); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 4);
+#define GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME)
 #endif//GASHA_FAST_ARITH_USE_SSE
 
 #ifdef GASHA_FAST_ARITH_USE_SSE2
 #define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_DOUBLE_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_M128D_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 2);
+	GASHA_FAST_ARITH_CLASS_SSE_M128D_INSTANCING(CLASS_NAME);
 #else//GASHA_FAST_ARITH_USE_SSE2
-#define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME) \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 2);
+#define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME)
 #endif//GASHA_FAST_ARITH_USE_SSE2
 
 #ifdef GASHA_FAST_ARITH_USE_AVX
 #define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_M256_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_M256D_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 3); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 4);
+	GASHA_FAST_ARITH_CLASS_SSE_M256D_INSTANCING(CLASS_NAME);
 #else//GASHA_FAST_ARITH_USE_SSE
-#define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME) \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 3); \
-	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 4);
+#define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME)
 #endif//GASHA_FAST_ARITH_USE_SSE
 
 #define GASHA_FAST_ARITH_CLASS_SET_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_INSTANCING(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME);
@@ -1271,18 +1335,66 @@ template<> inline __m256d sqrt(const dummyA<__m256d>&& value)
 //--------------------------------------------------------------------------------
 
 #define GASHA_FAST_VECTOR_SET_INSTANCING(CLASS_NAME) \
-	template<typename T, std::size_t N> inline T norm(const CLASS_NAME<T[N]>& vec){ return GASHA_ norm(*vec); } \
-	template<typename T, std::size_t N> inline T normSq(const CLASS_NAME<T[N]>& vec){ return GASHA_ normSq(*vec); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> merge(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ merge(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> difference(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ difference(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline T length(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ length(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline T lengthSq(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ lengthSq(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec){ T result[N] = { 0 }; GASHA_ normalize(result, *vec); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const T scalar){ T result[N] = { 0 }; GASHA_ mul(result, *vec, scalar); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> forward(const CLASS_NAME<T[N]>& vec, const T scalar){ T result[N] = { 0 }; GASHA_ forward(result, *vec, scalar); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline T dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline T normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ cross(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); }
+	template<typename T, std::size_t N> inline T norm(const CLASS_NAME<T[N]>& vec) \
+	{ \
+		return GASHA_ norm(*vec); \
+	} \
+	template<typename T, std::size_t N> inline T normSq(const CLASS_NAME<T[N]>& vec) \
+	{ \
+		return GASHA_ normSq(*vec); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> merge(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ merge(result, *vec1, *vec2); \
+		return CLASS_NAME<T[N]>(result); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> difference(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ difference(result, *vec1, *vec2); \
+		return CLASS_NAME<T[N]>(result); \
+	} \
+	template<typename T, std::size_t N> inline T length(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		return GASHA_ length(*vec1, *vec2); \
+	} \
+	template<typename T, std::size_t N> inline T lengthSq(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		return GASHA_ lengthSq(*vec1, *vec2); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ normalize(result, *vec); \
+		return CLASS_NAME<T[N]>(result); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const T scalar) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ mul(result, *vec, scalar); \
+		return CLASS_NAME<T[N]>(result); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> forward(const CLASS_NAME<T[N]>& vec, const T scalar) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ forward(result, *vec, scalar); \
+		return CLASS_NAME<T[N]>(result); \
+	} \
+	template<typename T, std::size_t N> inline T dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		return GASHA_ dot(*vec1, *vec2); \
+	} \
+	template<typename T, std::size_t N> inline T normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		return GASHA_ normalizedDot(*vec1, *vec2); \
+	} \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2) \
+	{ \
+		T result[N] = { 0 }; \
+		GASHA_ cross(result, *vec1, *vec2); \
+		return CLASS_NAME<T[N]>(result); \
+	}
 
 GASHA_FAST_VECTOR_SET_INSTANCING(fastA);
 GASHA_FAST_VECTOR_SET_INSTANCING(fastestA);
@@ -1290,25 +1402,63 @@ GASHA_FAST_VECTOR_SET_INSTANCING(semiA);
 GASHA_FAST_VECTOR_SET_INSTANCING(sseA);
 GASHA_FAST_VECTOR_SET_INSTANCING(normA);
 
-template<typename T, std::size_t N> inline T norm(const dummyA<T[N]>& vec){ return GASHA_ norm(*vec); }
-template<typename T, std::size_t N> inline T normSq(const dummyA<T[N]>& vec){ return GASHA_ normSq(*vec); }
-template<typename T, std::size_t N> inline void merge(T (&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ GASHA_ merge(result, *vec1, *vec2); }
-template<typename T, std::size_t N> inline void difference(T(&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ GASHA_ difference(result, *vec1, *vec2); }
-template<typename T, std::size_t N> inline T length(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ return GASHA_ length(*vec1, *vec2); }
-template<typename T, std::size_t N> inline T lengthSq(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ return GASHA_ lengthSq(*vec1, *vec2); }
-template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyA<T[N]>& vec){ GASHA_ normalize(result, *vec); }
-template<typename T, std::size_t N> inline void mul(T(&result)[N], const dummyA<T[N]>& vec, const T scalar){ GASHA_ mul(result, *vec, scalar); }
-template<typename T, std::size_t N> inline void forward(T(&result)[N], const dummyA<T[N]>& vec, const T scalar){ GASHA_ forward(result, *vec, scalar); }
-template<typename T, std::size_t N> inline T dot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); }
-template<typename T, std::size_t N> inline T normalizedDot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); }
-template<typename T, std::size_t N> inline void cross(T(&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2){ GASHA_ cross(result, *vec1, *vec2); }
+template<typename T, std::size_t N> inline T norm(const dummyA<T[N]>& vec)
+{
+	return GASHA_ norm(*vec);
+}
+template<typename T, std::size_t N> inline T normSq(const dummyA<T[N]>& vec)
+{
+	return GASHA_ normSq(*vec);
+}
+template<typename T, std::size_t N> inline void merge(T (&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	GASHA_ merge(result, *vec1, *vec2);
+}
+template<typename T, std::size_t N> inline void difference(T(&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	GASHA_ difference(result, *vec1, *vec2);
+}
+template<typename T, std::size_t N> inline T length(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	return GASHA_ length(*vec1, *vec2);
+}
+template<typename T, std::size_t N> inline T lengthSq(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	return GASHA_ lengthSq(*vec1, *vec2);
+}
+template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyA<T[N]>& vec)
+{
+	GASHA_ normalize(result, *vec);
+}
+template<typename T, std::size_t N> inline void mul(T(&result)[N], const dummyA<T[N]>& vec, const T scalar)
+{
+	GASHA_ mul(result, *vec, scalar);
+}
+template<typename T, std::size_t N> inline void forward(T(&result)[N], const dummyA<T[N]>& vec, const T scalar)
+{
+	GASHA_ forward(result, *vec, scalar);
+}
+template<typename T, std::size_t N> inline T dot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	return GASHA_ dot(*vec1, *vec2);
+}
+template<typename T, std::size_t N> inline T normalizedDot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	return GASHA_ normalizedDot(*vec1, *vec2);
+}
+template<typename T, std::size_t N> inline void cross(T(&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2)
+{
+	GASHA_ cross(result, *vec1, *vec2);
+}
 
 //----------------------------------------
 //高速ベクトル演算：特殊化
-#ifdef GASHA_FAST_ARITH_USE_SSE4_1
+
+#ifdef GASHA_USE_SSE4_1
+//※SSE命令に特化し、4次元／4次元ベクトル用特殊化
 
 //--------------------
-//SSE命令専用
+//SSE命令専用関数
 
 //ノルム
 inline __m128 m128_norm(const __m128 vec_m128)
@@ -1395,6 +1545,8 @@ inline __m128 m128_cross(const __m128 vec1_m128, const __m128 vec2_m128)
 	return _mm_sub_ps(vec_a_m128, vec_b_m128);
 }
 
+#ifdef GASHA_FAST_ARITH_USE_SSE4_1
+
 //--------------------
 //特殊化
 
@@ -1469,7 +1621,449 @@ GASHA_FAST_VECTOR_SET_SSE_SPECIALIZATION_INSTANCING(fastA, float, 4);
 GASHA_FAST_VECTOR_SET_SSE_SPECIALIZATION_INSTANCING(fastestA, float, 4);
 GASHA_FAST_VECTOR_SET_SSE_SPECIALIZATION_INSTANCING(semiA, float, 4);
 GASHA_FAST_VECTOR_SET_SSE_SPECIALIZATION_INSTANCING(sseA, float, 4);
+
 #endif//GASHA_FAST_ARITH_USE_SSE4_1
+
+#ifdef GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE
+//fastArithと無関係に、常にSSE命令を有効にする場合
+
+void mm_store_vec3(float(&dst)[3], const __m128 src)
+{
+	const float* _src = reinterpret_cast<const float*>(&src);
+	dst[0] = _src[0];
+	dst[1] = _src[1];
+	dst[2] = _src[2];
+}
+
+template<> inline float norm<float, 3>(const float(&vec)[3])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	float result;
+	_mm_store_ss(&result, m128_norm(vec_m128));
+	return result;
+}
+template<> inline float normSq<float, 3>(const float(&vec)[3])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	float result;
+	_mm_store_ss(&result, m128_normSq(vec_m128));
+	return result;
+}
+template<> inline void merge<float, 3>(float(&result)[3], const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	mm_store_vec3(result, m128_merge(vec1_m128, vec2_m128));
+}
+template<> inline void difference<float, 3>(float(&result)[3], const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	mm_store_vec3(result, m128_difference(vec1_m128, vec2_m128));
+} 
+template<> inline float length<float, 3>(const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_length(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline float lengthSq<float, 3>(const float(&vec1)[3], const float(&vec2)[3])
+{
+const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_lengthSq(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline void normalize<float, 3>(float(&result)[3], const float(&vec)[3])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	mm_store_vec3(result, m128_normalize(vec_m128));
+}
+template<> inline void mul<float, 3>(float(&result)[3], const float(&vec)[3], const float scalar)
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	mm_store_vec3(result, m128_mul(vec_m128, scalar));
+}
+template<> inline void forward<float, 3>(float(&result)[3], const float(&vec)[3], const float scalar)
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	mm_store_vec3(result, m128_forward(vec_m128, scalar));
+}
+template<> inline float dot<float, 3>(const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_dot(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline float normalizedDot<float, 3>(const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_normalizedDot(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline void cross<float, 3>(float(&result)[3], const float(&vec1)[3], const float(&vec2)[3])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	mm_store_vec3(result, m128_cross(vec1_m128, vec2_m128));
+}
+
+template<> inline float norm<float, 4>(const float(&vec)[4])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	float result;
+	_mm_store_ss(&result, m128_norm(vec_m128));
+	return result;
+}
+template<> inline float normSq<float, 4>(const float(&vec)[4])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	float result;
+	_mm_store_ss(&result, m128_normSq(vec_m128));
+	return result;
+}
+template<> inline void merge<float, 4>(float(&result)[4], const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	_mm_storeu_ps(result, m128_merge(vec1_m128, vec2_m128));
+}
+template<> inline void difference<float, 4>(float(&result)[4], const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	_mm_storeu_ps(result, m128_difference(vec1_m128, vec2_m128));
+}
+template<> inline float length<float, 4>(const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_length(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline float lengthSq<float, 4>(const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_lengthSq(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline void normalize<float, 4>(float(&result)[4], const float(&vec)[4])
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	_mm_storeu_ps(result, m128_normalize(vec_m128));
+}
+template<> inline void mul<float, 4>(float(&result)[4], const float(&vec)[4], const float scalar)
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	_mm_storeu_ps(result, m128_mul(vec_m128, scalar));
+}
+template<> inline void forward<float, 4>(float(&result)[4], const float(&vec)[4], const float scalar)
+{
+	const __m128 vec_m128 = _mm_loadu_ps(vec);
+	_mm_storeu_ps(result, m128_forward(vec_m128, scalar));
+}
+template<> inline float dot<float, 4>(const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_dot(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline float normalizedDot<float, 4>(const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	float result;
+	_mm_store_ss(&result, m128_normalizedDot(vec1_m128, vec2_m128));
+	return result;
+}
+template<> inline void cross<float, 4>(float(&result)[4], const float(&vec1)[4], const float(&vec2)[4])
+{
+	const __m128 vec1_m128 = _mm_loadu_ps(vec1);
+	const __m128 vec2_m128 = _mm_loadu_ps(vec2);
+	_mm_storeu_ps(result, m128_cross(vec1_m128, vec2_m128));
+}
+
+#endif//GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE
+
+#endif//GASHA_USE_SSE4_1
+
+//--------------------------------------------------------------------------------
+//テンプレート行列
+//--------------------------------------------------------------------------------
+
+#define GASHA_FAST_MATRIX_SET_INSTANCING(CLASS_NAME) \
+	template<typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]> add(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		T result[N][M]; \
+		GASHA_ add(result, *mat1, *mat2); \
+		return CLASS_NAME<T[N][M]>(result); \
+	} \
+	template<typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]> sub(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		T result[N][M]; \
+		GASHA_ sub(result, *mat1, *mat2); \
+		return CLASS_NAME<T[N][M]>(result); \
+	} \
+	template<typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]> mul(const CLASS_NAME<T[N][M]>& mat, const T scalar) \
+	{ \
+		T result[N][M]; \
+		GASHA_ mul(result, *mat, scalar); \
+		return CLASS_NAME<T[N][M]>(result); \
+	} \
+	template<typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]> mul(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		T result[N][M]; \
+		GASHA_ mul(result, *mat1, *mat2); \
+		return CLASS_NAME<T[N][M]>(result); \
+	} \
+
+GASHA_FAST_MATRIX_SET_INSTANCING(fastA);
+GASHA_FAST_MATRIX_SET_INSTANCING(fastestA);
+GASHA_FAST_MATRIX_SET_INSTANCING(semiA);
+GASHA_FAST_MATRIX_SET_INSTANCING(sseA);
+GASHA_FAST_MATRIX_SET_INSTANCING(normA);
+
+template<typename T, std::size_t N, std::size_t M> inline void add(T(&result)[N][M], const dummyA<T[N][M]>& mat1, const dummyA<T[N][M]>& mat2)
+{
+	GASHA_ add(result, *mat1, *mat2);
+}
+template<typename T, std::size_t N, std::size_t M> inline void sub(T(&result)[N][M], const dummyA<T[N][M]>& mat1, const dummyA<T[N][M]>& mat2)
+{
+	GASHA_ sub(result, *mat1, *mat2);
+}
+template<typename T, std::size_t N, std::size_t M> inline void mul(T(&result)[N][M], const dummyA<T[N][M]>& mat1, const T scalar)
+{
+	GASHA_ mul(result, *mat1, scalar);
+}
+template<typename T, std::size_t N, std::size_t M> inline void mul(T(&result)[N][M], const dummyA<T[N][M]>& mat1, const dummyA<T[N][M]>& mat2)
+{
+	GASHA_ mul(result, *mat1, *mat2);
+}
+
+#ifdef GASHA_USE_SSE
+//※SSE命令に特化し、float×4×4行列用特殊化
+
+//--------------------
+//SSE命令専用関数
+
+//加算
+inline void m128_add(__m128 (&mat_result)[4], const __m128 (&mat1_m128)[4], const __m128 (&mat2_m128)[4])
+{
+	mat_result[0] = _mm_add_ps(mat1_m128[0], mat2_m128[0]);
+	mat_result[1] = _mm_add_ps(mat1_m128[1], mat2_m128[1]);
+	mat_result[2] = _mm_add_ps(mat1_m128[2], mat2_m128[2]);
+	mat_result[3] = _mm_add_ps(mat1_m128[3], mat2_m128[3]);
+}
+
+//減算
+inline void m128_sub(__m128 (&mat_result)[4], const __m128 (&mat1_m128)[4], const __m128 (&mat2_m128)[4])
+{
+	mat_result[0] = _mm_sub_ps(mat1_m128[0], mat2_m128[0]);
+	mat_result[1] = _mm_sub_ps(mat1_m128[1], mat2_m128[1]);
+	mat_result[2] = _mm_sub_ps(mat1_m128[2], mat2_m128[2]);
+	mat_result[3] = _mm_sub_ps(mat1_m128[3], mat2_m128[3]);
+}
+
+//スカラー倍
+inline void m128_mul(__m128 (&mat_result)[4], const __m128 (&mat_m128)[4], const float scalar)
+{
+	const __m128 scalar_m128 = _mm_set1_ps(scalar);
+	mat_result[0] = _mm_sub_ps(mat_m128[0], scalar_m128);
+	mat_result[1] = _mm_sub_ps(mat_m128[1], scalar_m128);
+	mat_result[2] = _mm_sub_ps(mat_m128[2], scalar_m128);
+	mat_result[3] = _mm_sub_ps(mat_m128[3], scalar_m128);
+}
+
+#ifdef GASHA_USE_SSE4_1
+//乗算
+inline void m128_mul(__m128 (&mat_result)[4], const __m128 (&mat1_m128)[4], const __m128 (&mat2_m128)[4])
+{
+	//mat2_m128を転置
+	const __m128 _mat2t_tmp[4] =
+	{
+		_mm_unpacklo_ps(mat2_m128[0], mat2_m128[1]),
+		_mm_unpacklo_ps(mat2_m128[2], mat2_m128[3]),
+		_mm_unpackhi_ps(mat2_m128[0], mat2_m128[1]),
+		_mm_unpackhi_ps(mat2_m128[2], mat2_m128[3])
+	};
+	const __m128 _mat2t[4] =
+	{
+		_mm_shuffle_ps(_mat2t_tmp[0], _mat2t_tmp[1], 0x44),
+		_mm_shuffle_ps(_mat2t_tmp[0], _mat2t_tmp[1], 0xee),
+		_mm_shuffle_ps(_mat2t_tmp[2], _mat2t_tmp[3], 0x44),
+		_mm_shuffle_ps(_mat2t_tmp[2], _mat2t_tmp[3], 0xee)
+	};
+	//乗算
+	mat_result[0] =
+		_mm_shuffle_ps(
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[0], _mat2t[0], 0xf1),
+				_mm_dp_ps(mat1_m128[0], _mat2t[1], 0xf1)),
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[0], _mat2t[2], 0xf1),
+				_mm_dp_ps(mat1_m128[0], _mat2t[3], 0xf1)),
+			0x44);
+	mat_result[1] =
+		_mm_shuffle_ps(
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[1], _mat2t[0], 0xf1),
+				_mm_dp_ps(mat1_m128[1], _mat2t[1], 0xf1)),
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[1], _mat2t[2], 0xf1),
+				_mm_dp_ps(mat1_m128[1], _mat2t[3], 0xf1)),
+			0x44);
+	mat_result[2] =
+		_mm_shuffle_ps(
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[2], _mat2t[0], 0xf1),
+				_mm_dp_ps(mat1_m128[2], _mat2t[1], 0xf1)),
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[2], _mat2t[2], 0xf1),
+				_mm_dp_ps(mat1_m128[2], _mat2t[3], 0xf1)),
+			0x44);
+	mat_result[3] =
+		_mm_shuffle_ps(
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[3], _mat2t[0], 0xf1),
+				_mm_dp_ps(mat1_m128[3], _mat2t[1], 0xf1)),
+			_mm_unpacklo_ps(
+				_mm_dp_ps(mat1_m128[3], _mat2t[2], 0xf1),
+				_mm_dp_ps(mat1_m128[3], _mat2t[3], 0xf1)),
+			0x44);
+}
+#endif//GASHA_USE_SSE4_1
+
+
+//--------------------
+//特殊化
+
+#ifdef GASHA_FAST_ARITH_USE_SSE
+
+#define GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION_INSTANCING(CLASS_NAME, T, N, M) \
+	template<> inline CLASS_NAME<T[N][M]> add<T, N, M>(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		CLASS_NAME<T[N][M]> result; \
+		m128_add(result.m_val, mat1.m_val, mat2.m_val); \
+		return result; \
+	} \
+	template<> inline CLASS_NAME<T[N][M]> sub<T, N, M>(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		CLASS_NAME<T[N][M]> result; \
+		m128_sub(result.m_val, mat1.m_val, mat2.m_val); \
+		return result; \
+	} \
+	template<> inline CLASS_NAME<T[N][M]> mul<T, N, M>(const CLASS_NAME<T[N][M]>& mat, const T scalar) \
+	{ \
+		CLASS_NAME<T[N][M]> result; \
+		m128_mul(result.m_val, mat.m_val, scalar); \
+		return result; \
+	} \
+
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION_INSTANCING(fastA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION_INSTANCING(fastestA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION_INSTANCING(semiA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION_INSTANCING(sseA, float, 4, 4);
+
+#endif//GASHA_FAST_ARITH_USE_SSE
+
+#ifdef GASHA_FAST_ARITH_USE_SSE4_1
+
+#define GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(CLASS_NAME, T, N, M) \
+	template<> inline CLASS_NAME<T[N][M]> mul<T, N, M>(const CLASS_NAME<T[N][M]>& mat1, const CLASS_NAME<T[N][M]>& mat2) \
+	{ \
+		CLASS_NAME<T[N][M]> result; \
+		m128_mul(result.m_val, mat1.m_val, mat2.m_val); \
+		return result; \
+	} \
+
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(fastA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(fastestA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(semiA, float, 4, 4);
+GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(sseA, float, 4, 4);
+
+#endif//GASHA_FAST_ARITH_USE_SSE4_1
+
+#ifdef GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE
+
+//----------
+//行列の加算
+template<>
+void add<float, 4, 4>(float(&mat_result)[4][4], const float(&mat1)[4][4], const float(&mat2)[4][4])
+{
+	//mat1,mat2をロード
+	//※16バイトアラインメントが保証されているなら、_mm_loadu_ps() ではなく、_mm_load_ps() を使用した方が高速
+	const __m128 _mat1[4] = { _mm_loadu_ps(mat1[0]), _mm_loadu_ps(mat1[1]), _mm_loadu_ps(mat1[2]), _mm_loadu_ps(mat1[3]) };
+	const __m128 _mat2[4] = { _mm_loadu_ps(mat2[0]), _mm_loadu_ps(mat2[1]), _mm_loadu_ps(mat2[2]), _mm_loadu_ps(mat2[3]) };
+	//加算
+	__m128 _mat_result[4];
+	m128_add(_mat_result, _mat1, _mat2);
+	for (int i = 0; i < 4; ++i)
+		_mm_storeu_ps(mat_result[i], _mat_result[i]);
+}
+
+//----------
+//行列の減算
+template<>
+void sub<float, 4, 4>(float(&mat_result)[4][4], const float(&mat1)[4][4], const float(&mat2)[4][4])
+{
+	//mat1,mat2をロード
+	//※16バイトアラインメントが保証されているなら、_mm_loadu_ps() ではなく、_mm_load_ps() を使用した方が高速
+	const __m128 _mat1[4] = { _mm_loadu_ps(mat1[0]), _mm_loadu_ps(mat1[1]), _mm_loadu_ps(mat1[2]), _mm_loadu_ps(mat1[3]) };
+	const __m128 _mat2[4] = { _mm_loadu_ps(mat2[0]), _mm_loadu_ps(mat2[1]), _mm_loadu_ps(mat2[2]), _mm_loadu_ps(mat2[3]) };
+	//減算
+	__m128 _mat_result[4];
+	m128_sub(_mat_result, _mat1, _mat2);
+	for (int i = 0; i < 4; ++i)
+		_mm_storeu_ps(mat_result[i], _mat_result[i]);
+}
+
+//----------
+//行列のスカラー倍
+template<>
+void mul<float, 4, 4>(float(&mat_result)[4][4], const float(&mat)[4][4], const float scalar)
+{
+	//mat1をロード
+	//※16バイトアラインメントが保証されているなら、_mm_loadu_ps() ではなく、_mm_load_ps() を使用した方が高速
+	const __m128 _mat[4] = { _mm_loadu_ps(mat[0]), _mm_loadu_ps(mat[1]), _mm_loadu_ps(mat[2]), _mm_loadu_ps(mat[3]) };
+	//乗算
+	__m128 _mat_result[4];
+	m128_mul(_mat_result, _mat, scalar);
+	for (int i = 0; i < 4; ++i)
+		_mm_storeu_ps(mat_result[i], _mat_result[i]);
+}
+
+#ifdef GASHA_USE_SSE4_1
+//----------
+//行列の乗算
+template<>
+void mul<float, 4, 4, 4>(float(&mat_result)[4][4], const float(&mat1)[4][4], const float(&mat2)[4][4])
+{
+	//mat1,mat2をロード
+	//※16バイトアラインメントが保証されているなら、_mm_loadu_ps() ではなく、_mm_load_ps() を使用した方が高速
+	const __m128 _mat1[4] = { _mm_loadu_ps(mat1[0]), _mm_loadu_ps(mat1[1]), _mm_loadu_ps(mat1[2]), _mm_loadu_ps(mat1[3]) };
+	const __m128 _mat2[4] = { _mm_loadu_ps(mat2[0]), _mm_loadu_ps(mat2[1]), _mm_loadu_ps(mat2[2]), _mm_loadu_ps(mat2[3]) };
+	__m128 _mat_result[4];
+	m128_mul(_mat_result, _mat1, _mat2);
+	for (int i = 0; i < 4; ++i)
+		_mm_storeu_ps(mat_result[i], _mat_result[i]);
+}
+#endif//GASHA_USE_SSE4_1
+
+#endif//GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE
+
+#endif//GASHA_USE_SSE
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
