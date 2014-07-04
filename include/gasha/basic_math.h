@@ -493,6 +493,12 @@ template<typename T, std::size_t N>
 inline void mul(T (&result)[N], const T (&vec)[N], const T scalar);
 
 //----------------------------------------
+//スカラー進行（スカラー長の加算）
+//※ベクトルを返す
+template<typename T, std::size_t N>
+inline void forward(T(&result)[N], const T(&vec)[N], const T scalar);
+
+//----------------------------------------
 //内積
 template<typename T, std::size_t N>
 inline T dot(const T (&vec1)[N], const T (&vec2)[N]);

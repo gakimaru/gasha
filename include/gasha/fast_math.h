@@ -40,18 +40,18 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 
 //クラス宣言
-template <typename T>
-struct fastArith;
-template <typename T>
-struct fastestArith;
-template <typename T>
-struct semifastArith;
-template <typename T>
-struct sseArith;
-template <typename T>
-struct normalArith;
-template <typename T>
-struct dummyArith;
+//・fastA    ... fast arithmetic（高速演算）
+//・fastestA ... fastest arithmetic（最高速演算）※精度が悪いが速い
+//・semiA    ... semi-fast arithmetic（準高速演算）※精度が良いが遅い（通常演算より精度がよくなることはない）
+//・sseA     ... sse arithmetic（SSE高速演算）
+//・normA    ... normal arithmetic（通常演算）
+//・dummyA   ... dummy arithmetic（通常演算）※他の型は計算結果として同じ型（fastA型など）を返すが、dummyAはfloatなどの元の値を返す
+template <typename T> struct fastA;
+template <typename T> struct fastestA;
+template <typename T> struct semiA;
+template <typename T> struct sseA;
+template <typename T> struct normA;
+template <typename T> struct dummyA;
 
 //定義用マクロ
 #define GASHA_FAST_ARITH_CLASS(CLASS_NAME) \
@@ -60,41 +60,41 @@ struct dummyArith;
 	{ \
 		typedef T value_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator value_type() const { return m_val; } \
 		inline value_type operator*() const { return m_val; } \
 		inline CLASS_NAME& operator=(const value_type val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -105,12 +105,12 @@ struct dummyArith;
 		typedef float value_type; \
 		typedef __m128 sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		sse_type m_val; \
 		inline operator value_type() const { value_type val; _mm_store_ss(&val, m_val); return val; } \
 		inline operator sse_type() const { return m_val; } \
@@ -118,33 +118,33 @@ struct dummyArith;
 		inline CLASS_NAME& operator=(const value_type val); \
 		inline CLASS_NAME& operator=(const sse_type&& val); \
 		inline CLASS_NAME& operator=(const sse_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
 		inline CLASS_NAME(const sse_type&& val); \
 		inline CLASS_NAME(const sse_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -155,12 +155,12 @@ struct dummyArith;
 		typedef double value_type; \
 		typedef __m128d sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		sse_type m_val; \
 		inline operator value_type() const { value_type val; _mm_store_sd(&val, m_val); return val; } \
 		inline operator sse_type() const { return m_val; } \
@@ -168,33 +168,33 @@ struct dummyArith;
 		inline CLASS_NAME& operator=(const value_type val); \
 		inline CLASS_NAME& operator=(const sse_type&& val); \
 		inline CLASS_NAME& operator=(const sse_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
 		inline CLASS_NAME(const sse_type&& val); \
 		inline CLASS_NAME(const sse_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -205,43 +205,43 @@ struct dummyArith;
 		typedef __m128 value_type; \
 		typedef __m128 sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator value_type() const { return m_val; } \
 		inline value_type operator*() const { return static_cast<value_type>(*this); } \
 		inline CLASS_NAME& operator=(const value_type&& val); \
 		inline CLASS_NAME& operator=(const value_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type&& val); \
 		inline CLASS_NAME(const value_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -252,43 +252,43 @@ struct dummyArith;
 		typedef __m128d value_type; \
 		typedef __m128d sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator value_type() const { return m_val; } \
 		inline value_type operator*() const { return static_cast<value_type>(*this); } \
 		inline CLASS_NAME& operator=(const value_type&& val); \
 		inline CLASS_NAME& operator=(const value_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type&& val); \
 		inline CLASS_NAME(const value_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -299,43 +299,43 @@ struct dummyArith;
 		typedef __m256 value_type; \
 		typedef __m256 sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator value_type() const { return m_val; } \
 		inline value_type operator*() const { return static_cast<value_type>(*this); } \
 		inline CLASS_NAME& operator=(const value_type&& val); \
 		inline CLASS_NAME& operator=(const value_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type&& val); \
 		inline CLASS_NAME(const value_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -346,43 +346,43 @@ struct dummyArith;
 		typedef __m256d value_type; \
 		typedef __m256d sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator value_type() const { return m_val; } \
 		inline value_type operator*() const { return static_cast<value_type>(*this); } \
 		inline CLASS_NAME& operator=(const value_type&& val); \
 		inline CLASS_NAME& operator=(const value_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type&& val); \
 		inline CLASS_NAME(const value_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -392,12 +392,12 @@ struct dummyArith;
 	{ \
 	typedef TYPE value_type[SIZE]; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		value_type m_val; \
 		inline operator const value_type&() const { return m_val; } \
 		inline operator value_type&(){ return m_val; } \
@@ -405,31 +405,31 @@ struct dummyArith;
 		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
 		inline value_type& operator*(){ return static_cast<value_type&>(*this); } \
 		inline CLASS_NAME& operator=(const value_type val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -440,12 +440,12 @@ struct dummyArith;
 		typedef float value_type[3]; \
 		typedef __m128 sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		union \
 		{ \
 			sse_type m_val; \
@@ -461,33 +461,33 @@ struct dummyArith;
 		inline CLASS_NAME& operator=(const value_type val); \
 		inline CLASS_NAME& operator=(const sse_type&& val); \
 		inline CLASS_NAME& operator=(const sse_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
 		inline CLASS_NAME(const sse_type&& val); \
 		inline CLASS_NAME(const sse_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -498,12 +498,12 @@ struct dummyArith;
 		typedef float value_type[4]; \
 		typedef __m128 sse_type; \
 		typedef CLASS_NAME<value_type> result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		union \
 		{ \
 			sse_type m_val; \
@@ -518,33 +518,33 @@ struct dummyArith;
 		inline CLASS_NAME& operator=(const value_type val); \
 		inline CLASS_NAME& operator=(const sse_type&& val); \
 		inline CLASS_NAME& operator=(const sse_type& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const fastestArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const semifastArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const sseArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const normalArith<value_type>& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME& operator=(const dummyArith<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastA<value_type>& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const fastestA<value_type>& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const semiA<value_type>& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const sseA<value_type>& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const normA<value_type>& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>&& val); \
+		inline CLASS_NAME& operator=(const dummyA<value_type>& val); \
 		inline CLASS_NAME(const value_type val); \
 		inline CLASS_NAME(const sse_type&& val); \
 		inline CLASS_NAME(const sse_type& val); \
-		inline CLASS_NAME(const fastArith<value_type>&& val); \
-		inline CLASS_NAME(const fastArith<value_type>& val); \
-		inline CLASS_NAME(const fastestArith<value_type>&& val); \
-		inline CLASS_NAME(const fastestArith<value_type>& val); \
-		inline CLASS_NAME(const semifastArith<value_type>&& val); \
-		inline CLASS_NAME(const semifastArith<value_type>& val); \
-		inline CLASS_NAME(const sseArith<value_type>&& val); \
-		inline CLASS_NAME(const sseArith<value_type>& val); \
-		inline CLASS_NAME(const normalArith<value_type>&& val); \
-		inline CLASS_NAME(const normalArith<value_type>& val); \
-		inline CLASS_NAME(const dummyArith<value_type>&& val); \
-		inline CLASS_NAME(const dummyArith<value_type>& val); \
+		inline CLASS_NAME(const fastA<value_type>&& val); \
+		inline CLASS_NAME(const fastA<value_type>& val); \
+		inline CLASS_NAME(const fastestA<value_type>&& val); \
+		inline CLASS_NAME(const fastestA<value_type>& val); \
+		inline CLASS_NAME(const semiA<value_type>&& val); \
+		inline CLASS_NAME(const semiA<value_type>& val); \
+		inline CLASS_NAME(const sseA<value_type>&& val); \
+		inline CLASS_NAME(const sseA<value_type>& val); \
+		inline CLASS_NAME(const normA<value_type>&& val); \
+		inline CLASS_NAME(const normA<value_type>& val); \
+		inline CLASS_NAME(const dummyA<value_type>&& val); \
+		inline CLASS_NAME(const dummyA<value_type>& val); \
 		inline CLASS_NAME(); \
 		inline ~CLASS_NAME(); \
 	};
@@ -592,7 +592,7 @@ struct dummyArith;
 	GASHA_FAST_ARITH_CLASS_AVX(CLASS_NAME);
 
 //----------------------------------------
-//高速演算クラス
+//高速演算クラス（fast arithmetic）
 //※データ型に基づき、適切な高速演算を適用する。
 //※通常の演算に比べて、精度が若干落ちる。
 //※float型／__m128型の場合、高速化のために、除算に逆数を用いる。
@@ -600,9 +600,10 @@ struct dummyArith;
 //※その他、できる限りSSE命令を用いる。
 //※内部でSSE型を用いるなどするため、データサイズが大きくなることがある。
 //※SSE型のまま四則演算するので、演算を連続で行った時に高速になる。
-GASHA_FAST_ARITH_CLASS_SET(fastArith);
+//※演算結果として左辺値と同じ型（normA型）を返す。
+GASHA_FAST_ARITH_CLASS_SET(fastA);
 //----------------------------------------
-//最高速演算クラス
+//最高速演算クラス（fastest arithmetic）
 //※データ型に基づき、適切な高速演算を適用する。
 //※通常の演算に比べて、精度が悪い。
 //※float型／__m128型の場合、高速化のために、除算に逆数を用いる。
@@ -610,73 +611,78 @@ GASHA_FAST_ARITH_CLASS_SET(fastArith);
 //※その他、できる限りSSE命令を用いる。
 //※内部でSSE型を用いるなどするため、データサイズが大きくなることがある。
 //※SSE型のまま四則演算するので、演算を連続で行った時に高速になる。
-GASHA_FAST_ARITH_CLASS_SET(fastestArith);
+//※演算結果として左辺値と同じ型（normA型）を返す。
+GASHA_FAST_ARITH_CLASS_SET(fastestA);
 //----------------------------------------
-//準高速演算クラス
+//準高速演算クラス（semi-fast arithmetic）
 //※データ型に基づき、適切な高速演算を適用する。
 //※通常の演算に比べて、精度が若干落ちるが、可能な限り高めるようにする。
+//　通常演算より精度が高まることはない。
 //※float型／__m128型の場合、高速化のために、除算に逆数を用いる。
 //　逆数は、近似値を元にニュートン法を2回適用して精度を高める。
 //※その他、できる限りSSE命令を用いる。
 //※内部でSSE型を用いるなどするため、データサイズが大きくなることがある。
 //※SSE型のまま四則演算するので、演算を連続で行った時に高速になる。
-GASHA_FAST_ARITH_CLASS_SET(semifastArith);
+//※演算結果として左辺値と同じ型（normA型）を返す。
+GASHA_FAST_ARITH_CLASS_SET(semiA);
 //----------------------------------------
-//SSE高速演算クラス
+//SSE高速演算クラス（sse arithmetic）
 //※データ型に基づき、適切な高速演算を適用する。
 //※できる限りSSE命令を用いる。逆数を用いた除算は行わない。
-//※内部でSSE型を用いるなどするため、データサイズが大きくなることがある。
 //※SSE型のまま四則演算するので、演算を連続で行った時に高速になる。
-GASHA_FAST_ARITH_CLASS_SET(sseArith);
+//※演算結果として左辺値と同じ型（normA型）を返す。
+GASHA_FAST_ARITH_CLASS_SET(sseA);
 //----------------------------------------
-//通常演算クラス
+//通常演算クラス（normal arithmetic）
 //※そのままのデータ型で普通の演算を行う。
+//※演算結果として左辺値と同じ型（normA型）を返す。
 //※SSE命令型の場合はSSE命令を用いる。
-GASHA_FAST_ARITH_CLASS_SET(normalArith);
+GASHA_FAST_ARITH_CLASS_SET(normA);
 //----------------------------------------
-//ダミー演算クラス
+//ダミー演算クラス（dummy arithmetic）
 //※何もせず、元の値の参照を扱う。元の値のままとして処理する。
+//※他の型は演算結果として同じ型（fastA型など）を返すが、dummyAはfloatなどの元の値を返す。
 //※最適化により、クラスを通さず直接値を扱うのと同等になる。
 //※他の演算クラスと挙動やパフォーマンスの違いを確認したい時に用いる。
 //※他の演算クラスとインターフェースが異なるので注意。
 template <typename T>
-struct dummyArith
+struct dummyA
 {
 	typedef T value_type;
 	typedef value_type result_type;
-	typedef fastArith<value_type> fastArith_type;
-	typedef fastestArith<value_type> fastestArith_type;
-	typedef semifastArith<value_type> semifastArith_type;
-	typedef sseArith<value_type> sseArith_type;
-	typedef normalArith<value_type> normalArith_type;
-	typedef dummyArith<value_type> dummyArith_type;
+	typedef fastA<value_type> fastA_type;
+	typedef fastestA<value_type> fastestA_type;
+	typedef semiA<value_type> semiA_type;
+	typedef sseA<value_type> sseA_type;
+	typedef normA<value_type> normA_type;
+	typedef dummyA<value_type> dummyA_type;
 	const value_type& m_val;
 	inline operator value_type() const { return m_val; }
 	value_type operator*() const { return m_val; }
-	inline dummyArith(const value_type&& val) : m_val(val){}
-	inline dummyArith(const value_type& val) : m_val(val){}
-	dummyArith() = delete;
-	inline ~dummyArith(){}
+	inline dummyA(const value_type&& val) : m_val(val){}
+	inline dummyA(const value_type& val) : m_val(val){}
+	dummyA() = delete;
+	inline ~dummyA(){}
 };
 #define GASHA_DUMMY_ARITH_ARRAY_SPECIALIZATION(TYPE, SIZE) \
 	template <> \
-	struct dummyArith<TYPE[SIZE]> \
+	struct dummyA<TYPE[SIZE]> \
 	{ \
 		typedef TYPE value_type[SIZE]; \
 		typedef value_type result_type; \
-		typedef fastArith<value_type> fastArith_type; \
-		typedef fastestArith<value_type> fastestArith_type; \
-		typedef semifastArith<value_type> semifastArith_type; \
-		typedef sseArith<value_type> sseArith_type; \
-		typedef normalArith<value_type> normalArith_type; \
-		typedef dummyArith<value_type> dummyArith_type; \
+		typedef fastA<value_type> fastA_type; \
+		typedef fastestA<value_type> fastestA_type; \
+		typedef semiA<value_type> semiA_type; \
+		typedef sseA<value_type> sseA_type; \
+		typedef normA<value_type> normA_type; \
+		typedef dummyA<value_type> dummyA_type; \
 		const TYPE(&m_val)[SIZE]; \
 		inline operator const value_type&() const { return m_val; } \
 		inline TYPE operator[](const int index) const { return m_val[index]; } \
 		inline const value_type& operator*() const { return static_cast<const value_type&>(*this); } \
-		inline dummyArith(const TYPE(&val)[SIZE]) : m_val(val){} \
-		dummyArith() = delete; \
-		inline ~dummyArith(){} \
+		inline dummyA(const TYPE(&val)[SIZE]) : m_val(val){} \
+		dummyA() = delete; \
+		inline ~dummyA(){} \
 	};
 GASHA_DUMMY_ARITH_ARRAY_SPECIALIZATION(float, 2);
 GASHA_DUMMY_ARITH_ARRAY_SPECIALIZATION(float, 3);
@@ -687,525 +693,525 @@ GASHA_DUMMY_ARITH_ARRAY_SPECIALIZATION(double, 4);
 
 //----------------------------------------
 //高速演算クラスの別名
-using fastArith_f = fastArith<float>;
-using fastArith_2f = fastArith<float[2]>;
-using fastArith_3f = fastArith<float[3]>;
-using fastArith_4f = fastArith<float[4]>;
-using fastArith_d = fastArith<double>;
-using fastArith_2d = fastArith<double[2]>;
-using fastArith_3d = fastArith<double[3]>;
-using fastArith_4d = fastArith<double[4]>;
-using fastestArith_f = fastestArith<float>;
-using fastestArith_2f = fastestArith<float[2]>;
-using fastestArith_3f = fastestArith<float[3]>;
-using fastestArith_4f = fastestArith<float[4]>;
-using fastestArith_d = fastestArith<double>;
-using fastestArith_2d = fastestArith<double[2]>;
-using fastestArith_3d = fastestArith<double[3]>;
-using fastestArith_4d = fastestArith<double[4]>;
-using semifastArith_f = semifastArith<float>;
-using semifastArith_2f = semifastArith<float[2]>;
-using semifastArith_3f = semifastArith<float[3]>;
-using semifastArith_4f = semifastArith<float[4]>;
-using semifastArith_d = semifastArith<double>;
-using semifastArith_2d = semifastArith<double[2]>;
-using semifastArith_3d = semifastArith<double[3]>;
-using semifastArith_4d = semifastArith<double[4]>;
-using sseArith_f = sseArith<float>;
-using sseArith_2f = sseArith<float[2]>;
-using sseArith_3f = sseArith<float[3]>;
-using sseArith_4f = sseArith<float[4]>;
-using sseArith_d = sseArith<double>;
-using sseArith_2d = sseArith<double[2]>;
-using sseArith_3d = sseArith<double[3]>;
-using sseArith_4d = sseArith<double[4]>;
-using normalArith_f = normalArith<float>;
-using normalArith_2f = normalArith<float[2]>;
-using normalArith_3f = normalArith<float[3]>;
-using normalArith_4f = normalArith<float[4]>;
-using normalArith_d = normalArith<double>;
-using normalArith_2d = normalArith<double[2]>;
-using normalArith_3d = normalArith<double[3]>;
-using normalArith_4d = normalArith<double[4]>;
-using dummyArith_f = dummyArith<float>;
-using dummyArith_2f = dummyArith<float[2]>;
-using dummyArith_3f = dummyArith<float[3]>;
-using dummyArith_4f = dummyArith<float[4]>;
-using dummyArith_d = dummyArith<double>;
-using dummyArith_2d = dummyArith<double[2]>;
-using dummyArith_3d = dummyArith<double[3]>;
-using dummyArith_4d = dummyArith<double[4]>;
+using fastA_f = fastA<float>;
+using fastA_2f = fastA<float[2]>;
+using fastA_3f = fastA<float[3]>;
+using fastA_4f = fastA<float[4]>;
+using fastA_d = fastA<double>;
+using fastA_2d = fastA<double[2]>;
+using fastA_3d = fastA<double[3]>;
+using fastA_4d = fastA<double[4]>;
+using fastestA_f = fastestA<float>;
+using fastestA_2f = fastestA<float[2]>;
+using fastestA_3f = fastestA<float[3]>;
+using fastestA_4f = fastestA<float[4]>;
+using fastestA_d = fastestA<double>;
+using fastestA_2d = fastestA<double[2]>;
+using fastestA_3d = fastestA<double[3]>;
+using fastestA_4d = fastestA<double[4]>;
+using semiA_f = semiA<float>;
+using semiA_2f = semiA<float[2]>;
+using semiA_3f = semiA<float[3]>;
+using semiA_4f = semiA<float[4]>;
+using semiA_d = semiA<double>;
+using semiA_2d = semiA<double[2]>;
+using semiA_3d = semiA<double[3]>;
+using semiA_4d = semiA<double[4]>;
+using sseA_f = sseA<float>;
+using sseA_2f = sseA<float[2]>;
+using sseA_3f = sseA<float[3]>;
+using sseA_4f = sseA<float[4]>;
+using sseA_d = sseA<double>;
+using sseA_2d = sseA<double[2]>;
+using sseA_3d = sseA<double[3]>;
+using sseA_4d = sseA<double[4]>;
+using normA_f = normA<float>;
+using normA_2f = normA<float[2]>;
+using normA_3f = normA<float[3]>;
+using normA_4f = normA<float[4]>;
+using normA_d = normA<double>;
+using normA_2d = normA<double[2]>;
+using normA_3d = normA<double[3]>;
+using normA_4d = normA<double[4]>;
+using dummyA_f = dummyA<float>;
+using dummyA_2f = dummyA<float[2]>;
+using dummyA_3f = dummyA<float[3]>;
+using dummyA_4f = dummyA<float[4]>;
+using dummyA_d = dummyA<double>;
+using dummyA_2d = dummyA<double[2]>;
+using dummyA_3d = dummyA<double[3]>;
+using dummyA_4d = dummyA<double[4]>;
 
 //----------------------------------------
 //高速演算
 #define GASHA_FAST_ARITH_OPERATOR(CLASS_NAME) \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) + std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const normA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const normA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>&& lvalue, const T rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator+(const CLASS_NAME<T>& lvalue, const T rvalue){ return std::move(lvalue) + CLASS_NAME<T>(rvalue); } \
 	template<class T> inline T operator+(const T lvalue, const CLASS_NAME<T>&& rvalue){ return CLASS_NAME<T>(lvalue) +std::move(rvalue); } \
 	template<class T> inline T operator+(const T lvalue, const CLASS_NAME<T>& rvalue){ return CLASS_NAME<T>(lvalue) +std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) - std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const normA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const normA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>&& lvalue, const T rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator-(const CLASS_NAME<T>& lvalue, const T rvalue){ return std::move(lvalue) - CLASS_NAME<T>(rvalue); } \
 	template<class T> inline T operator-(const T lvalue, const CLASS_NAME<T>&& rvalue){ return CLASS_NAME<T>(lvalue) - std::move(rvalue); } \
 	template<class T> inline T operator-(const T lvalue, const CLASS_NAME<T>& rvalue){ return CLASS_NAME<T>(lvalue) - std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) * std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const normA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const normA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>&& lvalue, const T rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator*(const CLASS_NAME<T>& lvalue, const T rvalue){ return std::move(lvalue) * CLASS_NAME<T>(rvalue); } \
 	template<class T> inline T operator*(const T lvalue, const CLASS_NAME<T>&& rvalue){ return CLASS_NAME<T>(lvalue) * std::move(rvalue); } \
 	template<class T> inline T operator*(const T lvalue, const CLASS_NAME<T>& rvalue){ return CLASS_NAME<T>(lvalue) * std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastArith<T>& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastestArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const semifastArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const sseArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const normalArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
-	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const dummyArith<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastA<T>& rvalue){ return std::move(lvalue) / std::move(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const fastestA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const semiA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const sseA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const normA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const normA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
+	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const dummyA<T>& rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>&& lvalue, const T rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
 	template<class T> inline typename CLASS_NAME<T>::result_type operator/(const CLASS_NAME<T>& lvalue, const T rvalue){ return std::move(lvalue) / CLASS_NAME<T>(rvalue); } \
 	template<class T> inline T operator/(const T lvalue, const CLASS_NAME<T>&& rvalue){ return CLASS_NAME<T>(lvalue) / std::move(rvalue); } \
 	template<class T> inline T operator/(const T lvalue, const CLASS_NAME<T>& rvalue){ return CLASS_NAME<T>(lvalue) / std::move(rvalue); } \
 
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return fastArith<T>(*lvalue + *rvalue); }
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) + fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) + fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) + fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) + fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator+(const fastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) + fastArith<T>(rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const fastA<T>&& rvalue){ return fastA<T>(*lvalue + *rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) + fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) + fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) + fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) + fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator+(const fastA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) + fastA<T>(rvalue); }
 
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) + fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return fastestArith<T>(*lvalue + *rvalue); }
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) + fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) + fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) + fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator+(const fastestArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) + fastestArith<T>(rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) + fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const fastestA<T>&& rvalue){ return fastestA<T>(*lvalue + *rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) + fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) + fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) + fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator+(const fastestA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) + fastestA<T>(rvalue); }
 
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) + semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) + semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return semifastArith<T>(*lvalue + *rvalue); }
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) + semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) + semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator+(const semifastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) + semifastArith<T>(rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) + semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) + semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const semiA<T>&& rvalue){ return semiA<T>(*lvalue + *rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) + semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) + semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator+(const semiA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) + semiA<T>(rvalue); }
 
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) + sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) + sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) + sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const sseArith<T>&& rvalue){ return sseArith<T>(*lvalue + *rvalue); }
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) + sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator+(const sseArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) + sseArith<T>(rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) + sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) + sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) + sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const sseA<T>&& rvalue){ return sseA<T>(*lvalue + *rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) + sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator+(const sseA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) + sseA<T>(rvalue); }
 
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) + normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) + normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) + normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) + normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const normalArith<T>&& rvalue){ return normalArith<T>(*lvalue + *rvalue); }
-template<class T> inline normalArith<T> operator+(const normalArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return normalArith<T>(*lvalue + *rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) + normA<T>(rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) + normA<T>(rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) + normA<T>(rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) + normA<T>(rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const normA<T>&& rvalue){ return normA<T>(*lvalue + *rvalue); }
+template<class T> inline normA<T> operator+(const normA<T>&& lvalue, const dummyA<T>&& rvalue){ return normA<T>(*lvalue + *rvalue); }
 
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const fastArith<T>&& rvalue){ return *lvalue + *rvalue; }
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return *lvalue + *rvalue; }
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return *lvalue + *rvalue; }
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const sseArith<T>&& rvalue){ return *lvalue + *rvalue; }
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const normalArith<T>&& rvalue){ return *lvalue + *rvalue; }
-template<class T> inline T operator+(const dummyArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const fastA<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const fastestA<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const semiA<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const sseA<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const normA<T>&& rvalue){ return *lvalue + *rvalue; }
+template<class T> inline T operator+(const dummyA<T>&& lvalue, const dummyA<T>&& rvalue){ return *lvalue + *rvalue; }
 
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return fastArith<T>(*lvalue - *rvalue); }
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) - fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) - fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) - fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) - fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator-(const fastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) - fastArith<T>(rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const fastA<T>&& rvalue){ return fastA<T>(*lvalue - *rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) - fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) - fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) - fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) - fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator-(const fastA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) - fastA<T>(rvalue); }
 
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) - fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return fastestArith<T>(*lvalue - *rvalue); }
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) - fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) - fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) - fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator-(const fastestArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) - fastestArith<T>(rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) - fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const fastestA<T>&& rvalue){ return fastestA<T>(*lvalue - *rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) - fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) - fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) - fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator-(const fastestA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) - fastestA<T>(rvalue); }
 
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) - semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) - semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return semifastArith<T>(*lvalue - *rvalue); }
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) - semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) - semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator-(const semifastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) - semifastArith<T>(rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) - semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) - semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const semiA<T>&& rvalue){ return semiA<T>(*lvalue - *rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) - semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) - semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator-(const semiA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) - semiA<T>(rvalue); }
 
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) - sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) - sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) - sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const sseArith<T>&& rvalue){ return sseArith<T>(*lvalue - *rvalue); }
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) - sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator-(const sseArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) - sseArith<T>(rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) - sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) - sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) - sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const sseA<T>&& rvalue){ return sseA<T>(*lvalue - *rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) - sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator-(const sseA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) - sseA<T>(rvalue); }
 
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) - normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) - normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) - normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) - normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const normalArith<T>&& rvalue){ return normalArith<T>(*lvalue - *rvalue); }
-template<class T> inline normalArith<T> operator-(const normalArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return normalArith<T>(*lvalue - *rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) - normA<T>(rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) - normA<T>(rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) - normA<T>(rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) - normA<T>(rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const normA<T>&& rvalue){ return normA<T>(*lvalue - *rvalue); }
+template<class T> inline normA<T> operator-(const normA<T>&& lvalue, const dummyA<T>&& rvalue){ return normA<T>(*lvalue - *rvalue); }
 
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const fastArith<T>&& rvalue){ return *lvalue - *rvalue; }
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return *lvalue - *rvalue; }
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return *lvalue - *rvalue; }
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const sseArith<T>&& rvalue){ return *lvalue - *rvalue; }
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const normalArith<T>&& rvalue){ return *lvalue - *rvalue; }
-template<class T> inline T operator-(const dummyArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const fastA<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const fastestA<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const semiA<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const sseA<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const normA<T>&& rvalue){ return *lvalue - *rvalue; }
+template<class T> inline T operator-(const dummyA<T>&& lvalue, const dummyA<T>&& rvalue){ return *lvalue - *rvalue; }
 
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return fastArith<T>(*lvalue * *rvalue); }
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) * fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) * fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) * fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) * fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator*(const fastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) * fastArith<T>(rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const fastA<T>&& rvalue){ return fastA<T>(*lvalue * *rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) * fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) * fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) * fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) * fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator*(const fastA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) * fastA<T>(rvalue); }
 
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) * fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return fastestArith<T>(*lvalue * *rvalue); }
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) * fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) * fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) * fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator*(const fastestArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) * fastestArith<T>(rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) * fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const fastestA<T>&& rvalue){ return fastestA<T>(*lvalue * *rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) * fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) * fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) * fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator*(const fastestA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) * fastestA<T>(rvalue); }
 
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) * semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) * semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return semifastArith<T>(*lvalue * *rvalue); }
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) * semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) * semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator*(const semifastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) * semifastArith<T>(rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) * semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) * semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const semiA<T>&& rvalue){ return semiA<T>(*lvalue * *rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) * semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) * semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator*(const semiA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) * semiA<T>(rvalue); }
 
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) * sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) * sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) * sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const sseArith<T>&& rvalue){ return sseArith<T>(*lvalue * *rvalue); }
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) * sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator*(const sseArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) * sseArith<T>(rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) * sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) * sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) * sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const sseA<T>&& rvalue){ return sseA<T>(*lvalue * *rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) * sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator*(const sseA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) * sseA<T>(rvalue); }
 
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) * normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) * normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) * normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) * normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const normalArith<T>&& rvalue){ return normalArith<T>(*lvalue * *rvalue); }
-template<class T> inline normalArith<T> operator*(const normalArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return normalArith<T>(*lvalue * *rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) * normA<T>(rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) * normA<T>(rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) * normA<T>(rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) * normA<T>(rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const normA<T>&& rvalue){ return normA<T>(*lvalue * *rvalue); }
+template<class T> inline normA<T> operator*(const normA<T>&& lvalue, const dummyA<T>&& rvalue){ return normA<T>(*lvalue * *rvalue); }
 
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const fastArith<T>&& rvalue){ return *lvalue * *rvalue; }
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return *lvalue * *rvalue; }
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return *lvalue * *rvalue; }
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const sseArith<T>&& rvalue){ return *lvalue * *rvalue; }
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const normalArith<T>&& rvalue){ return *lvalue * *rvalue; }
-template<class T> inline T operator*(const dummyArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const fastA<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const fastestA<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const semiA<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const sseA<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const normA<T>&& rvalue){ return *lvalue * *rvalue; }
+template<class T> inline T operator*(const dummyA<T>&& lvalue, const dummyA<T>&& rvalue){ return *lvalue * *rvalue; }
 
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return fastArith<T>(*lvalue / *rvalue); }
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) / fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) / fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) / fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) / fastArith<T>(rvalue); }
-template<class T> inline fastArith<T> operator/(const fastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) / fastArith<T>(rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const fastA<T>&& rvalue){ return fastA<T>(*lvalue / *rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) / fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) / fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) / fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) / fastA<T>(rvalue); }
+template<class T> inline fastA<T> operator/(const fastA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) / fastA<T>(rvalue); }
 
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) / fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return fastestArith<T>(*lvalue / *rvalue); }
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) / fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) / fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) / fastestArith<T>(rvalue); }
-template<class T> inline fastestArith<T> operator/(const fastestArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) / fastestArith<T>(rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) / fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const fastestA<T>&& rvalue){ return fastestA<T>(*lvalue / *rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) / fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) / fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) / fastestA<T>(rvalue); }
+template<class T> inline fastestA<T> operator/(const fastestA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) / fastestA<T>(rvalue); }
 
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) / semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) / semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return semifastArith<T>(*lvalue / *rvalue); }
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) / semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) / semifastArith<T>(rvalue); }
-template<class T> inline semifastArith<T> operator/(const semifastArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) / semifastArith<T>(rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) / semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) / semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const semiA<T>&& rvalue){ return semiA<T>(*lvalue / *rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) / semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) / semiA<T>(rvalue); }
+template<class T> inline semiA<T> operator/(const semiA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) / semiA<T>(rvalue); }
 
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) / sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) / sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) / sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const sseArith<T>&& rvalue){ return sseArith<T>(*lvalue / *rvalue); }
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const normalArith<T>&& rvalue){ return std::move(lvalue) / sseArith<T>(rvalue); }
-template<class T> inline sseArith<T> operator/(const sseArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return std::move(lvalue) / sseArith<T>(rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) / sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) / sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) / sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const sseA<T>&& rvalue){ return sseA<T>(*lvalue / *rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const normA<T>&& rvalue){ return std::move(lvalue) / sseA<T>(rvalue); }
+template<class T> inline sseA<T> operator/(const sseA<T>&& lvalue, const dummyA<T>&& rvalue){ return std::move(lvalue) / sseA<T>(rvalue); }
 
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const fastArith<T>&& rvalue){ return std::move(lvalue) / normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return std::move(lvalue) / normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return std::move(lvalue) / normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const sseArith<T>&& rvalue){ return std::move(lvalue) / normalArith<T>(rvalue); }
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const normalArith<T>&& rvalue){ return normalArith<T>(*lvalue / *rvalue); }
-template<class T> inline normalArith<T> operator/(const normalArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return normalArith<T>(*lvalue / *rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const fastA<T>&& rvalue){ return std::move(lvalue) / normA<T>(rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const fastestA<T>&& rvalue){ return std::move(lvalue) / normA<T>(rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const semiA<T>&& rvalue){ return std::move(lvalue) / normA<T>(rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const sseA<T>&& rvalue){ return std::move(lvalue) / normA<T>(rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const normA<T>&& rvalue){ return normA<T>(*lvalue / *rvalue); }
+template<class T> inline normA<T> operator/(const normA<T>&& lvalue, const dummyA<T>&& rvalue){ return normA<T>(*lvalue / *rvalue); }
 
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const fastArith<T>&& rvalue){ return *lvalue / *rvalue; }
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const fastestArith<T>&& rvalue){ return *lvalue / *rvalue; }
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const semifastArith<T>&& rvalue){ return *lvalue / *rvalue; }
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const sseArith<T>&& rvalue){ return *lvalue / *rvalue; }
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const normalArith<T>&& rvalue){ return *lvalue / *rvalue; }
-template<class T> inline T operator/(const dummyArith<T>&& lvalue, const dummyArith<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const fastA<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const fastestA<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const semiA<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const sseA<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const normA<T>&& rvalue){ return *lvalue / *rvalue; }
+template<class T> inline T operator/(const dummyA<T>&& lvalue, const dummyA<T>&& rvalue){ return *lvalue / *rvalue; }
 
-GASHA_FAST_ARITH_OPERATOR(fastArith);
-GASHA_FAST_ARITH_OPERATOR(fastestArith);
-GASHA_FAST_ARITH_OPERATOR(semifastArith);
-GASHA_FAST_ARITH_OPERATOR(sseArith);
-GASHA_FAST_ARITH_OPERATOR(normalArith);
+GASHA_FAST_ARITH_OPERATOR(fastA);
+GASHA_FAST_ARITH_OPERATOR(fastestA);
+GASHA_FAST_ARITH_OPERATOR(semiA);
+GASHA_FAST_ARITH_OPERATOR(sseA);
+GASHA_FAST_ARITH_OPERATOR(normA);
 
 //----------------------------------------
 //高速演算：特殊化
 #ifdef GASHA_FAST_ARITH_USE_SSE
-template<> inline fastArith<float> operator+(const fastArith<float>&& lvalue, const fastArith<float>&& rvalue);
-template<> inline fastArith<__m128> operator+(const fastArith<__m128>&& lvalue, const fastArith<__m128>&& rvalue);
+template<> inline fastA<float> operator+(const fastA<float>&& lvalue, const fastA<float>&& rvalue);
+template<> inline fastA<__m128> operator+(const fastA<__m128>&& lvalue, const fastA<__m128>&& rvalue);
 
-template<> inline fastArith<float> operator-(const fastArith<float>&& lvalue, const fastArith<float>&& rvalue);
-template<> inline fastArith<__m128> operator-(const fastArith<__m128>&& lvalue, const fastArith<__m128>&& rvalue);
+template<> inline fastA<float> operator-(const fastA<float>&& lvalue, const fastA<float>&& rvalue);
+template<> inline fastA<__m128> operator-(const fastA<__m128>&& lvalue, const fastA<__m128>&& rvalue);
 
-template<> inline fastArith<float> operator*(const fastArith<float>&& lvalue, const fastArith<float>&& rvalue);
-template<> inline fastArith<__m128> operator*(const fastArith<__m128>&& lvalue, const fastArith<__m128>&& rvalue);
+template<> inline fastA<float> operator*(const fastA<float>&& lvalue, const fastA<float>&& rvalue);
+template<> inline fastA<__m128> operator*(const fastA<__m128>&& lvalue, const fastA<__m128>&& rvalue);
 
-template<> inline fastArith<float> operator/(const fastArith<float>&& lvalue, const fastArith<float>&& rvalue);
-template<> inline fastArith<__m128> operator/(const fastArith<__m128>&& lvalue, const fastArith<__m128>&& rvalue);
+template<> inline fastA<float> operator/(const fastA<float>&& lvalue, const fastA<float>&& rvalue);
+template<> inline fastA<__m128> operator/(const fastA<__m128>&& lvalue, const fastA<__m128>&& rvalue);
 
-template<> inline fastestArith<float> operator+(const fastestArith<float>&& lvalue, const fastestArith<float>&& rvalue);
-template<> inline fastestArith<__m128> operator+(const fastestArith<__m128>&& lvalue, const fastestArith<__m128>&& rvalue);
+template<> inline fastestA<float> operator+(const fastestA<float>&& lvalue, const fastestA<float>&& rvalue);
+template<> inline fastestA<__m128> operator+(const fastestA<__m128>&& lvalue, const fastestA<__m128>&& rvalue);
 
-template<> inline fastestArith<float> operator-(const fastestArith<float>&& lvalue, const fastestArith<float>&& rvalue);
-template<> inline fastestArith<__m128> operator-(const fastestArith<__m128>&& lvalue, const fastestArith<__m128>&& rvalue);
+template<> inline fastestA<float> operator-(const fastestA<float>&& lvalue, const fastestA<float>&& rvalue);
+template<> inline fastestA<__m128> operator-(const fastestA<__m128>&& lvalue, const fastestA<__m128>&& rvalue);
 
-template<> inline fastestArith<float> operator*(const fastestArith<float>&& lvalue, const fastestArith<float>&& rvalue);
-template<> inline fastestArith<__m128> operator*(const fastestArith<__m128>&& lvalue, const fastestArith<__m128>&& rvalue);
+template<> inline fastestA<float> operator*(const fastestA<float>&& lvalue, const fastestA<float>&& rvalue);
+template<> inline fastestA<__m128> operator*(const fastestA<__m128>&& lvalue, const fastestA<__m128>&& rvalue);
 
-template<> inline fastestArith<float> operator/(const fastestArith<float>&& lvalue, const fastestArith<float>&& rvalue);
-template<> inline fastestArith<__m128> operator/(const fastestArith<__m128>&& lvalue, const fastestArith<__m128>&& rvalue);
+template<> inline fastestA<float> operator/(const fastestA<float>&& lvalue, const fastestA<float>&& rvalue);
+template<> inline fastestA<__m128> operator/(const fastestA<__m128>&& lvalue, const fastestA<__m128>&& rvalue);
 
-template<> inline semifastArith<float> operator+(const semifastArith<float>&& lvalue, const semifastArith<float>&& rvalue);
-template<> inline semifastArith<__m128> operator+(const semifastArith<__m128>&& lvalue, const semifastArith<__m128>&& rvalue);
+template<> inline semiA<float> operator+(const semiA<float>&& lvalue, const semiA<float>&& rvalue);
+template<> inline semiA<__m128> operator+(const semiA<__m128>&& lvalue, const semiA<__m128>&& rvalue);
 
-template<> inline semifastArith<float> operator-(const semifastArith<float>&& lvalue, const semifastArith<float>&& rvalue);
-template<> inline semifastArith<__m128> operator-(const semifastArith<__m128>&& lvalue, const semifastArith<__m128>&& rvalue);
+template<> inline semiA<float> operator-(const semiA<float>&& lvalue, const semiA<float>&& rvalue);
+template<> inline semiA<__m128> operator-(const semiA<__m128>&& lvalue, const semiA<__m128>&& rvalue);
 
-template<> inline semifastArith<float> operator*(const semifastArith<float>&& lvalue, const semifastArith<float>&& rvalue);
-template<> inline semifastArith<__m128> operator*(const semifastArith<__m128>&& lvalue, const semifastArith<__m128>&& rvalue);
+template<> inline semiA<float> operator*(const semiA<float>&& lvalue, const semiA<float>&& rvalue);
+template<> inline semiA<__m128> operator*(const semiA<__m128>&& lvalue, const semiA<__m128>&& rvalue);
 
-template<> inline semifastArith<float> operator/(const semifastArith<float>&& lvalue, const semifastArith<float>&& rvalue);
-template<> inline semifastArith<__m128> operator/(const semifastArith<__m128>&& lvalue, const semifastArith<__m128>&& rvalue);
+template<> inline semiA<float> operator/(const semiA<float>&& lvalue, const semiA<float>&& rvalue);
+template<> inline semiA<__m128> operator/(const semiA<__m128>&& lvalue, const semiA<__m128>&& rvalue);
 
-template<> inline sseArith<float> operator+(const sseArith<float>&& lvalue, const sseArith<float>&& rvalue);
-template<> inline sseArith<__m128> operator+(const sseArith<__m128>&& lvalue, const sseArith<__m128>&& rvalue);
+template<> inline sseA<float> operator+(const sseA<float>&& lvalue, const sseA<float>&& rvalue);
+template<> inline sseA<__m128> operator+(const sseA<__m128>&& lvalue, const sseA<__m128>&& rvalue);
 
-template<> inline sseArith<float> operator-(const sseArith<float>&& lvalue, const sseArith<float>&& rvalue);
-template<> inline sseArith<__m128> operator-(const sseArith<__m128>&& lvalue, const sseArith<__m128>&& rvalue);
+template<> inline sseA<float> operator-(const sseA<float>&& lvalue, const sseA<float>&& rvalue);
+template<> inline sseA<__m128> operator-(const sseA<__m128>&& lvalue, const sseA<__m128>&& rvalue);
 
-template<> inline sseArith<float> operator*(const sseArith<float>&& lvalue, const sseArith<float>&& rvalue);
-template<> inline sseArith<__m128> operator*(const sseArith<__m128>&& lvalue, const sseArith<__m128>&& rvalue);
+template<> inline sseA<float> operator*(const sseA<float>&& lvalue, const sseA<float>&& rvalue);
+template<> inline sseA<__m128> operator*(const sseA<__m128>&& lvalue, const sseA<__m128>&& rvalue);
 
-template<> inline sseArith<float> operator/(const sseArith<float>&& lvalue, const sseArith<float>&& rvalue);
-template<> inline sseArith<__m128> operator/(const sseArith<__m128>&& lvalue, const sseArith<__m128>&& rvalue);
+template<> inline sseA<float> operator/(const sseA<float>&& lvalue, const sseA<float>&& rvalue);
+template<> inline sseA<__m128> operator/(const sseA<__m128>&& lvalue, const sseA<__m128>&& rvalue);
 
-template<> inline normalArith<__m128> operator+(const normalArith<__m128>&& lvalue, const normalArith<__m128>&& rvalue);
+template<> inline normA<__m128> operator+(const normA<__m128>&& lvalue, const normA<__m128>&& rvalue);
 
-template<> inline normalArith<__m128> operator-(const normalArith<__m128>&& lvalue, const normalArith<__m128>&& rvalue);
+template<> inline normA<__m128> operator-(const normA<__m128>&& lvalue, const normA<__m128>&& rvalue);
 
-template<> inline normalArith<__m128> operator*(const normalArith<__m128>&& lvalue, const normalArith<__m128>&& rvalue);
+template<> inline normA<__m128> operator*(const normA<__m128>&& lvalue, const normA<__m128>&& rvalue);
 
-template<> inline normalArith<__m128> operator/(const normalArith<__m128>&& lvalue, const normalArith<__m128>&& rvalue);
+template<> inline normA<__m128> operator/(const normA<__m128>&& lvalue, const normA<__m128>&& rvalue);
 
-template<> inline __m128 operator+(const dummyArith<__m128>&& lvalue, const dummyArith<__m128>&& rvalue);
+template<> inline __m128 operator+(const dummyA<__m128>&& lvalue, const dummyA<__m128>&& rvalue);
 
-template<> inline __m128 operator-(const dummyArith<__m128>&& lvalue, const dummyArith<__m128>&& rvalue);
+template<> inline __m128 operator-(const dummyA<__m128>&& lvalue, const dummyA<__m128>&& rvalue);
 
-template<> inline __m128 operator*(const dummyArith<__m128>&& lvalue, const dummyArith<__m128>&& rvalue);
+template<> inline __m128 operator*(const dummyA<__m128>&& lvalue, const dummyA<__m128>&& rvalue);
 
-template<> inline __m128 operator/(const dummyArith<__m128>&& lvalue, const dummyArith<__m128>&& rvalue);
+template<> inline __m128 operator/(const dummyA<__m128>&& lvalue, const dummyA<__m128>&& rvalue);
 #endif//GASHA_FAST_ARITH_USE_SSE
 #ifdef GASHA_FAST_ARITH_USE_SSE2
-template<> inline fastArith<double> operator+(const fastArith<double>&& lvalue, const fastArith<double>&& rvalue);
-template<> inline fastArith<__m128d> operator+(const fastArith<__m128d>&& lvalue, const fastArith<__m128d>&& rvalue);
+template<> inline fastA<double> operator+(const fastA<double>&& lvalue, const fastA<double>&& rvalue);
+template<> inline fastA<__m128d> operator+(const fastA<__m128d>&& lvalue, const fastA<__m128d>&& rvalue);
 
-template<> inline fastArith<double> operator-(const fastArith<double>&& lvalue, const fastArith<double>&& rvalue);
-template<> inline fastArith<__m128d> operator-(const fastArith<__m128d>&& lvalue, const fastArith<__m128d>&& rvalue);
+template<> inline fastA<double> operator-(const fastA<double>&& lvalue, const fastA<double>&& rvalue);
+template<> inline fastA<__m128d> operator-(const fastA<__m128d>&& lvalue, const fastA<__m128d>&& rvalue);
 
-template<> inline fastArith<double> operator*(const fastArith<double>&& lvalue, const fastArith<double>&& rvalue);
-template<> inline fastArith<__m128d> operator*(const fastArith<__m128d>&& lvalue, const fastArith<__m128d>&& rvalue);
+template<> inline fastA<double> operator*(const fastA<double>&& lvalue, const fastA<double>&& rvalue);
+template<> inline fastA<__m128d> operator*(const fastA<__m128d>&& lvalue, const fastA<__m128d>&& rvalue);
 
-template<> inline fastArith<double> operator/(const fastArith<double>&& lvalue, const fastArith<double>&& rvalue);
-template<> inline fastArith<__m128d> operator/(const fastArith<__m128d>&& lvalue, const fastArith<__m128d>&& rvalue);
+template<> inline fastA<double> operator/(const fastA<double>&& lvalue, const fastA<double>&& rvalue);
+template<> inline fastA<__m128d> operator/(const fastA<__m128d>&& lvalue, const fastA<__m128d>&& rvalue);
 
-template<> inline fastestArith<double> operator+(const fastestArith<double>&& lvalue, const fastestArith<double>&& rvalue);
-template<> inline fastestArith<__m128d> operator+(const fastestArith<__m128d>&& lvalue, const fastestArith<__m128d>&& rvalue);
+template<> inline fastestA<double> operator+(const fastestA<double>&& lvalue, const fastestA<double>&& rvalue);
+template<> inline fastestA<__m128d> operator+(const fastestA<__m128d>&& lvalue, const fastestA<__m128d>&& rvalue);
 
-template<> inline fastestArith<double> operator-(const fastestArith<double>&& lvalue, const fastestArith<double>&& rvalue);
-template<> inline fastestArith<__m128d> operator-(const fastestArith<__m128d>&& lvalue, const fastestArith<__m128d>&& rvalue);
+template<> inline fastestA<double> operator-(const fastestA<double>&& lvalue, const fastestA<double>&& rvalue);
+template<> inline fastestA<__m128d> operator-(const fastestA<__m128d>&& lvalue, const fastestA<__m128d>&& rvalue);
 
-template<> inline fastestArith<double> operator*(const fastestArith<double>&& lvalue, const fastestArith<double>&& rvalue);
-template<> inline fastestArith<__m128d> operator*(const fastestArith<__m128d>&& lvalue, const fastestArith<__m128d>&& rvalue);
+template<> inline fastestA<double> operator*(const fastestA<double>&& lvalue, const fastestA<double>&& rvalue);
+template<> inline fastestA<__m128d> operator*(const fastestA<__m128d>&& lvalue, const fastestA<__m128d>&& rvalue);
 
-template<> inline fastestArith<double> operator/(const fastestArith<double>&& lvalue, const fastestArith<double>&& rvalue);
-template<> inline fastestArith<__m128d> operator/(const fastestArith<__m128d>&& lvalue, const fastestArith<__m128d>&& rvalue);
+template<> inline fastestA<double> operator/(const fastestA<double>&& lvalue, const fastestA<double>&& rvalue);
+template<> inline fastestA<__m128d> operator/(const fastestA<__m128d>&& lvalue, const fastestA<__m128d>&& rvalue);
 
-template<> inline semifastArith<double> operator+(const semifastArith<double>&& lvalue, const semifastArith<double>&& rvalue);
-template<> inline semifastArith<__m128d> operator+(const semifastArith<__m128d>&& lvalue, const semifastArith<__m128d>&& rvalue);
+template<> inline semiA<double> operator+(const semiA<double>&& lvalue, const semiA<double>&& rvalue);
+template<> inline semiA<__m128d> operator+(const semiA<__m128d>&& lvalue, const semiA<__m128d>&& rvalue);
 
-template<> inline semifastArith<double> operator-(const semifastArith<double>&& lvalue, const semifastArith<double>&& rvalue);
-template<> inline semifastArith<__m128d> operator-(const semifastArith<__m128d>&& lvalue, const semifastArith<__m128d>&& rvalue);
+template<> inline semiA<double> operator-(const semiA<double>&& lvalue, const semiA<double>&& rvalue);
+template<> inline semiA<__m128d> operator-(const semiA<__m128d>&& lvalue, const semiA<__m128d>&& rvalue);
 
-template<> inline semifastArith<double> operator*(const semifastArith<double>&& lvalue, const semifastArith<double>&& rvalue);
-template<> inline semifastArith<__m128d> operator*(const semifastArith<__m128d>&& lvalue, const semifastArith<__m128d>&& rvalue);
+template<> inline semiA<double> operator*(const semiA<double>&& lvalue, const semiA<double>&& rvalue);
+template<> inline semiA<__m128d> operator*(const semiA<__m128d>&& lvalue, const semiA<__m128d>&& rvalue);
 
-template<> inline semifastArith<double> operator/(const semifastArith<double>&& lvalue, const semifastArith<double>&& rvalue);
-template<> inline semifastArith<__m128d> operator/(const semifastArith<__m128d>&& lvalue, const semifastArith<__m128d>&& rvalue);
+template<> inline semiA<double> operator/(const semiA<double>&& lvalue, const semiA<double>&& rvalue);
+template<> inline semiA<__m128d> operator/(const semiA<__m128d>&& lvalue, const semiA<__m128d>&& rvalue);
 
-template<> inline sseArith<double> operator+(const sseArith<double>&& lvalue, const sseArith<double>&& rvalue);
-template<> inline sseArith<__m128d> operator+(const sseArith<__m128d>&& lvalue, const sseArith<__m128d>&& rvalue);
+template<> inline sseA<double> operator+(const sseA<double>&& lvalue, const sseA<double>&& rvalue);
+template<> inline sseA<__m128d> operator+(const sseA<__m128d>&& lvalue, const sseA<__m128d>&& rvalue);
 
-template<> inline sseArith<double> operator-(const sseArith<double>&& lvalue, const sseArith<double>&& rvalue);
-template<> inline sseArith<__m128d> operator-(const sseArith<__m128d>&& lvalue, const sseArith<__m128d>&& rvalue);
+template<> inline sseA<double> operator-(const sseA<double>&& lvalue, const sseA<double>&& rvalue);
+template<> inline sseA<__m128d> operator-(const sseA<__m128d>&& lvalue, const sseA<__m128d>&& rvalue);
 
-template<> inline sseArith<double> operator*(const sseArith<double>&& lvalue, const sseArith<double>&& rvalue);
-template<> inline sseArith<__m128d> operator*(const sseArith<__m128d>&& lvalue, const sseArith<__m128d>&& rvalue);
+template<> inline sseA<double> operator*(const sseA<double>&& lvalue, const sseA<double>&& rvalue);
+template<> inline sseA<__m128d> operator*(const sseA<__m128d>&& lvalue, const sseA<__m128d>&& rvalue);
 
-template<> inline sseArith<double> operator/(const sseArith<double>&& lvalue, const sseArith<double>&& rvalue);
-template<> inline sseArith<__m128d> operator/(const sseArith<__m128d>&& lvalue, const sseArith<__m128d>&& rvalue);
+template<> inline sseA<double> operator/(const sseA<double>&& lvalue, const sseA<double>&& rvalue);
+template<> inline sseA<__m128d> operator/(const sseA<__m128d>&& lvalue, const sseA<__m128d>&& rvalue);
 
-template<> inline normalArith<__m128d> operator+(const normalArith<__m128d>&& lvalue, const normalArith<__m128d>&& rvalue);
+template<> inline normA<__m128d> operator+(const normA<__m128d>&& lvalue, const normA<__m128d>&& rvalue);
 
-template<> inline normalArith<__m128d> operator-(const normalArith<__m128d>&& lvalue, const normalArith<__m128d>&& rvalue);
+template<> inline normA<__m128d> operator-(const normA<__m128d>&& lvalue, const normA<__m128d>&& rvalue);
 
-template<> inline normalArith<__m128d> operator*(const normalArith<__m128d>&& lvalue, const normalArith<__m128d>&& rvalue);
+template<> inline normA<__m128d> operator*(const normA<__m128d>&& lvalue, const normA<__m128d>&& rvalue);
 
-template<> inline normalArith<__m128d> operator/(const normalArith<__m128d>&& lvalue, const normalArith<__m128d>&& rvalue);
+template<> inline normA<__m128d> operator/(const normA<__m128d>&& lvalue, const normA<__m128d>&& rvalue);
 
-template<> inline __m128d operator+(const dummyArith<__m128d>&& lvalue, const dummyArith<__m128d>&& rvalue);
+template<> inline __m128d operator+(const dummyA<__m128d>&& lvalue, const dummyA<__m128d>&& rvalue);
 
-template<> inline __m128d operator-(const dummyArith<__m128d>&& lvalue, const dummyArith<__m128d>&& rvalue);
+template<> inline __m128d operator-(const dummyA<__m128d>&& lvalue, const dummyA<__m128d>&& rvalue);
 
-template<> inline __m128d operator*(const dummyArith<__m128d>&& lvalue, const dummyArith<__m128d>&& rvalue);
+template<> inline __m128d operator*(const dummyA<__m128d>&& lvalue, const dummyA<__m128d>&& rvalue);
 
-template<> inline __m128d operator/(const dummyArith<__m128d>&& lvalue, const dummyArith<__m128d>&& rvalue);
+template<> inline __m128d operator/(const dummyA<__m128d>&& lvalue, const dummyA<__m128d>&& rvalue);
 #endif//GASHA_FAST_ARITH_USE_SSE2
 #ifdef GASHA_FAST_ARITH_USE_AVX
-template<> inline fastArith<__m256> operator+(const fastArith<__m256>&& lvalue, const fastArith<__m256>&& rvalue);
-template<> inline fastArith<__m256d> operator+(const fastArith<__m256d>&& lvalue, const fastArith<__m256d>&& rvalue);
+template<> inline fastA<__m256> operator+(const fastA<__m256>&& lvalue, const fastA<__m256>&& rvalue);
+template<> inline fastA<__m256d> operator+(const fastA<__m256d>&& lvalue, const fastA<__m256d>&& rvalue);
 
-template<> inline fastArith<__m256> operator-(const fastArith<__m256>&& lvalue, const fastArith<__m256>&& rvalue);
-template<> inline fastArith<__m256d> operator-(const fastArith<__m256d>&& lvalue, const fastArith<__m256d>&& rvalue);
+template<> inline fastA<__m256> operator-(const fastA<__m256>&& lvalue, const fastA<__m256>&& rvalue);
+template<> inline fastA<__m256d> operator-(const fastA<__m256d>&& lvalue, const fastA<__m256d>&& rvalue);
 
-template<> inline fastArith<__m256> operator*(const fastArith<__m256>&& lvalue, const fastArith<__m256>&& rvalue);
-template<> inline fastArith<__m256d> operator*(const fastArith<__m256d>&& lvalue, const fastArith<__m256d>&& rvalue);
+template<> inline fastA<__m256> operator*(const fastA<__m256>&& lvalue, const fastA<__m256>&& rvalue);
+template<> inline fastA<__m256d> operator*(const fastA<__m256d>&& lvalue, const fastA<__m256d>&& rvalue);
 
-template<> inline fastArith<__m256> operator/(const fastArith<__m256>&& lvalue, const fastArith<__m256>&& rvalue);
-template<> inline fastArith<__m256d> operator/(const fastArith<__m256d>&& lvalue, const fastArith<__m256d>&& rvalue);
+template<> inline fastA<__m256> operator/(const fastA<__m256>&& lvalue, const fastA<__m256>&& rvalue);
+template<> inline fastA<__m256d> operator/(const fastA<__m256d>&& lvalue, const fastA<__m256d>&& rvalue);
 
-template<> inline fastestArith<__m256> operator+(const fastestArith<__m256>&& lvalue, const fastestArith<__m256>&& rvalue);
-template<> inline fastestArith<__m256d> operator+(const fastestArith<__m256d>&& lvalue, const fastestArith<__m256d>&& rvalue);
+template<> inline fastestA<__m256> operator+(const fastestA<__m256>&& lvalue, const fastestA<__m256>&& rvalue);
+template<> inline fastestA<__m256d> operator+(const fastestA<__m256d>&& lvalue, const fastestA<__m256d>&& rvalue);
 
-template<> inline fastestArith<__m256> operator-(const fastestArith<__m256>&& lvalue, const fastestArith<__m256>&& rvalue);
-template<> inline fastestArith<__m256d> operator-(const fastestArith<__m256d>&& lvalue, const fastestArith<__m256d>&& rvalue);
+template<> inline fastestA<__m256> operator-(const fastestA<__m256>&& lvalue, const fastestA<__m256>&& rvalue);
+template<> inline fastestA<__m256d> operator-(const fastestA<__m256d>&& lvalue, const fastestA<__m256d>&& rvalue);
 
-template<> inline fastestArith<__m256> operator*(const fastestArith<__m256>&& lvalue, const fastestArith<__m256>&& rvalue);
-template<> inline fastestArith<__m256d> operator*(const fastestArith<__m256d>&& lvalue, const fastestArith<__m256d>&& rvalue);
+template<> inline fastestA<__m256> operator*(const fastestA<__m256>&& lvalue, const fastestA<__m256>&& rvalue);
+template<> inline fastestA<__m256d> operator*(const fastestA<__m256d>&& lvalue, const fastestA<__m256d>&& rvalue);
 
-template<> inline fastestArith<__m256> operator/(const fastestArith<__m256>&& lvalue, const fastestArith<__m256>&& rvalue);
-template<> inline fastestArith<__m256d> operator/(const fastestArith<__m256d>&& lvalue, const fastestArith<__m256d>&& rvalue);
+template<> inline fastestA<__m256> operator/(const fastestA<__m256>&& lvalue, const fastestA<__m256>&& rvalue);
+template<> inline fastestA<__m256d> operator/(const fastestA<__m256d>&& lvalue, const fastestA<__m256d>&& rvalue);
 
-template<> inline semifastArith<__m256> operator+(const semifastArith<__m256>&& lvalue, const semifastArith<__m256>&& rvalue);
-template<> inline semifastArith<__m256d> operator+(const semifastArith<__m256d>&& lvalue, const semifastArith<__m256d>&& rvalue);
+template<> inline semiA<__m256> operator+(const semiA<__m256>&& lvalue, const semiA<__m256>&& rvalue);
+template<> inline semiA<__m256d> operator+(const semiA<__m256d>&& lvalue, const semiA<__m256d>&& rvalue);
 
-template<> inline semifastArith<__m256> operator-(const semifastArith<__m256>&& lvalue, const semifastArith<__m256>&& rvalue);
-template<> inline semifastArith<__m256d> operator-(const semifastArith<__m256d>&& lvalue, const semifastArith<__m256d>&& rvalue);
+template<> inline semiA<__m256> operator-(const semiA<__m256>&& lvalue, const semiA<__m256>&& rvalue);
+template<> inline semiA<__m256d> operator-(const semiA<__m256d>&& lvalue, const semiA<__m256d>&& rvalue);
 
-template<> inline semifastArith<__m256> operator*(const semifastArith<__m256>&& lvalue, const semifastArith<__m256>&& rvalue);
-template<> inline semifastArith<__m256d> operator*(const semifastArith<__m256d>&& lvalue, const semifastArith<__m256d>&& rvalue);
+template<> inline semiA<__m256> operator*(const semiA<__m256>&& lvalue, const semiA<__m256>&& rvalue);
+template<> inline semiA<__m256d> operator*(const semiA<__m256d>&& lvalue, const semiA<__m256d>&& rvalue);
 
-template<> inline semifastArith<__m256> operator/(const semifastArith<__m256>&& lvalue, const semifastArith<__m256>&& rvalue);
-template<> inline semifastArith<__m256d> operator/(const semifastArith<__m256d>&& lvalue, const semifastArith<__m256d>&& rvalue);
+template<> inline semiA<__m256> operator/(const semiA<__m256>&& lvalue, const semiA<__m256>&& rvalue);
+template<> inline semiA<__m256d> operator/(const semiA<__m256d>&& lvalue, const semiA<__m256d>&& rvalue);
 
-template<> inline sseArith<__m256> operator+(const sseArith<__m256>&& lvalue, const sseArith<__m256>&& rvalue);
-template<> inline sseArith<__m256d> operator+(const sseArith<__m256d>&& lvalue, const sseArith<__m256d>&& rvalue);
+template<> inline sseA<__m256> operator+(const sseA<__m256>&& lvalue, const sseA<__m256>&& rvalue);
+template<> inline sseA<__m256d> operator+(const sseA<__m256d>&& lvalue, const sseA<__m256d>&& rvalue);
 
-template<> inline sseArith<__m256> operator-(const sseArith<__m256>&& lvalue, const sseArith<__m256>&& rvalue);
-template<> inline sseArith<__m256d> operator-(const sseArith<__m256d>&& lvalue, const sseArith<__m256d>&& rvalue);
+template<> inline sseA<__m256> operator-(const sseA<__m256>&& lvalue, const sseA<__m256>&& rvalue);
+template<> inline sseA<__m256d> operator-(const sseA<__m256d>&& lvalue, const sseA<__m256d>&& rvalue);
 
-template<> inline sseArith<__m256> operator*(const sseArith<__m256>&& lvalue, const sseArith<__m256>&& rvalue);
-template<> inline sseArith<__m256d> operator*(const sseArith<__m256d>&& lvalue, const sseArith<__m256d>&& rvalue);
+template<> inline sseA<__m256> operator*(const sseA<__m256>&& lvalue, const sseA<__m256>&& rvalue);
+template<> inline sseA<__m256d> operator*(const sseA<__m256d>&& lvalue, const sseA<__m256d>&& rvalue);
 
-template<> inline sseArith<__m256> operator/(const sseArith<__m256>&& lvalue, const sseArith<__m256>&& rvalue);
-template<> inline sseArith<__m256d> operator/(const sseArith<__m256d>&& lvalue, const sseArith<__m256d>&& rvalue);
+template<> inline sseA<__m256> operator/(const sseA<__m256>&& lvalue, const sseA<__m256>&& rvalue);
+template<> inline sseA<__m256d> operator/(const sseA<__m256d>&& lvalue, const sseA<__m256d>&& rvalue);
 
-template<> inline normalArith<__m256> operator+(const normalArith<__m256>&& lvalue, const normalArith<__m256>&& rvalue);
-template<> inline normalArith<__m256d> operator+(const normalArith<__m256d>&& lvalue, const normalArith<__m256d>&& rvalue);
+template<> inline normA<__m256> operator+(const normA<__m256>&& lvalue, const normA<__m256>&& rvalue);
+template<> inline normA<__m256d> operator+(const normA<__m256d>&& lvalue, const normA<__m256d>&& rvalue);
 
-template<> inline normalArith<__m256> operator-(const normalArith<__m256>&& lvalue, const normalArith<__m256>&& rvalue);
-template<> inline normalArith<__m256d> operator-(const normalArith<__m256d>&& lvalue, const normalArith<__m256d>&& rvalue);
+template<> inline normA<__m256> operator-(const normA<__m256>&& lvalue, const normA<__m256>&& rvalue);
+template<> inline normA<__m256d> operator-(const normA<__m256d>&& lvalue, const normA<__m256d>&& rvalue);
 
-template<> inline normalArith<__m256> operator*(const normalArith<__m256>&& lvalue, const normalArith<__m256>&& rvalue);
-template<> inline normalArith<__m256d> operator*(const normalArith<__m256d>&& lvalue, const normalArith<__m256d>&& rvalue);
+template<> inline normA<__m256> operator*(const normA<__m256>&& lvalue, const normA<__m256>&& rvalue);
+template<> inline normA<__m256d> operator*(const normA<__m256d>&& lvalue, const normA<__m256d>&& rvalue);
 
-template<> inline normalArith<__m256> operator/(const normalArith<__m256>&& lvalue, const normalArith<__m256>&& rvalue);
-template<> inline normalArith<__m256d> operator/(const normalArith<__m256d>&& lvalue, const normalArith<__m256d>&& rvalue);
+template<> inline normA<__m256> operator/(const normA<__m256>&& lvalue, const normA<__m256>&& rvalue);
+template<> inline normA<__m256d> operator/(const normA<__m256d>&& lvalue, const normA<__m256d>&& rvalue);
 
-template<> inline __m256 operator+(const dummyArith<__m256>&& lvalue, const dummyArith<__m256>&& rvalue);
-template<> inline __m256d operator+(const dummyArith<__m256d>&& lvalue, const dummyArith<__m256d>&& rvalue);
+template<> inline __m256 operator+(const dummyA<__m256>&& lvalue, const dummyA<__m256>&& rvalue);
+template<> inline __m256d operator+(const dummyA<__m256d>&& lvalue, const dummyA<__m256d>&& rvalue);
 
-template<> inline __m256 operator-(const dummyArith<__m256>&& lvalue, const dummyArith<__m256>&& rvalue);
-template<> inline __m256d operator-(const dummyArith<__m256d>&& lvalue, const dummyArith<__m256d>&& rvalue);
+template<> inline __m256 operator-(const dummyA<__m256>&& lvalue, const dummyA<__m256>&& rvalue);
+template<> inline __m256d operator-(const dummyA<__m256d>&& lvalue, const dummyA<__m256d>&& rvalue);
 
-template<> inline __m256 operator*(const dummyArith<__m256>&& lvalue, const dummyArith<__m256>&& rvalue);
-template<> inline __m256d operator*(const dummyArith<__m256d>&& lvalue, const dummyArith<__m256d>&& rvalue);
+template<> inline __m256 operator*(const dummyA<__m256>&& lvalue, const dummyA<__m256>&& rvalue);
+template<> inline __m256d operator*(const dummyA<__m256d>&& lvalue, const dummyA<__m256d>&& rvalue);
 
-template<> inline __m256 operator/(const dummyArith<__m256>&& lvalue, const dummyArith<__m256>&& rvalue);
-template<> inline __m256d operator/(const dummyArith<__m256d>&& lvalue, const dummyArith<__m256d>&& rvalue);
+template<> inline __m256 operator/(const dummyA<__m256>&& lvalue, const dummyA<__m256>&& rvalue);
+template<> inline __m256d operator/(const dummyA<__m256d>&& lvalue, const dummyA<__m256d>&& rvalue);
 #endif//GASHA_FAST_ARITH_USE_AVX
 
 //--------------------------------------------------------------------------------
@@ -1214,61 +1220,61 @@ template<> inline __m256d operator/(const dummyArith<__m256d>&& lvalue, const du
 
 //----------------------------------------
 //高速平方根
-template<typename T> inline fastArith<T> sqrt(const fastArith<T>&& value);
-template<typename T> inline fastArith<T> sqrt(const fastArith<T>& value){ return sqrt(std::move(value)); }
-template<typename T> inline fastestArith<T> sqrt(const fastestArith<T>&& value);
-template<typename T> inline fastestArith<T> sqrt(const fastestArith<T>& value){ return sqrt(std::move(value)); }
-template<typename T> inline semifastArith<T> sqrt(const semifastArith<T>&& value);
-template<typename T> inline semifastArith<T> sqrt(const semifastArith<T>& value){ return sqrt(std::move(value)); }
-template<typename T> inline sseArith<T> sqrt(const sseArith<T>&& value);
-template<typename T> inline sseArith<T> sqrt(const sseArith<T>& value){ return sqrt(std::move(value)); }
-template<typename T> inline normalArith<T> sqrt(const normalArith<T>&& value);
-template<typename T> inline normalArith<T> sqrt(const normalArith<T>& value){ return sqrt(std::move(value)); }
-template<typename T> inline T sqrt(const dummyArith<T>&& value);
-template<typename T> inline T sqrt(const dummyArith<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline fastA<T> sqrt(const fastA<T>&& value);
+template<typename T> inline fastA<T> sqrt(const fastA<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline fastestA<T> sqrt(const fastestA<T>&& value);
+template<typename T> inline fastestA<T> sqrt(const fastestA<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline semiA<T> sqrt(const semiA<T>&& value);
+template<typename T> inline semiA<T> sqrt(const semiA<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline sseA<T> sqrt(const sseA<T>&& value);
+template<typename T> inline sseA<T> sqrt(const sseA<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline normA<T> sqrt(const normA<T>&& value);
+template<typename T> inline normA<T> sqrt(const normA<T>& value){ return sqrt(std::move(value)); }
+template<typename T> inline T sqrt(const dummyA<T>&& value);
+template<typename T> inline T sqrt(const dummyA<T>& value){ return sqrt(std::move(value)); }
 
 //----------------------------------------
 //高速平方根：特殊化
 #ifdef GASHA_FAST_ARITH_USE_SSE
-template<> inline fastArith<float> sqrt(const fastArith<float>&& value);
-template<> inline fastestArith<float> sqrt(const fastestArith<float>&& value);
-template<> inline semifastArith<float> sqrt(const semifastArith<float>&& value);
-template<> inline sseArith<float> sqrt(const sseArith<float>&& value);
+template<> inline fastA<float> sqrt(const fastA<float>&& value);
+template<> inline fastestA<float> sqrt(const fastestA<float>&& value);
+template<> inline semiA<float> sqrt(const semiA<float>&& value);
+template<> inline sseA<float> sqrt(const sseA<float>&& value);
 
-template<> inline fastArith<__m128> sqrt(const fastArith<__m128>&& value);
-template<> inline fastestArith<__m128> sqrt(const fastestArith<__m128>&& value);
-template<> inline semifastArith<__m128> sqrt(const semifastArith<__m128>&& value);
-template<> inline sseArith<__m128> sqrt(const sseArith<__m128>&& value);
-template<> inline normalArith<__m128> sqrt(const normalArith<__m128>&& value);
-template<> inline __m128 sqrt(const dummyArith<__m128>&& value);
+template<> inline fastA<__m128> sqrt(const fastA<__m128>&& value);
+template<> inline fastestA<__m128> sqrt(const fastestA<__m128>&& value);
+template<> inline semiA<__m128> sqrt(const semiA<__m128>&& value);
+template<> inline sseA<__m128> sqrt(const sseA<__m128>&& value);
+template<> inline normA<__m128> sqrt(const normA<__m128>&& value);
+template<> inline __m128 sqrt(const dummyA<__m128>&& value);
 #endif//GASHA_FAST_ARITH_USE_SSE
 #ifdef GASHA_FAST_ARITH_USE_SSE2
-template<> inline fastArith<double> sqrt(const fastArith<double>&& value);
-template<> inline fastestArith<double> sqrt(const fastestArith<double>&& value);
-template<> inline semifastArith<double> sqrt(const semifastArith<double>&& value);
-template<> inline sseArith<double> sqrt(const sseArith<double>&& value);
+template<> inline fastA<double> sqrt(const fastA<double>&& value);
+template<> inline fastestA<double> sqrt(const fastestA<double>&& value);
+template<> inline semiA<double> sqrt(const semiA<double>&& value);
+template<> inline sseA<double> sqrt(const sseA<double>&& value);
 
-template<> inline fastArith<__m128d> sqrt(const fastArith<__m128d>&& value);
-template<> inline fastestArith<__m128d> sqrt(const fastestArith<__m128d>&& value);
-template<> inline semifastArith<__m128d> sqrt(const semifastArith<__m128d>&& value);
-template<> inline sseArith<__m128d> sqrt(const sseArith<__m128d>&& value);
-template<> inline normalArith<__m128d> sqrt(const normalArith<__m128d>&& value);
-template<> inline __m128d sqrt(const dummyArith<__m128d>&& value);
+template<> inline fastA<__m128d> sqrt(const fastA<__m128d>&& value);
+template<> inline fastestA<__m128d> sqrt(const fastestA<__m128d>&& value);
+template<> inline semiA<__m128d> sqrt(const semiA<__m128d>&& value);
+template<> inline sseA<__m128d> sqrt(const sseA<__m128d>&& value);
+template<> inline normA<__m128d> sqrt(const normA<__m128d>&& value);
+template<> inline __m128d sqrt(const dummyA<__m128d>&& value);
 #endif//GASHA_FAST_ARITH_USE_SSE2
 #ifdef GASHA_FAST_ARITH_USE_AVX
-template<> inline fastArith<__m256> sqrt(const fastArith<__m256>&& value);
-template<> inline fastestArith<__m256> sqrt(const fastestArith<__m256>&& value);
-template<> inline semifastArith<__m256> sqrt(const semifastArith<__m256>&& value);
-template<> inline sseArith<__m256> sqrt(const sseArith<__m256>&& value);
-template<> inline normalArith<__m256> sqrt(const normalArith<__m256>&& value);
-template<> inline __m256 sqrt(const dummyArith<__m256>&& value);
+template<> inline fastA<__m256> sqrt(const fastA<__m256>&& value);
+template<> inline fastestA<__m256> sqrt(const fastestA<__m256>&& value);
+template<> inline semiA<__m256> sqrt(const semiA<__m256>&& value);
+template<> inline sseA<__m256> sqrt(const sseA<__m256>&& value);
+template<> inline normA<__m256> sqrt(const normA<__m256>&& value);
+template<> inline __m256 sqrt(const dummyA<__m256>&& value);
 
-template<> inline fastArith<__m256d> sqrt(const fastArith<__m256d>&& value);
-template<> inline fastestArith<__m256d> sqrt(const fastestArith<__m256d>&& value);
-template<> inline semifastArith<__m256d> sqrt(const semifastArith<__m256d>&& value);
-template<> inline sseArith<__m256d> sqrt(const sseArith<__m256d>&& value);
-template<> inline normalArith<__m256d> sqrt(const normalArith<__m256d>&& value);
-template<> inline __m256d sqrt(const dummyArith<__m256d>&& value);
+template<> inline fastA<__m256d> sqrt(const fastA<__m256d>&& value);
+template<> inline fastestA<__m256d> sqrt(const fastestA<__m256d>&& value);
+template<> inline semiA<__m256d> sqrt(const semiA<__m256d>&& value);
+template<> inline sseA<__m256d> sqrt(const sseA<__m256d>&& value);
+template<> inline normA<__m256d> sqrt(const normA<__m256d>&& value);
+template<> inline __m256d sqrt(const dummyA<__m256d>&& value);
 #endif//GASHA_FAST_ARITH_USE_AVX
 
 //--------------------------------------------------------------------------------
@@ -1284,26 +1290,28 @@ template<> inline __m256d sqrt(const dummyArith<__m256d>&& value);
 	template<typename T, std::size_t N> inline T lengthSq(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec); \
 	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const T scalar); \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> forward(const CLASS_NAME<T[N]>& vec, const T scalar); \
 	template<typename T, std::size_t N> inline T dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<typename T, std::size_t N> inline T normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2);
 
-GASHA_FAST_VECTOR_SET(fastArith);
-GASHA_FAST_VECTOR_SET(fastestArith);
-GASHA_FAST_VECTOR_SET(semifastArith);
-GASHA_FAST_VECTOR_SET(sseArith);
-GASHA_FAST_VECTOR_SET(normalArith);
-template<typename T, std::size_t N> inline T norm(const dummyArith<T[N]>& vec);
-template<typename T, std::size_t N> inline T normSq(const dummyArith<T[N]>& vec);
-template<typename T, std::size_t N> inline void merge(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline void difference(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline T length(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline T lengthSq(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyArith<T[N]>& vec);
-template<typename T, std::size_t N> inline void mul(T (&result)[N], const dummyArith<T[N]>& vec, const T scalar);
-template<typename T, std::size_t N> inline T dot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline T normalizedDot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
-template<typename T, std::size_t N> inline void cross(T (&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2);
+GASHA_FAST_VECTOR_SET(fastA);
+GASHA_FAST_VECTOR_SET(fastestA);
+GASHA_FAST_VECTOR_SET(semiA);
+GASHA_FAST_VECTOR_SET(sseA);
+GASHA_FAST_VECTOR_SET(normA);
+template<typename T, std::size_t N> inline T norm(const dummyA<T[N]>& vec);
+template<typename T, std::size_t N> inline T normSq(const dummyA<T[N]>& vec);
+template<typename T, std::size_t N> inline void merge(T (&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline void difference(T (&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline T length(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline T lengthSq(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyA<T[N]>& vec);
+template<typename T, std::size_t N> inline void mul(T(&result)[N], const dummyA<T[N]>& vec, const T scalar);
+template<typename T, std::size_t N> inline void forward(T(&result)[N], const dummyA<T[N]>& vec, const T scalar);
+template<typename T, std::size_t N> inline T dot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline T normalizedDot(const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
+template<typename T, std::size_t N> inline void cross(T (&result)[N], const dummyA<T[N]>& vec1, const dummyA<T[N]>& vec2);
 
 //----------------------------------------
 //高速ベクトル演算：特殊化
@@ -1319,6 +1327,7 @@ inline __m128 m128_length(const __m128 vec1_m128, const __m128 vec2_m128);//二�
 inline __m128 m128_lengthSq(const __m128 vec1_m128, const __m128 vec2_m128);//二点間の長さの二乗
 inline __m128 m128_normalize(const __m128 vec_m128);//正規化
 inline __m128 m128_mul(const __m128 vec_m128, const float scalar);//スカラー倍
+inline __m128 m128_forward(const __m128 vec_m128, const float scalar);//スカラー長の進行
 inline __m128 m128_dot(const __m128 vec1_m128, const __m128 vec2_m128);//内積
 inline __m128 m128_normalizedDot(const __m128 vec1_m128, const __m128 vec2_m128);//正規化して内積
 inline __m128 m128_cross(const __m128 vec1_m128, const __m128 vec2_m128);//外積
@@ -1332,19 +1341,20 @@ inline __m128 m128_cross(const __m128 vec1_m128, const __m128 vec2_m128);//外�
 	template<> inline T lengthSq<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<> inline CLASS_NAME<T[N]> normalize<T, N>(const CLASS_NAME<T[N]>& vec); \
 	template<> inline CLASS_NAME<T[N]> mul<T, N>(const CLASS_NAME<T[N]>& vec, const T scalar); \
+	template<> inline CLASS_NAME<T[N]> forward<T, N>(const CLASS_NAME<T[N]>& vec, const T scalar); \
 	template<> inline T dot<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<> inline T normalizedDot<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2); \
 	template<> inline CLASS_NAME<T[N]> cross<T, N>(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2);
 
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastArith, float, 3);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestArith, float, 3);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(semifastArith, float, 3);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseArith, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastA, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestA, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(semiA, float, 3);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseA, float, 3);
 
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastArith, float, 4);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestArith, float, 4);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(semifastArith, float, 4);
-GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseArith, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastA, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(fastestA, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(semiA, float, 4);
+GASHA_FAST_VECTOR_SET_SPECIALIZATION(sseA, float, 4);
 
 #endif//GASHA_FAST_ARITH_USE_SSE4_1
 
