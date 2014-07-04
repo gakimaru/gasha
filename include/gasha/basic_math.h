@@ -490,17 +490,17 @@ inline void normalize(T (&result)[N], const T (&vec)[N]);
 //スカラー倍
 //※ベクトルを返す
 template<typename T, std::size_t N>
-inline void mul(T (&result)[N], const T (&vec)[N], const float scalar);
+inline void mul(T (&result)[N], const T (&vec)[N], const T scalar);
 
 //----------------------------------------
 //内積
 template<typename T, std::size_t N>
-inline float dot(const T (&vec1)[N], const T (&vec2)[N]);
+inline T dot(const T (&vec1)[N], const T (&vec2)[N]);
 
 //----------------------------------------
 //正規化して内積
 template<typename T, std::size_t N>
-inline float normalizedDot(const T (&vec1)[N], const T (&vec2)[N]);
+inline T normalizedDot(const T (&vec1)[N], const T (&vec2)[N]);
 
 //----------------------------------------
 //外積

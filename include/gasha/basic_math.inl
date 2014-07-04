@@ -16,6 +16,7 @@
 #include <gasha/basic_math.h>//基本算術【宣言部】
 
 #include <cmath>//std::sqrt()
+#include <assert.h>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -192,7 +193,7 @@ inline void normalize(T(&result)[N], const T(&vec)[N])
 //----------------------------------------
 //スカラー倍
 template<typename T, std::size_t N>
-inline void mul(T(&result)[N], const T(&vec)[N], const float scalar)
+inline void mul(T(&result)[N], const T(&vec)[N], const T scalar)
 {
 	for (int i = 0; i < N; ++i)
 		result[i] = vec[i] * scalar;
@@ -201,7 +202,7 @@ inline void mul(T(&result)[N], const T(&vec)[N], const float scalar)
 //----------------------------------------
 //内積
 template<typename T, std::size_t N>
-inline float dot(const T(&vec1)[N], const T(&vec2)[N])
+inline T dot(const T(&vec1)[N], const T(&vec2)[N])
 {
 	T dot = 0.f;
 	for (int i = 0; i < N; ++i)
@@ -212,10 +213,10 @@ inline float dot(const T(&vec1)[N], const T(&vec2)[N])
 //----------------------------------------
 //正規化して内積
 template<typename T, std::size_t N>
-inline float normalizedDot(const T(&vec1)[N], const T(&vec2)[N])
+inline T normalizedDot(const T(&vec1)[N], const T(&vec2)[N])
 {
-	const float n1 = norm(vec1);
-	const float n2 = norm(vec2);
+	const T n1 = norm(vec1);
+	const T n2 = norm(vec2);
 	T dot = 0.f;
 	for (int i = 0; i < N; ++i)
 		dot += ((vec1[i] / n1) * (vec2[i] / n2));
@@ -227,10 +228,11 @@ inline float normalizedDot(const T(&vec1)[N], const T(&vec2)[N])
 template<typename T, std::size_t N>
 inline void cross(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 {
-	static_assert(N == 3, "cross is only used by 3D vector.");
+	//static_assert(N == 3 || N == 4, "cross is only used by 3D vector.");
+	assert(N == 3 || N == 4);
 	result[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
 	result[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
-	result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[1];
+	result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

@@ -251,98 +251,38 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<__m256d>::CLASS_NAME() : m_val(_mm256_setzero_pd()){} \
 	inline CLASS_NAME<__m256d>::~CLASS_NAME(){} \
 
-#define GASHA_FAST_ARITH_CLASS_FLOAT2_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const float val[2]){ memcpy(m_val, val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const fastArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const fastArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const fastestArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const fastestArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const semifastArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const semifastArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const sseArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const sseArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const normalArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const normalArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const dummyArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>& CLASS_NAME<float[2]>::operator=(const dummyArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const float val[2]){ memcpy(m_val, val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const fastArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const fastArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const fastestArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const fastestArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const semifastArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const semifastArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const sseArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const sseArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const normalArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const normalArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const dummyArith<float[2]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(const dummyArith<float[2]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::CLASS_NAME(){ memset(m_val, 0, sizeof(value_type)); } \
-	inline CLASS_NAME<float[2]>::~CLASS_NAME(){} \
-
-#define GASHA_FAST_ARITH_CLASS_FLOAT3_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float val[3]){ memcpy(m_val, val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastestArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastestArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const semifastArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const semifastArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const sseArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const sseArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const normalArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const normalArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const float val[3]){ memcpy(m_val, val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastestArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastestArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const semifastArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const semifastArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const sseArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const sseArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const normalArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const normalArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(){ memset(m_val, 0, sizeof(value_type)); } \
-	inline CLASS_NAME<float[3]>::~CLASS_NAME(){} \
-
-#define GASHA_FAST_ARITH_CLASS_FLOAT4_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const float val[4]){ memcpy(m_val, val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const fastArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const fastArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const fastestArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const fastestArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const semifastArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const semifastArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const sseArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const sseArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const normalArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const normalArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const dummyArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>& CLASS_NAME<float[4]>::operator=(const dummyArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const float val[4]){ memcpy(m_val, val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const fastArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const fastArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const fastestArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const fastestArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const semifastArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const semifastArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const sseArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const sseArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const normalArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const normalArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const dummyArith<float[4]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(const dummyArith<float[4]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::CLASS_NAME(){ memset(m_val, 0, sizeof(value_type)); } \
-	inline CLASS_NAME<float[4]>::~CLASS_NAME(){} \
+#define GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, TYPE, SIZE) \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const TYPE val[SIZE]){ memcpy(m_val, val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastestArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const fastestArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const semifastArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const semifastArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const sseArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const sseArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const normalArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const normalArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const dummyArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>& CLASS_NAME<TYPE[SIZE]>::operator=(const dummyArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); return *this; } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const TYPE val[SIZE]){ memcpy(m_val, val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastestArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const fastestArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const semifastArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const semifastArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const sseArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const sseArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const normalArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const normalArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const dummyArith<TYPE[SIZE]>&& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(const dummyArith<TYPE[SIZE]>& val){ memcpy(m_val, val.m_val, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::CLASS_NAME(){ memset(m_val, 0, sizeof(value_type)); } \
+	inline CLASS_NAME<TYPE[SIZE]>::~CLASS_NAME(){} \
 
 #define GASHA_FAST_ARITH_CLASS_SSE_FLOAT3_INSTANCING(CLASS_NAME) \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float val[3]){ m_val = _mm_loadu_ps(val); m_array4[3] = 0; return *this; } \
+	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const float val[3]){ m_val = _mm_loadu_ps(val); return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const __m128&& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const __m128& val){ m_val = val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const fastArith<float[3]>&& val){ m_val = val.m_val; return *this; } \
@@ -355,9 +295,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const sseArith<float[3]>& val){ m_val = val.m_val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const normalArith<float[3]>&& val){ m_val = val.m_val; return *this; } \
 	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const normalArith<float[3]>& val){ m_val = val.m_val; return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>&& val){ m_val = _mm_loadu_ps(val.m_val); m_array4[3] = 0; return *this; } \
-	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>& val){ m_val = _mm_loadu_ps(val.m_val); m_array4[3] = 0; return *this; } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const float val[3]) : m_val(_mm_loadu_ps(val)){ m_array4[3] = 0; } \
+	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>&& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
+	inline CLASS_NAME<float[3]>& CLASS_NAME<float[3]>::operator=(const dummyArith<float[3]>& val){ m_val = _mm_loadu_ps(val.m_val); return *this; } \
+	inline CLASS_NAME<float[3]>::CLASS_NAME(const float val[3]) : m_val(_mm_loadu_ps(val)){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const __m128&& val) : m_val(val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const __m128& val) : m_val(val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const fastArith<float[3]>&& val) : m_val(val.m_val){} \
@@ -370,8 +310,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const sseArith<float[3]>& val) : m_val(val.m_val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const normalArith<float[3]>&& val) : m_val(val.m_val){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME(const normalArith<float[3]>& val) : m_val(val.m_val){} \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>&& val) : m_val(_mm_loadu_ps(val.m_val)){ m_array4[3] = 0; } \
-	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>& val) : m_val(_mm_loadu_ps(val.m_val)){ m_array4[3] = 0; } \
+	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>&& val) : m_val(_mm_loadu_ps(val.m_val)){} \
+	inline CLASS_NAME<float[3]>::CLASS_NAME(const dummyArith<float[3]>& val) : m_val(_mm_loadu_ps(val.m_val)){} \
 	inline CLASS_NAME<float[3]>::CLASS_NAME() : m_val(_mm_setzero_ps()){} \
 	inline CLASS_NAME<float[3]>::~CLASS_NAME(){} \
 
@@ -413,29 +353,35 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #define GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_SSE_M128_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_FLOAT2_INSTANCING(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 2); \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT3_INSTANCING(CLASS_NAME); \
 	GASHA_FAST_ARITH_CLASS_SSE_FLOAT4_INSTANCING(CLASS_NAME);
 #else//GASHA_FAST_ARITH_USE_SSE
 #define GASHA_FAST_ARITH_CLASS_SSE_INSTANCING(CLASS_NAME) \
-	GASHA_FAST_ARITH_CLASS_FLOAT3_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_FLOAT4_INSTANCING(CLASS_NAME);
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 3); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, float, 4);
 #endif//GASHA_FAST_ARITH_USE_SSE
 
 #ifdef GASHA_FAST_ARITH_USE_SSE2
 #define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_DOUBLE_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_M128D_INSTANCING(CLASS_NAME);
+	GASHA_FAST_ARITH_CLASS_SSE_M128D_INSTANCING(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 2);
 #else//GASHA_FAST_ARITH_USE_SSE2
-#define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME)
+#define GASHA_FAST_ARITH_CLASS_SSE2_INSTANCING(CLASS_NAME) \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 2);
 #endif//GASHA_FAST_ARITH_USE_SSE2
 
 #ifdef GASHA_FAST_ARITH_USE_AVX
 #define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME) \
 	GASHA_FAST_ARITH_CLASS_SSE_M256_INSTANCING(CLASS_NAME); \
-	GASHA_FAST_ARITH_CLASS_SSE_M256D_INSTANCING(CLASS_NAME);
+	GASHA_FAST_ARITH_CLASS_SSE_M256D_INSTANCING(CLASS_NAME); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 3); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 4);
 #else//GASHA_FAST_ARITH_USE_SSE
-#define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME)
+#define GASHA_FAST_ARITH_CLASS_AVX_INSTANCING(CLASS_NAME) \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 3); \
+	GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME, double, 4);
 #endif//GASHA_FAST_ARITH_USE_SSE
 
 #define GASHA_FAST_ARITH_CLASS_SET_INSTANCING(CLASS_NAME) \
@@ -1327,15 +1273,15 @@ template<> inline __m256d sqrt(const dummyArith<__m256d>&& value)
 #define GASHA_FAST_VECTOR_SET_INSTANCING(CLASS_NAME) \
 	template<typename T, std::size_t N> inline T norm(const CLASS_NAME<T[N]>& vec){ return GASHA_ norm(*vec); } \
 	template<typename T, std::size_t N> inline T normSq(const CLASS_NAME<T[N]>& vec){ return GASHA_ normSq(*vec); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> merge(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N]; GASHA_ merge(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> difference(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N]; GASHA_ difference(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> merge(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ merge(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> difference(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ difference(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); } \
 	template<typename T, std::size_t N> inline T length(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ length(*vec1, *vec2); } \
 	template<typename T, std::size_t N> inline T lengthSq(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ lengthSq(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec){ T result[N]; GASHA_ normalize(result, *vec); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const float scalar){ T result[N]; GASHA_ mul(result, *vec, scalar); return CLASS_NAME <T[N]>(result); } \
-	template<typename T, std::size_t N> inline float dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline float normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); } \
-	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N]; GASHA_ cross(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); }
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> normalize(const CLASS_NAME<T[N]>& vec){ T result[N] = { 0 }; GASHA_ normalize(result, *vec); return CLASS_NAME <T[N]>(result); } \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> mul(const CLASS_NAME<T[N]>& vec, const T scalar){ T result[N] = { 0 }; GASHA_ mul(result, *vec, scalar); return CLASS_NAME <T[N]>(result); } \
+	template<typename T, std::size_t N> inline T dot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); } \
+	template<typename T, std::size_t N> inline T normalizedDot(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); } \
+	template<typename T, std::size_t N> inline CLASS_NAME<T[N]> cross(const CLASS_NAME<T[N]>& vec1, const CLASS_NAME<T[N]>& vec2){ T result[N] = { 0 }; GASHA_ cross(result, *vec1, *vec2); return CLASS_NAME <T[N]>(result); }
 
 GASHA_FAST_VECTOR_SET_INSTANCING(fastArith);
 GASHA_FAST_VECTOR_SET_INSTANCING(fastestArith);
@@ -1350,9 +1296,9 @@ template<typename T, std::size_t N> inline void difference(T(&result)[N], const 
 template<typename T, std::size_t N> inline T length(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ length(*vec1, *vec2); }
 template<typename T, std::size_t N> inline T lengthSq(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ lengthSq(*vec1, *vec2); }
 template<typename T, std::size_t N> inline void normalize(T(&result)[N], const dummyArith<T[N]>& vec){ GASHA_ normalize(result, *vec); }
-template<typename T, std::size_t N> inline void mul(T(&result)[N], const dummyArith<T[N]>& vec, const float scalar){ GASHA_ mul(result, *vec, scalar); }
-template<typename T, std::size_t N> inline float dot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); }
-template<typename T, std::size_t N> inline float normalizedDot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); }
+template<typename T, std::size_t N> inline void mul(T(&result)[N], const dummyArith<T[N]>& vec, const T scalar){ GASHA_ mul(result, *vec, scalar); }
+template<typename T, std::size_t N> inline T dot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ dot(*vec1, *vec2); }
+template<typename T, std::size_t N> inline T normalizedDot(const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ return GASHA_ normalizedDot(*vec1, *vec2); }
 template<typename T, std::size_t N> inline void cross(T(&result)[N], const dummyArith<T[N]>& vec1, const dummyArith<T[N]>& vec2){ GASHA_ cross(result, *vec1, *vec2); }
 
 //----------------------------------------
@@ -1397,7 +1343,7 @@ inline __m128 m128_lengthSq(const __m128 vec1_m128, const __m128 vec2_m128)
 //正規化
 inline __m128 m128_normalize(const __m128 vec_m128)
 {
-	const __m128 norm_m128 = _mm_sqrt_ps(_mm_dp_ps(vec_m128, vec_m128, 0x77));
+	const __m128 norm_m128 = _mm_sqrt_ps(_mm_dp_ps(vec_m128, vec_m128, 0x7f));
 	return _mm_div_ps(vec_m128, norm_m128);
 }
 //スカラー倍
@@ -1415,10 +1361,10 @@ inline __m128 m128_dot(const __m128 vec1_m128, const __m128 vec2_m128)
 inline __m128 m128_normalizedDot(const __m128 vec1_m128, const __m128 vec2_m128)
 {
 	//vec1正規化
-	__m128 norm1_m128 = _mm_sqrt_ps(_mm_dp_ps(vec1_m128, vec1_m128, 0x77));
+	__m128 norm1_m128 = _mm_sqrt_ps(_mm_dp_ps(vec1_m128, vec1_m128, 0x7f));
 	const __m128 nvec1_m128 = _mm_div_ps(vec1_m128, norm1_m128);
 	//vec2正規化
-	__m128 norm2_m128 = _mm_sqrt_ps(_mm_dp_ps(vec2_m128, vec2_m128, 0x77));
+	__m128 norm2_m128 = _mm_sqrt_ps(_mm_dp_ps(vec2_m128, vec2_m128, 0x7f));
 	const __m128 nvec2_m128 = _mm_div_ps(vec2_m128, norm2_m128);
 	//内積
 	return _mm_dp_ps(nvec1_m128, nvec2_m128, 0x71);
