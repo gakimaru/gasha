@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // shared_lock_guard.h
-// 共有ロックガード（スコープロック）
+// 共有ロックガード（スコープロック）【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -33,27 +33,13 @@ public:
 	shared_lock_guard& operator=(const shared_lock_guard&) = delete;
 public:
 	//ムーブコンストラクタ
-	inline shared_lock_guard(shared_lock_guard&& obj) :
-		m_lock(obj.m_lock),
-		m_isLocked(obj.m_isLocked)
-	{
-		obj.m_isLocked = false;
-	}
+	inline shared_lock_guard(shared_lock_guard&& obj);
 	//コピーコンストラクタ
 	shared_lock_guard(const shared_lock_guard&) = delete;
 	//コンストラクタ
-	inline explicit shared_lock_guard(lock_type& lock) :
-		m_lock(lock),
-		m_isLocked(true)
-	{
-		m_lock.lock_shared();
-	}
+	inline explicit shared_lock_guard(lock_type& lock);
 	//デストラクタ
-	inline ~shared_lock_guard()
-	{
-		if(m_isLocked)
-			m_lock.unlock_shared();
-	}
+	inline ~shared_lock_guard();
 private:
 	//フィールド
 	lock_type& m_lock;//ロックオブジェクトの参照
@@ -61,6 +47,9 @@ private:
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/shared_lock_guard.inl>
 
 #endif//GASHA_INCLUDED_SHARED_LOCK_GUARD_H
 

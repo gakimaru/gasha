@@ -23,10 +23,6 @@
 
 #include <utility>//C++11 std::move, std::forward
 
-//【VC++】例外を無効化した状態で <chrono> 内関数を使用すると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------

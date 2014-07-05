@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // sort_basic.h
-// ソート処理基本
+// ソート処理基本【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru

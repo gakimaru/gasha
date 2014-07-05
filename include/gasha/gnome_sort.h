@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // gnome_sort.h
-// ノームソート
+// ノームソート【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -14,7 +14,6 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -52,41 +51,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
-std::size_t gnomeSort(T* array, const std::size_t size, PREDICATE predicate)
-{
-	if (!array || size <= 1)
-		return 0;
-	std::size_t swapped_count = 0;
-	const T* end = array + size;
-	T* now = array;
-	T* next = now + 1;
-	while (next < end)
-	{
-		if (predicate(*next, *now))
-		{
-			T* prev = now;
-			now = next;
-			while (prev >= array)
-			{
-				if (predicate(*now, *prev))
-				{
-					GASHA_ swapValues(*now, *prev);
-					++swapped_count;
-				}
-				else
-					break;
-				--prev;
-				--now;
-			}
-		}
-		now = next;
-		++next;
-	}
-	return swapped_count;
-}
+std::size_t gnomeSort(T* array, const std::size_t size, PREDICATE predicate);
 sortingFuncSet(gnomeSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/gnome_sort.inl>
 
 #endif//GASHA_INCLUDED_GNOME_SORT_H
 

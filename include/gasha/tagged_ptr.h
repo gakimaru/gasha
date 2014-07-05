@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // tagged_ptr.h
-// タグ付きポインタ
+// タグ付きポインタ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -92,10 +92,7 @@ struct taggedPtr
 	inline bool isNull() const { return m_value == ZERO_VALUE; }//値がゼロか？
 	inline bool isNotNull() const { return m_value != ZERO_VALUE; }//値がゼロじゃないか？
 	inline void setNull(){ m_value = ZERO_VALUE; }//値をゼロにする
-	inline void set(const pointer_type ptr, const tag_type tag)//値にポインターとタグをセット
-	{
-		m_value = (reinterpret_cast<value_type>(ptr) & NEGATIVE_TAG_MASK) | ((static_cast<value_type>(tag) & TAG_MASK) << TAG_SHIFT);
-	}
+	inline void set(const pointer_type ptr, const tag_type tag);//値にポインターとタグをセット
 	//フィールド
 	value_type m_value;//値（タグ＋ポインタ）
 };
@@ -132,15 +129,15 @@ struct taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>
 	inline bool isNull() const { return m_value == ZERO_VALUE; }//値がゼロか？
 	inline bool isNotNull() const { return m_value != ZERO_VALUE; }//値がゼロじゃないか？
 	inline void setNull(){ m_value = ZERO_VALUE; }//値をゼロにする
-	inline void set(const pointer_type ptr, const tag_type tag)//値にポインターとタグをセット
-	{
-		m_value = reinterpret_cast<value_type>(ptr);
-	}
+	inline void set(const pointer_type ptr, const tag_type tag);//値にポインターとタグをセット
 	//フィールド
 	value_type m_value;//値（タグ＋ポインタ）
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/tagged_ptr.inl>
 
 #endif//GASHA_INCLUDED_TAGGED_PTR_H
 

@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // crc32.inl
-// CRC32計算【インライン関数定義部】
+// CRC32計算【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru

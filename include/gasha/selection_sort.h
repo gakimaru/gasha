@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // selection_sort.h
-// 選択ソート
+// 選択ソート【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -14,7 +14,6 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/sort_basic.h>//ソート処理基本
-#include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -52,34 +51,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
-std::size_t selectionSort(T* array, const std::size_t size, PREDICATE predicate)
-{
-	if (!array || size <= 1)
-		return 0;
-	std::size_t swapped_count = 0;
-	T* now = array;
-	const std::size_t size_1 = size - 1;
-	for (std::size_t i = 0; i < size_1; ++i, ++now)
-	{
-		T* min = now;
-		T* check = now;
-		for (std::size_t ii = i + 1; ii < size; ++ii)
-		{
-			++check;
-			if (predicate(*check, *min))
-				min = check;
-		}
-		if (now != min)
-		{
-			GASHA_ swapValues(*min, *now);
-			++swapped_count;
-		}
-	}
-	return swapped_count;
-}
+std::size_t selectionSort(T* array, const std::size_t size, PREDICATE predicate);
 sortingFuncSet(selectionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/selection_sort.inl>
 
 #endif//GASHA_INCLUDED_SELECTION_SORT_H
 

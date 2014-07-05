@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // is_ordered.h
-// 整列状態（ソート済み状態）確認
+// 整列状態（ソート済み状態）確認【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -146,17 +146,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
-bool isUnordered(const T* array, const std::size_t size, PREDICATE predicate)
-{
-	const T* prev = array;
-	const T* now = prev + 1;
-	for (std::size_t i = 1; i < size; ++i, ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			return true;
-	}
-	return false;
-}
+bool isUnordered(const T* array, const std::size_t size, PREDICATE predicate);
 isOrderedFuncSet(isUnordered);
 
 //----------------------------------------
@@ -166,18 +156,7 @@ isOrderedFuncSet(isUnordered);
 //プロトタイプ：
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
-bool iteratorIsUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
-{
-	ITERATOR prev = begin;
-	ITERATOR now = begin;
-	++now;
-	for (;now != end; ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			return true;
-	}
-	return false;
-}
+bool iteratorIsUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
 iteratorIsOrderedFuncSet(iteratorIsUnordered);
 
 //----------------------------------------
@@ -187,18 +166,7 @@ iteratorIsOrderedFuncSet(iteratorIsUnordered);
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
-bool singlyLinkedListIsUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
-{
-	const T* prev = first;
-	const T* now = get_next_func(*prev);
-	while (now)
-	{
-		if (predicate(*now, *prev))
-			return true;
-		now = get_next_func(*now);
-	}
-	return false;
-}
+bool singlyLinkedListIsUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
 singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
 
 //----------------------------------------
@@ -207,10 +175,7 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
-inline bool isOrdered(const T* array, const std::size_t size, PREDICATE predicate)
-{
-	return !isUnordered(array, size, predicate);
-}
+inline bool isOrdered(const T* array, const std::size_t size, PREDICATE predicate);
 isOrderedFuncSet(isOrdered);
 
 //----------------------------------------
@@ -220,10 +185,7 @@ isOrderedFuncSet(isOrdered);
 //プロトタイプ：
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
-bool iteratorIsOrdered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
-{
-	return !iteratorIsUnordered(begin, end, predicate);
-}
+bool iteratorIsOrdered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
 iteratorIsOrderedFuncSet(iteratorIsOrdered);
 
 //----------------------------------------
@@ -233,10 +195,7 @@ iteratorIsOrderedFuncSet(iteratorIsOrdered);
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
-bool singlyLinkedListIsOrdered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
-{
-	return !singlyLinkedListIsUnordered(first, get_next_func, predicate);
-}
+bool singlyLinkedListIsOrdered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
 singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
 
 //----------------------------------------
@@ -245,18 +204,7 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
-std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE predicate)
-{
-	std::size_t unordered = 0;
-	const T* prev = array;
-	const T* now = prev + 1;
-	for (std::size_t i = 1; i < size; ++i, ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			++unordered;
-	}
-	return unordered;
-}
+std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE predicate);
 sumupUnorderedFuncSet(sumupUnordered);
 
 //----------------------------------------
@@ -266,19 +214,7 @@ sumupUnorderedFuncSet(sumupUnordered);
 //プロトタイプ：
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
-std::size_t iteratorSumupUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate)
-{
-	std::size_t unordered = 0;
-	ITERATOR prev = begin;
-	ITERATOR now = begin;
-	++now;
-	for (;now != end; ++now, ++prev)
-	{
-		if (predicate(*now, *prev))
-			++unordered;
-	}
-	return unordered;
-}
+std::size_t iteratorSumupUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
 iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
 
 //----------------------------------------
@@ -288,22 +224,13 @@ iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
 //プロトタイプ：
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
-std::size_t singlyLinkedListSumupUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate)
-{
-	std::size_t unordered = 0;
-	const T* prev = first;
-	const T* now = get_next_func(*prev);
-	while (now)
-	{
-		if (predicate(*now, *prev))
-			++unordered;
-		now = get_next_func(*now);
-	}
-	return unordered;
-}
+std::size_t singlyLinkedListSumupUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
 singlyLinkedListSumupUnorderedFuncSet(singlyLinkedListSumupUnordered);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/is_ordered.inl>
 
 #endif//GASHA_INCLUDED_IS_ORDERED_H
 

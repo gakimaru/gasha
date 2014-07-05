@@ -551,10 +551,8 @@ void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_BASIC_MATH_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/basic_math.inl>
-#endif//GASHA_BASIC_MATH_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_BASIC_MATH_H
 

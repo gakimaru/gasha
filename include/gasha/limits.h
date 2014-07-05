@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ】
 // limits.h
-// 限界値
+// 限界値【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -333,6 +333,9 @@ public:
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/limits.inl>
 
 #endif//GASHA_INCLUDED_LIMITS_H
 

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // unique_shared_lock.h
-// 単一共有ロック制御
+// 単一共有ロック【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -44,161 +44,45 @@ public:
 	//メソッド
 
 	//排他ロック（ライトロック）取得
-	inline void lock()
-	{
-		if (!m_lock || m_status != UNLOCKED)
-			return;
-		m_lock->lock();
-		m_status = LOCKING_EXCLUSIVELY;
-	}
+	inline void lock();
 	//排他ロック（ライトロック）取得を試行
-	inline bool try_lock()
-	{
-		if (!m_lock)
-			return false;
-		if (m_status == LOCKING_EXCLUSIVELY)
-			return true;
-		else if (m_status != UNLOCKED)
-			return false;
-		const bool locked = m_lock->try_lock();
-		if(locked)
-			m_status = LOCKING_EXCLUSIVELY;
-		return locked;
-	}
+	inline bool try_lock();
 	//排他ロック（ライトロック）解放
-	inline void unlock()
-	{
-		if (!m_lock || m_status != LOCKING_EXCLUSIVELY)
-			return;
-		m_lock->unlock();
-		m_status = UNLOCKED;
-	}
+	inline void unlock();
 
 	//共有ロック（リードロック）取得
-	inline void lock_shared()
-	{
-		if (!m_lock || m_status != UNLOCKED)
-			return;
-		m_lock->lock_shared();
-		m_status = LOCKING_SHARED;
-	}
+	inline void lock_shared();
 	//共有ロック（リードロック）取得を試行
-	inline bool try_lock_shared()
-	{
-		if (!m_lock)
-			return false;
-		if (m_status == LOCKING_SHARED)
-			return true;
-		else if (m_status != UNLOCKED)
-			return false;
-		const bool locked = m_lock->try_lock_shared();
-		if(locked)
-			m_status = LOCKING_SHARED;
-		return locked;
-	}
+	inline bool try_lock_shared();
 	//共有ロック（リードロック）解放
-	inline void unlock_shared()
-	{
-		if (!m_lock || m_status != LOCKING_SHARED)
-			return;
-		m_lock->unlock_shared();
-		m_status = UNLOCKED;
-	}
+	inline void unlock_shared();
 	//ロックの所有権を放棄する
-	lock_type* release()
-	{
-		lock_type* lock = m_lock;
-		m_lock = nullptr;
-		m_status = UNLOCKED;
-		return lock;
-	}
+	lock_type* release();
 	//ロックの所有権を交換する
-	inline void swap(unique_shared_lock& obj)
-	{
-		lock_type* lock_tmp = m_lock;
-		status_t status_tmp = m_status;
-		m_lock = obj.m_lock;
-		m_status = obj.m_status;
-		obj.m_lock = lock_tmp;
-		obj.m_status = status_tmp;
-	}
+	inline void swap(unique_shared_lock& obj);
 public:
 	//ムーブオペレータ
-	inline unique_shared_lock& operator=(unique_shared_lock&& rhs)
-	{
-		unlock();
-		unlock_shared();
-		m_lock = rhs.m_lock;
-		m_status = rhs.m_status;
-		rhs.m_status = UNLOCKED;
-		return *this;
-	}
+	inline unique_shared_lock& operator=(unique_shared_lock&& rhs);
 	//コピーオペレータ
 	unique_shared_lock& operator=(const unique_shared_lock&) = delete;
 public:
 	//ムーブコンストラクタ
-	inline unique_shared_lock(unique_shared_lock&& obj) :
-		m_lock(obj.m_lock),
-		m_status(obj.m_status)
-	{
-		obj.m_status = UNLOCKED;
-	}
+	inline unique_shared_lock(unique_shared_lock&& obj);
 	//コピーコンストラクタ
 	unique_shared_lock(const unique_shared_lock&) = delete;
 	//コンストラクタ
-	inline explicit unique_shared_lock(lock_type& obj) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{
-		lock_shared();
-	}
-	inline unique_shared_lock(lock_type& obj, const with_lock_t) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{
-		lock();
-	}
-	inline unique_shared_lock(lock_type& obj, const with_lock_shared_t) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{
-		lock_shared();
-	}
-	inline unique_shared_lock(lock_type& obj, const try_lock_t) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{
-		try_lock();
-	}
-	inline unique_shared_lock(lock_type& obj, const try_lock_shared_t) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{
-		try_lock_shared();
-	}
-	inline unique_shared_lock(lock_type& obj, const adopt_lock_t) :
-		m_lock(&obj),
-		m_status(LOCKING_EXCLUSIVELY)
-	{}
-	inline unique_shared_lock(lock_type& obj, const adopt_shared_lock_t) :
-		m_lock(&obj),
-		m_status(LOCKING_SHARED)
-	{}
-	inline unique_shared_lock(lock_type& obj, const defer_lock_t) :
-		m_lock(&obj),
-		m_status(UNLOCKED)
-	{}
+	inline explicit unique_shared_lock(lock_type& obj);
+	inline unique_shared_lock(lock_type& obj, const with_lock_t);
+	inline unique_shared_lock(lock_type& obj, const with_lock_shared_t);
+	inline unique_shared_lock(lock_type& obj, const try_lock_t);
+	inline unique_shared_lock(lock_type& obj, const try_lock_shared_t);
+	inline unique_shared_lock(lock_type& obj, const adopt_lock_t);
+	inline unique_shared_lock(lock_type& obj, const adopt_shared_lock_t);
+	inline unique_shared_lock(lock_type& obj, const defer_lock_t);
 	//デフォルトコンストラクタ
-	inline unique_shared_lock() :
-		m_lock(nullptr),
-		m_status(UNLOCKED)
-	{}
+	inline unique_shared_lock();
 	//デストラクタ
-	inline ~unique_shared_lock()
-	{
-		unlock();
-		unlock_shared();
-	}
+	inline ~unique_shared_lock();
 private:
 	//フィールド
 	lock_type* m_lock;//ロックオブジェクトの参照
@@ -206,6 +90,9 @@ private:
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/unique_shared_lock.inl>
 
 #endif//GASHA_INCLUDED_UNIQUE_SHARED_LOCK_H
 

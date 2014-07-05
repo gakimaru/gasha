@@ -13,13 +13,6 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <chrono> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
 #include <chrono>//C++11 std::chrono
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -106,13 +99,8 @@ inline double calcElapsedTime(const std::chrono::system_clock::time_point begin,
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
-
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
-#ifdef GASHA_UTILITY_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/utility.inl>
-#endif//GASHA_UTILITY_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_UTILITY_H
 

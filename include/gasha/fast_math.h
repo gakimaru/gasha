@@ -1822,10 +1822,8 @@ void mul<float, 4, 4, 4>(float(&mat_result)[4][4], const float(&mat1)[4][4], con
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
-#ifdef GASHA_FAST_MATH_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/fast_math.inl>
-#endif//GASHA_FAST_MATH_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_FAST_MATH_H
 

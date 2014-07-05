@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // lw_spin_lock.h
-// サイズ軽量スピンロック
+// サイズ軽量スピンロック【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -32,33 +32,22 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<lwSpinLock> lockUnique(){ GASHA_ unique_lock<lwSpinLock> lock(*this); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique();
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ with_lock_t);
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ try_lock_t);
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ adopt_lock_t);
+	inline GASHA_ unique_lock<lwSpinLock> lockUnique(const GASHA_ defer_lock_t);
 
 	//ロック取得
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
 	//※ロック取得を伴う
-	inline GASHA_ lock_guard<lwSpinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT)
-	{
-		GASHA_ lock_guard<lwSpinLock> lock(*this);
-		return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
-	}
+	inline GASHA_ lock_guard<lwSpinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロック取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
-	inline bool try_lock()
-	{
-		bool prev = false;
-		return m_lock.compare_exchange_weak(prev, true) == false;
-	}
+	inline bool try_lock();
 	//ロック解放
-	inline void unlock()
-	{
-		m_lock.store(false);
-	}
+	inline void unlock();
 public:
 	//ムーブオペレータ
 	lwSpinLock& operator=(lwSpinLock&&) = delete;
@@ -70,19 +59,18 @@ public:
 	//コピーコンストラクタ
 	lwSpinLock(const lwSpinLock&) = delete;
 	//コンストラクタ
-	inline lwSpinLock()
-	{
-		m_lock.store(false);//ロック用フラグ
-	}
+	inline lwSpinLock();
 	//デストラクタ
-	inline ~lwSpinLock()
-	{}
+	inline ~lwSpinLock();
 private:
 	//フィールド
 	std::atomic_bool m_lock;//ロック用フラグ
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/lw_spin_lock.inl>
 
 #endif//GASHA_INCLUDED_LW_SPIN_LOCK_H
 

@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // dummy_lock.h
-// ダミーロック
+// ダミーロック【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -30,35 +30,21 @@ public:
 	//メソッド
 
 	//単一ロック取得
-	inline GASHA_ unique_lock<dummyLock> lockUnique(){ GASHA_ unique_lock<dummyLock> lock(*this); return lock; }
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
+	inline GASHA_ unique_lock<dummyLock> lockUnique();
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ with_lock_t);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ try_lock_t);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ adopt_lock_t);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t);
 
 	//ロック取得
-	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
-	{
-		//何もしない
-	}
+	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
-	inline GASHA_ lock_guard<dummyLock> lockScoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT)
-	{
-		GASHA_ lock_guard<dummyLock> lock(*this);
-		return lock;
-	}
+	inline GASHA_ lock_guard<dummyLock> lockScoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロック取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
-	inline bool try_lock()
-	{
-		//何もしない（常に成功）
-		return true;
-	}
+	inline bool try_lock();
 	//ロック解放
-	inline void unlock()
-	{
-		//何もしない
-	}
+	inline void unlock();
 public:
 	//ムーブオペレータ
 	dummyLock& operator=(dummyLock&&) = delete;
@@ -70,18 +56,15 @@ public:
 	//コピーコンストラクタ
 	dummyLock(const dummyLock&) = delete;
 	//コンストラクタ
-	inline dummyLock()
-	{
-		//何もしない
-	}
+	inline dummyLock();
 	//デストラクタ
-	inline ~dummyLock()
-	{
-		//何もしない
-	}
+	inline ~dummyLock();
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/dummy_lock.inl>
 
 #endif//GASHA_INCLUDED_DUMMY_LOCK_H
 

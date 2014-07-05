@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // lock_common.h
-// ロック共通設定
+// ロック共通設定【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -24,25 +24,25 @@ static const int SHARED_LOCK_COUNTER_UNLOCKED = 0x01000000;//ロックが取得�
 //uqnieu_lock用のパラメータ
 
 struct with_lock_t {};//ロック／排他ロック取得 ※コンストラクタでロック／排他ロックを取得する
-const with_lock_t with_lock;
+extern const with_lock_t with_lock;
 
 struct with_lock_shared_t {};//共有ロック取得 ※コンストラクタで共有ロックを取得する
-const with_lock_shared_t with_lock_shared;
+extern const with_lock_shared_t with_lock_shared;
 
 struct try_lock_t {};//ロック／排他ロック試行 ※コンストラクタでロック／排他ロック取得を試行する
-const try_lock_t try_lock;
+extern const try_lock_t try_lock;
 
 struct try_lock_shared_t {};//共有ロック試行 ※コンストラクタで共有ロック取得を試行する
-const try_lock_shared_t try_lock_shared;
+extern const try_lock_shared_t try_lock_shared;
 
 struct adopt_lock_t {};//ロック／排他取得済み状態管理の委譲 ※コンストラクタでロック／排他ロック取得済み状態にする（ロックを取得するわけではない）
-const adopt_lock_t adopt_lock;
+extern const adopt_lock_t adopt_lock;
 
 struct adopt_shared_lock_t {};//共有ロック取得済み状態管理の委譲 ※コンストラクタで共有ロック取得済み状態にする（ロックを取得するわけではない）
-const adopt_shared_lock_t adopt_shared_lock;
+extern const adopt_shared_lock_t adopt_shared_lock;
 
 struct defer_lock_t {};//遅延ロック ※コンストラクタでロックを取得しない
-const defer_lock_t defer_lock;
+extern const defer_lock_t defer_lock;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -69,10 +69,8 @@ void makeAndPrintPolyTable();
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
-#ifdef GASHA_CRC32_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/crc32.inl>
-#endif//GASHA_CRC32_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_CRC32_H
 
