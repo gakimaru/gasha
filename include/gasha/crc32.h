@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // crc32.h
-// CRC32計算
+// CRC32計算【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -22,160 +22,57 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------
 //型
 typedef std::uint32_t crc32_t;//CRC32型
-#if 0
-//型の限界値情報：crc32_t型
-template<>
-class numeric_limits<crc32_t> : public std::numeric_limits<crc32_t>
-{
-public:
-	typedef crc32_t signed_type;//同サイズの符号付き型
-	typedef crc32_t unsigned_type;//同サイズの符号なし型
-	typedef crc32_t contained_signed_type;//値全域を含む符号付き型
-	typedef std::uint32_t range_type;//値の範囲型（符号なし型）
-	typedef std::int64_t signed_range_type;//値の範囲型（符号付き型）
-	static const crc32_t MIN = 0;//最小値
-	static const crc32_t MAX = UINT32_MAX;//最大値
-	static const crc32_t SIZE = sizeof(crc32_t);//サイズ
-};
-#endif
 
 //--------------------
-//メタプログラミング用（コンパイル時計算用）
-namespace _private//直接使用しない処理を隠ぺいするためのネームスペース
-{
-	//--------------------
-	//CRC3232生成多項式マクロと定数を定義
-	//※constexpr関数内では変数/定数が使えないため、定数にマクロを使用
-#ifndef GASHA_CRC32_IS_CRC32C
-	//IEEE勧告の標準的なCRC32の生成多項式
-	//#define _POLYNOMIAL 0x04c11db7u//（標準）
-	#define _POLYNOMIAL 0xedb88320u//（反転）
-#else//GASHA_CRC32_IS_CRC32C
-	//CRC-32C(Castagnoli)の生成多項式
-	//#define _POLYNOMIAL 0x1edc6f41u//（標準）
-	#define _POLYNOMIAL 0x82f63b78u//（反転）
-#endif//GASHA_CRC32_IS_CRC32C
-	static const crc32_t POLYNOMIAL = _POLYNOMIAL;//CRC32生成多項式定数
+//【メタプログラミング：constexpr版】CRC32算出
+//※constexpr対応コンパイラなら、コンパイル時にCRCを計算できる。
+//　（例）const crc32_t text_crc = calcStaticCRC32("text");//※変数にconstまたはconstexprを付けないと、コンパイル時に処理されないので注意（その場合、ランタイム処理になる）
+constexpr inline crc32_t calcStaticCRC32(const char* str);//文字列から算出
+constexpr inline crc32_t calcStaticCRC32(const char* data, const std::size_t len);//バイナリデータから算出
 
-	//--------------------
-	//CRC32多項式計算
-	//※constexpr関数内ではラムダ式が使えないため、関数を分割（ラムダ式を使用するとコンパイル時に評価されなくなる）
-	constexpr inline GASHA_ crc32_t calcPoly_core(const GASHA_ crc32_t poly)
-	{
-		//多項式計算
-		return poly & 1 ? _POLYNOMIAL ^ (poly >> 1) : (poly >> 1);
-	}
-	constexpr inline GASHA_ crc32_t calcPoly(const GASHA_ crc32_t poly)
-	{
-		//多項式計算
-		return calcPoly_core(
-		         calcPoly_core(
-		           calcPoly_core(
-		             calcPoly_core(
-		               calcPoly_core(
-		                 calcPoly_core(
-		                   calcPoly_core(
-		                     calcPoly_core(poly)
-		                   )
-		                 )
-		               )
-		             )
-		           )
-		         )
-		       );
-	}
-
-	//--------------------
-	//CRC32生成多項式マクロを破棄
-	#undef POLYNO_POLYNOMIALMIAL
-	
-	//--------------------
-	//文字列からCRC算出用（再帰処理）
-	//※constexpr関数内ではSSE命令に非対応（使用するとコンパイル時に評価されなくなる）
-	constexpr inline GASHA_ crc32_t calcStr(const GASHA_ crc32_t crc, const char* str)
-	{
-		return *str == '\0' ? crc : calcStr(calcPoly(static_cast<GASHA_ crc32_t>((crc ^ *str) & 0xffu)) ^ (crc >> 8), str + 1);//CRC多項式(生成多項式から計算)を合成
-	}
-	//--------------------
-	//データ長を指定してCRC算出用（再帰処理）
-	//※constexpr関数内ではSSE命令に非対応（使用するとコンパイル時に評価されなくなる）
-	constexpr inline GASHA_ crc32_t calcData(const GASHA_ crc32_t crc, const char* data, const std::size_t len)
-	{
-		return len == 0 ? crc : calcData(calcPoly(static_cast<crc32_t>((crc ^ *data) & 0xffu)) ^ (crc >> 8), data + 1, len - 1);//CRC多項式(生成多項式から計算)を合成
-	}
-}//namespace _private
-
-//--------------------
-//【constexpr版】文字列からCRC算出
-constexpr inline crc32_t calcConstCRC32(const char* str)
-{
-	return ~_private::calcStr(~0u, str);
-}
-//--------------------
-//【constexpr版】データ長を指定してCRC算出
-constexpr inline crc32_t calcConstCRC32(const char* data, const std::size_t len)
-{
-	return ~_private::calcData(~0u, data, len);
-}
 #ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------
-//【ユーザー定義リテラル版】文字列と文字列長を指定してCRC算出
-//※operator "" の後に空白が必要なことに注意
-constexpr inline crc32_t operator "" _crc32(const char* str, const std::size_t len)
-{
-	return calcConstCRC32(str, len);
-}
+//【メタプログラミング：ユーザー定義リテラル版】
+//※ユーザー定義リテラル対応コンパイラなら、コンパイル時にCRCを計算できる。
+//　（例）const crc32_t text_crc = "text"_crc32;//※変数にconstまたはconstexprを付けないと、コンパイル時に処理されないので注意（その場合、ランタイム処理になる）
+//※ユーザー定義リテラルの宣言では、operator "" の後に空白が必要なことに注意
+constexpr inline crc32_t operator "" _crc32(const char* str, const std::size_t len);//（基本的に）文字列から算出
 #endif//GASHA_HAS_USER_DEFINED_LITERAL
 
 //--------------------
-//【ランタイム関数版】各種CRC32計算
-//※いずれも、通常直接使用しない関数
-crc32_t calcCRC32_recursive(const char* str);//再帰処理版
-crc32_t calcCRC32_recursive(const char* data, const std::size_t len);//再帰処理版
-crc32_t calcCRC32_loop(const char* str);//ループ処理版
-crc32_t calcCRC32_loop(const char* data, const std::size_t len);//ループ処理版
-//※事前計算済み多項式テーブルが使用できない場合、通常版として処理する
-crc32_t calcCRC32_table(const char* str);//事前計算済み多項式テーブル処理版
-crc32_t calcCRC32_table(const char* data, const std::size_t len);//事前計算済み多項式テーブル処理版
-//※SSE命令が使用できない場合、事前テーブル版、もしくは、通常版として処理する
-crc32_t calcCRC32_sse(const char* str);//SSE命令版
-crc32_t calcCRC32_sse(const char* data, const std::size_t len);//SSE命令版
+//【ランタイム関数版】
+//※処理方法は、コンパイル時の設定に応じて、SSE命令版、事前計算済みテーブル版、ループ処理版のいずれかが適用される。
+inline crc32_t calcCRC32(const char* str);//文字列から算出
+inline crc32_t calcCRC32(const char* data, const std::size_t len);//バイナリデータから算出
 
 //--------------------
-//【ランタイム関数版】文字列のCRC32計算
-inline crc32_t calcCRC32(const char* str)
-{
-#ifdef GASHA_CRC32_USE_SSE
-	return calcCRC32_sse(str);
-#else//GASHA_CRC32_USE_SSE
-#ifdef GASHA_CRC32_USE_STATIC_TABLE
-	return calcCRC32_table(str);
-#else//GASHA_CRC32_USE_STATIC_TABLE
-	return calcCRC32_loop(str);
-#endif//GASHA_CRC32_USE_STATIC_TABLE
-#endif//GASHA_CRC32_USE_SSE
-}
-//--------------------
-//【ランタイム関数版】指定長データのCRC32計算
-inline crc32_t calcCRC32(const char* data, const std::size_t len)
-{
-#ifdef GASHA_CRC32_USE_SSE
-	return calcCRC32_sse(data, len);
-#else//GASHA_CRC32_USE_SSE
-#ifdef GASHA_CRC32_USE_STATIC_TABLE
-	return calcCRC32_table(data, len);
-#else//GASHA_CRC32_USE_STATIC_TABLE
-	return calcCRC32_loop(data, len);
-#endif//GASHA_CRC32_USE_STATIC_TABLE
-#endif//GASHA_CRC32_USE_SSE
-}
+//【ランタイム関数版】※処理方法別の個別関数
+//通常版：ループ処理版
+crc32_t calcCRC32_loop(const char* str);//文字列から算出
+crc32_t calcCRC32_loop(const char* data, const std::size_t len);//バイナリデータから算出
+//通常版：再帰処理版 ※メタプログラミング版処理動作確認用
+crc32_t calcCRC32_recursive(const char* str);//文字列から算出
+crc32_t calcCRC32_recursive(const char* data, const std::size_t len);//バイナリデータから算出
+//事前計算済み多項式テーブル版
+//※事前計算済みテーブルが使用できない場合でも、関数は実行可能。その場合、通常版として処理する。
+crc32_t calcCRC32_table(const char* str);//文字列から算出
+crc32_t calcCRC32_table(const char* data, const std::size_t len);//バイナリデータから算出
+//SSE命命令版
+//※SSE命令が使用できない場合でも、関数は実行可能。その場合、事前計算済みテーブル版、もしくは、通常版として処理する。
+crc32_t calcCRC32_sse(const char* str);//文字列から算出
+crc32_t calcCRC32_sse(const char* data, const std::size_t len);//バイナリデータから算出
 
 //--------------------
-//【プログラム作成補助処理】CRC多項式テーブルの作成と表示
-//※ソースコードを生成して標準出力に出力する。
+//【プログラム作成補助処理】CRC多項式テーブルの作成と表示（事前生成済みテーブル作成用）
+//※標準出力に出力されたテキストをコピペしてソースコードに適用する。
 void makeAndPrintPolyTable();
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする
+#ifdef GASHA_CRC32_ALLWAYS_TOGETHER_INL
+#include <gasha/crc32.inl>
+#endif//GASHA_CRC32_ALLWAYS_TOGETHER_INL
 
 #endif//GASHA_INCLUDED_CRC32_H
 

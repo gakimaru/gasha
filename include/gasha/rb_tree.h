@@ -423,27 +423,6 @@ namespace rb_tree
 	//※関数内でスタックを二つ使用
 	template<class OPE_TYPE>
 	typename OPE_TYPE::node_type* removeNode(const typename OPE_TYPE::node_type& target_node, typename OPE_TYPE::node_type*& root);
-	//--------------------
-	//※直接使用しない関数
-	namespace _private
-	{
-		//--------------------
-		//赤黒木操作関数：【汎用処理】ノード左回転処理
-		template<class OPE_TYPE>
-		inline typename OPE_TYPE::node_type* rotateL(typename OPE_TYPE::node_type* curr_node);
-		//--------------------
-		//赤黒木操作関数：【汎用処理】ノード右回転処理
-		template<class OPE_TYPE>
-		inline typename OPE_TYPE::node_type* rotateR(typename OPE_TYPE::node_type* curr_node);
-		//--------------------
-		//赤黒木操作関数：ノード追加時の平衡化
-		template<class OPE_TYPE>
-		void balanceForAdd(typename OPE_TYPE::node_type*& root, stack_t<OPE_TYPE>& stack, typename OPE_TYPE::node_type* curr_node, bool child_is_large, typename OPE_TYPE::node_type* child_node);
-		//--------------------
-		//赤黒木操作関数：ノード削除時の平衡化
-		template<class OPE_TYPE>
-		void balanceForRemove(typename OPE_TYPE::node_type*& root, stack_t<OPE_TYPE>& stack, typename OPE_TYPE::node_type* removing_node, typename OPE_TYPE::node_type* replacing_node);
-	}
 
 	//----------------------------------------
 	//赤黒木コンテナ

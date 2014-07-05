@@ -107,7 +107,7 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//【VC++】ワーニング設定を退避
+//【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合

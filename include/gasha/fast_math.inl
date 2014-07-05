@@ -4,8 +4,8 @@
 
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ含む】
-// fast_math.h
-// 高速算術【インライン関数部】
+// fast_math.inl
+// 高速算術【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru

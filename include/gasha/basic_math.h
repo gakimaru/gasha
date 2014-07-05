@@ -526,28 +526,28 @@ template<typename T, std::size_t N, std::size_t M>
 void add(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
 //※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
 template<typename T, std::size_t N, std::size_t M>
-void addRU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
+void addLU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
 //----------
 //行列の減算
 template<typename T, std::size_t N, std::size_t M>
 void sub(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M]);
 //※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
 template<typename T, std::size_t N, std::size_t M>
-void subRU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M]);
+void subLU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M]);
 //----------
 //行列のスカラー倍
 template<typename T, std::size_t N, std::size_t M>
 void mul(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar);
 //※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
 template<typename T, std::size_t N, std::size_t M>
-void mulRU(T(&mat_result)[N][M], const T(&mat)[N][M], const T scalar);
+void mulLU(T(&mat_result)[N][M], const T(&mat)[N][M], const T scalar);
 //----------
 //行列の乗算
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
 void mul(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M]);
 //※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
-void mulRU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
+void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

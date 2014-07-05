@@ -15,6 +15,9 @@
 
 #include <gasha/basic_math.h>//基本算術
 
+#include <cstdint>//std::int*_t
+#include <utility>//C++11 std::move
+
 #ifdef GASHA_USE_SSE
 #include <xmmintrin.h>//SSE1
 #endif//GASHA_USE_SSE
@@ -31,9 +34,97 @@
 #include <immintrin.h>//AVX
 #endif//GASHA_USE_AVX
 
-#include <utility>//C++11 std::move
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//--------------------------------------------------------------------------------
+//SSE補助処理
+//--------------------------------------------------------------------------------
+
+#ifdef GASHA_USE_SSE
+//__m128型のキャスト用
+union m128_cast
+{
+	__m128 m_xmm;
+	float m_float[4];
+	m128_cast(__m128 xmm) :
+		m_xmm(xmm)
+	{}
+};
+#endif//GASHA_USE_SSE
+
+#ifdef GASHA_USE_SSE2
+//__m128d型のキャスト用
+union m128d_cast
+{
+	__m128d m_xmm;
+	float m_double[2];
+	m128d_cast(__m128d xmm) :
+		m_xmm(xmm)
+	{}
+};
+#endif//GASHA_USE_SSE2
+
+#ifdef GASHA_USE_SSE2
+//__m128i型のキャスト用
+union m128i_cast
+{
+	__m128i m_xmm;
+	std::int64_t m_i64[2];
+	std::uint64_t m_u64[2];
+	std::int32_t m_i32[4];
+	std::uint32_t m_u32[4];
+	std::int16_t m_i16[8];
+	std::uint16_t m_u16[8];
+	std::int8_t m_i8[16];
+	std::uint8_t m_u8[16];
+	m128i_cast(__m128i xmm) :
+		m_xmm(xmm)
+	{}
+};
+#endif//GASHA_USE_SSE2
+
+#ifdef GASHA_USE_AVX
+//__m256型のキャスト用
+union m256_cast
+{
+	__m256 m_ymm;
+	float m_float[8];
+	m256_cast(__m256 ymm) :
+		m_ymm(ymm)
+	{}
+};
+#endif//GASHA_USE_AVX
+
+#ifdef GASHA_USE_AVX
+//__m256d型のキャスト用
+union m256d_cast
+{
+	__m256d m_ymm;
+	float m_double[4];
+	m256d_cast(__m256d ymm) :
+		m_ymm(ymm)
+	{}
+};
+#endif//GASHA_USE_AVX
+
+#ifdef GASHA_USE_AVX2
+//__m256i型のキャスト用
+union m256i_cast
+{
+	__m256i m_ymm;
+	std::int64_t m_i64[4];
+	std::uint64_t m_u64[4];
+	std::int32_t m_i32[8];
+	std::uint32_t m_u32[8];
+	std::int16_t m_i16[16];
+	std::uint16_t m_u16[16];
+	std::int8_t m_i8[32];
+	std::uint8_t m_u8[32];
+	m256i_cast(__m256i ymm) :
+		m_ymm(ymm)
+	{}
+};
+#endif//GASHA_USE_AVX2
 
 //--------------------------------------------------------------------------------
 //高速四則演算

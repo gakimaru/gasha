@@ -302,6 +302,27 @@ namespace rb_tree
 		return count;
 	}
 	//--------------------
+	//※直接使用しない関数
+	namespace _private
+	{
+		//--------------------
+		//赤黒木操作関数：【汎用処理】ノード左回転処理
+		template<class OPE_TYPE>
+		inline typename OPE_TYPE::node_type* rotateL(typename OPE_TYPE::node_type* curr_node);
+		//--------------------
+		//赤黒木操作関数：【汎用処理】ノード右回転処理
+		template<class OPE_TYPE>
+		inline typename OPE_TYPE::node_type* rotateR(typename OPE_TYPE::node_type* curr_node);
+		//--------------------
+		//赤黒木操作関数：ノード追加時の平衡化
+		template<class OPE_TYPE>
+		void balanceForAdd(typename OPE_TYPE::node_type*& root, stack_t<OPE_TYPE>& stack, typename OPE_TYPE::node_type* curr_node, bool child_is_large, typename OPE_TYPE::node_type* child_node);
+		//--------------------
+		//赤黒木操作関数：ノード削除時の平衡化
+		template<class OPE_TYPE>
+		void balanceForRemove(typename OPE_TYPE::node_type*& root, stack_t<OPE_TYPE>& stack, typename OPE_TYPE::node_type* removing_node, typename OPE_TYPE::node_type* replacing_node);
+	}//namespace _private
+	//--------------------
 	//赤黒木操作関数：ノードを追加
 	template<class OPE_TYPE>
 	typename OPE_TYPE::node_type* addNode(typename OPE_TYPE::node_type& new_node, typename OPE_TYPE::node_type*& root)
@@ -1556,7 +1577,7 @@ namespace rb_tree
 				}
 			}
 		}
-	}
+	}//namespace _private
 
 	//--------------------
 	//イテレータのインライン関数

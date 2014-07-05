@@ -4,8 +4,8 @@
 
 //--------------------------------------------------------------------------------
 //【テンプレートライブラリ含む】
-// basic_math.h
-// 基本算術【インライン関数部】
+// basic_math.inl
+// 基本算術【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -283,7 +283,7 @@ struct _addRU<T, N, M, 0, 0>{
 	}
 };
 template<typename T, std::size_t N, std::size_t M>
-void addRU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
+void addLU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
 {
 	_addRU<T, N, M, N - 1, M - 1>::calc(mat_result, mat1, mat2);
 }
@@ -322,7 +322,7 @@ struct _subRU<T, N, M, 0, 0>{
 	}
 };
 template<typename T, std::size_t N, std::size_t M>
-void subRU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
+void subLU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
 {
 	_subRU<T, N, M, N - 1, M - 1>::calc(mat_result, mat1, mat2);
 }
@@ -361,7 +361,7 @@ struct _mulRU1<T, N, M, 0, 0>{
 	}
 };
 template<typename T, std::size_t N, std::size_t M>
-void mulRU(T(&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
+void mulLU(T(&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
 {
 	_mulRU1<T, N, M, N - 1, M - 1>::calc(mat_result, mat, scalar);
 }
@@ -412,7 +412,7 @@ struct _mulRU2<T, N, M, NM, 0, 0, 0>{
 	}
 };
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
-void mulRU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M])
+void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M])
 {
 	for (int i = 0; i < N; ++i)
 		for (int j = 0; j < M; ++j)

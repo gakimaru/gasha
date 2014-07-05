@@ -32,64 +32,71 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 
 //非配列用
-template<typename T> inline std::size_t rankof(const T& data){ return 0; }
-template<typename T> inline std::size_t sizeofelemof(const T& data){ return sizeof(T); }
-template<typename T> inline std::size_t extentof(const T& data){ return 0; }
-template<typename T> inline std::size_t extent1of(const T& data){ return 0; }
-template<typename T> inline std::size_t extent2of(const T& data){ return 0; }
-template<typename T> inline std::size_t extent3of(const T& data){ return 0; }
-template<typename T> inline std::size_t extent4of(const T& data){ return 0; }
-template<typename T> inline std::size_t extent5of(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t rankof(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t sizeofelemof(const T& data){ return sizeof(T); }
+template<typename T> constexpr inline std::size_t extentof(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t extent1of(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t extent2of(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t extent3of(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t extent4of(const T& data){ return 0; }
+template<typename T> constexpr inline std::size_t extent5of(const T& data){ return 0; }
 
 //一次配列用
-template<typename T, std::size_t N1> inline std::size_t rankof(const T(&data)[N1]){ return 1; }
-template<typename T, std::size_t N1> inline std::size_t sizeofelemof(const T(&data)[N1]){ return sizeof(T); }
-template<typename T, std::size_t N1> inline std::size_t extentof(const T(&data)[N1]){ return N1; }
-template<typename T, std::size_t N1> inline std::size_t extent1of(const T(&data)[N1]){ return N1; }
-//template<typename T, std::size_t N1> inline std::size_t extent2of(const T(&data)[N1]){ return 0; }//※不要
-//template<typename T, std::size_t N1> inline std::size_t extent3of(const T(&data)[N1]){ return 0; }//※不要
-//template<typename T, std::size_t N1> inline std::size_t extent4of(const T(&data)[N1]){ return 0; }//※不要
-//template<typename T, std::size_t N1> inline std::size_t extent5of(const T(&data)[N1]){ return 0; }//※不要
+template<typename T, std::size_t N1> constexpr inline std::size_t rankof(const T(&data)[N1]){ return 1; }
+template<typename T, std::size_t N1> constexpr inline std::size_t sizeofelemof(const T(&data)[N1]){ return sizeof(T); }
+template<typename T, std::size_t N1> constexpr inline std::size_t extentof(const T(&data)[N1]){ return N1; }
+template<typename T, std::size_t N1> constexpr inline std::size_t extent1of(const T(&data)[N1]){ return N1; }
+//template<typename T, std::size_t N1> constexpr inline std::size_t extent2of(const T(&data)[N1]){ return 0; }//※不要
+//template<typename T, std::size_t N1> constexpr inline std::size_t extent3of(const T(&data)[N1]){ return 0; }//※不要
+//template<typename T, std::size_t N1> constexpr inline std::size_t extent4of(const T(&data)[N1]){ return 0; }//※不要
+//template<typename T, std::size_t N1> constexpr inline std::size_t extent5of(const T(&data)[N1]){ return 0; }//※不要
 
 //二次配列用
-template<typename T, std::size_t N1, std::size_t N2> inline std::size_t rankof(const T(&data)[N1][N2]){ return 2; }
-template<typename T, std::size_t N1, std::size_t N2> inline std::size_t sizeofelemof(const T(&data)[N1][N2]){ return sizeof(T); }
-template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extentof(const T(&data)[N1][N2]){ return N1 * N2; }
-//template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent1of(const T(&data)[N1][N2]){ return N1; }//※不要
-template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent2of(const T(&data)[N1][N2]){ return N2; }
-//template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent3of(const T(&data)[N1][N2]){ return 0; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent4of(const T(&data)[N1][N2]){ return 0; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2> inline std::size_t extent5of(const T(&data)[N1][N2]){ return 0; }//※不要
+template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t rankof(const T(&data)[N1][N2]){ return 2; }
+template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t sizeofelemof(const T(&data)[N1][N2]){ return sizeof(T); }
+template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extentof(const T(&data)[N1][N2]){ return N1 * N2; }
+//template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extent1of(const T(&data)[N1][N2]){ return N1; }//※不要
+template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extent2of(const T(&data)[N1][N2]){ return N2; }
+//template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extent3of(const T(&data)[N1][N2]){ return 0; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extent4of(const T(&data)[N1][N2]){ return 0; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2> constexpr inline std::size_t extent5of(const T(&data)[N1][N2]){ return 0; }//※不要
 
 //三次配列用
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t rankof(const T(&data)[N1][N2][N3]){ return 3; }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3]){ return sizeof(T); }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extentof(const T(&data)[N1][N2][N3]){ return N1 * N2 * N3; }
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent1of(const T(&data)[N1][N2][N3]){ return N1; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent2of(const T(&data)[N1][N2][N3]){ return N2; }//※不要
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent3of(const T(&data)[N1][N2][N3]){ return N3; }
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent4of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> inline std::size_t extent5of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t rankof(const T(&data)[N1][N2][N3]){ return 3; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3]){ return sizeof(T); }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extentof(const T(&data)[N1][N2][N3]){ return N1 * N2 * N3; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extent1of(const T(&data)[N1][N2][N3]){ return N1; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extent2of(const T(&data)[N1][N2][N3]){ return N2; }//※不要
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extent3of(const T(&data)[N1][N2][N3]){ return N3; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extent4of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3> constexpr inline std::size_t extent5of(const T(&data)[N1][N2][N3]){ return 0; }//※不要
 
 //四次配列用
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t rankof(const T(&data)[N1][N2][N3][N4]){ return 4; }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3][N4]){ return sizeof(T); }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extentof(const T(&data)[N1][N2][N3][N4]){ return N1 * N2 * N3 * N4; }
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent1of(const T(&data)[N1][N2][N3][N4]){ return N1; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4]){ return N2; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4]){ return N3; }//※不要
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4]){ return N4; }
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4]){ return 0; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t rankof(const T(&data)[N1][N2][N3][N4]){ return 4; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3][N4]){ return sizeof(T); }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extentof(const T(&data)[N1][N2][N3][N4]){ return N1 * N2 * N3 * N4; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extent1of(const T(&data)[N1][N2][N3][N4]){ return N1; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4]){ return N2; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4]){ return N3; }//※不要
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4]){ return N4; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4> constexpr inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4]){ return 0; }
 
 //五次配列用
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t rankof(const T(&data)[N1][N2][N3][N4][N5]){ return 5; }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3][N4][N5]){ return sizeof(T); }
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extentof(const T(&data)[N1][N2][N3][N4][N5]){ return N1 * N2 * N3 * N4 * N5; }
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent1of(const T(&data)[N1][N2][N3][N4][N5]){ return N1; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4][N5]){ return N2; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4][N5]){ return N3; }//※不要
-//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4][N5]){ return N4; }//※不要
-template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4][N5]){ return N5; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t rankof(const T(&data)[N1][N2][N3][N4][N5]){ return 5; }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t sizeofelemof(const T(&data)[N1][N2][N3][N4][N5]){ return sizeof(T); }
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extentof(const T(&data)[N1][N2][N3][N4][N5]){ return N1 * N2 * N3 * N4 * N5; }
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extent1of(const T(&data)[N1][N2][N3][N4][N5]){ return N1; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extent2of(const T(&data)[N1][N2][N3][N4][N5]){ return N2; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extent3of(const T(&data)[N1][N2][N3][N4][N5]){ return N3; }//※不要
+//template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extent4of(const T(&data)[N1][N2][N3][N4][N5]){ return N4; }//※不要
+template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> constexpr inline std::size_t extent5of(const T(&data)[N1][N2][N3][N4][N5]){ return N5; }
+
+//※constexprが使えない環境でのメタプログラミング用（extent*ofだけマクロで用意）
+#define extent1of_m(data) (sizeof(data) / sizeof(data[0]))
+#define extent2of_m(data) (sizeof(data[0]) / sizeof(data[0][0]))
+#define extent3of_m(data) (sizeof(data[0][0]) / sizeof(data[0][0][0]))
+#define extent4of_m(data) (sizeof(data[0][0][0]) / sizeof(data[0][0][0][0]))
+#define extent5of_m(data) (sizeof(data[0][0][0][0]) / sizeof(data[0][0][0][0][0]))
 
 //--------------------------------------------------------------------------------
 //ポインター型情報
@@ -98,8 +105,8 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t
 //----------------------------------------
 //ポインターでも実体でも値（クラス／構造体）のサイズを返す sizeof()
 //----------------------------------------
-template<typename T> inline std::size_t sizeofvalueof(T val){ return sizeof(T); }
-template<typename T> inline std::size_t sizeofvalueof(T* val){ return sizeof(T); }
+template<typename T> constexpr inline std::size_t sizeofvalueof(T val){ return sizeof(T); }
+template<typename T> constexpr inline std::size_t sizeofvalueof(T* val){ return sizeof(T); }
 
 //--------------------------------------------------------------------------------
 //クラス／構造体に比較演算子を自動定義するためのCRPTクラス
