@@ -113,12 +113,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_SHARED_QUEUE_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/shared_queue.inl>
-#endif//GASHA_SHARED_QUEUE_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_SHARED_QUEUE_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/shared_queue.cpp.h>
 #endif//GASHA_SHARED_QUEUE_ALLWAYS_TOGETHER_CPP_H

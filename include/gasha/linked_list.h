@@ -554,8 +554,8 @@ namespace linked_list
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique() const { GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
@@ -883,26 +883,15 @@ using lList = linked_list::container<OPE_TYPE>;
 template<typename VALUE_TYPE>
 using simpleLList = linked_list::simpleContainer<VALUE_TYPE>;
 
-//双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_lList(OPE_TYPE) \
-	template class linked_list::container<OPE_TYPE>;
-
-//シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleLList(VALUE_TYPE) \
-	template class linked_list::simpleContainer<VALUE_TYPE>; \
-	template class linked_list::container<typename linked_list::simpleContainer<VALUE_TYPE>::ope>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_LINKED_LIST_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/linked_list.inl>
-#endif//GASHA_LINKED_LIST_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_LINKED_LIST_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/linked_list.cpp.h>
 #endif//GASHA_LINKED_LIST_ALLWAYS_TOGETHER_CPP_H

@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class T>
 inline void unique_shared_lock<T>::lock()
 {
-	if (!m_lock || m_status != UNLOCKED)
+	if (!m_lock || owns_any_lock())
 		return;
 	m_lock->lock();
 	m_status = LOCKING_EXCLUSIVELY;
@@ -60,7 +60,7 @@ inline void unique_shared_lock<T>::unlock()
 template<class T>
 inline void unique_shared_lock<T>::lock_shared()
 {
-	if (!m_lock || m_status != UNLOCKED)
+	if (!m_lock || owns_any_lock())
 		return;
 	m_lock->lock_shared();
 	m_status = LOCKING_SHARED;
@@ -90,6 +90,41 @@ inline void unique_shared_lock<T>::unlock_shared()
 		return;
 	m_lock->unlock_shared();
 	m_status = UNLOCKED;
+}
+
+//アップグレード
+template<class T>
+inline bool unique_shared_lock<T>::upgrade()
+{
+	if (!m_lock || m_status != LOCKING_SHARED)
+		return false;
+	m_lock->upgrade();
+	m_status = LOCKING_EXCLUSIVELY;
+	return true;
+}
+
+//アップグレードを試行
+template<class T>
+inline bool unique_shared_lock<T>::try_upgrade()
+{
+	if (!m_lock || m_status != LOCKING_SHARED)
+		return false;
+	const bool locked = m_lock->try_upgrade();
+	if (locked)
+		m_status = LOCKING_EXCLUSIVELY;
+	return locked;
+}
+
+//ダウングレード
+//※排他ロックから共有ロックにダウングレード
+template<class T>
+inline bool unique_shared_lock<T>::downgrade()
+{
+	if (!m_lock || m_status != LOCKING_EXCLUSIVELY)
+		return false;
+	m_lock->downgrade();
+	m_status = LOCKING_SHARED;
+	return true;
 }
 
 //ロックの所有権を放棄する
@@ -158,14 +193,14 @@ inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>:
 	lock_shared();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_t) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {
 	try_lock();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_lock_shared_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_shared_t) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {

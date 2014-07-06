@@ -110,7 +110,7 @@ inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, cons
 	lock();
 }
 template<class T>
-inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const try_lock_t) :
+inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const try_to_lock_t) :
 	m_lock(&obj),
 	m_isLocked(false)
 {

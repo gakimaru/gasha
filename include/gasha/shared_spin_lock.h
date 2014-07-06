@@ -44,8 +44,8 @@ public:
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique();
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ with_lock_t);
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ with_lock_shared_t);
-	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_lock_t);
-	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_lock_shared_t);
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_to_lock_t);
+	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ try_to_lock_shared_t);
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ adopt_lock_t);
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ adopt_shared_lock_t);
 	inline GASHA_ unique_shared_lock<sharedSpinLock> lockUnique(const GASHA_ defer_lock_t);
@@ -71,6 +71,15 @@ public:
 	bool try_lock_shared();
 	//共有ロック（リードロック）解放
 	inline void unlock_shared();
+
+	//アップグレード
+	//※共有ロックから排他ロックにアップグレード
+	void upgrade(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
+	//アップグレードを試行
+	bool try_upgrade();
+	//ダウングレード
+	//※排他ロックから共有ロックにダウングレード
+	inline void downgrade();
 public:
 	//ムーブオペレータ
 	sharedSpinLock& operator=(sharedSpinLock&&) = delete;

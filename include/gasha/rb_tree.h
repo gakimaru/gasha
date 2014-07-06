@@ -713,8 +713,8 @@ namespace rb_tree
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique() const { GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
@@ -1038,32 +1038,15 @@ using rbTree = rb_tree::container<OPE_TYPE>;
 template<typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
 using simpleRBTree = rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>;
 
-//赤黒木コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_rbTree(OPE_TYPE) \
-	template class rb_tree::stack_t<OPE_TYPE>; \
-	template class rb_tree::container<OPE_TYPE>;
-
-//シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleRBTree(VALUE_TYPE) \
-	template class rb_tree::simpleContainer<VALUE_TYPE>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
-#define INSTANCING_simpleRBTree_withKey(VALUE_TYPE, KEY_TYPE) \
-	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/dynamic_array.inl>
-#endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H

@@ -692,6 +692,21 @@ namespace rb_tree
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//赤黒木コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_rbTree(OPE_TYPE) \
+	template class rb_tree::stack_t<OPE_TYPE>; \
+	template class rb_tree::container<OPE_TYPE>;
+
+//シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleRBTree(VALUE_TYPE) \
+	template class rb_tree::simpleContainer<VALUE_TYPE>; \
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
+#define INSTANCING_simpleRBTree_withKey(VALUE_TYPE, KEY_TYPE) \
+	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
+
 #endif//GASHA_INCLUDED_RB_TREE_CPP_H
 
 // End of file

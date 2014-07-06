@@ -19,19 +19,64 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //共有ロックガードクラス（スコープロック）
-	//ムーブコンストラクタ
+
+//アップグレード
+template<class T>
+inline bool shared_lock_guard<T>::upgrade()
+{
+	if (m_isLocked && !m_isUpgraded)
+	{
+		m_lock.upgrade();
+		m_isUpgraded = true;
+		return true;
+	}
+	return false;
+}
+
+//アップグレードを試行
+template<class T>
+inline bool shared_lock_guard<T>::try_upgrade()
+{
+	if (m_isLocked && !m_isUpgraded)
+	{
+		if (m_lock.try_upgrade())
+		{
+			m_isUpgraded = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+//ダウングレード
+template<class T>
+inline bool shared_lock_guard<T>::downgrade()
+{
+	if (m_isLocked && m_isUpgraded)
+	{
+		m_lock.downgrade();
+		m_isUpgraded = false;
+		return true;
+	}
+	return false;
+}
+
+//ムーブコンストラクタ
 template<class T>
 inline shared_lock_guard<T>::shared_lock_guard(shared_lock_guard&& obj) :
 	m_lock(obj.m_lock),
-	m_isLocked(obj.m_isLocked)
+	m_isLocked(obj.m_isLocked),
+	m_isUpgraded(obj.m_isUpgraded)
 {
 	obj.m_isLocked = false;
+	obj.m_isUpgraded = false;
 }
 //コンストラクタ
 template<class T>
 inline shared_lock_guard<T>::shared_lock_guard(lock_type& lock) :
 	m_lock(lock),
-	m_isLocked(true)
+	m_isLocked(true),
+	m_isUpgraded(false)
 {
 	m_lock.lock_shared();
 }
@@ -39,8 +84,13 @@ inline shared_lock_guard<T>::shared_lock_guard(lock_type& lock) :
 template<class T>
 inline shared_lock_guard<T>::~shared_lock_guard()
 {
-	if(m_isLocked)
-		m_lock.unlock_shared();
+	if (m_isLocked)
+	{
+		if (m_isUpgraded)
+			m_lock.unlock();
+		else
+			m_lock.unlock_shared();
+	}
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

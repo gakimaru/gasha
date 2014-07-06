@@ -456,8 +456,8 @@ namespace dynamic_array
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique() const { GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
@@ -814,26 +814,15 @@ using dArray = dynamic_array::container<OPE_TYPE>;
 template<typename VALUE_TYPE>
 using simpleDArray = dynamic_array::simpleContainer<VALUE_TYPE>;
 
-//動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_dArray(OPE_TYPE) \
-	template class dynamic_array::container<OPE_TYPE>;
-
-//シンプル動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleDArray(VALUE_TYPE) \
-	template class dynamic_array::simpleContainer<VALUE_TYPE>; \
-	template class dynamic_array::container<typename dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/dynamic_array.inl>
-#endif//GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_DYNAMIC_ARRAY_ALLWAYS_TOGETHER_CPP_H

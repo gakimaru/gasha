@@ -184,6 +184,15 @@
 	#undef GASHA_STRNCPY_FAST_USE_SSE4_2
 #endif//GASHA_STRNCPY_FAST_USE_SSE4_2
 
+
+//--------------------------------------------------------------------------------
+//【シングルトンデバッグ用処理】
+//※ライブラリの再ビルド不要（ただし、ライブラリ内で使用している可能性があるため、できるだけ再ビルドした方が良い）
+
+#if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_HAS_DEBUG_FEATURE)
+	#undef GASHA_SINGLETON_DEBUG_ENABLED
+#endif//GASHA_SINGLETON_DEBUG_ENABLED
+
 #endif//GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 
 // End of file

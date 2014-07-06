@@ -23,8 +23,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this); return lock; }
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ try_lock); return lock; }
-inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ try_lock_shared); return lock; }
+inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ try_to_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ try_to_lock); return lock; }
+inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ try_to_lock_shared_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 inline GASHA_ unique_shared_lock<unsharedSpinLock> unsharedSpinLock::lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<unsharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
@@ -71,6 +71,29 @@ inline bool unsharedSpinLock::try_lock_shared()
 inline void unsharedSpinLock::unlock_shared()
 {
 	m_lock.clear();
+}
+
+//アップグレード
+//※共有ロックから排他ロックにアップグレード
+inline void unsharedSpinLock::upgrade(const int spin_count)
+{
+	//何もしない（常に成功）
+	return;
+}
+
+//アップグレードを試行
+inline bool unsharedSpinLock::try_upgrade()
+{
+	//何もしない（常に成功）
+	return true;
+}
+
+//ダウングレード
+//※排他ロックから共有ロックにダウングレード
+inline void unsharedSpinLock::downgrade()
+{
+	//何もしない（常に成功）
+	return;
 }
 
 //コンストラクタ

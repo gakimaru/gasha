@@ -482,6 +482,15 @@ namespace linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//双方向連結リストコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_lList(OPE_TYPE) \
+	template class linked_list::container<OPE_TYPE>;
+
+//シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleLList(VALUE_TYPE) \
+	template class linked_list::simpleContainer<VALUE_TYPE>; \
+	template class linked_list::container<typename linked_list::simpleContainer<VALUE_TYPE>::ope>;
+
 #endif//GASHA_INCLUDED_LINKED_LIST_CPP_H
 
 // End of file

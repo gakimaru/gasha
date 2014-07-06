@@ -39,18 +39,18 @@ class threadId
 {
 public:
 	//型
-	typedef std::hash<std::thread::id>::result_type id_t;//ID型
+	typedef std::hash<std::thread::id>::result_type id_type;//ID型
 public:
 	//定数
-	static const id_t INVALID_ID = GASHA_ numeric_limits<id_t>::MAX;//無向なID
+	static const id_type INITIAL_ID = GASHA_ numeric_limits<id_type>::MAX;//初期ID
 public:
 	//アクセッサ
-	inline id_t id() const { return *m_id; }//スレッドIDを取得
+	inline id_type id() const { return *m_id; }//スレッドIDを取得
 	inline const char* name() const { return *m_name; }//スレッド名を取得
 	inline bool isThisThread() const { return *m_id == m_thisId; }//現在のスレッドと同じスレッドか判定
 public:
 	//静的フィールドのアクセッサ
-	inline id_t thisId() const { return m_thisId; }//現在のスレッドのスレッドIDを取得
+	inline id_type thisId() const { return m_thisId; }//現在のスレッドのスレッドIDを取得
 	inline const char* thisName() const { return m_thisName; }//現在のスレッドのスレッド名を取得
 public:
 	//比較オペレータ
@@ -58,11 +58,11 @@ public:
 	inline bool operator!=(const threadId& rhs) const { return id() != rhs.id(); }
 public:
 	//キャストオペレータ
-	inline operator id_t() const { return *m_id; }//スレッドID
+	inline operator id_type() const { return *m_id; }//スレッドID
 	inline operator const char*() const { return *m_name; }//スレッド名
 public:
 	//基本オペレータ
-	inline id_t operator*() const { return *m_id; }//スレッドID
+	inline id_type operator*() const { return *m_id; }//スレッドID
 public:
 	//メソッド
 	//現在のスレッドのスレッドIDをセット
@@ -89,12 +89,12 @@ public:
 	inline ~threadId();
 private:
 	//フィールド
-	id_t* m_id;//スレッドID
+	id_type* m_id;//スレッドID
 	const char** m_name;//スレッド名
 private:
 	//静的フィールド
 	static thread_local bool m_thisIdIsInitialized;//現在のスレッドのスレッドIDセット済みフラグ
-	static thread_local id_t m_thisId;//現在のスレッドのスレッドID
+	static thread_local id_type m_thisId;//現在のスレッドのスレッドID
 	static thread_local const char* m_thisName;//現在のスレッドのスレッド名
 };
 

@@ -527,7 +527,7 @@ namespace binary_heap
 		//単一ロック取得
 		inline GASHA_ unique_lock<lock_type> lockUnique() const { GASHA_ unique_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
@@ -787,26 +787,15 @@ using bHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
 using simpleBHeap = binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
 
-//二分ヒープコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
-
-//シンプル二分ヒープコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/dynamic_array.inl>
-#endif//GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_BINARY_HEAP_ALLWAYS_TOGETHER_CPP_H

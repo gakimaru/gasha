@@ -23,8 +23,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this); return lock; }
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_lock); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_lock_shared); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_shared_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
@@ -53,6 +53,12 @@ inline GASHA_ shared_lock_guard<simpleSharedSpinLock> simpleSharedSpinLock::lock
 inline void simpleSharedSpinLock::unlock_shared()
 {
 	m_lockCounter.fetch_add(1);//カウンタを戻す
+}
+
+//ダウングレード
+void simpleSharedSpinLock::downgrade()
+{
+	m_lockCounter.fetch_add(SHARED_LOCK_COUNTER_UNLOCKED - 1);//カウンタを戻す
 }
 
 //コンストラクタ

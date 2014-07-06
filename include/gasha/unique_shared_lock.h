@@ -35,9 +35,10 @@ public:
 	};
 public:
 	//キャストオペレータ
-	inline operator bool() const { return m_status != UNLOCKED; }//排他／共有ロック取得中か？
+	inline operator bool() const { return owns_any_lock(); }//排他／共有ロック取得中か？
 public:
 	//アクセッサ
+	inline bool owns_any_lock() const { return m_status != UNLOCKED; }//排他／共有ロック取得中か？
 	inline bool owns_lock() const { return m_status == LOCKING_EXCLUSIVELY; }//排他ロック取得中か？
 	inline bool owns_shared_lock() const { return m_status == LOCKING_SHARED; }//共有ロック取得中か？
 public:
@@ -56,6 +57,16 @@ public:
 	inline bool try_lock_shared();
 	//共有ロック（リードロック）解放
 	inline void unlock_shared();
+	
+	//アップグレード
+	//※共有ロックから排他ロックにアップグレード
+	inline bool upgrade();
+	//アップグレードを試行
+	inline bool try_upgrade();
+	//ダウングレード
+	//※排他ロックから共有ロックにダウングレード
+	inline bool downgrade();
+
 	//ロックの所有権を放棄する
 	lock_type* release();
 	//ロックの所有権を交換する
@@ -74,8 +85,8 @@ public:
 	inline explicit unique_shared_lock(lock_type& obj);
 	inline unique_shared_lock(lock_type& obj, const with_lock_t);
 	inline unique_shared_lock(lock_type& obj, const with_lock_shared_t);
-	inline unique_shared_lock(lock_type& obj, const try_lock_t);
-	inline unique_shared_lock(lock_type& obj, const try_lock_shared_t);
+	inline unique_shared_lock(lock_type& obj, const try_to_lock_t);
+	inline unique_shared_lock(lock_type& obj, const try_to_lock_shared_t);
 	inline unique_shared_lock(lock_type& obj, const adopt_lock_t);
 	inline unique_shared_lock(lock_type& obj, const adopt_shared_lock_t);
 	inline unique_shared_lock(lock_type& obj, const defer_lock_t);

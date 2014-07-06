@@ -76,6 +76,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/thread_id.inl>
 
-#endif//GASHA_INCLUDED_THREAD_ID_NIL
+#endif//GASHA_INCLUDED_THREAD_ID_INL
 
 // End of file

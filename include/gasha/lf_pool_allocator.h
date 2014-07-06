@@ -130,11 +130,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_LF_POOL_ALLOCATOR_ALLWAYS_TOGETHER_INL
 #include <gasha/lf_pool_allocator.inl>
-#endif//GASHA_LF_POOL_ALLOCATOR_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_LF_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/lf_pool_allocator.cpp.h>
 #endif//GASHA_LF_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H

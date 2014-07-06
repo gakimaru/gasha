@@ -580,6 +580,15 @@ namespace dynamic_array
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//動的配列コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_dArray(OPE_TYPE) \
+	template class dynamic_array::container<OPE_TYPE>;
+
+//シンプル動的配列コンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleDArray(VALUE_TYPE) \
+	template class dynamic_array::simpleContainer<VALUE_TYPE>; \
+	template class dynamic_array::container<typename dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
+
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 

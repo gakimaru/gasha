@@ -23,8 +23,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this); return lock; }
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock); return lock; }
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ try_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock); return lock; }
-inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ try_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_lock_shared); return lock; }
+inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ try_to_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_to_lock); return lock; }
+inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ try_to_lock_shared_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_lock); return lock; }
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 inline GASHA_ unique_shared_lock<dummySharedLock> dummySharedLock::lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<dummySharedLock> lock(*this, GASHA_ defer_lock); return lock; }
@@ -70,6 +70,29 @@ inline bool dummySharedLock::try_lock_shared()
 	//何もしない（常に成功）
 	return true;
 }
+
+//アップグレード
+//※共有ロックから排他ロックにアップグレード
+inline void dummySharedLock::upgrade(const int spin_count)
+{
+	//何もしない（常に成功）
+	return;
+}
+
+//ダウングレード
+inline void dummySharedLock::downgrade()
+{
+	//何もしない（常に成功）
+	return;
+}
+
+//アップグレードを試行
+inline bool dummySharedLock::try_upgrade()
+{
+	//何もしない（常に成功）
+	return true;
+}
+
 //共有ロック（リードロック）解放
 inline void dummySharedLock::unlock_shared()
 {

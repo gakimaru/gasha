@@ -600,6 +600,15 @@ namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//リングバッファコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_rBuff(OPE_TYPE) \
+	template class ring_buffer::container<OPE_TYPE>;
+
+//シンプルリングバッファコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleRBuff(VALUE_TYPE) \
+	template class ring_buffer::simpleContainer<VALUE_TYPE>; \
+	template class ring_buffer::container<typename ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
+
 #endif//GASHA_INCLUDED_RING_BUFFER_CPP_H
 
 // End of file

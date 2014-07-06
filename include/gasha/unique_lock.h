@@ -59,7 +59,7 @@ public:
 	//コンストラクタ
 	inline explicit unique_lock(lock_type& obj);
 	inline unique_lock(lock_type& obj, const with_lock_t);
-	inline unique_lock(lock_type& obj, const try_lock_t);
+	inline unique_lock(lock_type& obj, const try_to_lock_t);
 	inline unique_lock(lock_type& obj, const adopt_lock_t);
 	inline unique_lock(lock_type& obj, const defer_lock_t);
 	//デフォルトコンストラクタ

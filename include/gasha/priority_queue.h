@@ -292,7 +292,7 @@ namespace priority_queue
 		//単一ロック取得
 		inline GASHA_ unique_lock<lock_type> lockUnique() const { GASHA_ unique_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
@@ -561,25 +561,12 @@ using pQueue = priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>
 using simplePQueue = priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
 
-//優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
-#define INSTANCING_pQueue_withBHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>; \
-	template class priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
-
-//シンプル優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
-#define INSTANCING_simplePQueue(NODE_TYPE, _TABLE_SIZE) \
-	template class priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>; \
-	template class priority_queue::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/dynamic_array.inl>
-#endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H

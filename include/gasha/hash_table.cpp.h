@@ -805,6 +805,18 @@ namespace hash_table
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_hTable(OPE_TYPE, _TABLE_SIZE) \
+	template class hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+
+//シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
+#define INSTANCING_simpleHTable(VALUE_TYPE, _TABLE_SIZE) \
+	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
+	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+#define INSTANCING_simpleHTable_withKey(VALUE_TYPE, _TABLE_SIZE, KEY_TYPE) \
+	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
+	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
+
 #endif//GASHA_INCLUDED_HASH_TABLE_CPP_H
 
 // End of file

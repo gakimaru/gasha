@@ -32,6 +32,15 @@ public:
 	//コピーオペレータ
 	shared_lock_guard& operator=(const shared_lock_guard&) = delete;
 public:
+	//アップグレード
+	//※共有ロックから排他ロックにアップグレード
+	inline bool upgrade();
+	//アップグレードを試行
+	inline bool try_upgrade();
+	//ダウングレード
+	//※排他ロックから共有ロックにダウングレード
+	inline bool downgrade();
+public:
 	//ムーブコンストラクタ
 	inline shared_lock_guard(shared_lock_guard&& obj);
 	//コピーコンストラクタ
@@ -44,6 +53,7 @@ private:
 	//フィールド
 	lock_type& m_lock;//ロックオブジェクトの参照
 	bool m_isLocked;//ロック取得中フラグ
+	bool m_isUpgraded;//アップグレード状態フラグ
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

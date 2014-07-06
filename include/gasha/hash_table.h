@@ -606,8 +606,8 @@ namespace hash_table
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique() const { GASHA_ unique_shared_lock<lock_type> lock(*this); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ with_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ with_lock_shared); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock); return lock; }
-		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_lock_shared); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
+		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ try_to_lock_shared_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ try_to_lock_shared); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ adopt_shared_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ adopt_shared_lock); return lock; }
 		inline GASHA_ unique_shared_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_shared_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
@@ -859,29 +859,15 @@ using hTable = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 template<typename VALUE_TYPE, std::size_t _TABLE_SIZE, typename KEY_TYPE = std::uint32_t>
 using simpleHTable = hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>;
 
-//開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_hTable(OPE_TYPE, _TABLE_SIZE) \
-	template class hash_table::container<OPE_TYPE, _TABLE_SIZE>;
-
-//シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleHTable(VALUE_TYPE, _TABLE_SIZE) \
-	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
-	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
-#define INSTANCING_simpleHTable_withKey(VALUE_TYPE, _TABLE_SIZE, KEY_TYPE) \
-	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
-	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルードする場合
-#ifdef GASHA_HASH_TABLE_ALLWAYS_TOGETHER_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/dynamic_array.inl>
-#endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_INL
 
-//.hファイルのインクルードに伴い、常に.cp.hファイル（および.inlファイル）を自動インクルードする場合
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/dynamic_array.cpp.h>
 #endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
