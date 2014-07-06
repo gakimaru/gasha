@@ -235,6 +235,13 @@ lfPoolAllocator<T, _POOL_SIZE>::~lfPoolAllocator()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
+//明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfPoolAllocator(T, _POOL_SIZE) \
+	template class lfPoolAllocator<T, _POOL_SIZE>;
+
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 

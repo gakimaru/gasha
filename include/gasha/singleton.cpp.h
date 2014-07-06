@@ -47,6 +47,9 @@ namespace _private
 	typename singleton<T, LOCK_TYPE, DEBUG_TYPE>::debug_type singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticDebug;
 }//namepace _private
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //シングルトンの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_singleton(T) \
 	template class _private::singleton<T, T::lock_type, T::debug_type>;

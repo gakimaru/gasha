@@ -21,6 +21,8 @@
 
 #include <gasha/utility.h>//汎用ユーティリティ：getSysElapsedTime()
 
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
 //--------------------------------------------------------------------------------
 //シングルトンデバッグ用処理
 //--------------------------------------------------------------------------------
@@ -102,6 +104,11 @@ singletonDebug<_MAX_RECORDS, LOCK_TYPE>::~singletonDebug()
 {}
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED
+
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//----------------------------------------
+//明示的なインスタンス化
 
 #ifdef GASHA_SINGLETON_DEBUG_ENABLED//シングルトンデバッグ用処理有効時
 

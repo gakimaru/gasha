@@ -177,6 +177,15 @@ sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>::~sharedPoolAllocator()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
+//明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_sharedPoolAllocator(T, _POOL_SIZE) \
+	template class sharedPoolAllocator<T, _POOL_SIZE>;
+#define GASHA_INSTANCING_sharedPoolAllocator_withLock(T, _POOL_SIZE, LOCK_TYPE) \
+	template class sharedPoolAllocator<T, _POOL_SIZE, LOCK_TYPE>;
+
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 

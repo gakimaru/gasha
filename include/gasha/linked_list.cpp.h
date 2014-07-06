@@ -482,14 +482,20 @@ namespace linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_lList(OPE_TYPE) \
+#define GASHA_INSTANCING_lList(OPE_TYPE) \
 	template class linked_list::container<OPE_TYPE>;
 
 //シンプル双方向連結リストコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleLList(VALUE_TYPE) \
+#define GASHA_INSTANCING_simpleLList(VALUE_TYPE) \
 	template class linked_list::simpleContainer<VALUE_TYPE>; \
 	template class linked_list::container<typename linked_list::simpleContainer<VALUE_TYPE>::ope>;
+
+//【注意】明示的なインスタンスを行うと、探索やソートを行わなくても、そのためもインターフェースの実装が必要になる点に注意。
+//　　　　対象データに bool operator==(const T&) const もしくは friend bool operator(const T&, const T&) を実装する必要あり。
 
 #endif//GASHA_INCLUDED_LINKED_LIST_CPP_H
 

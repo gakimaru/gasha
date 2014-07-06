@@ -137,6 +137,15 @@ sharedQueue<T, POOL_SIZE, LOCK_TYPE>::~sharedQueue()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
+//明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_sharedQueue(T, _POOL_SIZE) \
+	template class sharedQueue<T, _POOL_SIZE>;
+#define GASHA_INSTANCING_sharedQueue_withLock(T, _POOL_SIZE, LOCK_TYPE) \
+	template class sharedQueue<T, _POOL_SIZE, LOCK_TYPE>;
+
 #endif//GASHA_INCLUDED_SHARED_QUEUE_CPP_H
 
 // End of file

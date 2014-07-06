@@ -580,14 +580,20 @@ namespace dynamic_array
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_dArray(OPE_TYPE) \
+#define GASHA_INSTANCING_dArray(OPE_TYPE) \
 	template class dynamic_array::container<OPE_TYPE>;
 
 //シンプル動的配列コンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleDArray(VALUE_TYPE) \
+#define GASHA_INSTANCING_simpleDArray(VALUE_TYPE) \
 	template class dynamic_array::simpleContainer<VALUE_TYPE>; \
 	template class dynamic_array::container<typename dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
+
+//【注意】明示的なインスタンスを行うと、探索やソートを行わなくても、そのためもインターフェースの実装が必要になる点に注意。
+//　　　　対象データに bool operator==(const T&) const もしくは friend bool operator(const T&, const T&) を実装する必要あり。
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)

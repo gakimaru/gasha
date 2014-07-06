@@ -286,6 +286,9 @@ namespace priority_queue
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_pQueue_withBHeap(OPE_TYPE, _TABLE_SIZE) \
 	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>; \

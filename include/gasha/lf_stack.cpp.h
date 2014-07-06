@@ -158,6 +158,15 @@ lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_V
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
+//明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfStack(T, _POOL_SIZE) \
+	template class lfStack<T, _POOL_SIZE>;
+#define GASHA_INSTANCING_lfStack_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
+	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
+
 #endif//GASHA_INCLUDED_LOCKFREE_STACK_CPP_H
 
 // End of file

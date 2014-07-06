@@ -522,12 +522,15 @@ namespace binary_heap
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //二分ヒープコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
+#define GASHA_INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
 	template class binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル二分ヒープコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
+#define GASHA_INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
 	template class binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
 	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 

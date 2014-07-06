@@ -600,14 +600,20 @@ namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//----------------------------------------
+//明示的なインスタンス化
+
 //リングバッファコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_rBuff(OPE_TYPE) \
+#define GASHA_INSTANCING_rBuff(OPE_TYPE) \
 	template class ring_buffer::container<OPE_TYPE>;
 
 //シンプルリングバッファコンテナの明示的なインスタンス化用マクロ
-#define INSTANCING_simpleRBuff(VALUE_TYPE) \
+#define GASHA_INSTANCING_simpleRBuff(VALUE_TYPE) \
 	template class ring_buffer::simpleContainer<VALUE_TYPE>; \
 	template class ring_buffer::container<typename ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
+
+//【注意】明示的なインスタンスを行うと、探索やソートを行わなくても、そのためもインターフェースの実装が必要になる点に注意。
+//　　　　対象データに bool operator==(const T&) const もしくは friend bool operator(const T&, const T&) を実装する必要あり。
 
 #endif//GASHA_INCLUDED_RING_BUFFER_CPP_H
 
