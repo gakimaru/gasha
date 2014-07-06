@@ -171,6 +171,22 @@ union unionTypes
 };
 
 //--------------------------------------------------------------------------------
+//明示的なコンストラクタ／デストラクタ呼び出し
+//--------------------------------------------------------------------------------
+
+//明示的なコンストラクタ呼び出し
+template<class T, typename... Tx>
+inline T* callConstructor(void* buff, Tx&&... args);
+template<class T, typename... Tx>
+inline T* callConstructor(T* buff, Tx&&... args);
+
+//明示的なデストラクタ呼び出し
+template<class T>
+inline void callDestructor(T*& obj);//※呼び出し完了後、obj に nullptr を代入する
+template<class T>
+inline void callDestructor(void* obj);//※nullptrの代入はしない
+
+//--------------------------------------------------------------------------------
 //文字列化
 //--------------------------------------------------------------------------------
 
