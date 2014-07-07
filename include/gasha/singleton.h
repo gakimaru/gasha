@@ -101,6 +101,11 @@ namespace _private
 		inline bool create(const char* procedure_name, Tx&&... args);
 		//シングルトンインスタンスの明示的な破棄
 		inline bool destroy(const char* procedure_name);
+		//デバッグ情報作成
+		//※十分なサイズのバッファを渡す必要あり。
+		//※使用したバッファのサイズを返す。
+		//※作成中、ロックを取得する。
+		inline std::size_t debugInfo(char* message);
 	private:
 		//デフォルトコンストラクタでインスタンスを生成
 		inline bool createDefault(const char* procedure_name);

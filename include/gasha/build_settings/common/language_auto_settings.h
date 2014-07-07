@@ -6,16 +6,19 @@
 // language_auto_settings.h
 // 言語機能自動判別・設定
 //
+// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+//                   compiler_auto_settings.h//コンパイラ自動判別・設定
+//                   platform_auto_settings.h//プラットフォーム自動判別・設定
+//                   ※build_settings.h により、依存関係順にインクルード
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-//依存ヘッダー：project_build_settings_first.h
-//              compiler_auto_settings.h
-//              platform_auto_settings.h
-//依存関係の解消：build_settings.h にてインクルード
+//--------------------------------------------------------------------------------
+//言語機能自動判別・設定
 
 //----------------------------------------
 //関数名取得マクロ対応
@@ -56,6 +59,7 @@
 //           　GCC 4.7 C++11 Status
 //           　GCC 4.8 C++11 Status
 
+//--------------------
 //【C++11仕様】nullptr
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
@@ -76,6 +80,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】override指定子
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1400//VC++8.0(2005)以降
@@ -94,6 +99,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】final指定子
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1700//VC++11.0(2012)以降
@@ -112,6 +118,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】auto型推論
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
@@ -124,6 +131,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】decltype型指定子
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
@@ -136,6 +144,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】default/detete宣言
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
@@ -148,6 +157,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】constexpr修飾子
 #ifdef GASHA_IS_VC
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
@@ -168,6 +178,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】ユーザー定義リテラル
 #ifdef GASHA_IS_VC
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）※しばらく対応はなさそう
@@ -180,6 +191,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】ラムダ式
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
@@ -192,6 +204,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】範囲に基づくforループ
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
@@ -204,6 +217,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】列挙型の型付け
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++11.1(2012)以降 ※VC++12(2013)以降とする
@@ -216,6 +230,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】可変長引数テンプレート
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.1(2013)以降 ※VC++12(2013)以降とする
@@ -228,6 +243,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】エイリアステンプレート
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.1(2013)以降 ※VC++12(2013)以降とする
@@ -240,6 +256,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】委譲コンストラクタ
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
@@ -252,6 +269,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】継承コンストラクタ
 #ifdef GASHA_IS_VC
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
@@ -264,6 +282,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】一様初期化
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
@@ -276,6 +295,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】初期化リスト
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
@@ -288,7 +308,8 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
-//【C++11仕様】右辺値参照とstd::move
+//--------------------
+//【C++11仕様】右辺値参照／ムーブセマンティクス
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1800//VC++12.0(2013)以降
 		#define GASHA_HAS_RVALUE_REFERENCE
@@ -300,6 +321,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】static_assert
 #ifdef GASHA_IS_VC
 	#if _MSC_VER >= 1600//VC++10.0(2010)以降
@@ -318,6 +340,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】thread_local：スレッドローカルストレージ（TLS）修飾子
 #ifdef GASHA_IS_VC
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
@@ -336,6 +359,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】alignas：アラインメント修飾子
 //【注意】修飾子の指定位置がコンパイラによって異なる
 //        ＜変数宣言＞
@@ -365,6 +389,7 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
 //【C++11仕様】alignof：アラインメント取得関数
 #ifdef GASHA_IS_WIN
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
@@ -386,6 +411,7 @@
 //----------------------------------------
 //非言語仕様対応　※方言吸収
 
+//--------------------
 //アラインメント指定付きメモリ確保関数
 //※VC++仕様に合わせて共通化
 #ifdef GASHA_IS_GCC
@@ -413,6 +439,7 @@
 	#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
 
+//--------------------
 //noinline / always_inline
 #ifdef GASHA_IS_VC
 	#define no_inline __declspec(noinline)

@@ -7,6 +7,8 @@
 // singleton.inl
 // シングルトン【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -118,7 +120,18 @@ namespace _private
 			m_lock.downgrade();
 		return true;
 	}
-	
+
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、ロックを取得する。
+	//インスタンス生成用クラス：インスタンス生成
+	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
+	inline std::size_t singleton<T, LOCK_TYPE, DEBUG_TYPE>::debugInfo(char* message)
+	{
+		return m_staticDebug.debugInfo(message);
+	}
+
 	//デフォルトコンストラクタでインスタンスを生成
 	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
 	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::createDefault(const char* procedure_name)
@@ -126,7 +139,7 @@ namespace _private
 		createDefaultInstance_t create_instance(*this);
 		return create_instance.create(procedure_name);
 	}
-	
+
 	//コンストラクタ：デフォルト：排他ロック
 	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name) :
@@ -260,9 +273,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
-
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/singleton.inl>
 
 #endif//GASHA_INCLUDED_SINGLETON_INL
 

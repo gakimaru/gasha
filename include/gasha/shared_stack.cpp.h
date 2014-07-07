@@ -4,11 +4,14 @@
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// shared_stack.h
-// マルチスレッド共有スタック【関数定義部】
+// shared_stack.cpp.h
+// マルチスレッド共有スタック【関数／実体定義部】
 //
-// ※クラスの実体化が必要な場所でインクルード。
-// ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
+// ※クラスのインスタンス化が必要な場所でインクルード。
+// ※基本的に、ヘッダーファイル内でのインクルード禁止。
+// 　（コンパイル・リンク時間への影響を気にしないならOK）
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -18,10 +21,17 @@
 
 #include <gasha/shared_stack.inl>//共有スタック【インライン関数／テンプレート関数定義部】
 
-#include <gasha/shared_pool_allocator.cpp.h>//マルチスレッド共有プールアロケータ【関数定義部】
+#include <gasha/pool_allocator.cpp.h>//プールアロケータ【関数／実体定義部】
 
 #include <utility>//C++11 std::move
-#include <stdio.h>//printf()
+#include <stdio.h>//sprintf()
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
+//【VC++】sprintf を使用すると、error C4996 が発生する
+//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -74,27 +84,35 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE
 	return false;//ポップ失敗
 }
 
-//デバッグ情報表示
+//デバッグ情報作成
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-void sharedStack<T, POOL_SIZE, LOCK_TYPE>::printDebugInfo(std::function<void(const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node)
+std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, std::function<std::size_t(char* message, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node)
 {
-	printf("----- Debug Info for stack -----\n");
-	printf("Stack:\n");
+#ifdef GASHA_HAS_DEBUG_FEATURE
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	std::size_t size = 0;
+	size += sprintf(message + size, "----- Debug Info for stack -----\n");
+	size += sprintf(message + size, "Stack:\n");
 	int no = 0;
 	stack_t* node = m_head;
 	while (node)
 	{
-		printf("[%d](%p) ", no++, node);
-		print_node(node->m_value);
-		printf("\n");
+		size += sprintf(message + size, "[%d](%p) ", no++, node);
+		size += print_node(message + size, node->m_value);
+		size += sprintf(message + size, "\n");
 		node = node->m_next;
 	}
-	printf("----------\n");
-	auto print_allocator_node = [&print_node](const stack_t& info)
+	size += sprintf(message + size, "----------\n");
+	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
-		print_node(info.m_value);
+		return print_node(message, info.m_value);
 	};
-	m_allocator.printDebugInfo(print_allocator_node);
+	size += m_allocator.template debugInfo<stack_t>(message + size, print_allocator_node);
+	return size;
+#else//GASHA_HAS_DEBUG_FEATURE
+	message[0] = '\0';
+	return 0;
+#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //初期化
@@ -134,9 +152,14 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_sharedStack(T, _POOL_SIZE) \
-	template class sharedStack<T, _POOL_SIZE>;
+	template class sharedStack<T, _POOL_SIZE>; \
+	template class poolAllocator_withType<typename sharedStack<T, _POOL_SIZE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
 #define GASHA_INSTANCING_sharedStack_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class sharedStack<T, _POOL_SIZE, LOCK_TYPE>;
+	template class sharedStack<T, _POOL_SIZE, LOCK_TYPE>; \
+	template class poolAllocator_withType<typename sharedStack<T, _POOL_SIZE, LOCK_TYPE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_SHARED_STACK_CPP_H
 

@@ -6,14 +6,23 @@
 // build_configuration.h
 // ビルド構成
 //
+// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+//                   compiler_auto_settings.h//コンパイラ自動判別・設定
+//                   platform_auto_settings.h//プラットフォーム自動判別・設定
+//                   language_auto_settings.h//言語機能自動判別・設定
+//                   ※build_settings.h により、依存関係順にインクルード
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------------
+//ビルド構成
+
 //----------------------------------------
-//ビルド設定識別マクロ一覧
+//ビルド構成識別マクロ一覧
 //#define GASHA_BUILD_CONFIG_IS_DEBUG//フルデバッグ設定
 //#define GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE//プログラム開発向け設定
 //#define GASHA_BUILD_CONFIG_IS_DEBUG_OPT//コンテンツ制作・QA向け設定
@@ -22,7 +31,7 @@
 //#define GASHA_BUILD_CONFIG_ISRELEASE//製品向け設定
 
 //----------------------------------------
-//ビルド設定個別マクロ一覧
+//ビルド構成個別マクロ一覧
 //#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
 //#define GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
 //#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化

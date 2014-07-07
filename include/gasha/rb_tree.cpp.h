@@ -5,10 +5,13 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // rb_tree.cpp.h
-// 赤黒木コンテナ【関数定義部】
+// 赤黒木コンテナ【関数／実体定義部】
 //
-// ※コンテナクラスの実体化が必要な場所でインクルード。
-// ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
+// ※クラスのインスタンス化が必要な場所でインクルード。
+// ※基本的に、ヘッダーファイル内でのインクルード禁止。
+// 　（コンパイル・リンク時間への影響を気にしないならOK）
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -20,9 +23,7 @@
 
 #include <utility>//C++11 std::move
 
-#ifdef GASHA_ASSERTION_IS_ENABLED
 #include <assert.h>//assert()
-#endif//GASHA_ASSERTION_IS_ENABLED
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -35,9 +36,7 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type& node, const bool is_large)
 	{
-	#ifdef GASHA_ASSERTION_IS_ENABLED
 		assert(m_depth < DEPTH_MAX);
-	#endif//GASHA_ASSERTION_IS_ENABLED
 		info_t* stack_node = &m_array[m_depth++];
 		stack_node->m_nodeRef = &node;
 		stack_node->m_isLarge = is_large;
@@ -703,12 +702,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleRBTree(VALUE_TYPE) \
 	template class rb_tree::simpleContainer<VALUE_TYPE>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
 #define GASHA_INSTANCING_simpleRBTree_withKey(VALUE_TYPE, KEY_TYPE) \
 	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
+	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
+	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
 
 #endif//GASHA_INCLUDED_RB_TREE_CPP_H
 

@@ -5,10 +5,13 @@
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
 // priority_queue.cpp.h
-// 優先度付きキューコンテナ【関数定義部】
+// 優先度付きキューコンテナ【関数／実体定義部】
 //
-// ※コンテナクラスの実体化が必要な場所でインクルード。
-// ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
+// ※クラスのインスタンス化が必要な場所でインクルード。
+// ※基本的に、ヘッダーファイル内でのインクルード禁止。
+// 　（コンパイル・リンク時間への影響を気にしないならOK）
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -18,7 +21,7 @@
 
 #include <gasha/priority_queue.inl>//優先度付きキューコンテナアダプタ【インライン関数／テンプレート関数定義部】
 
-#include <gasha/binary_heap.cpp.h>//二分ヒープコンテナ【関数定義部】
+#include <gasha/binary_heap.cpp.h>//二分ヒープコンテナ【関数／実体定義部】
 
 #include <utility>//C++11 std::move
 
@@ -291,14 +294,14 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_pQueue_withBHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>; \
-	template class priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
+	template class priority_queue::container<OPE_TYPE, _TABLE_SIZE>; \
+	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>;
 
 //シンプル優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simplePQueue(NODE_TYPE, _TABLE_SIZE) \
 	template class priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>; \
-	template class priority_queue::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+	template class priority_queue::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>; \
+	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>;
 
 #endif//GASHA_INCLUDED_PRIORITY_QUEUE_CPP_H
 

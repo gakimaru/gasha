@@ -7,15 +7,9 @@
 // lockfree_stack.h
 // ロックフリースタック【宣言部】
 //
-// ※コンテナをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
-//
-//   ・lf_stack.inl   ... 【インライン関数／テンプレート関数定義部】
-//                        クラスの操作が必要な場所でインクルード。
-//   ・lf_stack.cpp.h ... 【関数定義部】
-//                        クラスの実体化が必要な場所でインクルード。
-//
-// ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
+// ※クラスをインスタンス化する際は、別途 .cpp.h ファイルをインクルードする必要あり。
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -79,7 +73,7 @@ public:
 	typedef GASHA_ taggedPtr<stack_t, TAGGED_PTR_TAG_BITS, TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE> stack_ptr_t;
 	
 	//アロケータ型
-	typedef GASHA_ lfPoolAllocator<stack_t, POOL_SIZE> allocator_type;//ロックフリープールアロケータ
+	typedef GASHA_ lfPoolAllocator_withType<stack_t, POOL_SIZE> allocator_type;//ロックフリープールアロケータ
 
 	//スタック型
 	struct stack_t
@@ -108,8 +102,11 @@ public:
 	//ポップ
 	bool pop(value_type& value);
 
-	//デバッグ情報表示
-	void printDebugInfo(std::function<void(const value_type& value)> print_node);
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
+	std::size_t debugInfo(char* message, std::function<std::size_t(char* message, const value_type& value)> print_node);
 
 private:
 	//初期化

@@ -3,7 +3,6 @@
 #define GASHA_INCLUDED_DUMMY_SINGLETON_DEBUG_H
 
 //--------------------------------------------------------------------------------
-//【テンプレートライブラリ】
 // dummy_singleton_debug.h
 // シングルトンデバッグ用ダミー処理【宣言部】
 //
@@ -39,6 +38,8 @@ public:
 	inline id_type enter(const char* procedure_name);
 	//シングルトンアクセス終了時呼び出し
 	inline bool leave(const id_type id);
+	//デバッグ情報作成
+	std::size_t debugInfo(char* message);
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

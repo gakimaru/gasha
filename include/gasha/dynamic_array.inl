@@ -7,8 +7,7 @@
 // dynamic_array.inl
 // 動的配列コンテナ【インライン関数／テンプレート関数定義部】
 //
-// ※コンテナクラスの操作が必要な場所でインクルード。
-// ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru

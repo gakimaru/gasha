@@ -6,15 +6,20 @@
 // compiler_auto_settings.h
 // コンパイラ自動判別・設定
 //
+// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+//                   ※build_settings.h により、依存関係順にインクルード
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-//依存ヘッダー：project_build_settings_first.h
-//依存関係の解消：build_settings.h にてインクルード
+//--------------------------------------------------------------------------------
+//コンパイラ自動判別
 
+//----------------------------------------
+//Visual C++
 #ifdef _MSC_VER 
 	#include <cstddef>//VC++では、これを最初にインクルードしておかないと、コンパイルに影響がでることがある。
                       //※先に #define constexpr や #define thread_local を行ったあとで、
@@ -41,6 +46,9 @@
 	//  1700 ... Visual C++ 11.0 (Visual Studio 2012)
 	//  1800 ... Visual C++ 12.0 (Visual Studio 2013)
 #endif//_MSC_VER
+
+//----------------------------------------
+//GCC
 #ifdef __GNUC__
 	#include <features.h>//__GNUC_PREREQマクロを使えるようにする
 	#define GASHA_IS_GCC//コンパイラ：GCC

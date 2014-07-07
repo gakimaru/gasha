@@ -84,6 +84,11 @@ public:
 	id_type enter(const char* procedure_name);
 	//シングルトンアクセス終了時呼び出し
 	bool leave(const id_type id);
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、ロックを取得する。
+	std::size_t debugInfo(char* message);
 public:
 	//コンストラクタ
 	singletonDebug();
@@ -91,7 +96,7 @@ public:
 	~singletonDebug();
 private:
 	//フィールド
-	lfPoolAllocator<accessInfo, MAX_RECORDS> m_pool;//アクセス情報のプール情報
+	lfPoolAllocator_withType<accessInfo, MAX_RECORDS> m_allocator;//アクセス情報のプール情報
 	list_type m_list;//アクセス情報の連結情報
 	const char* m_createdProcedureName;//インスタンス生成手続き名
 	const char* m_destroyedProcedureName;//インスタンス破棄手続き名
@@ -120,6 +125,8 @@ public:
 	inline id_type enter(const char* procedure_name);
 	//シングルトンアクセス終了時呼び出し
 	inline bool leave(const id_type id);
+	//デバッグ情報作成
+	inline std::size_t debugInfo(char* message);
 };
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED

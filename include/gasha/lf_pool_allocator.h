@@ -7,21 +7,18 @@
 // lockfree_pool_allocator.h
 // ロックフリープールアロケータ【宣言部】
 //
-// ※クラスをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
-//
-//   ・lf_pool_allocator.inl   ... 【インライン関数／テンプレート関数定義部】
-//                                 クラスの操作が必要な場所でインクルード。
-//   ・lf_pool_allocator.cpp.h ... 【関数定義部】
-//                                 クラスの実体化が必要な場所でインクルード。
-//
-// ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
+// ※クラスをインスタンス化する際は、別途 .cpp.h ファイルをインクルードする必要あり。
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
+
+#include <gasha/allocator_common.h>//メモリアロケータ共通設定
+#include <gasha/basic_math.h>//基本算術：adjustStaticAlign
 
 #include <cstddef>//std::size_t
 #include <cstdint>//++11 std::uint32_t
@@ -40,17 +37,16 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //ロックフリープールアロケータクラス
+//※プールバッファをコンストラクタで受け渡して使用
 //※ABA問題対策あり（プールの再利用インデックスに8ビットのタグを付けて管理）
 //※プール可能な要素数の最大は2^(32-8)-2 = 16,777,214個（2^(32-8)-1だと、値がINVALID_INDEXになる可能性があるのでNG）
-template<class T, std::size_t _POOL_SIZE>
+template<std::size_t _MAX_POOL_SIZE>
 class lfPoolAllocator
 {
-	static_assert(sizeof(T) >= 4, "sizeof(T) is too small.");
-	static_assert(_POOL_SIZE < 0x00ffffff, "POOL is too large.");
+	static_assert(_MAX_POOL_SIZE < 0x00ffffff, "POOL is too large.");
 
 public:
 	//型
-	typedef T value_type;//値型
 	typedef std::uint32_t index_type;//インデックス型
 
 	//再利用プール型
@@ -61,63 +57,124 @@ public:
 
 public:
 	//定数
-	static const std::size_t POOL_SIZE = _POOL_SIZE;//プールサイズ（プールする個数）
-	static const std::size_t VALUE_SIZE = sizeof(value_type);//値のサイズ
+	static const std::size_t MAX_POOL_SIZE = _MAX_POOL_SIZE;//最大プール数
+	                                                        //※実際のプール数はコンストラクタで渡されたバッファサイズに基づく。
+	                                                        //※最大プール数は、それと同じかそれ以上の値を指定する必要がある。
 	static const index_type INVALID_INDEX = 0xffffffff;//無効なインデックス
 	static const index_type DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
+
+public:
+	//アクセッサ
+	inline std::size_t offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
+	inline std::size_t maxSize() const { return m_maxSize; }//プールバッファの全体サイズ
+	inline std::size_t blockSize() const { return m_blockAlign; }//ブロックサイズ
+	inline std::size_t blockAlign() const { return m_blockAlign; }//ブロックのアライメント
+	inline std::size_t poolSize() const { return m_blockSize; }//プール数
+	inline std::size_t size() const { return m_usingCount; }//使用中のサイズ（プール数）
 
 public:
 	//メソッド
 	
 	//メモリ確保
 	void* alloc();
+	
+	//メモリ解放
+	bool free(void* p);
+	
+	//メモリ確保とコンストラクタ呼び出し
+	template<typename T, typename...Tx>
+	T* newObj(Tx&&... args);
+
+	//メモリ解放とデストラクタ呼び出し
+	template<typename T>
+	bool deleteObj(T* p);
+
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
+	template<typename T, class FUNC = std::function<std::size_t(char* message, const T& value)>>
+	std::size_t debugInfo(char* message, FUNC print_node);
 
 private:
 	//メモリ解放（共通処理）
 	bool free(void* p, const index_type index);
 	
 	//ポインタをインデックスに変換
-	index_type ptrToIndex(void* p);
+	inline index_type ptrToIndex(void* p);
 
-public:
-	//メモリ解放
-	bool free(void* p);
-
-	//メモリ確保とコンストラクタ呼び出し
-	//※既定の型
-	template<typename...Tx>
-	value_type* newObj(Tx&&... args);
-	//※型指定
-	template<typename ObjType, typename...Tx>
-	ObjType* newObj(Tx&&... args);
-	//※ムーブ／コピー
-	value_type* newMoveObj(value_type&& org);//※ムーブ版
-	value_type* newCopyObj(const value_type& org);//※コピー版
-
-	//メモリ解放とデストラクタ呼び出し
-	//※型指定
-	template<typename ObjType>
-	bool deleteObj(ObjType* p);
-
-	//デバッグ情報表示
-	void printDebugInfo(std::function<void(const value_type& value)> print_node);
+	//インデックスに対応するバッファのポインタを取得
+	inline const void* refBuff(const std::size_t index) const;
+	inline void* refBuff(const std::size_t index);
 
 public:
 	//コンストラクタ
-	lfPoolAllocator();
+	inline lfPoolAllocator(const char* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = DEFAULT_ALIGN);
+	template<typename T>
+	inline lfPoolAllocator(const T* buff, const std::size_t max_size);
+	template<typename T, std::size_t N>
+	inline lfPoolAllocator(const T (&buff)[N]);
 	//デストラクタ
-	~lfPoolAllocator();
+	inline ~lfPoolAllocator();
 
 private:
 	//フィールド
-	char m_pool[POOL_SIZE][VALUE_SIZE];//プールバッファ ※先頭に配置してクラスのアライメントと一致させる
+	char* m_buffRef;//プールバッファの参照 ※先頭に配置してクラスのアライメントと一致させる
+	const std::size_t m_offset;//プールバッファのオフセット（アラインメント調整用）
+	const std::size_t m_maxSize;//プールバッファの全体サイズ
+	const std::size_t m_blockSize;//ブロックサイズ
+	const std::size_t m_blockAlign;//ブロックのアライメント
+	const std::size_t m_poolSize;//プール数
 	std::atomic<index_type> m_vacantHead;//空きプールの先頭インデックス
 	std::atomic<index_type> m_recyclableHead;//再利用プールの先頭インデックス
 	std::atomic<unsigned char> m_tag;//ABA問題対策用のタグ
-	std::atomic<char> m_using[POOL_SIZE];//使用中インデックス（二重解放判定＆保険の排他制御用）  ※std::bitset使用不可
-	//std::atomic<std::size_t> m_usingCount;//使用中の数（デバッグ用）※必須の情報ではない
-	//std::atomic<std::size_t> m_allocCount[POOL_SIZE];//アロケート回数（デバッグ用）※必須の情報ではない
-	//std::atomic<std::size_t> m_freeCount[POOL_SIZE];//フリー回数（デバッグ用）※必須の情報ではない
+	std::atomic<char> m_using[MAX_POOL_SIZE];//使用中インデックス（二重解放判定＆保険の排他制御用）  ※std::bitset使用不可
+	std::atomic<std::size_t> m_usingCount;//使用中の数（デバッグ用）※制御に必要な情報ではない
+	//std::atomic<std::size_t> m_allocCount[MAX_POOL_SIZE];//アロケート回数（デバッグ用）※制御に必要な情報ではない
+	//std::atomic<std::size_t> m_freeCount[MAX_POOL_SIZE];//フリー回数（デバッグ用）※制御に必要な情報ではない
+};
+
+//--------------------------------------------------------------------------------
+//バッファ付きプールアロケータクラス
+//※アラインメント分余計にバッファを確保するため、場合によっては指定の _POOL_SIZE よりも多くなることがある。
+template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = DEFAULT_ALIGN>
+class lfPoolAllocator_withBuff : public lfPoolAllocator<_POOL_SIZE>
+{
+	//静的アサーション
+	static_assert(isValidStaticAlign<_BLOCK_ALIGN>::value == true, "lfPoolAllocator_withBuff: _BLOCK_ALIGN is invalid. ");
+public:
+	//定数
+	static const std::size_t BLOCK_ALIGN = _BLOCK_ALIGN;//ブロックのアラインメント
+	static const std::size_t BLOCK_SIZE = adjustStaticAlign<_BLOCK_SIZE, BLOCK_ALIGN>::value;//ブロックサイズ
+	static const std::size_t POOL_SIZE = _POOL_SIZE;//プール数
+	static const std::size_t MAX_SIZE = BLOCK_SIZE * POOL_SIZE + BLOCK_ALIGN;//プールバッファの全体サイズ ※アラインメント分余計に確保する
+public:
+	//コンストラクタ
+	inline lfPoolAllocator_withBuff();
+	//デストラクタ
+	inline ~lfPoolAllocator_withBuff();
+private:
+	char m_buff[MAX_SIZE];//プールバッファ
+};
+//※型指定版
+template<typename T, std::size_t _POOL_SIZE>
+class lfPoolAllocator_withType : public lfPoolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T)>
+{
+public:
+	//型
+	typedef T block_type;//ブロックの型
+public:
+	//デフォルト型のメモリ確保とコンストラクタ呼び出し
+	template<typename... Tx>
+	inline T* newDefault(Tx&&... args);
+	
+	//デフォルト型のメモリ解放とデストラクタ呼び出し
+	inline bool deleteDefault(T*& p);
+public:
+	//コンストラクタ
+	inline lfPoolAllocator_withType();
+	//デストラクタ
+	inline ~lfPoolAllocator_withType();
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

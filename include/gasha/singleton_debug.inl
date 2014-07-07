@@ -7,6 +7,8 @@
 // singleton_debug.inl
 // シングルトンデバッグ用処理【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -26,6 +28,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_SINGLETON_DEBUG_ENABLED//シングルトンデバッグ用処理有効時
 
+//なし
 
 #else//GASHA_SINGLETON_DEBUG_ENABLED//シングルトンデバッグ用処理無向時
 
@@ -62,6 +65,15 @@ inline bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename single
 {
 	//何もしない
 	return true;
+}
+
+//デバッグ情報作成
+template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
+inline std::size_t  singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message)
+{
+	//何もしない
+	message[0] = '\0';
+	return 0;
 }
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED//シングルトンデバッグ用処理有効時

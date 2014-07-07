@@ -6,15 +6,15 @@
 // platform_atuo_settings.h
 // プラットフォーム自動判別・設定
 //
+// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+//                   compiler_auto_settings.h//コンパイラ自動判別・設定
+//                   ※build_settings.h により、依存関係順にインクルード
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
-
-//依存ヘッダー：project_build_settings_first.h
-//              compiler_auto_settings.h
-//依存関係の解消：build_settings.h にてインクルード
 
 #ifdef _WIN32
 	#define GASHA_IS_WIN//プラットフォーム：Windows

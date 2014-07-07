@@ -7,15 +7,9 @@
 // shared_queue.h
 // マルチスレッド共有キュー【宣言部】
 //
-// ※クラスをインスタンス化する際は、別途下記のファイルをインクルードする必要あり
-//
-//   ・shared_queue.inl   ... 【インライン関数／テンプレート関数定義部】
-//                            クラスの操作が必要な場所でインクルード。
-//   ・shared_queue.cpp.h ... 【関数定義部】
-//                            クラスの実体化が必要な場所でインクルード。
-//
-// ※面倒なら三つまとめてインクルードして使用しても良いが、分けた方が、
-// 　コンパイル・リンク時間の短縮、および、クラス修正時の影響範囲の抑制になる。
+// ※クラスをインスタンス化する際は、別途 .cpp.h ファイルをインクルードする必要あり。
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -23,7 +17,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/shared_pool_allocator.h>//マルチスレッド共有プールアロケータ
+#include <gasha/pool_allocator.h>//プールアロケータ
 #include <gasha/spin_lock.h>//スピンロック
 #include <gasha/dummy_lock.h>//ダミーロック
 
@@ -80,8 +74,11 @@ public:
 	//デキュー
 	bool dequeue(value_type& value);
 
-	//デバッグ情報表示
-	void printDebugInfo(std::function<void(const value_type& value)> print_node);
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、ロックを取得する。
+	std::size_t debugInfo(char* message, std::function<std::size_t(char* message, const value_type& value)> print_node);
 
 private:
 	//初期化
@@ -96,7 +93,7 @@ public:
 	~sharedQueue();
 private:
 	//フィールド
-	sharedPoolAllocator<queue_t, POOL_SIZE, GASHA_ dummyLock> m_allocator;//プールアロケータ（プールアロケータ自体はロック制御しない）
+	poolAllocator_withType<queue_t, POOL_SIZE, GASHA_ dummyLock> m_allocator;//プールアロケータ（プールアロケータ自体はロック制御しない）
 	queue_t* m_head;//キューの先頭
 	queue_t* m_tail;//キューの末尾
 	lock_type m_lock;//ロックオブジェクト

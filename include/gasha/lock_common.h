@@ -70,6 +70,21 @@ inline void contextSwitch(const short_sleep_switch_t){ std::this_thread::sleep_f
 inline void contextSwitch(const force_switch_t){ std::this_thread::sleep_for(std::chrono::milliseconds(1)); }//確実なコンテキストスイッチ
 inline void contextSwitch(const yield_switch_t){ std::this_thread::yield(); }//イールド ※実際にはコンテキストスイッチではなく、同じ優先度の他のスレッドに一時的に処理を譲るだけなので注意。
 
+//デフォルトコンテキストスイッチ
+#ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
+inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//確実なスイッチ
+#else//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
+#ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
+inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短いスリープでスイッチ
+#else//GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
+#ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
+inline void defaultContextSwitch(){ contextSwitch(yield_switch); }//イールド
+#else//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
+inline void defaultContextSwitch(){ contextSwitch(); }//ゼロスリープでコンテキストスイッチ
+#endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
+#endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
+#endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//GASHA_INCLUDED_LOCK_COMMON_H

@@ -4,11 +4,14 @@
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// lockfree_stack.h
-// ロックフリースタック【関数定義部】
+// lockfree_stack.cpp.h
+// ロックフリースタック【関数／実体定義部】
 //
-// ※クラスの実体化が必要な場所でインクルード。
-// ※基本的に、ヘッダーファイル内でのインクルード禁止。（コンパイルへの影響を気にしないならOK）
+// ※クラスのインスタンス化が必要な場所でインクルード。
+// ※基本的に、ヘッダーファイル内でのインクルード禁止。
+// 　（コンパイル・リンク時間への影響を気にしないならOK）
+// ※明示的なインスタンス化を避けたい場合は、ヘッダーファイルと共にインクルード。
+// 　（この場合、実際に使用するメンバー関数しかインスタンス化されないので、対象クラスに不要なインターフェースを実装しなくても良い）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -18,10 +21,17 @@
 
 #include <gasha/lf_stack.inl>//ロックフリースタック【インライン関数／テンプレート関数定義部】
 
-#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数定義部】
+#include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
 
 #include <utility>//C++11 std::move
-#include <stdio.h>//printf()
+#include <stdio.h>//sprintf()
+
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
+//【VC++】sprintf を使用すると、error C4996 が発生する
+//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -99,28 +109,35 @@ bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 	return false;//ポップ失敗
 }
 
-//デバッグ情報表示
+//デバッグ情報作成
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
-void lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::printDebugInfo(std::function<void(const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
+std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, std::function<std::size_t(char* message, const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
 {
-	printf("----- Debug Info for lfStack -----\n");
-	printf("Stack:\n");
+#ifdef GASHA_HAS_DEBUG_FEATURE
+	std::size_t size = 0;
+	size += sprintf(message + size, "----- Debug Info for lfStack -----\n");
+	size += sprintf(message + size, "Stack:\n");
 	int no = 0;
 	stack_ptr_t node_tag_ptr = m_head.load();
 	while (node_tag_ptr.isNotNull())
 	{
 		const stack_t* node = node_tag_ptr;
-		printf("[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
-		print_node(node->m_value);
-		printf("\n");
+		size += sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		size += print_node(message + size, node->m_value);
+		size += sprintf(message + size, "\n");
 		node_tag_ptr = node->m_next;
 	}
-	printf("----------\n");
-	auto print_allocator_node = [&print_node](const stack_t& info)
+	size += sprintf(message + size, "----------\n");
+	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
-		print_node(info.m_value);
+		return print_node(message, info.m_value);
 	};
-	m_allocator.printDebugInfo(print_allocator_node);
+	size += m_allocator.template debugInfo<stack_t>(message + size, print_allocator_node);
+	return size;
+#else//GASHA_HAS_DEBUG_FEATURE
+	message[0] = '\0';
+	return 0;
+#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //初期化
@@ -163,9 +180,17 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfStack(T, _POOL_SIZE) \
-	template class lfStack<T, _POOL_SIZE>;
-#define GASHA_INSTANCING_lfStack_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
-	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
+	template class lfStack<T, _POOL_SIZE>; \
+	template class lfPoolAllocator<sizeof(typename lfStack<T, _POOL_SIZE>::stack_t), _POOL_SIZE>;
+#define GASHA_INSTANCING_lfStack_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT) \
+	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>; \
+	template class lfPoolAllocator_withType<typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>::stack_t, _POOL_SIZE>;
+#define GASHA_INSTANCING_lfStack_withTagDetail(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
+	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>; \
+	template class lfPoolAllocator_withType<typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::stack_t, _POOL_SIZE>;
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_LOCKFREE_STACK_CPP_H
 

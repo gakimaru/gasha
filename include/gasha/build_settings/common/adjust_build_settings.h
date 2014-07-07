@@ -6,6 +6,14 @@
 // adjust_build_settings.h
 // ビルド設定調整
 //
+// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+//                   compiler_auto_settings.h//コンパイラ自動判別・設定
+//                   platform_auto_settings.h//プラットフォーム自動判別・設定
+//                   language_auto_settings.h//言語機能自動判別・設定
+//                   build_configuration.h//ビルド構成
+//                   project/last_settings.h//プロジェクト固有のビルド設定（最終設定）
+//                   ※build_settings.h により、依存関係順にインクルード
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.

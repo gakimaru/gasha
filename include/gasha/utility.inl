@@ -3,9 +3,11 @@
 #define GASHA_INCLUDED_UTILITY_INL
 
 //--------------------------------------------------------------------------------
-//【テンプレートライブラリ】
+//【テンプレートライブラリ含む】
 // utility.inl
 // 汎用ユーティリティ【インライン関数／テンプレート関数定義部】
+//
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -24,6 +26,10 @@
 #include <utility>//C++11 std::move, std::forward
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//--------------------------------------------------------------------------------
+//最大値／最小値
+//--------------------------------------------------------------------------------
 
 //----------------------------------------
 //最大値取得
@@ -74,7 +80,7 @@ namespace _private
 	//----------------------------------------
 	//型に応じた処理クラス
 	template<class T>
-	struct _swapArithmetic{
+	struct swapArithmetic{
 		inline static void exec(T& val1, T& val2)
 		{
 			T tmp;
@@ -84,7 +90,7 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _swapArithmetic<T*>{
+	struct swapArithmetic<T*>{
 		inline static void exec(T*& val1, T*& val2)
 		{
 			T* tmp;
@@ -94,7 +100,7 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _swapObjects{
+	struct swapObjects{
 		inline static void exec(T& val1, T& val2)
 		{
 		#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
@@ -110,10 +116,10 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _swapObjects<T*>{
+	struct swapObjects<T*>{
 		inline static void exec(T*& val1, T*& val2)
 		{
-			_swapArithmetic<T*>::exec(val1, val2);
+			swapArithmetic<T*>::exec(val1, val2);
 		}
 	};
 }//namespace _private
@@ -125,8 +131,8 @@ template<class T>
 inline void swapValues(T& val1, T& val2)
 {
 	std::conditional<std::is_arithmetic<T>::value,
-		_private::_swapArithmetic<T>,
-		_private::_swapObjects<T>
+		_private::swapArithmetic<T>,
+		_private::swapObjects<T>
 	>::type::exec(val1, val2);
 }
 
@@ -158,7 +164,7 @@ namespace _private
 	//----------------------------------------
 	//型に応じた処理クラス
 	template<class T>
-	struct _rotateArithmetic{
+	struct rotateArithmetic{
 		inline static void exec(T* val1, T* val2, int step)
 		{
 			T tmp;
@@ -173,7 +179,7 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _rotateArithmetic<T*>{
+	struct rotateArithmetic<T*>{
 		inline static void exec(T** val1, T** val2, int step)
 		{
 			T* tmp;
@@ -188,7 +194,7 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _rotateObjects{
+	struct rotateObjects{
 		inline static void exec(T* val1, T* val2, int step)
 		{
 		#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
@@ -214,10 +220,10 @@ namespace _private
 		}
 	};
 	template<class T>
-	struct _rotateObjects<T*>{
+	struct rotateObjects<T*>{
 		inline static void exec(T** val1, T** val2, int step)
 		{
-			_rotateArithmetic<T*>::exec(val1, val2, step);
+			rotateArithmetic<T*>::exec(val1, val2, step);
 		}
 	};
 }//namespace _private
@@ -229,8 +235,8 @@ template<class T>
 inline void rotateValues(T* val1, T* val2, int step)
 {
 	std::conditional<std::is_arithmetic<T>::value,
-		_private::_rotateArithmetic<T>,
-		_private::_rotateObjects<T>
+		_private::rotateArithmetic<T>,
+		_private::rotateObjects<T>
 	>::type::exec(val1, val2, step);
 }
 

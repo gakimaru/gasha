@@ -7,6 +7,8 @@
 // quick_sort.inl
 // クイックソート【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -17,9 +19,7 @@
 
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-#ifdef GASHA_ASSERTION_IS_ENABLED
 #include <assert.h>//assert()
-#endif//GASHA_ASSERTION_IS_ENABLED
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -32,7 +32,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	template<class T, class PREDICATE>
-	std::size_t _quickSort(T* array, const std::size_t size, PREDICATE predicate)
+	std::size_t quickSort(T* array, const std::size_t size, PREDICATE predicate)
 	{
 	#ifdef GASHA_QUICK_SORT_USE_RECURSIVE_CALL
 		//--------------------
@@ -144,9 +144,7 @@ namespace _private
 				if (new_size >= 1)
 				{
 					stack_p = &stack[stack_curr++];
-				#ifdef GASHA_ASSERTION_IS_ENABLED
 					assert(stack_curr <= STACK_DEPTH_MAX);
-				#endif//GASHA_ASSERTION_IS_ENABLED
 					stack_p->array = new_array;
 					stack_p->size = new_size;
 				}
@@ -243,9 +241,7 @@ namespace _private
 						{
 						#pragma omp critical
 							{ queue_write_tmp = queue_write++; }
-						#ifdef GASHA_ASSERTION_IS_ENABLED
 							assert(queue_write_tmp >= queue_read ? queue_write_tmp - queue_read < size : size - queue_write_tmp + queue_read < size);
-						#endif//GASHA_ASSERTION_IS_ENABLED
 							queue_p = &queue[queue_write_tmp % size];
 							queue_p->array = new_array;
 							queue_p->size = new_size;
@@ -265,7 +261,7 @@ inline std::size_t quickSort(T* array, const std::size_t size, PREDICATE predica
 {
 	if (!array || size <= 1)
 		return 0;
-	return _private::_quickSort(array, size, predicate);
+	return _private::quickSort(array, size, predicate);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

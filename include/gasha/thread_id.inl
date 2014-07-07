@@ -6,6 +6,8 @@
 // thread_id.inl
 // スレッドID【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -72,9 +74,6 @@ inline threadId::~threadId()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/thread_id.inl>
 
 #endif//GASHA_INCLUDED_THREAD_ID_INL
 

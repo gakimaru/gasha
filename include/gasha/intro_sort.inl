@@ -7,6 +7,8 @@
 // intro_sort.inl
 // イントロソート【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -35,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	template<class T, class PREDICATE>
-	std::size_t _introSort(T* array, const std::size_t size, PREDICATE predicate)
+	std::size_t introSort(T* array, const std::size_t size, PREDICATE predicate)
 	{
 		int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ※log2(全体サイズ)で計算
 		for (std::size_t size_tmp = size; size_tmp > 1; size_tmp >>= 1, ++depth_max);
@@ -139,7 +141,7 @@ inline std::size_t introSort(T* array, const std::size_t size, PREDICATE predica
 		return 0;
 	if (GASHA_ isOrdered(array, size, predicate))
 		return 0;
-	return _private::_introSort(array, size, predicate);
+	return _private::introSort(array, size, predicate);
 }
 
 //----------------------------------------
@@ -148,7 +150,7 @@ inline std::size_t introSort(T* array, const std::size_t size, PREDICATE predica
 namespace _private
 {
 	template<class ITERATOR, class PREDICATE>
-	std::size_t _iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
+	std::size_t iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate)
 	{
 		int depth_max = 0;//ヒープソートに切り替える再帰（スタック）の深さ※log2(全体サイズ)で計算
 		typename ITERATOR::difference_type size = iteratorDifference(begin, end);
@@ -255,7 +257,7 @@ inline std::size_t iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE pre
 		return 0;
 	if (GASHA_ iteratorIsOrdered(begin, end, predicate))
 		return 0;
-	return _private::_iteratorIntroSort(begin, end, predicate);
+	return _private::iteratorIntroSort(begin, end, predicate);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
