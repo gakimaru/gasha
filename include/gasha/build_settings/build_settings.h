@@ -35,7 +35,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ライブラリビルド時の状態を診断
 struct diagnosisModeForLibrary_t{};
 extern const diagnosisModeForLibrary_t diagnosisModeForLibrary;
-struct diagnosisModeForLibrary_internal_t{};//※内部処理用（直接使用しない）
 
 //現在の状態を診断
 struct diagnosisModeForCurrent_t{};

@@ -108,7 +108,7 @@ public:
 	template<typename T>
 	inline poolAllocator(T* buff, const std::size_t max_size);
 	template<typename T, std::size_t N>
-	inline poolAllocator(const T (&buff)[N]);
+	inline poolAllocator(T (&buff)[N]);
 	//デストラクタ
 	inline ~poolAllocator();
 
@@ -185,6 +185,11 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/pool_allocator.inl>
+
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/pool_allocator.cpp.h>
+#endif//GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
 #endif//GASHA_INCLUDED_POOL_ALLOCATOR_H
 

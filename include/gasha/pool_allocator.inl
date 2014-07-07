@@ -160,8 +160,8 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const st
 {}
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, std::size_t N>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(const T(&buff)[N]) :
-	poolAllocator(buff, sizeof(buff), sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T(&buff)[N]) :
+poolAllocator(reinterpret_cast<void*>(buff), sizeof(buff), sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ

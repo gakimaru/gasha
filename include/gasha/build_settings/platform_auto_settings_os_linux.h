@@ -6,7 +6,7 @@
 // platform_atuo_settings_os_linux.h
 // プラットフォーム自動判別・設定：【OS系】Linux用
 //
-// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+// 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
 //                   compiler_auto_settings.h//コンパイラ自動判別・設定
 //                   platform_auto_settings.h//プラットフォーム自動判別・設定
 //                   ※build_settings.h, platform_auto_settings.h により、依存関係順にインクルード

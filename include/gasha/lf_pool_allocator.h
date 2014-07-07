@@ -115,7 +115,7 @@ public:
 	template<typename T>
 	inline lfPoolAllocator(T* buff, const std::size_t max_size);
 	template<typename T, std::size_t N>
-	inline lfPoolAllocator(const T (&buff)[N]);
+	inline lfPoolAllocator(T (&buff)[N]);
 	//デストラクタ
 	inline ~lfPoolAllocator();
 

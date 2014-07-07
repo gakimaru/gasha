@@ -6,7 +6,7 @@
 // platform_atuo_settings_cpu_endian.h
 // プラットフォーム自動判別・設定：【CPU系】エンディアン用
 //
-// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+// 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
 //                   compiler_auto_settings.h//コンパイラ自動判別・設定
 //                   platform_auto_settings.h//プラットフォーム自動判別・設定
 //                   platform_auto_settings_***.h//プラットフォーム自動判別・設定：【CPU系】

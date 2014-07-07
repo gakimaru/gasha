@@ -35,6 +35,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ビルド設定
 
 //--------------------
+//診断モード
+
+//ライブラリビルド時の状態を診断
+struct diagnosisModeForLibrary_internal_t{};//※内部処理用（直接使用しない）
+
+//--------------------
 //ビルド設定が実行環境に適合するか診断
 template<class MODE>
 bool diagnoseBuildSettings(char* message, std::size_t& size, const MODE mode)
@@ -470,7 +476,7 @@ bool diagnoseBuildSettings(char* message, std::size_t& size, const MODE mode)
 #ifdef GASHA_IS_ALLOWED_ALIGNAS_OF
 	size += sprintf(message + size, "is available.\n");
 #else//GASHA_HAS_ALIGNAS_OF_PROXY
-#ifdef GASHA_HAS_ALIGNOF_PROXY
+#ifdef GASHA_HAS_ALIGNAS_OF_PROXY
 	size += sprintf(message + size, "is PROXY available.\n");
 #else//GASHA_HAS_ALIGNAS_OF_PROXY
 	size += sprintf(message + size, "is NOT available.\n");

@@ -6,7 +6,7 @@
 // build_configuration.h
 // ビルド構成
 //
-// 依存するヘッダー：project/first_settings.h//プロジェクト固有のビルド設定（先行設定）
+// 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
 //                   compiler_auto_settings.h//コンパイラ自動判別・設定
 //                   platform_auto_settings.h//プラットフォーム自動判別・設定
 //                   language_auto_settings.h//言語機能自動判別・設定

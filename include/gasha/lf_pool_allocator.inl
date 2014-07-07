@@ -178,8 +178,8 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size
 {}
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, std::size_t N>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(const T(&buff)[N]) :
-	lfPoolAllocator(buff, sizeof(buff), sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T(&buff)[N]) :
+lfPoolAllocator(reinterpret_cast<void*>(buff), sizeof(buff), sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
