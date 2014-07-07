@@ -408,6 +408,28 @@
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
+//--------------------
+//【C++11仕様】alignof(alignas(T))：アラインメントを取得して適用
+#ifdef GASHA_IS_WIN
+	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
+		#define GASHA_IS_ALLOWED_ALIGNAS_OF
+		#define GASHA_ALIGNAS_OF(T) alignas(alignof(T))
+	#else//_MSC_VER
+		//#define GASHA_HAS_ALIGNAS_OF_PROXY
+		//#define GASHA_ALIGNAS_OF(T) __declspec(align(__alignof(T)))
+		#define GASHA_ALIGNAS_OF(T)
+	#endif//_MSC_VER
+#endif//GASHA_IS_WIN
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 5)
+		#define GASHA_IS_ALLOWED_ALIGNAS_OF
+		#define GASHA_ALIGNAS_OF(T) alignas(alignof(T))
+	#else//GASHA_HAS_CPP11
+		#define GASHA_HAS_ALIGNAS_OF_PROXY
+		#define GASHA_ALIGNAS_OF(T) __attribute__((aligned(__alignof__(T))))
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+
 //----------------------------------------
 //非言語仕様対応　※方言吸収
 

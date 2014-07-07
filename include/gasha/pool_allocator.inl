@@ -70,7 +70,8 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, offset=%d, poolSize=%d, blockSize=%d, blockAlign=%d, vacantHead=%d, usingCount=%d\n", m_buffRef, m_offset, m_poolSize, m_blockSize, m_blockAlign, m_vacantHead, m_usingCount);
+	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), this->size(), remain(), m_vacantHead);
+
 	size += sprintf(message + size, "Using:\n");
 	for (std::size_t index = 0; index < m_poolSize; ++index)
 	{
@@ -137,9 +138,9 @@ inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const std::size_t
 
 //コンストラクタ
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(const char* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
-	m_buffRef(adjustAlign(buff, block_align)),
-	m_offset(m_buffRef - buff),
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
+	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
+	m_offset(m_buffRef - reinterpret_cast<char*>(buff)),
 	m_maxSize(max_size - m_offset),
 	m_blockSize(block_size),
 	m_blockAlign(block_align),
@@ -154,8 +155,8 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(const char* buff,
 }
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(const T* buff, const std::size_t max_size) :
-	poolAllocator(buff, max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t max_size) :
+	poolAllocator(reinterpret_cast<void*>(buff), max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, std::size_t N>
@@ -204,7 +205,7 @@ inline bool poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::deleteDefault(T*& 
 //コンストラクタ
 template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
 inline poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::poolAllocator_withType() :
-	poolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T), LOCK_TYPE>()
+	poolAllocator<_POOL_SIZE, LOCK_TYPE>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
 {}
 
 //デストラクタ

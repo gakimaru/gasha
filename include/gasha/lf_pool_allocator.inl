@@ -71,7 +71,8 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, FUNC print
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, offset=%d, poolSize=%d, blockSize=%d, blockAlign=%d, vacantHead=%d, usingCount=%d\n", m_buffRef, m_offset, m_poolSize, m_blockSize, m_blockAlign, m_vacantHead.load(), m_usingCount.load());
+	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), this->size(), remain(), m_vacantHead.load());
+
 	size += sprintf(message + size, "Using:\n");
 	for (std::size_t index = 0; index < m_poolSize; ++index)
 	{
@@ -148,9 +149,9 @@ inline void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const std::size_t index)
 
 //コンストラクタ
 template<std::size_t _MAX_POOL_SIZE>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(const char* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
-	m_buffRef(adjustAlign(buff, block_align)),
-	m_offset(m_buffRef - buff),
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
+	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
+	m_offset(m_buffRef - reinterpret_cast<char*>(buff)),
 	m_maxSize(max_size - m_offset),
 	m_blockSize(block_size),
 	m_blockAlign(block_align),
@@ -172,8 +173,8 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(const char* buff, const 
 }
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(const T* buff, const std::size_t max_size) :
-	lfPoolAllocator(buff, max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size_t max_size) :
+	lfPoolAllocator(reinterpret_cast<void*>(buff), max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, std::size_t N>
@@ -222,7 +223,7 @@ inline bool lfPoolAllocator_withType<T, _POOL_SIZE>::deleteDefault(T*& p)
 //コンストラクタ
 template<typename T, std::size_t _POOL_SIZE>
 inline lfPoolAllocator_withType<T, _POOL_SIZE>::lfPoolAllocator_withType() :
-	lfPoolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T)>()
+	lfPoolAllocator<_POOL_SIZE>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
 {}
 
 //デストラクタ

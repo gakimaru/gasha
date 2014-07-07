@@ -66,11 +66,13 @@ public:
 public:
 	//アクセッサ
 	inline std::size_t offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
-	inline std::size_t maxSize() const { return m_maxSize; }//プールバッファの全体サイズ
-	inline std::size_t blockSize() const { return m_blockAlign; }//ブロックサイズ
+	inline std::size_t maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
+	inline std::size_t blockSize() const { return m_blockSize; }//ブロックサイズ
 	inline std::size_t blockAlign() const { return m_blockAlign; }//ブロックのアライメント
-	inline std::size_t poolSize() const { return m_blockSize; }//プール数
-	inline std::size_t size() const { return m_usingCount; }//使用中のサイズ（プール数）
+	inline std::size_t poolSize() const { return m_poolSize; }//プール数
+	inline std::size_t usingPoolSize() const { return m_usingCount.load(); }//使用中のプール数
+	inline std::size_t size() const { return  m_usingCount.load() * m_blockSize; }//使用中のサイズ（バイト数）
+	inline std::size_t remain() const { return m_maxSize - size(); }//残りサイズ（プール数）
 
 public:
 	//メソッド
@@ -109,9 +111,9 @@ private:
 
 public:
 	//コンストラクタ
-	inline lfPoolAllocator(const char* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = DEFAULT_ALIGN);
+	inline lfPoolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = DEFAULT_ALIGN);
 	template<typename T>
-	inline lfPoolAllocator(const T* buff, const std::size_t max_size);
+	inline lfPoolAllocator(T* buff, const std::size_t max_size);
 	template<typename T, std::size_t N>
 	inline lfPoolAllocator(const T (&buff)[N]);
 	//デストラクタ
@@ -119,7 +121,7 @@ public:
 
 private:
 	//フィールド
-	char* m_buffRef;//プールバッファの参照 ※先頭に配置してクラスのアライメントと一致させる
+	char* m_buffRef;//プールバッファの参照
 	const std::size_t m_offset;//プールバッファのオフセット（アラインメント調整用）
 	const std::size_t m_maxSize;//プールバッファの全体サイズ
 	const std::size_t m_blockSize;//ブロックサイズ
@@ -158,11 +160,17 @@ private:
 };
 //※型指定版
 template<typename T, std::size_t _POOL_SIZE>
-class lfPoolAllocator_withType : public lfPoolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T)>
+class lfPoolAllocator_withType : public lfPoolAllocator<_POOL_SIZE>
 {
 public:
 	//型
 	typedef T block_type;//ブロックの型
+public:
+	//定数
+	static const std::size_t BLOCK_ALIGN = alignof(block_type);//ブロックのアラインメント
+	static const std::size_t BLOCK_SIZE = sizeof(block_type);//ブロックサイズ
+	static const std::size_t POOL_SIZE = _POOL_SIZE;//プール数
+	static const std::size_t MAX_SIZE = BLOCK_SIZE * POOL_SIZE + BLOCK_ALIGN;//プールバッファの全体サイズ ※アラインメント分余計に確保する
 public:
 	//デフォルト型のメモリ確保とコンストラクタ呼び出し
 	template<typename... Tx>
@@ -175,6 +183,8 @@ public:
 	inline lfPoolAllocator_withType();
 	//デストラクタ
 	inline ~lfPoolAllocator_withType();
+private:
+	GASHA_ALIGNAS_OF(block_type) char m_buff[MAX_SIZE];//プールバッファ
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
