@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // language_auto_settings.h
-// 言語機能自動判別・設定
+// 言語仕様自動判別・設定
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
 //                   compiler_auto_settings.h//コンパイラ自動判別・設定
@@ -67,7 +67,7 @@
 	#else//_MSC_VER
 		//static const void* nullptr = 0;
 		#define nullptr 0
-		#define GASHA_HAS_NULLPTR_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_NULLPTR
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -76,7 +76,7 @@
 	#else//GASHA_HAS_CPP11
 		//static const void* nullptr = 0;
 		#define nullptr 0
-		#define GASHA_HAS_NULLPTR_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_NULLPTR
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -87,7 +87,7 @@
 		#define GASHA_HAS_OVERRIDE
 	#else//_MSC_VER
 		#define override//ダミー
-		#define GASHA_HAS_OVERRIDE_DUMMY
+		#define GASHA_HAS_DUMMY_OVERRIDE
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -95,7 +95,7 @@
 		#define GASHA_HAS_OVERRIDE
 	#else//GASHA_HAS_CPP11
 		#define override//ダミー
-		#define GASHA_HAS_OVERRIDE_DUMMY
+		#define GASHA_HAS_DUMMY_OVERRIDE
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -106,7 +106,7 @@
 		#define GASHA_HAS_FINAL
 	#else//_MSC_VER
 		#define final//ダミー
-		#define GASHA_HAS_FINAL_DUMMY
+		#define GASHA_HAS_DUMMY_FINAL
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -114,7 +114,7 @@
 		#define GASHA_HAS_FINAL
 	#else//GASHA_HAS_CPP11
 		#define final//ダミー
-		#define GASHA_HAS_FINAL_DUMMY
+		#define GASHA_HAS_DUMMY_FINAL
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -165,7 +165,7 @@
 	#else//_MSC_VER
 		//#define constexpr const
 		#define constexpr//ダミー
-		#define GASHA_HAS_CONSTEXPR_DUMMY
+		#define GASHA_HAS_DUMMY_CONSTEXPR
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -174,7 +174,7 @@
 	#else//GASHA_HAS_CPP11
 		//#define constexpr const
 		#define constexpr//ダミー
-		#define GASHA_HAS_CONSTEXPR_DUMMY
+		#define GASHA_HAS_DUMMY_CONSTEXPR
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -328,7 +328,7 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
 		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
-		#define GASHA_HAS_STATIC_ASSERT_PROXY
+		#define GASHA_HAS_ORIGINAL_STATIC_ASSERT
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -336,7 +336,7 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//GASHA_HAS_CPP11
 		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
-		#define GASHA_HAS_STATIC_ASSERT_PROXY
+		#define GASHA_HAS_ORIGINAL_STATIC_ASSERT
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -347,7 +347,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//_MSC_VER
 		#define thread_local __declspec(thread)
-		#define GASHA_HAS_THREAD_LOCAL_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -355,7 +355,7 @@
 		#define GASHA_HAS_THREAD_LOCAL
 	#else//GASHA_HAS_CPP11
 		#define thread_local __thread
-		#define GASHA_HAS_THREAD_LOCAL_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -365,16 +365,22 @@
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
 		#define GASHA_HAS_NOEXCEPT
 		#define GASHA_NOEXCEPT noexcept
+		#define GASHA_NOTHROW throw()
 	#else//_MSC_VER
+		#define GASHA_HAS_CAMOUFLAGE_NOEXCEPT
 		#define GASHA_NOEXCEPT throw()
+		#define GASHA_NOTHROW throw()
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
 	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 6)
 		#define GASHA_HAS_NOEXCEPT
 		#define GASHA_NOEXCEPT noexcept
+		#define GASHA_NOTHROW throw()
 	#else//GASHA_HAS_CPP11
+		#define GASHA_HAS_CAMOUFLAGE_NOEXCEPT
 		#define GASHA_NOEXCEPT throw()
+		#define GASHA_NOTHROW throw()
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 //--------------------
@@ -395,7 +401,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//_MSC_VER
 		#define alignas(n) __declspec(align(n))
-		#define GASHA_HAS_ALIGNAS_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_ALIGNAS
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -403,7 +409,7 @@
 		#define GASHA_HAS_ALIGNAS
 	#else//GASHA_HAS_CPP11
 		#define alignas(n) __attribute__((aligned(n)))
-		#define GASHA_HAS_ALIGNAS_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_ALIGNAS
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -414,7 +420,7 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//_MSC_VER
 		#define alignof(T) __alignof(T)
-		#define GASHA_HAS_ALIGNOF_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_ALIGNOF
 	#endif//_MSC_VER
 #endif//GASHA_IS_WIN
 #ifdef GASHA_IS_GCC
@@ -422,7 +428,7 @@
 		#define GASHA_HAS_ALIGNOF
 	#else//GASHA_HAS_CPP11
 		#define alignof(T) __alignof__(T)
-		#define GASHA_HAS_ALIGNOF_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_ALIGNOF
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
 
@@ -433,7 +439,7 @@
 		#define GASHA_IS_ALLOWED_ALIGNAS_OF
 		#define GASHA_ALIGNAS_OF(T) alignas(alignof(T))
 	#else//_MSC_VER
-		//#define GASHA_HAS_ALIGNAS_OF_PROXY
+		//#define GASHA_HAS_CAMOUFLAGE_ALIGNAS_OF
 		//#define GASHA_ALIGNAS_OF(T) __declspec(align(__alignof(T)))
 		#define GASHA_ALIGNAS_OF(T)
 	#endif//_MSC_VER
@@ -443,7 +449,7 @@
 		#define GASHA_IS_ALLOWED_ALIGNAS_OF
 		#define GASHA_ALIGNAS_OF(T) alignas(alignof(T))
 	#else//GASHA_HAS_CPP11
-		#define GASHA_HAS_ALIGNAS_OF_PROXY
+		#define GASHA_HAS_CAMOUFLAGE_ALIGNAS_OF
 		#define GASHA_ALIGNAS_OF(T) __attribute__((aligned(__alignof__(T))))
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
@@ -461,23 +467,24 @@
 	#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-	#define GASHA_HAS_ALIGNED_MALLOC_PROXY
-	#define GASHA_HAS_ALIGNED_FREE_PROXY
+	#define GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+	#define GASHA_HASCAMOUFLAGE_ALIGNED_FREE
 #endif//GASHA_IS_GCC
 
 //--------------------
 //noinline / always_inline
+//※独自の共通化
 #ifdef GASHA_IS_VC
-	#define no_inline __declspec(noinline)
-	#define always_inline __forceinline
-	#define GASHA_HAS_NO_INLINE_PROXY
-	#define GASHA_HAS_ALWAYS_INLINE_PROXY
+	#define GASHA_NOINLINE __declspec(noinline)
+	#define GASHA_ALWAYS_INLINE __forceinline
+	#define GASHA_HAS_CAMOUFLAGE_NO_INLINE
+	#define GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-	#define no_inline __attribute__ ((noinline))
-	#define always_inline __attribute__ ((always_inline)) inline
-	#define GASHA_HAS_NO_INLINE_PROXY
-	#define GASHA_HAS_ALWAYS_INLINE_PROXY
+	#define GASHA_NOINLINE __attribute__ ((noinline))
+	#define GASHA_ALWAYS_INLINE __attribute__ ((always_inline)) inline
+	#define GASHA_HAS_CAMOUFLAGE_NO_INLINE
+	#define GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
 #endif//GASHA_IS_GCC
 
 #endif//GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_

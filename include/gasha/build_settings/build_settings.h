@@ -16,7 +16,7 @@
 
 #include <gasha/build_settings/compiler_auto_settings.h>//コンパイラ自動判別・設定
 #include <gasha/build_settings/platform_auto_settings.h>//プラットフォーム自動判別・設定
-#include <gasha/build_settings/language_auto_settings.h>//言語機能自動判別・設定
+#include <gasha/build_settings/language_auto_settings.h>//言語仕様自動判別・設定
 
 #include <gasha/build_settings/build_configuration.h>//ビルド構成
 

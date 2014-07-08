@@ -82,7 +82,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------
 //アラインメント指定付きメモリ確保
 //※VC++仕様に合わせて共通化
-#ifdef GASHA_HAS_ALIGNED_MALLOC_PROXY
+#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
 #ifdef GASHA_IS_GCC
 inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
 {
@@ -91,19 +91,19 @@ inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment
 	return (ret == 0) ? p : 0;
 }
 #endif//GASHA_IS_GCC
-#endif//GASHA_HAS_ALIGNED_MALLOC_PROXY
+#endif//GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
 
 //--------------------
 //アラインメント指定付きメモリ解放
 //※VC++仕様に合わせて共通化
-#ifdef GASHA_HAS_ALIGNED_FREE_PROXY
+#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_FREE
 #ifdef GASHA_IS_GCC
 inline void _aligned_free(void* p)
 {
 	free(p);
 }
 #endif//GASHA_IS_GCC
-#endif//GASHA_HAS_ALIGNED_FREE_PROXY
+#endif//GASHA_HASCAMOUFLAGE_ALIGNED_FREE
 
 #endif//GASHA_INCLUDED_MEMORY_INL
 
