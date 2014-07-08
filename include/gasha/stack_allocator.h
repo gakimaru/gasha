@@ -17,6 +17,7 @@
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint32_t
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -67,16 +68,14 @@ public:
 	//型
 	typedef LOCK_TYPE lock_type;//ロック型
 	typedef AUTO_CLEAR auto_clear_type;//スタック自動クリア型
+	typedef std::uint32_t size_type;//サイズ型
 
 public:
 	//アクセッサ
-	inline std::size_t maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
-	inline std::size_t size() const { return  m_size; }//使用中のサイズ（バイト数）
-	inline std::size_t remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline std::size_t allocatedCount() const { return m_allocatedCount; }//アロケート中の数
-	inline const void* prevPtr() const { return  reinterpret_cast<void*>(reinterpret_cast<char*>(m_buffRef)+m_prevSize); }//直近のアロケート時のポインタ
-	inline void* prevPtr(){ return  reinterpret_cast<void*>(reinterpret_cast<char*>(m_buffRef)+m_prevSize); }//直近のアロケート時のポインタ
-	inline std::size_t prevSize() const { return  m_prevSize; }//直近のアロケート前のサイズ
+	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
+	inline size_type size() const { return  m_size; }//使用中のサイズ（バイト数）
+	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
+	inline size_type allocatedCount() const { return m_allocatedCount; }//アロケート中の数
 
 public:
 	//メソッド
@@ -84,17 +83,7 @@ public:
 	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
 	//メモリ解放
-	bool free(void* p);
-
-	//メモリを以前の位置に戻す
-	//※マーカー指定版
-	void back(const std::size_t pos);
-	//※ポインタ指定版
-	void back(const void* p);
-
-	//メモリクリア
-	//※初期状態にする
-	void clear();
+	inline bool free(void* p);
 
 	//メモリ確保とコンストラクタ呼び出し
 	template<typename T, typename...Tx>
@@ -110,29 +99,52 @@ public:
 	template<typename T>
 	bool deleteArray(T*& p, const std::size_t num);
 
+	//メモリを以前の位置に戻す
+	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
+	//※マーカー指定版
+	inline bool back(const size_type pos);
+	//※ポインタ指定版
+	bool back(void* p);
+
+	//メモリクリア
+	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
+	//※初期状態にする
+	inline void clear();
+	
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
-	std::size_t debugInfo(char* message, FUNC print_node);
+	std::size_t debugInfo(char* message);
+
+private:
+	//メモリ解放（共通処理）
+	//※ロック取得は呼び出し元で行う
+	bool _free(void* p);
+
+	//メモリクリア（共通処理）
+	//※ロック取得は呼び出し元で行う
+	inline void _clear();
+
+	//ポインタが範囲内か判定
+	inline bool inUsingRange(void* p);
+
 public:
 	//コンストラクタ
-	inline stackAllocator(const char* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
+	inline stackAllocator(void* buff, const std::size_t max_size);
 	template<typename T>
-	inline stackAllocator(const T* buff, const std::size_t max_size);
+	inline stackAllocator(T* buff, const std::size_t num);
 	template<typename T, std::size_t N>
-	inline stackAllocator(const T (&buff)[N]);
+	inline stackAllocator(T (&buff)[N]);
 	//デストラクタ
 	inline ~stackAllocator();
 
 private:
 	//フィールド
-	char* m_buffRef;//プールバッファの参照
-	const std::size_t m_maxSize;//プールバッファの全体サイズ
-	const std::size_t m_size;//プールバッファの使用中サイズ
-	const std::size_t m_prevSize;//直近のアロケート前のサイズ（直近のアロケート時のポインタを指す）
-	std::size_t m_allocatedCount;//アロケート中の数
+	char* m_buffRef;//バッファの参照
+	const size_type m_maxSize;//バッファの全体サイズ
+	size_type m_size;//バッファの使用中サイズ
+	size_type m_allocatedCount;//アロケート中の数
 	lock_type m_lock;//ロックオブジェクト
 };
 
@@ -150,11 +162,11 @@ public:
 	//デストラクタ
 	inline ~stackAllocator_withBuff();
 private:
-	char m_buff[MAX_SIZE];//プールバッファ
+	char m_buff[MAX_SIZE];//バッファ
 };
 //----------------------------------------
 //※バッファを基本型とその個数で指定
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
+template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
 class stackAllocator_withType : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
 {
 public:
@@ -162,10 +174,10 @@ public:
 	typedef T value_type;//値の型
 public:
 	//定数
-	static const std::size_t TYPE_ALIGN = alignof(value_type);//基本型のアラインメント
-	static const std::size_t TYPE_SIZE = sizeof(value_type);//基本型のサイズ
-	static const std::size_t SIZE = _SIZE;//基本型の確保可能数
-	static const std::size_t MAX_SIZE = TYPE_SIZE * SIZE + TYPE_SIZE;//バッファの全体サイズ ※アラインメント分余計に確保する
+	static const std::size_t VALUE_ALIGN = alignof(value_type);//基本型のアラインメント
+	static const std::size_t VALUE_SIZE = sizeof(value_type);//基本型のサイズ
+	static const std::size_t VALUE_NUM = _NUM;//基本型の確保可能数
+	static const std::size_t MAX_SIZE = VALUE_SIZE * VALUE_NUM + VALUE_ALIGN;//バッファの全体サイズ ※アラインメント分余計に確保する
 public:
 	//デフォルト型のメモリ確保とコンストラクタ呼び出し
 	template<typename... Tx>
@@ -179,20 +191,20 @@ public:
 	//デストラクタ
 	inline ~stackAllocator_withType();
 private:
-	GASHA_ALIGNAS_OF(value_type) char m_buff[MAX_SIZE];//プールバッファ
+	GASHA_ALIGNAS_OF(value_type) char m_buff[MAX_SIZE];//バッファ
 };
 
 //----------------------------------------
 //スタックアロケータ別名
 
 //※自動クリア版
-template<class LOCK_TYPE = GASHA_ dummyLock >
+template<class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator = stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
 //※バッファ付き＋自動クリア版
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock >
+template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator_withBuff = stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
 //※バッファ付き（基本型とその個数で指定）＋自動クリア版
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock >
+template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator_withType = stackAllocator_withType<T, _SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

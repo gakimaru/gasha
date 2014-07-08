@@ -21,8 +21,9 @@
 
 #include <gasha/lf_pool_allocator.inl>//ロックフリープールアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <utility>//C++11 std::move
+#include <gasha/type_traits.h>//型特性ユーティリティ
 
+#include <utility>//C++11 std::move
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -33,6 +34,10 @@
 #pragma warning(disable: 4530)//C4530を抑える
 
 #include <new>//配置new,配置delete用
+
+//【VC++】sprintf を使用すると、error C4996 が発生する
+//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -61,7 +66,7 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t
 		if (vacant_index < m_poolSize)//プールサイズ未満なら確保成功
 		{
 			m_using[vacant_index].fetch_add(1);//インデックスを使用中状態にする
-			//m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
+			m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
 			//m_allocCount[vacant_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
 			void* ptr = refBuff(vacant_index);//メモリ確保成功
 			return adjustAlign(ptr, _align);//アラインメント調整して返す
@@ -95,7 +100,7 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t
 			{
 				recyclable_pool->m_next_index.store(DIRTY_INDEX);//再利用プールの連結インデックスを削除
 				m_using[recyclable_index].fetch_add(1);//インデックスを使用中状態にする
-				//m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
+				m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
 				//m_allocCount[recyclable_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
 				void* ptr = reinterpret_cast<void*>(recyclable_pool);//メモリ確保成功
 				return adjustAlign(ptr, _align);//アラインメント調整して返す
@@ -126,7 +131,7 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p, const typename lfPoolAllocat
 		//        recycable_index_and_tag = m_recyclableHead;//再利用プールの先頭インデックスを再取得
 		{
 			m_using[index].fetch_sub(1);//インデックスを未使用状態にする
-			//m_usingPoolSize.fetch_sub(1);//使用中の数を減らす（デバッグ用）
+			m_usingPoolSize.fetch_sub(1);//使用中の数を減らす（デバッグ用）
 			//m_freeCount[index].fetch_add(1);//フリー回数をカウントアップ（デバッグ用）
 			return true;//メモリ解放成功
 		}
@@ -142,6 +147,18 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p)
 	if (index == INVALID_INDEX)
 		return false;
 	return free(p, index);
+}
+
+//デバッグ情報作成
+template<std::size_t _MAX_POOL_SIZE>
+std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message)
+{
+	auto print_node = [](char* message, std::uint32_t& data) -> std::size_t
+	{
+		unionTypes uni(data);
+		return sprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
+	};
+	return this->template debugInfo<std::uint32_t>(message, print_node);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

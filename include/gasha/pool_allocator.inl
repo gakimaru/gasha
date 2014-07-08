@@ -82,6 +82,7 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T*& p, const std::size_t num)
 {
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;
@@ -173,23 +174,24 @@ inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename po
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
 	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
-	m_offset(m_buffRef - reinterpret_cast<char*>(buff)),
-	m_maxSize(max_size - m_offset),
-	m_blockSize(block_size),
-	m_blockAlign(block_align),
+	m_offset(static_cast<size_type>(m_buffRef - reinterpret_cast<char*>(buff))),
+	m_maxSize(static_cast<size_type>(max_size - m_offset)),
+	m_blockSize(static_cast<size_type>(block_size)),
+	m_blockAlign(static_cast<size_type>(block_align)),
 	m_poolSize(m_maxSize / m_blockSize),
 	m_vacantHead(0),
 	m_recyclableHead(INVALID_INDEX),
 	m_usingPoolSize(0)
 {
+	assert(m_buffRef != nullptr);
 	assert(m_poolSize <= MAX_POOL_SIZE);
 	assert(m_maxSize > 0);
 	assert(m_poolSize > 0);
 }
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t max_size) :
-	poolAllocator(reinterpret_cast<void*>(buff), max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t num) :
+	poolAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, std::size_t N>

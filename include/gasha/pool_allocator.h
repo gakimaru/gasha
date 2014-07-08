@@ -41,6 +41,7 @@ public:
 	//型
 	typedef LOCK_TYPE lock_type;//ロック型
 	typedef std::uint32_t index_type;//インデックス型
+	typedef std::uint32_t size_type;//サイズ型
 
 	//再利用プール型
 	struct recycable_t
@@ -50,7 +51,7 @@ public:
 
 public:
 	//定数
-	static const std::size_t MAX_POOL_SIZE = _MAX_POOL_SIZE;//最大プール数
+	static const size_type MAX_POOL_SIZE = static_cast<size_type>(_MAX_POOL_SIZE);//最大プール数
 	                                                        //※実際のプール数はコンストラクタで渡されたバッファサイズに基づく。
 	                                                        //※最大プール数は、それと同じかそれ以上の値を指定する必要がある。
 	static const index_type INVALID_INDEX = 0xffffffff;//無効なインデックス
@@ -58,15 +59,15 @@ public:
 
 public:
 	//アクセッサ
-	inline std::size_t offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
-	inline std::size_t maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
-	inline std::size_t blockSize() const { return m_blockSize; }//ブロックサイズ
-	inline std::size_t blockAlign() const { return m_blockAlign; }//ブロックのアライメント
-	inline std::size_t poolSize() const { return m_poolSize; }//プール数（最大）
-	inline std::size_t size() const { return  m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
-	inline std::size_t usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
-	inline std::size_t remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline std::size_t poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
+	inline size_type offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
+	inline size_type maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
+	inline size_type blockSize() const { return m_blockSize; }//ブロックサイズ
+	inline size_type blockAlign() const { return m_blockAlign; }//ブロックのアライメント
+	inline size_type poolSize() const { return m_poolSize; }//プール数（最大）
+	inline size_type size() const { return  m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
+	inline size_type usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
+	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
+	inline size_type poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
 
 public:
 	//メソッド
@@ -99,6 +100,7 @@ public:
 	//※作成中、ロックを取得する。
 	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
 	std::size_t debugInfo(char* message, FUNC print_node);
+	std::size_t debugInfo(char* message);
 
 private:
 	//メモリ解放（共通処理）
@@ -116,7 +118,7 @@ public:
 	//コンストラクタ
 	inline poolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
 	template<typename T>
-	inline poolAllocator(T* buff, const std::size_t max_size);
+	inline poolAllocator(T* buff, const std::size_t num);
 	template<typename T, std::size_t N>
 	inline poolAllocator(T (&buff)[N]);
 	//デストラクタ
@@ -125,15 +127,15 @@ public:
 private:
 	//フィールド
 	char* m_buffRef;//プールバッファの参照
-	const std::size_t m_offset;//プールバッファのオフセット（アラインメント調整用）
-	const std::size_t m_maxSize;//プールバッファの全体サイズ
-	const std::size_t m_blockSize;//ブロックサイズ
-	const std::size_t m_blockAlign;//ブロックのアライメント
-	const std::size_t m_poolSize;//プール数
+	const size_type m_offset;//プールバッファのオフセット（アラインメント調整用）
+	const size_type m_maxSize;//プールバッファの全体サイズ
+	const size_type m_blockSize;//ブロックサイズ
+	const size_type m_blockAlign;//ブロックのアライメント
+	const size_type m_poolSize;//プール数
 	index_type m_vacantHead;//空きプールの先頭インデックス
 	index_type m_recyclableHead;//再利用プールの先頭インデックス
 	std::bitset<MAX_POOL_SIZE> m_using;//使用中インデックス（二重解放判定用）
-	std::size_t m_usingPoolSize;//使用中の数（デバッグ用）※制御に必要な情報ではない
+	size_type m_usingPoolSize;//使用中の数（デバッグ用）※制御に必要な情報ではない
 	lock_type m_lock;//ロックオブジェクト
 };
 

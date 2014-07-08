@@ -39,99 +39,54 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //スタックアロケータクラス
 
-#if 0
-
-	//メモリ確保
-	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
-	{
-		const uintptr_t now_ptr = reinterpret_cast<uintptr_t>(m_buffPtr) + m_size;//現在のポインタ位置算出
-		const uintptr_t align_diff = align > 0 ? now_ptr % align == 0 ? 0 : align - now_ptr % align : 0;//アラインメント計算
-		const marker_t next_used = m_size + align_diff + size;//次のマーカー算出
-		if (next_used > m_maxSize)//メモリオーバーチェック（符号なしなので、範囲チェックは大判定のみでOK）
-		{
-			//printf("stack overflow!(size=%d+align=%d, remain=%d)\n", size, align_diff, m_maxSize - m_size);
-			return nullptr;
-		}
-		const uintptr_t alloc_ptr = now_ptr + align_diff;//メモリ確保アドレス算出
-		m_size = next_used;//マーカー更新
-		return reinterpret_cast<void*>(alloc_ptr);
-	}
-
-	//メモリ解放
-	bool free(void* p);
-	
-	//メモリを以前のマーカーに戻す
-	//※マーカー指定版
-	void back(const marker_t marker)
-	{
-		if (marker >= m_size)//符号なしなので、範囲チェックは大判定のみでOK
-			return;
-		m_size = marker;
-	}
-	//メモリを以前のマーカーに戻す
-	//※ポインタ指定版
-	void back(const void* p)
-	{
-		const marker_t marker = reinterpret_cast<uintptr_t>(p)-reinterpret_cast<uintptr_t>(m_buffPtr);
-		back(marker);
-	}
-	//メモリ破棄
-	void clear()
-	{
-		m_size = 0;//マーカーをリセット
-	}
-#endif
-
 //メモリ確保
-template<std::size_t _MAX_STACK_SIZE, class LOCK_TYPE>
-void* stackAllocator<_MAX_STACK_SIZE, LOCK_TYPE>::alloc()
+template<class LOCK_TYPE, class AUTO_CLEAR>
+void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	//空きスタックを確保
-	if (m_vacantHead < m_stackSize)//空きスタックの先頭インデックスがスタックサイズ未満なら空きスタックを利用する
+	//サイズとアラインメントをチェック
+	void* new_ptr = reinterpret_cast<void*>(adjustAlign(m_buffRef + m_size, align));
+	const size_type new_size = static_cast<size_type>((reinterpret_cast<char*>(new_ptr) - m_buffRef) + size);
+	if (new_size > remain())
 	{
-		const std::size_t vacant_index = m_vacantHead++;//空きスタックの先頭インでックスを取得＆インクリメント
-		m_using[vacant_index] = true;//インデックスを使用中にする
-		//++m_usingPoolSize;//使用中の数を増やす（デバッグ用）
-		return refBuff(vacant_index);//メモリ確保成功
+	#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+		static const bool NOT_ENOUGH_SPACE = false;
+		assert(NOT_ENOUGH_SPACE);
+	#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+		return nullptr;
 	}
-	//再利用スタックの先頭インデックスが無効ならメモリ確保失敗（再利用スタックが無い）
-	if (m_recyclableHead == INVALID_INDEX)
-		return nullptr;//メモリ確保失敗
-	//再利用スタックを確保
-	{
-		const std::size_t recyclable_index = m_recyclableHead;//再利用スタックの先頭インデックスを取得
-		recycable_t* recyclable_stack = static_cast<recycable_t*>(refBuff(recyclable_index));//再利用スタックの先頭を割り当て
-		m_recyclableHead = recyclable_stack->m_next_index;//再利用スタックの先頭インデックスを次の再利用スタックに変更
-		recyclable_stack->m_next_index = DIRTY_INDEX;//再利用スタックの連結インデックスを削除
-		m_using[recyclable_index] = true;//インデックスを使用中にする
-		//++m_usingPoolSize;//使用中の数を増やす（デバッグ用）
-		return recyclable_stack;//メモリ確保成功
-	}
+	
+	//使用中のサイズとメモリ確保数を更新
+	m_size += new_size;
+	++m_allocatedCount;
+
+	//空き領域を確保
+	return new_ptr;
 }
 
 //メモリ解放（共通処理）
 //※ロック取得は呼び出し元で行う
-template<std::size_t _MAX_STACK_SIZE, class LOCK_TYPE>
-bool stackAllocator<_MAX_STACK_SIZE, LOCK_TYPE>::free(void* p, const std::size_t index)
+template<class LOCK_TYPE, class AUTO_CLEAR>
+bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_free(void* p)
 {
-	recycable_t* deleted_stack = static_cast<recycable_t*>(refBuff(index));//解放されたメモリを参照
-	deleted_stack->m_next_index = m_recyclableHead;//次の再利用スタックのインデックスを保存
-	m_recyclableHead = index;//再利用スタックの先頭インデックスを変更
-	m_using[index] = false;//インデックスを未使用状態にする
-	//--m_usingPoolSize;//使用中の数を減らす（デバッグ用）
+	//メモリ確保数を更新
+	--m_allocatedCount;
+	//自動クリア呼び出し
+	AUTO_CLEAR auto_clear;
+	auto_clear.autoClear(*this);
 	return true;
 }
 
-//メモリ解放
-template<std::size_t _MAX_STACK_SIZE, class LOCK_TYPE>
-bool stackAllocator<_MAX_STACK_SIZE, LOCK_TYPE>::free(void* p)
+//メモリを以前の位置に戻す
+//※ポインタ指定版
+template<class LOCK_TYPE, class AUTO_CLEAR>
+bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::back(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const std::size_t index = ptrToIndex(p);//ポインタをインデックスに変換
-	if (index == INVALID_INDEX)
+	if (!inUsingRange(p))//正しいポインタか判定
 		return false;
-	return free(p, index);
+	m_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
+	return true;
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
@@ -142,34 +97,52 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //明示的なインスタンス化用マクロ
 
 //基本形
-#define GASHA_INSTANCING_stackAllocator(_MAX_STACK_SIZE) \
-	template class stackAllocator<_MAX_STACK_SIZE>;
+#define GASHA_INSTANCING_stackAllocator() \
+	template class stackAllocator<>;
+#define GASHA_INSTANCING_smartStackAllocator() \
+	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
 
 //基本形＋ロック指定
-#define GASHA_INSTANCING_stackAllocator_withLock(_MAX_STACK_SIZE, LOCK_TYPE) \
-	template class stackAllocator<_MAX_STACK_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withLock(LOCK_TYPE) \
+	template class stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_TYPE) \
+	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
 
 //バッファ付き
-#define GASHA_INSTANCING_stackAllocator_withBuff(_BLOCK_SIZE, _STACK_SIZE, _BLOCK_ALIGN) \
-	template class stackAllocator_withBuff<_BLOCK_SIZE, _STACK_SIZE, _BLOCK_ALIGN>; \
-	template class stackAllocator<_STACK_SIZE>;
+#define GASHA_INSTANCING_stackAllocator_withBuff(_MAX_SIZE) \
+	template class stackAllocator_withBuff<_MAX_SIZE>; \
+	template class stackAllocator<>;
+#define GASHA_INSTANCING_smartStackAllocator_withBuff(_MAX_SIZE) \
+	template class stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, stackAllocatorAutoClear>; \
+	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
 
 //バッファ付き＋ロック指定
-#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_BLOCK_SIZE, _STACK_SIZE, _BLOCK_ALIGN, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_BLOCK_SIZE, _STACK_SIZE, _BLOCK_ALIGN, LOCK_TYPE>; \
-	template class stackAllocator<_STACK_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
+	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
+	template class stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
+	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>; \
+	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
 
 //型指定バッファ付き
-#define GASHA_INSTANCING_stackAllocator_withType(T, _STACK_SIZE) \
-	template class stackAllocator_withType<T, _STACK_SIZE>; \
-	template class stackAllocator_withBuff<sizeof(T), _STACK_SIZE, alignof(T)>; \
-	template class stackAllocator<_STACK_SIZE>;
+#define GASHA_INSTANCING_stackAllocator_withType(T, _NUM) \
+	template class stackAllocator_withType<T, _NUM>; \
+	template class stackAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class stackAllocator<>;
+#define GASHA_INSTANCING_smartStackAllocator_withType(T, _NUM) \
+	template class stackAllocator_withType<T, _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
+	template class stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
+	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
 
 //型指定バッファ付き＋ロック指定
-#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _STACK_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _STACK_SIZE, LOCK_TYPE>; \
-	template class stackAllocator_withBuff<sizeof(T), _STACK_SIZE, alignof(T), LOCK_TYPE>; \
-	template class stackAllocator<_STACK_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
+	template class stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
+	template class stackAllocator_withBuff<sizeof(T) * _NUM, LOCK_TYPE>; \
+	template class stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
+	template class stackAllocator_withType<T, _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
+	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
+	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)

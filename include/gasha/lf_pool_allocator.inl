@@ -184,15 +184,16 @@ inline void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const typename lfPoolAlloc
 template<std::size_t _MAX_POOL_SIZE>
 inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
 	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
-	m_offset(m_buffRef - reinterpret_cast<char*>(buff)),
-	m_maxSize(max_size - m_offset),
-	m_blockSize(block_size),
-	m_blockAlign(block_align),
+	m_offset(static_cast<size_type>(m_buffRef - reinterpret_cast<char*>(buff))),
+	m_maxSize(static_cast<size_type>(max_size - m_offset)),
+	m_blockSize(static_cast<size_type>(block_size)),
+	m_blockAlign(static_cast<size_type>(block_align)),
 	m_poolSize(m_maxSize / m_blockSize),
 	m_vacantHead(0),
 	m_recyclableHead(INVALID_INDEX),
 	m_usingPoolSize(0)
 {
+	assert(m_buffRef != nullptr);
 	assert(m_poolSize <= MAX_POOL_SIZE);
 	assert(m_maxSize > 0);
 	assert(m_poolSize > 0);
@@ -206,8 +207,8 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::s
 }
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size_t max_size) :
-	lfPoolAllocator(reinterpret_cast<void*>(buff), max_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size_t num) :
+	lfPoolAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, std::size_t N>
