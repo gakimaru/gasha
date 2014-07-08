@@ -86,43 +86,6 @@ inline void rotateValues(T* val1, T* val2, int step);
 template<class ITERATOR>
 inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, typename ITERATOR::difference_type step);
 
-//--------------------------------------------------------------------------------
-//時間
-//--------------------------------------------------------------------------------
-
-//----------------------------------------
-//経過時間を算出
-//※秒を返す
-inline std::chrono::system_clock::time_point nowTime();
-inline double calcElapsedTime(const std::chrono::system_clock::time_point begin);
-inline double calcElapsedTime(const std::chrono::system_clock::time_point begin, const std::chrono::system_clock::time_point end);
-
-//----------------------------------------
-//経過時間クラス
-class elapsedTime
-{
-public:
-	//開始時間を取得
-	inline double now();
-	//開始時間をリセット
-	//※開始時間を現在時間にリセット
-	inline void reset();
-public:
-	//コンストラクタ
-	inline elapsedTime();
-private:
-	std::chrono::system_clock::time_point m_beginTime;//開始時間
-};
-
-//----------------------------------------
-//システム経過時間
-
-//取得
-inline double nowSysElapsedTime();
-//リセット
-//※開始時間を現在時間にリセット
-inline void resetSysElapsedTime();
-
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード

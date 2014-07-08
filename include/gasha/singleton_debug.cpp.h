@@ -24,7 +24,7 @@
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
 #include <gasha/linked_list.cpp.h>//双方向連結リスト【関数／実体定義部】
 
-#include <gasha/utility.h>//汎用ユーティリティ：getSysElapsedTime()
+#include <gasha/chrono.h>//時間系ユーティリティ：getSysElapsedTime()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -49,7 +49,7 @@ template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::create(const char* procedure_name)
 {
 	m_createdProcedureName = procedure_name;
-	m_createdSysTime = nowSysElapsedTime();
+	m_createdSysTime = nowElapsedTime();
 	m_destroyedProcedureName = nullptr;
 	m_destroyedSysTime = 0.;
 	return true;
@@ -60,7 +60,7 @@ template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::destroy(const char* procedure_name)
 {
 	m_destroyedProcedureName = procedure_name;
-	m_destroyedSysTime = nowSysElapsedTime();
+	m_destroyedSysTime = nowElapsedTime();
 	return true;
 }
 
@@ -75,7 +75,7 @@ typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RE
 		seq_no = m_seqNo.fetch_add(1);
 		info->m_seqNo = seq_no;
 		info->m_procedureName = procedure_name;
-		info->m_sysTime = nowSysElapsedTime();
+		info->m_sysTime = nowElapsedTime();
 		{
 			auto lock = m_list.lockScoped();
 			m_list.push_back(*info);

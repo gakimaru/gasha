@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
-#include <gasha/basic_math.h>//基本算術：adjustStaticAlign
+#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t

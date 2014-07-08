@@ -1,16 +1,18 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_BUIILD_SETTINGS_INL
-#define GASHA_INCLUDED_BUIILD_SETTINGS_INL
+#ifndef GASHA_INCLUDED_BUIILD_SETTINGS_DIAG_INL
+#define GASHA_INCLUDED_BUIILD_SETTINGS_DIAG_INL
 
 //--------------------------------------------------------------------------------
-// build_settings.inl
-// ビルド設定【インライン関数／テンプレート関数定義部】
+// build_settings_diag.inl
+// ビルド設定診断【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
+
+#include <gasha/build_settings/build_settings_diag.h>//ビルド設定診断【宣言部】
 
 #include <gasha/fast_string.h>//高速文字列：strncpy_fast()
 #include <gasha/cpuid.h>//CPU情報（x86系CPU用）
@@ -32,32 +34,32 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//ビルド設定
+//ビルド設定診断
 
 //--------------------
 //診断モード
 
 //ライブラリビルド時の状態を診断
-struct diagnosisModeForLibrary_internal_t{};//※内部処理用（直接使用しない）
+struct diagForLibrary_internal_t{};//※内部処理用（直接使用しない）
 
 //--------------------
 //ビルド設定が実行環境に適合するか診断
 template<class MODE>
-bool diagnoseBuildSettings(char* message, std::size_t& size, const MODE mode)
+bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mode)
 {
 	size = 0;
 	message[0] = '\0';
 	
 	size += sprintf(message + size, "==============================================================================\n");
-	if (std::is_same<MODE, diagnosisModeForLibrary_internal_t>::value)
-		size += sprintf(message + size, "Diagnosis Mode: Library\n");
+	if (std::is_same<MODE, diagForLibrary_internal_t>::value)
+		size += sprintf(message + size, "Diagnostic Mode: Library\n");
 	else
-		size += sprintf(message + size, "Diagnosis Mode: Current\n");
+		size += sprintf(message + size, "Diagnostic Mode: Current\n");
 	size += sprintf(message + size, "==============================================================================\n");
 	size += sprintf(message + size, "\n");
 
 	size += sprintf(message + size, "------------------------------------------------------------------------------\n");
-	size += sprintf(message + size, "[ Diagnose build-settings suitable for runtime environment ]\n");
+	size += sprintf(message + size, "[ Build-settings diagnostic test ]\n");
 	size += sprintf(message + size, "\n");
 	
 	bool has_error = false;
@@ -200,7 +202,7 @@ bool diagnoseBuildSettings(char* message, std::size_t& size, const MODE mode)
 
 	size += sprintf(message + size, "\n");
 	size += sprintf(message + size, "------------------------------------------------------------------------------\n");
-	size += sprintf(message + size, "[ Build-settings by compiled environment ]\n");
+	size += sprintf(message + size, "[ Compiler specification ]\n");
 	
 	//CPUアーキテクチャ情報
 	size += sprintf(message + size, "\n");
@@ -625,6 +627,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_BUIILD_SETTINGS_INL
+#endif//GASHA_INCLUDED_BUIILD_SETTINGS_DIAG_INL
 
 // End of file

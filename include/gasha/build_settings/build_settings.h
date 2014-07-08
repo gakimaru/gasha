@@ -24,38 +24,9 @@
 
 #include <gasha/build_settings/adjust_build_settings.h>//ビルド設定の調整
 
-GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
-
-//--------------------------------------------------------------------------------
-//ビルド設定
-
-//--------------------
-//診断モード
-
-//ライブラリビルド時の状態を診断
-struct diagnosisModeForLibrary_t{};
-extern const diagnosisModeForLibrary_t diagnosisModeForLibrary;
-
-//現在の状態を診断
-struct diagnosisModeForCurrent_t{};
-extern const diagnosisModeForCurrent_t diagnosisModeForCurrent;
-
-//----------------------------------------
-//ビルド設定が実行環境に適合するか診断
-//※全ての要素が問題なければ true を返す
-//※診断結果メッセージとそのサイズを受け取るための変数を引数に渡す（バッファは4KBもあれば十分）。
-//※ライブラリビルド時の状態か、現在の状態かを選んで指定可能。
-template<class MODE>
-bool diagnoseBuildSettings(char* message, std::size_t& size, const MODE mode);
-
-//※ライブラリビルド時の診断モードを特殊化
-template<>
-bool diagnoseBuildSettings<diagnosisModeForLibrary_t>(char* message, std::size_t& size, const diagnosisModeForLibrary_t mode);
-
-GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/build_settings/build_settings.inl>
+//ネームスペースを定義
+GASHA_NAMESPACE_BEGIN;
+GASHA_NAMESPACE_END;
 
 #endif//GASHA_INCLUDED_BUIILD_SETTINGS_H
 
