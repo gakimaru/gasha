@@ -67,16 +67,20 @@ CXXFLAGS := \
 #  -Wmultichar
 #  -Wparentheses
 #  -Wreturn-type
-#  -Wswitch ←この警告を出したくない
+#  -Wswitch ←この警告を出したくない ... -Wno-switch
 #  -Wtrigraphs
 #  -Wunused
 #  -Wuninitialized
-#  -Wunknown-pragmas ←この警告を出したくない
+#  -Wunknown-pragmas ←この警告を出したくない ... -Wno-unknown-pragmas
 #  以下、GCC4.8追加(?)
-#  -Wunused-local-typedefs ←この警告を出したくない
-# -wavx ... AVX有効化
-# -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
-# -fopenmp ... OpenMP有効化
+#  -Wunused-local-typedefs ←この警告を出したくない ... -Wno-unused-local-typedefs
+# 以下、使用しているオプションの解説
+#  -wavx ... AVX有効化
+#  -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
+#  -fopenmp ... OpenMP有効化
+# 以下、必要に応じて使用
+#  -Winline ... インライン指定されていながら、インライン化されなかった関数を警告
+#  -fpermissive ... テンプレートのインスタンス化重複エラーなど、「非適合なコード」のエラーを警告に格下げする
 
 # C++コンパイルオプション（ビルド設定別）
 ifeq ($(BUILD_TYPE),Release)

@@ -60,6 +60,8 @@ public:
 
 //--------------------------------------------------------------------------------
 //スタックアロケータクラス
+//※スタック用のバッファをコンストラクタで受け渡して使用
+//※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
 template<class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
 class stackAllocator
 {
@@ -83,6 +85,9 @@ public:
 	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
 	//メモリ解放
+	//※実際にはメモリを解放しない（できない）ので注意。
+	//※アロケート中の数を減らすだけ。
+	//※アロケート中の数を見て、バッファを全クリアしても良いかどうかの判断に用いる。
 	inline bool free(void* p);
 
 	//メモリ確保とコンストラクタ呼び出し
@@ -99,12 +104,12 @@ public:
 	template<typename T>
 	bool deleteArray(T*& p, const std::size_t num);
 
-	//メモリを以前の位置に戻す
+	//使用中のサイズを指定位置に戻す
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
-	//※マーカー指定版
-	inline bool back(const size_type pos);
+	//※位置指定版
+	inline bool rewind(const size_type pos);
 	//※ポインタ指定版
-	bool back(void* p);
+	bool rewind(void* p);
 
 	//メモリクリア
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
@@ -150,7 +155,6 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付きスタックアロケータクラス
-//※アラインメント分余計にバッファを確保するため、場合によっては指定の _POOL_SIZE よりも多くなることがある。
 template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
 class stackAllocator_withBuff : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
 {
@@ -166,6 +170,7 @@ private:
 };
 //----------------------------------------
 //※バッファを基本型とその個数で指定
+//※アラインメント分余計にバッファを確保するので注意
 template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
 class stackAllocator_withType : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
 {
@@ -195,15 +200,18 @@ private:
 };
 
 //----------------------------------------
-//スタックアロケータ別名
+//スタックアロケータ別名定義：スマートスタックアロケータ
+//※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
 
-//※自動クリア版
+//※スタック用のバッファをコンストラクタで受け渡して使用
 template<class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator = stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
-//※バッファ付き＋自動クリア版
+
+//※バッファ付き
 template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator_withBuff = stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
-//※バッファ付き（基本型とその個数で指定）＋自動クリア版
+
+//※バッファ付き（基本型とその個数で指定）
 template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
 using smartStackAllocator_withType = stackAllocator_withType<T, _SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
 

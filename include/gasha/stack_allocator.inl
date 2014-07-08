@@ -67,6 +67,8 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	if (!inUsingRange(p))//正しいポインタか判定
+		return false;
 	return _free(p);
 }
 
@@ -128,12 +130,12 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T*& p, const std::size_t
 	return _free(p);
 }
 
-//メモリを以前の位置に戻す
-//※マーカー指定版
+//使用中のサイズを指定位置に戻す
+//※位置指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::back(const size_type pos)
+inline bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(const size_type pos)
 {
-	return back(m_buffRef + pos);
+	return rewind(m_buffRef + pos);
 }
 
 //メモリクリア

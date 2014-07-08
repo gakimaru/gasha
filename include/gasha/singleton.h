@@ -146,7 +146,7 @@ template<class T>
 using singleton = _private::singleton<T, typename T::lock_type, typename T::debug_type>;
 
 //----------------------------------------
-//固定バッファシングルトン：単純シングルトン
+//固定バッファシングルトン：シンプルシングルトン
 //※対象クラスメンバーに lock_type と debug_type の定義が不要。
 template<class T, class LOCK_TYPE = GASHA_ dummySharedLock, class DEBUG_TYPE = GASHA_ dummySingletonDebug>
 using simpleSingleton = _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
@@ -156,7 +156,7 @@ using simpleSingleton = _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
 #define GASHA_SINGLETON_FRIEND_CLASS(T) friend class _private::singleton<T, T::lock_type, T::debug_type>;
 
 //----------------------------------------
-//単純シングルトンのフレンド宣言用マクロ
+//シンプルシングルトンのフレンド宣言用マクロ
 #define GASHA_SIMPLE_SINGLETON_FRIEND_CLASS(T) friend class _private::singleton<T, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

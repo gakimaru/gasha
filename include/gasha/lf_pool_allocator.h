@@ -149,7 +149,7 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付きプールアロケータクラス
-//※アラインメント分余計にバッファを確保するため、場合によっては指定の _POOL_SIZE よりも多くなることがある。
+//※アラインメント分余計にバッファを確保するので注意
 template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = GASHA_ DEFAULT_ALIGN>
 class lfPoolAllocator_withBuff : public lfPoolAllocator<_POOL_SIZE>
 {
@@ -171,6 +171,7 @@ private:
 };
 //----------------------------------------
 //※バッファを型で指定
+//※アラインメント分余計にバッファを確保するので注意
 template<typename T, std::size_t _POOL_SIZE>
 class lfPoolAllocator_withType : public lfPoolAllocator<_POOL_SIZE>
 {
