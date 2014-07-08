@@ -291,7 +291,7 @@ namespace dynamic_array
 			for (index_type index = max_size; index < m_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 			m_size = max_size;
 			m_maxSize = m_size;
@@ -328,7 +328,7 @@ namespace dynamic_array
 			for (index_type index = _size; index < m_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -357,7 +357,7 @@ namespace dynamic_array
 			for (index_type index = 0; index < used_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 	#endif
@@ -402,7 +402,7 @@ namespace dynamic_array
 			return false;
 		value_type* value = const_cast<value_type*>(refBack());
 		ope_type::callDestructor(value);//デストラクタ呼び出し
-		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -415,7 +415,7 @@ namespace dynamic_array
 		value_type* obj = const_cast<value_type*>(refBack());
 		value = std::move(*obj);//ムーブ
 		ope_type::callDestructor(obj);//デストラクタ呼び出し
-		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -430,7 +430,7 @@ namespace dynamic_array
 		for (size_type i = 0; i < m_size; ++i, ++value)
 		{
 			ope_type::callDestructor(value);//デストラクタ呼び出し
-			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		}
 		m_size = 0;
 	}
@@ -508,7 +508,7 @@ namespace dynamic_array
 		for (size_type i = 0; i < _num; ++i, ++delete_value)
 		{
 			ope_type::callDestructor(delete_value);//デストラクタ呼び出し
-			operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
+			//operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
 		}
 		//移動
 		moveAsc(index, index + _num, move_num);

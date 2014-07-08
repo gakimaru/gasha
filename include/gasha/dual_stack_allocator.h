@@ -51,7 +51,7 @@ public:
 public:
 	//メソッド
 	//メモリ確保（正順）
-	void* allocN(const std::size_t size, const std::size_t align = DEFAULT_ALIGN)
+	void* allocN(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
 	{
 		const uintptr_t now_ptr = reinterpret_cast<uintptr_t>(m_buffPtr)+m_usedN;//現在のポインタ位置算出
 		const uintptr_t align_diff = align > 0 ? now_ptr % align == 0 ? 0 : align - now_ptr % align : 0;//アラインメント計算
@@ -66,7 +66,7 @@ public:
 		return reinterpret_cast<void*>(alloc_ptr);
 	}
 	//メモリ確保（逆順）
-	void* allocR(const std::size_t size, const std::size_t align = DEFAULT_ALIGN)
+	void* allocR(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
 	{
 		const uintptr_t now_ptr = reinterpret_cast<uintptr_t>(m_buffPtr)+m_usedR;//現在のポインタ位置算出
 		const uintptr_t alloc_ptr_tmp = now_ptr - size;//メモリ確保アドレス算出（暫定）
@@ -82,17 +82,17 @@ public:
 		return reinterpret_cast<void*>(alloc_ptr);
 	}
 	//メモリ確保
-	void* allocD(const std::size_t size, const std::size_t align = DEFAULT_ALIGN)
+	void* allocD(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
 	{
 		return alloc(m_defaultOrdered, size, align);
 	}
 	//メモリ確保
-	void* alloc(const E_ORDERED ordered, const std::size_t size, const std::size_t align = DEFAULT_ALIGN)
+	void* alloc(const E_ORDERED ordered, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
 	{
 		return ordered == DEFAULT ? allocD(size, align) : ordered == REVERSE ? allocR(size, align) : allocN(size, align);
 	}
 	//メモリ確保
-	void* alloc(const std::size_t size, const std::size_t align = DEFAULT_ALIGN) override
+	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN) override
 	{
 		return allocD(size, align);
 	}

@@ -40,11 +40,28 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, typename...Tx>
 T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newObj(Tx&&... args)
 {
-	assert(sizeof(T) <= m_blockSize);
-	void* p = alloc();
+	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
 		return nullptr;
 	return new(p)T(std::forward<Tx>(args)...);
+}
+//※配列用
+template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<typename T, typename...Tx>
+T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
+{
+	void* p = alloc(sizeof(T) * num, alignof(T));
+	if (!p)
+		return nullptr;
+	T* top_obj = nullptr;
+	for (std::size_t i = 0; i < num; ++i)
+	{
+		T* obj = new(p)T(std::forward<Tx>(args)...);
+		if (!top_obj)
+			top_obj = obj;
+		p = reinterpret_cast<void*>(reinterpret_cast<char*>(p) + sizeof(T));
+	}
+	return top_obj;
 }
 
 //メモリ解放とデストラクタ呼び出し
@@ -53,11 +70,27 @@ template<typename T>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T*& p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const std::size_t index = ptrToIndex(p);//ポインタをインデックスに変換
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;
 	p->~T();//デストラクタ呼び出し
-	operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	return free(p, index);
+}
+//※配列用
+template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<typename T>
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T*& p, const std::size_t num)
+{
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
+	if (index == INVALID_INDEX)
+		return false;
+	T* obj = p;
+	for (std::size_t i = 0; i < num; ++i, ++obj)
+	{
+		obj->~T();//デストラクタ呼び出し
+		//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	}
 	return free(p, index);
 }
 
@@ -70,10 +103,10 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), this->size(), remain(), m_vacantHead);
+	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
 
 	size += sprintf(message + size, "Using:\n");
-	for (std::size_t index = 0; index < m_poolSize; ++index)
+	for (index_type index = 0; index < m_poolSize; ++index)
 	{
 		if (m_using[index])
 		{
@@ -84,7 +117,7 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 		}
 	}
 	size += sprintf(message + size, "Recycable pool:\n");
-	std::size_t recycable_index = m_recyclableHead;
+	index_type recycable_index = m_recyclableHead;
 	while (recycable_index != INVALID_INDEX)
 	{
 		size += sprintf(message + size, " [%d]", recycable_index);
@@ -102,23 +135,23 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 
 //ポインタをインデックスに変換
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)
+inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)
 {
-	const std::size_t index = (reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_buffRef)) / m_blockSize;
+	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p)-reinterpret_cast<char*>(m_buffRef)) / m_blockSize);
 	if (index >= m_poolSize)//範囲外のインデックスなら終了
 	{
-	#ifdef GASHA_ASSERTION_IS_ENABLED
-		static const bool IS_INVALID_POINTER_OF_POOL = false;
-		assert(IS_INVALID_POINTER_OF_POOL);
-	#endif//GASHA_ASSERTION_IS_ENABLED
+	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+		static const bool IS_INVALID_POINTER = false;
+		assert(IS_INVALID_POINTER);
+	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
 	}
 	if (!m_using[index])//インデックスが既に未使用状態なら終了
 	{
-	#ifdef GASHA_ASSERTION_IS_ENABLED
+	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		static const bool IS_ALREADY_DELETE_POINTER = false;
 		assert(IS_ALREADY_DELETE_POINTER);
-	#endif//GASHA_ASSERTION_IS_ENABLED
+	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
 	}
 	return index;
@@ -126,12 +159,12 @@ inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)
 
 //インデックスに対応するバッファのポインタを取得
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline const void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const std::size_t index) const
+inline const void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index) const
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const std::size_t index)
+inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
@@ -147,7 +180,7 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const
 	m_poolSize(m_maxSize / m_blockSize),
 	m_vacantHead(0),
 	m_recyclableHead(INVALID_INDEX),
-	m_usingCount(0)
+	m_usingPoolSize(0)
 {
 	assert(m_poolSize <= MAX_POOL_SIZE);
 	assert(m_maxSize > 0);
@@ -190,14 +223,14 @@ inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE>:
 //メモリ確保とコンストラクタ呼び出し
 template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
 template<typename... Tx>
-inline T* poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::newDefault(Tx&&... args)
+inline typename poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::block_type* poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::newDefault(Tx&&... args)
 {
 	return this->template newObj<block_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
 template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-inline bool poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::deleteDefault(T*& p)
+inline bool poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::deleteDefault(typename poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::block_type*& p)
 {
 	return this->template deleteObj<block_type>(p);
 }

@@ -450,7 +450,7 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -470,7 +470,7 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		{

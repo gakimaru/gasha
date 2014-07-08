@@ -43,11 +43,28 @@ template<std::size_t _MAX_POOL_SIZE>
 template<typename T, typename...Tx>
 T* lfPoolAllocator<_MAX_POOL_SIZE>::newObj(Tx&&... args)
 {
-	assert(sizeof(T) <= m_blockSize);
-	void* p = alloc();
+	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
 		return nullptr;
 	return new(p)T(std::forward<Tx>(args)...);
+}
+//※配列用
+template<std::size_t _MAX_POOL_SIZE>
+template<typename T, typename...Tx>
+T* lfPoolAllocator<_MAX_POOL_SIZE>::newArray(const std::size_t num, Tx&&... args)
+{
+	void* p = alloc(sizeof(T) * num, alignof(T));
+	if (!p)
+		return nullptr;
+	T* top_obj = nullptr;
+	for (std::size_t i = 0; i < num; ++i)
+	{
+		T* obj = new(p)T(std::forward<Tx>(args)...);
+		if (!top_obj)
+			top_obj = obj;
+		p = reinterpret_cast<void*>(reinterpret_cast<char*>(p) + sizeof(T));
+	}
+	return top_obj;
 }
 
 //メモリ解放とデストラクタ呼び出し
@@ -59,7 +76,23 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteObj(T* p)
 	if (index == INVALID_INDEX)
 		return false;
 	p->~T();//デストラクタ呼び出し
-	operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	return free(p, index);
+}
+//※配列用
+template<std::size_t _MAX_POOL_SIZE>
+template<typename T>
+bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T*& p, const std::size_t num)
+{
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
+	if (index == INVALID_INDEX)
+		return false;
+	T* obj = p;
+	for (std::size_t i = 0; i < num; ++i, ++obj)
+	{
+		obj->~T();//デストラクタ呼び出し
+		//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	}
 	return free(p, index);
 }
 
@@ -71,10 +104,10 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, FUNC print
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), this->size(), remain(), m_vacantHead.load());
+	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
 
 	size += sprintf(message + size, "Using:\n");
-	for (std::size_t index = 0; index < m_poolSize; ++index)
+	for (index_type index = 0; index < m_poolSize; ++index)
 	{
 		if (m_using[index].load() != 0)
 		{
@@ -118,18 +151,18 @@ inline typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type lfPoolAllocator<_MAX
 	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p) - reinterpret_cast<char*>(m_buffRef)) / m_blockSize);
 	if (index >= m_poolSize)//範囲外のインデックスなら終了
 	{
-	#ifdef GASHA_ASSERTION_IS_ENABLED
-		static const bool IS_INVALID_POINTER_OF_POOL = false;
-		assert(IS_INVALID_POINTER_OF_POOL);
-	#endif//GASHA_ASSERTION_IS_ENABLED
+	#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+		static const bool IS_INVALID_POINTER = false;
+		assert(IS_INVALID_POINTER);
+	#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
 	}
 	if (m_using[index].load() == 0)//インデックスが既に未使用状態なら終了
 	{
-	#ifdef GASHA_ASSERTION_IS_ENABLED
+	#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 		static const bool IS_ALREADY_DELETE_POINTER = false;
 		assert(IS_ALREADY_DELETE_POINTER);
-	#endif//GASHA_ASSERTION_IS_ENABLED
+	#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
 	}
 	return index;
@@ -137,12 +170,12 @@ inline typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type lfPoolAllocator<_MAX
 
 //インデックスに対応するバッファのポインタを取得
 template<std::size_t _MAX_POOL_SIZE>
-inline const void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const std::size_t index) const
+inline const void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type index) const
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
 template<std::size_t _MAX_POOL_SIZE>
-inline void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const std::size_t index)
+inline void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type index)
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
@@ -158,7 +191,7 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::s
 	m_poolSize(m_maxSize / m_blockSize),
 	m_vacantHead(0),
 	m_recyclableHead(INVALID_INDEX),
-	m_usingCount(0)
+	m_usingPoolSize(0)
 {
 	assert(m_poolSize <= MAX_POOL_SIZE);
 	assert(m_maxSize > 0);
@@ -208,14 +241,14 @@ inline lfPoolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN>::~lfPoolA
 //メモリ確保とコンストラクタ呼び出し
 template<typename T, std::size_t _POOL_SIZE>
 template<typename... Tx>
-inline T* lfPoolAllocator_withType<T, _POOL_SIZE>::newDefault(Tx&&... args)
+inline typename lfPoolAllocator_withType<T, _POOL_SIZE>::block_type* lfPoolAllocator_withType<T, _POOL_SIZE>::newDefault(Tx&&... args)
 {
 	return this->template newObj<block_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
 template<typename T, std::size_t _POOL_SIZE>
-inline bool lfPoolAllocator_withType<T, _POOL_SIZE>::deleteDefault(T*& p)
+inline bool lfPoolAllocator_withType<T, _POOL_SIZE>::deleteDefault(typename lfPoolAllocator_withType<T, _POOL_SIZE>::block_type*& p)
 {
 	return this->template deleteObj<block_type>(p);
 }

@@ -18,8 +18,8 @@
 #include <gasha/shear_sort.h>//シェアソート【宣言部】
 
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
+#include <gasha/fast_math.h>//高速算術
 
-#include <math.h>//sqrt()
 #ifdef GASHA_SHEAR_SORT_USE_OPENMP_NEST
 #include <omp.h>//omp_set_nested()
 #endif//GASHA_SHEAR_SORT_USE_OPENMP_NEST
@@ -54,7 +54,7 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 	T* now;
 	T* next;
 	bool is_odd;
-	std::size_t rows = static_cast<std::size_t>(sqrt(size));//正方形のデータとして扱うための行数算出
+	std::size_t rows = static_cast<std::size_t>(sqrt(fastestA_f(static_cast<float>(size))));//正方形のデータとして扱うための行数算出
 	std::size_t over = size % rows;//余り算出
 	if (over > 0 && (rows & 0x1) == 0x1)//余りが出た場合、（余りを除く）行数が偶数になるように調整
 	{

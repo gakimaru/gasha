@@ -283,7 +283,7 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -312,7 +312,7 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 	#endif
@@ -384,7 +384,7 @@ namespace ring_buffer
 			return false;
 		value_type* value = const_cast<value_type*>(refFront());
 		ope_type::callDestructor(value);//デストラクタ呼び出し
-		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
 		return true;
@@ -398,7 +398,7 @@ namespace ring_buffer
 		value_type* obj = const_cast<value_type*>(refFront());
 		value = std::move(*obj);//ムーブ
 		ope_type::callDestructor(obj);//デストラクタ呼び出し
-		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		m_offset = m_offset == m_maxSize - 1 ? 0 : m_offset + 1;
 		return true;
@@ -412,7 +412,7 @@ namespace ring_buffer
 			return false;
 		value_type* value = const_cast<value_type*>(refFront());
 		ope_type::callDestructor(value);//デストラクタ呼び出し
-		operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+		//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -425,7 +425,7 @@ namespace ring_buffer
 		value_type* obj = const_cast<value_type*>(refBack());
 		value = std::move(*obj);//ムーブ
 		ope_type::callDestructor(obj);//デストラクタ呼び出し
-		operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
+		//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -440,7 +440,7 @@ namespace ring_buffer
 		{
 			value_type* value = _refElement(i);
 			ope_type::callDestructor(value);//デストラクタ呼び出し
-			operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+			//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		}
 		m_size = 0;
 		m_offset = 0;
@@ -526,7 +526,7 @@ namespace ring_buffer
 		{
 			value_type* delete_value = _refElement(_index);
 			ope_type::callDestructor(delete_value);//デストラクタ呼び出し
-			operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
+			//operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
 			++_index;
 		}
 		//移動

@@ -125,7 +125,7 @@ inline void callDestructor(void* obj)
 	if (!obj)
 		return;
 	reinterpret_cast<T*>(obj)->~T();
-	operator delete (obj, obj);//作法として念のため
+	//operator delete (obj, obj);//（作法として）deleteオペレータ呼び出し
 }
 template<class T>
 inline void callDestructor(T*& obj)
@@ -133,7 +133,7 @@ inline void callDestructor(T*& obj)
 	if (!obj)
 		return;
 	obj->~T();
-	operator delete (obj, obj);//作法として念のため
+	//operator delete (obj, obj);//（作法として）deleteオペレータ呼び出し
 	obj = nullptr;
 }
 

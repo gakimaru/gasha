@@ -360,6 +360,24 @@
 #endif//GASHA_IS_GCC
 
 //--------------------
+//【C++11仕様】noexcept：例外無効
+#ifdef GASHA_IS_WIN
+	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）
+		#define GASHA_HAS_NOEXCEPT
+		#define GASHA_NOEXCEPT noexcept
+	#else//_MSC_VER
+		#define GASHA_NOEXCEPT throw()
+	#endif//_MSC_VER
+#endif//GASHA_IS_WIN
+#ifdef GASHA_IS_GCC
+	#if defined(GASHA_HAS_CPP11) && __GNUC_PREREQ(4, 6)
+		#define GASHA_HAS_NOEXCEPT
+		#define GASHA_NOEXCEPT noexcept
+	#else//GASHA_HAS_CPP11
+		#define GASHA_NOEXCEPT throw()
+	#endif//GASHA_HAS_CPP11
+#endif//GASHA_IS_GCC
+//--------------------
 //【C++11仕様】alignas：アラインメント修飾子
 //【注意】修飾子の指定位置がコンパイラによって異なる
 //        ＜変数宣言＞
@@ -435,31 +453,17 @@
 
 //--------------------
 //アラインメント指定付きメモリ確保関数
-//※VC++仕様に合わせて共通化
-#ifdef GASHA_IS_GCC
-	#include <cstddef>//std::size_t
-	#include <stdlib.h>//posix_memalign()
-	#include <memory.h>//free()
-	inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
-	{
-		void *p;
-		int ret = posix_memalign(&p, alignment, size);
-		return (ret == 0) ? p : 0;
-	}
-	inline void _aligned_free(void* p)
-	{
-		free(p);
-	}
-	#define GASHA_HAS_ALIGNED_MALLOC_PROXY
-	#define GASHA_HAS_ALIGNED_FREE_PROXY
-#endif//GASHA_IS_GCC
+//※VC++仕様に合わせて下記関数を共通実装
+//　void* _aligned_malloc(size_t size, size_t alignment);
+//　void _aligned_free(void* p);
 #ifdef GASHA_IS_VC
-	#include <malloc.h>//_aligned_malloc(), _aligned_free()
-	//void* _aligned_malloc(size_t size, size_t alignment);
-	//void _aligned_free(void* p);
 	#define GASHA_HAS_ALIGNED_MALLOC
 	#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#define GASHA_HAS_ALIGNED_MALLOC_PROXY
+	#define GASHA_HAS_ALIGNED_FREE_PROXY
+#endif//GASHA_IS_GCC
 
 //--------------------
 //noinline / always_inline

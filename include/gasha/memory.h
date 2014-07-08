@@ -17,6 +17,8 @@
 
 #include <cstddef>//std::size_t
 
+#include <malloc.h>//_aligned_malloc(), _aligned_free(), free()
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -47,6 +49,29 @@ template<std::size_t ALIGN> struct isValidStaticAlign{    static const bool valu
 template<>                  struct isValidStaticAlign<0>{ static const bool value = true; };                                //アラインメントとして適正な値か判定
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//--------------------------------------------------------------------------------
+//アラインメント付きメモリ確保
+//※【注】グローバルネームスペースの関数として定義
+//--------------------------------------------------------------------------------
+
+//--------------------
+//アラインメント指定付きメモリ確保
+//※VC++仕様に合わせて共通化
+#ifdef GASHA_HAS_ALIGNED_MALLOC_PROXY
+#ifdef GASHA_IS_GCC
+inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment);
+#endif//GASHA_IS_GCC
+#endif//GASHA_HAS_ALIGNED_MALLOC_PROXY
+
+//--------------------
+//アラインメント指定付きメモリ解放
+//※VC++仕様に合わせて共通化
+#ifdef GASHA_HAS_ALIGNED_FREE_PROXY
+#ifdef GASHA_IS_GCC
+inline void _aligned_free(void* p);
+#endif//GASHA_IS_GCC
+#endif//GASHA_HAS_ALIGNED_FREE_PROXY
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/memory.inl>

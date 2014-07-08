@@ -192,10 +192,22 @@
 	#undef GASHA_STRNCPY_FAST_USE_SSE4_2
 #endif//GASHA_STRNCPY_FAST_USE_SSE4_2
 
+//--------------------------------------------------------------------------------
+//【プールアロケータ】
+
+#if defined(GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
+//【ロックフリープールアロケータ】
+
+#if defined(GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
-//※ライブラリの再ビルド不要（ただし、ライブラリ内で使用している可能性があるため、できるだけ再ビルドした方が良い）
 
 #if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_HAS_DEBUG_FEATURE)
 	#undef GASHA_SINGLETON_DEBUG_ENABLED

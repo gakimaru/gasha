@@ -852,7 +852,7 @@ namespace singly_linked_list
 	inline void simpleContainer<VALUE_TYPE>::node::destructor()
 	{
 		m_value.~core_value_type();//デストラクタ呼び出し
-		operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+		//operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
 	}
 
 	//ムーブオペレータ

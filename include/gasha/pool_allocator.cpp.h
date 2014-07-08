@@ -41,42 +41,55 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //メモリ確保
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc()
+void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, const std::size_t align)
 {
+	//サイズとアラインメントをチェック
+	const std::size_t _align = align == m_blockAlign ? 0 : align;
+	if (adjustAlign(m_blockAlign, _align) - m_blockAlign + size > m_blockSize)
+	{
+	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+		static const bool IS_INVALID_SIZE_OR_ALIGNMENT = false;
+		assert(IS_INVALID_SIZE_OR_ALIGNMENT);
+	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+		return nullptr;
+	}
+
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//空きプールを確保
 	if (m_vacantHead < m_poolSize)//空きプールの先頭インデックスがプールサイズ未満なら空きプールを利用する
 	{
-		const std::size_t vacant_index = m_vacantHead++;//空きプールの先頭インでックスを取得＆インクリメント
+		const index_type vacant_index = m_vacantHead++;//空きプールの先頭インでックスを取得＆インクリメント
 		m_using[vacant_index] = true;//インデックスを使用中にする
-		//++m_usingCount;//使用中の数を増やす（デバッグ用）
-		return refBuff(vacant_index);//メモリ確保成功
+		//++m_usingPoolSize;//使用中の数を増やす（デバッグ用）
+		void* ptr = refBuff(vacant_index);//メモリ確保成功
+		return adjustAlign(ptr, _align);//アラインメント調整して返す
 	}
 	//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
 	if (m_recyclableHead == INVALID_INDEX)
 		return nullptr;//メモリ確保失敗
 	//再利用プールを確保
 	{
-		const std::size_t recyclable_index = m_recyclableHead;//再利用プールの先頭インデックスを取得
+		const index_type recyclable_index = m_recyclableHead;//再利用プールの先頭インデックスを取得
 		recycable_t* recyclable_pool = static_cast<recycable_t*>(refBuff(recyclable_index));//再利用プールの先頭を割り当て
 		m_recyclableHead = recyclable_pool->m_next_index;//再利用プールの先頭インデックスを次の再利用プールに変更
 		recyclable_pool->m_next_index = DIRTY_INDEX;//再利用プールの連結インデックスを削除
 		m_using[recyclable_index] = true;//インデックスを使用中にする
-		//++m_usingCount;//使用中の数を増やす（デバッグ用）
-		return recyclable_pool;//メモリ確保成功
+		//++m_usingPoolSize;//使用中の数を増やす（デバッグ用）
+		void* ptr = reinterpret_cast<void*>(recyclable_pool);//メモリ確保成功
+		return adjustAlign(ptr, _align);//アラインメント調整して返す
 	}
 }
 
 //メモリ解放（共通処理）
 //※ロック取得は呼び出し元で行う
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const std::size_t index)
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
 {
 	recycable_t* deleted_pool = static_cast<recycable_t*>(refBuff(index));//解放されたメモリを参照
 	deleted_pool->m_next_index = m_recyclableHead;//次の再利用プールのインデックスを保存
 	m_recyclableHead = index;//再利用プールの先頭インデックスを変更
 	m_using[index] = false;//インデックスを未使用状態にする
-	//--m_usingCount;//使用中の数を減らす（デバッグ用）
+	//--m_usingPoolSize;//使用中の数を減らす（デバッグ用）
 	return true;
 }
 
@@ -85,7 +98,7 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const std::size_t index = ptrToIndex(p);//ポインタをインデックスに変換
+	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;
 	return free(p, index);

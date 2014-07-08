@@ -40,11 +40,12 @@ class poolAllocator
 public:
 	//型
 	typedef LOCK_TYPE lock_type;//ロック型
+	typedef std::uint32_t index_type;//インデックス型
 
 	//再利用プール型
 	struct recycable_t
 	{
-		std::size_t m_next_index;//再利用プール連結インデックス
+		index_type m_next_index;//再利用プール連結インデックス
 	};
 
 public:
@@ -52,8 +53,8 @@ public:
 	static const std::size_t MAX_POOL_SIZE = _MAX_POOL_SIZE;//最大プール数
 	                                                        //※実際のプール数はコンストラクタで渡されたバッファサイズに基づく。
 	                                                        //※最大プール数は、それと同じかそれ以上の値を指定する必要がある。
-	static const std::size_t INVALID_INDEX = 0xffffffff;//無効なインデックス
-	static const std::size_t DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
+	static const index_type INVALID_INDEX = 0xffffffff;//無効なインデックス
+	static const index_type DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
 
 public:
 	//アクセッサ
@@ -61,16 +62,19 @@ public:
 	inline std::size_t maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
 	inline std::size_t blockSize() const { return m_blockSize; }//ブロックサイズ
 	inline std::size_t blockAlign() const { return m_blockAlign; }//ブロックのアライメント
-	inline std::size_t poolSize() const { return m_poolSize; }//プール数
-	inline std::size_t usingPoolSize() const { return m_usingCount; }//使用中のプール数
-	inline std::size_t size() const { return  m_usingCount * m_blockSize; }//使用中のサイズ（バイト数）
-	inline std::size_t remain() const { return m_maxSize - size(); }//残りサイズ（プール数）
+	inline std::size_t poolSize() const { return m_poolSize; }//プール数（最大）
+	inline std::size_t size() const { return  m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
+	inline std::size_t usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
+	inline std::size_t remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
+	inline std::size_t poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
 
 public:
 	//メソッド
 
 	//メモリ確保
-	void* alloc();
+	//※最低限必要なサイズとアラインメントを指定可能。
+	//※ブロックサイズを超える場合は確保不可。
+	void* alloc(const std::size_t size = 0, const std::size_t align = 0);
 
 	//メモリ解放
 	bool free(void* p);
@@ -78,10 +82,16 @@ public:
 	//メモリ確保とコンストラクタ呼び出し
 	template<typename T, typename...Tx>
 	T* newObj(Tx&&... args);
-	
+	//※配列用（一つのプールに収まる配列を扱う点に注意。連続したブロックを確保するのではない。）
+	template<typename T, typename...Tx>
+	T* newArray(const std::size_t num, Tx&&... args);
+
 	//メモリ解放とデストラクタ呼び出し
 	template<typename T>
 	bool deleteObj(T*& p);
+	//※配列用（要素数の指定が必要な点に注意）
+	template<typename T>
+	bool deleteArray(T*& p, const std::size_t num);
 
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。
@@ -93,18 +103,18 @@ public:
 private:
 	//メモリ解放（共通処理）
 	//※ロック取得は呼び出し元で行う
-	bool free(void* p, const std::size_t index);
+	bool free(void* p, const index_type index);
 	
 	//ポインタをインデックスに変換
-	inline std::size_t ptrToIndex(void* p);
+	inline index_type ptrToIndex(void* p);
 
 	//インデックスに対応するバッファのポインタを取得
-	inline const void* refBuff(const std::size_t index) const;
-	inline void* refBuff(const std::size_t index);
+	inline const void* refBuff(const index_type index) const;
+	inline void* refBuff(const index_type index);
 
 public:
 	//コンストラクタ
-	inline poolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = DEFAULT_ALIGN);
+	inline poolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
 	template<typename T>
 	inline poolAllocator(T* buff, const std::size_t max_size);
 	template<typename T, std::size_t N>
@@ -120,17 +130,17 @@ private:
 	const std::size_t m_blockSize;//ブロックサイズ
 	const std::size_t m_blockAlign;//ブロックのアライメント
 	const std::size_t m_poolSize;//プール数
-	std::size_t m_vacantHead;//空きプールの先頭インデックス
-	std::size_t m_recyclableHead;//再利用プールの先頭インデックス
+	index_type m_vacantHead;//空きプールの先頭インデックス
+	index_type m_recyclableHead;//再利用プールの先頭インデックス
 	std::bitset<MAX_POOL_SIZE> m_using;//使用中インデックス（二重解放判定用）
-	std::size_t m_usingCount;//使用中の数（デバッグ用）※制御に必要な情報ではない
+	std::size_t m_usingPoolSize;//使用中の数（デバッグ用）※制御に必要な情報ではない
 	lock_type m_lock;//ロックオブジェクト
 };
 
 //--------------------------------------------------------------------------------
 //バッファ付きプールアロケータクラス
 //※アラインメント分余計にバッファを確保するため、場合によっては指定の _POOL_SIZE よりも多くなることがある。
-template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = DEFAULT_ALIGN, class LOCK_TYPE = GASHA_ dummyLock>
+template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = GASHA_ DEFAULT_ALIGN, class LOCK_TYPE = GASHA_ dummyLock>
 class poolAllocator_withBuff : public poolAllocator<_POOL_SIZE, LOCK_TYPE>
 {
 	//静的アサーション
@@ -149,7 +159,8 @@ public:
 private:
 	char m_buff[MAX_SIZE];//プールバッファ
 };
-//※型指定版
+//----------------------------------------
+//※バッファを型で指定
 template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
 class poolAllocator_withType : public poolAllocator<_POOL_SIZE, LOCK_TYPE>
 {
@@ -165,10 +176,10 @@ public:
 public:
 	//デフォルト型のメモリ確保とコンストラクタ呼び出し
 	template<typename... Tx>
-	inline T* newDefault(Tx&&... args);
+	inline block_type* newDefault(Tx&&... args);
 	
 	//デフォルト型のメモリ解放とデストラクタ呼び出し
-	inline bool deleteDefault(T*& p);
+	inline bool deleteDefault(block_type*& p);
 public:
 	//コンストラクタ
 	inline poolAllocator_withType();
@@ -180,9 +191,6 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
-
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/pool_allocator.inl>
 
@@ -190,6 +198,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #ifdef GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/pool_allocator.cpp.h>
 #endif//GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_POOL_ALLOCATOR_H
 

@@ -449,6 +449,18 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 #endif//GASHA_HAS_THREAD_LOCAL_PROXY
 #endif//GASHA_HAS_THREAD_LOCAL
 
+	//【C++11仕様】例外無効
+	size += sprintf(message + size, "- noexcept ... ");
+#ifdef GASHA_HAS_NOEXCEPT
+	size += sprintf(message + size, "is available.\n");
+#else//GASHA_HAS_NOEXCEPT
+#ifdef GASHA_HAS_NOEXCEPT_PROXY
+	size += sprintf(message + size, "is PROXY available.\n");
+#else//GASHA_HAS_NOEXCEPT_PROXY
+	size += sprintf(message + size, "is NOT available.\n");
+#endif//GASHA_HAS_NOEXCEPT_PROXY
+#endif//GASHA_HAS_NOEXCEPT
+
 	//【C++11仕様】alignas
 	size += sprintf(message + size, "- alignas ... ");
 #ifdef GASHA_HAS_ALIGNAS

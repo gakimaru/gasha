@@ -16,6 +16,11 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/memory.h>//メモリ操作【宣言部】
+//#include <memory>//C++11 std::align
+
+#ifdef GASHA_IS_GCC
+#include <stdlib.h>//posix_memalign()
+#endif//GASHA_IS_GCC
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -68,6 +73,37 @@ inline bool isValidAlign(const std::size_t align)
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//--------------------------------------------------------------------------------
+//アラインメント付きメモリ確保
+//※【注】グローバルネームスペースの関数として定義
+//--------------------------------------------------------------------------------
+
+//--------------------
+//アラインメント指定付きメモリ確保
+//※VC++仕様に合わせて共通化
+#ifdef GASHA_HAS_ALIGNED_MALLOC_PROXY
+#ifdef GASHA_IS_GCC
+inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment)
+{
+	void *p;
+	int ret = posix_memalign(&p, alignment, size);
+	return (ret == 0) ? p : 0;
+}
+#endif//GASHA_IS_GCC
+#endif//GASHA_HAS_ALIGNED_MALLOC_PROXY
+
+//--------------------
+//アラインメント指定付きメモリ解放
+//※VC++仕様に合わせて共通化
+#ifdef GASHA_HAS_ALIGNED_FREE_PROXY
+#ifdef GASHA_IS_GCC
+inline void _aligned_free(void* p)
+{
+	free(p);
+}
+#endif//GASHA_IS_GCC
+#endif//GASHA_HAS_ALIGNED_FREE_PROXY
 
 #endif//GASHA_INCLUDED_MEMORY_INL
 

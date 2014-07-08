@@ -391,7 +391,7 @@ namespace dynamic_array
 			for (index_type index = size; index < m_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -411,7 +411,7 @@ namespace dynamic_array
 			for (index_type index = 0; index < used_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				operator delete(value, value);//（作法として）deleteオペレータ呼び出し
+				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		{

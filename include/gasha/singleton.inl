@@ -108,7 +108,7 @@ namespace _private
 		if (m_staticInstanceIsCreated.exchange(false))
 		{
 			m_staticInstanceRef->~class_type();
-			operator delete(m_staticInstanceRef, m_staticInstanceRef);
+			//operator delete(m_staticInstanceRef, m_staticInstanceRef);
 			m_staticInstanceRef = nullptr;
 			//シングルトンデバッグ用処理呼び出し
 			m_staticDebug.destroy(procedure_name);

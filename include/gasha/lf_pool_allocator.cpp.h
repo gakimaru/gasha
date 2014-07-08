@@ -41,8 +41,19 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //メモリ確保
 template<std::size_t _MAX_POOL_SIZE>
-void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc()
+void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t align)
 {
+	//サイズとアラインメントをチェック
+	const std::size_t _align = align == m_blockAlign ? 0 : align;
+	if (adjustAlign(m_blockAlign, _align) - m_blockAlign + size > m_blockSize)
+	{
+	#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+		static const bool IS_INVALID_SIZE_OR_ALIGNMENT = false;
+		assert(IS_INVALID_SIZE_OR_ALIGNMENT);
+	#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+		return nullptr;
+	}
+
 	//空きプールを確保
 	if (m_vacantHead.load() < m_poolSize)//空きプールの先頭インデックスがプールサイズ未満なら空きプールを利用
 	{
@@ -50,9 +61,10 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc()
 		if (vacant_index < m_poolSize)//プールサイズ未満なら確保成功
 		{
 			m_using[vacant_index].fetch_add(1);//インデックスを使用中状態にする
-			//m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
+			//m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
 			//m_allocCount[vacant_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
-			return refBuff(vacant_index);//メモリ確保成功
+			void* ptr = refBuff(vacant_index);//メモリ確保成功
+			return adjustAlign(ptr, _align);//アラインメント調整して返す
 		}
 		if (vacant_index > m_poolSize)//インクリメントでオーバーしたインデックスを元に戻す
 			m_vacantHead.store(static_cast<index_type>(m_poolSize));
@@ -83,9 +95,10 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc()
 			{
 				recyclable_pool->m_next_index.store(DIRTY_INDEX);//再利用プールの連結インデックスを削除
 				m_using[recyclable_index].fetch_add(1);//インデックスを使用中状態にする
-				//m_usingCount.fetch_add(1);//使用中の数を増やす（デバッグ用）
+				//m_usingPoolSize.fetch_add(1);//使用中の数を増やす（デバッグ用）
 				//m_allocCount[recyclable_index].fetch_add(1);//アロケート回数をカウントアップ（デバッグ用）
-				return recyclable_pool;//メモリ確保成功
+				void* ptr = reinterpret_cast<void*>(recyclable_pool);//メモリ確保成功
+				return adjustAlign(ptr, _align);//アラインメント調整して返す
 			}
 		}
 		return nullptr;//ダミー
@@ -113,7 +126,7 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p, const typename lfPoolAllocat
 		//        recycable_index_and_tag = m_recyclableHead;//再利用プールの先頭インデックスを再取得
 		{
 			m_using[index].fetch_sub(1);//インデックスを未使用状態にする
-			//m_usingCount.fetch_sub(1);//使用中の数を減らす（デバッグ用）
+			//m_usingPoolSize.fetch_sub(1);//使用中の数を減らす（デバッグ用）
 			//m_freeCount[index].fetch_add(1);//フリー回数をカウントアップ（デバッグ用）
 			return true;//メモリ解放成功
 		}

@@ -18,10 +18,11 @@
 #include <gasha/radix_sort.h>//基数ソート【宣言部】
 
 #include <gasha/limits.h>//限界値
+#include <gasha/memory.h>//_aligned_malloc(), _aligned_free()
 
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
 #include <utility>//C++11 std::move
-#include <malloc.h>//_aligned_malloc(), _aligned_free()
+#include <memory.h>//memset()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
