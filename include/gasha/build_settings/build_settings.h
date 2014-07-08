@@ -24,8 +24,12 @@
 
 #include <gasha/build_settings/adjust_build_settings.h>//ビルド設定の調整
 
+#include <gasha/build_settings/project_default_includes.h>//プロジェクト固有のデフォルトインクルード
+
+//----------------------------------------
 //ネームスペースを定義
 GASHA_NAMESPACE_BEGIN;
+//（ネームスペースの定義のみ）
 GASHA_NAMESPACE_END;
 
 #endif//GASHA_INCLUDED_BUIILD_SETTINGS_H
