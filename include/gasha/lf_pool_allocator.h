@@ -99,7 +99,7 @@ public:
 	bool deleteObj(T* p);
 	//※配列用（要素数の指定が必要な点に注意）
 	template<typename T>
-	bool deleteArray(T*& p, const std::size_t num);
+	bool deleteArray(T* p, const std::size_t num);
 
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。

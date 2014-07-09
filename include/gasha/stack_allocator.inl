@@ -104,7 +104,7 @@ T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&..
 //メモリ解放とデストラクタ呼び出し
 template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T*& p)
+bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定
@@ -116,7 +116,7 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T*& p)
 //※配列用
 template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T*& p, const std::size_t num)
+bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定

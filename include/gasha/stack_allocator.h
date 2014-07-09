@@ -99,10 +99,10 @@ public:
 
 	//メモリ解放とデストラクタ呼び出し
 	template<typename T>
-	bool deleteObj(T*& p);
+	bool deleteObj(T* p);
 	//※配列用（要素数の指定が必要な点に注意）
 	template<typename T>
-	bool deleteArray(T*& p, const std::size_t num);
+	bool deleteArray(T* p, const std::size_t num);
 
 	//使用中のサイズを指定位置に戻す
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意

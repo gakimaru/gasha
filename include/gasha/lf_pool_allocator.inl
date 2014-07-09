@@ -82,7 +82,7 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteObj(T* p)
 //※配列用
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T>
-bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T*& p, const std::size_t num)
+bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T* p, const std::size_t num)
 {
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)

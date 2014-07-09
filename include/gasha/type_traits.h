@@ -182,9 +182,9 @@ inline T* callConstructor(T* buff, Tx&&... args);
 
 //明示的なデストラクタ呼び出し
 template<class T>
-inline void callDestructor(T*& obj);//※呼び出し完了後、obj に nullptr を代入する
+inline void callDestructor(T* obj);
 template<class T>
-inline void callDestructor(void* obj);//※nullptrの代入はしない
+inline void callDestructor(void* obj);
 
 //--------------------------------------------------------------------------------
 //文字列化

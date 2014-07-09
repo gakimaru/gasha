@@ -65,8 +65,8 @@ public:
 	inline size_type blockAlign() const { return m_blockAlign; }//ブロックのアライメント
 	inline size_type poolSize() const { return m_poolSize; }//プール数（最大）
 	inline size_type size() const { return  m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
-	inline size_type usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
+	inline size_type usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
 	inline size_type poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
 
 public:
@@ -89,10 +89,10 @@ public:
 
 	//メモリ解放とデストラクタ呼び出し
 	template<typename T>
-	bool deleteObj(T*& p);
+	bool deleteObj(T* p);
 	//※配列用（要素数の指定が必要な点に注意）
 	template<typename T>
-	bool deleteArray(T*& p, const std::size_t num);
+	bool deleteArray(T* p, const std::size_t num);
 
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。
@@ -194,6 +194,9 @@ private:
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
+
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/pool_allocator.inl>
 
@@ -201,9 +204,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #ifdef GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 #include <gasha/pool_allocator.cpp.h>
 #endif//GASHA_POOL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_POOL_ALLOCATOR_H
 

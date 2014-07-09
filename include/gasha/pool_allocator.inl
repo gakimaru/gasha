@@ -35,6 +35,8 @@
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
+//--------------------------------------------------------------------------------
+//プールアロケータクラス
 //メモリ確保とコンストラクタ呼び出し
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, typename...Tx>
@@ -67,7 +69,7 @@ T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newArray(const std::size_t num, Tx&
 //メモリ解放とデストラクタ呼び出し
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T*& p)
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
@@ -80,7 +82,7 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T*& p)
 //※配列用
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T*& p, const std::size_t num)
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
@@ -112,7 +114,7 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 		if (m_using[index])
 		{
 			size += sprintf(message + size, "[%d] ", index);
-			T* value = static_cast<T*>(refBuff(index));
+			T* value = reinterpret_cast<T*>(refBuff(index));
 			size += print_node(message + size, *value);
 			size += sprintf(message + size, "\n");
 		}
@@ -122,7 +124,7 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 	while (recycable_index != INVALID_INDEX)
 	{
 		size += sprintf(message + size, " [%d]", recycable_index);
-		recycable_t* recycable_pool = static_cast<recycable_t*>(refBuff(recycable_index));
+		recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
 		recycable_index = recycable_pool->m_next_index;
 	}
 	size += sprintf(message + size, "\n");

@@ -75,7 +75,7 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 	//再利用プールを確保
 	{
 		const index_type recyclable_index = m_recyclableHead;//再利用プールの先頭インデックスを取得
-		recycable_t* recyclable_pool = static_cast<recycable_t*>(refBuff(recyclable_index));//再利用プールの先頭を割り当て
+		recycable_t* recyclable_pool = reinterpret_cast<recycable_t*>(refBuff(recyclable_index));//再利用プールの先頭を割り当て
 		m_recyclableHead = recyclable_pool->m_next_index;//再利用プールの先頭インデックスを次の再利用プールに変更
 		recyclable_pool->m_next_index = DIRTY_INDEX;//再利用プールの連結インデックスを削除
 		m_using[recyclable_index] = true;//インデックスを使用中にする
@@ -90,7 +90,7 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
 {
-	recycable_t* deleted_pool = static_cast<recycable_t*>(refBuff(index));//解放されたメモリを参照
+	recycable_t* deleted_pool = reinterpret_cast<recycable_t*>(refBuff(index));//解放されたメモリを参照
 	deleted_pool->m_next_index = m_recyclableHead;//次の再利用プールのインデックスを保存
 	m_recyclableHead = index;//再利用プールの先頭インデックスを変更
 	m_using[index] = false;//インデックスを未使用状態にする
