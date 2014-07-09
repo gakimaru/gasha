@@ -100,7 +100,7 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, class FUNC>
-std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, FUNC print_node)
+std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
@@ -108,26 +108,35 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, F
 	size += sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
 
-	size += sprintf(message + size, "Using:\n");
-	for (index_type index = 0; index < m_poolSize; ++index)
+	if (with_detail)
 	{
-		if (m_using[index])
+		size += sprintf(message + size, "Using:\n");
+		std::size_t num = 0;
+		for (index_type index = 0; index < m_poolSize; ++index)
 		{
-			size += sprintf(message + size, "[%d] ", index);
-			T* value = reinterpret_cast<T*>(refBuff(index));
-			size += print_node(message + size, *value);
-			size += sprintf(message + size, "\n");
+			if (m_using[index])
+			{
+				++num;
+				size += sprintf(message + size, "[%d] ", index);
+				T* value = reinterpret_cast<T*>(refBuff(index));
+				size += print_node(message + size, *value);
+				size += sprintf(message + size, "\n");
+			}
 		}
+		size += sprintf(message + size, "(num=%d)\n", num);
+		size += sprintf(message + size, "Recycable pool:\n");
+		num = 0;
+		index_type recycable_index = m_recyclableHead;
+		while (recycable_index != INVALID_INDEX)
+		{
+			++num;
+			size += sprintf(message + size, " [%d]", recycable_index);
+			recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
+			recycable_index = recycable_pool->m_next_index;
+		}
+		size += sprintf(message + size, "\n");
+		size += sprintf(message + size, "(num=%d)\n", num);
 	}
-	size += sprintf(message + size, "Recycable pool:\n");
-	index_type recycable_index = m_recyclableHead;
-	while (recycable_index != INVALID_INDEX)
-	{
-		size += sprintf(message + size, " [%d]", recycable_index);
-		recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
-		recycable_index = recycable_pool->m_next_index;
-	}
-	size += sprintf(message + size, "\n");
 	size += sprintf(message + size, "----------\n");
 	return size;
 #else//GASHA_HAS_DEBUG_FEATURE
@@ -174,10 +183,10 @@ inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename po
 
 //コンストラクタ
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const std::size_t buff_size, const std::size_t block_size, const std::size_t block_align) :
 	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
 	m_offset(static_cast<size_type>(m_buffRef - reinterpret_cast<char*>(buff))),
-	m_maxSize(static_cast<size_type>(max_size - m_offset)),
+	m_maxSize(static_cast<size_type>(buff_size - m_offset)),
 	m_blockSize(static_cast<size_type>(block_size)),
 	m_blockAlign(static_cast<size_type>(block_align)),
 	m_poolSize(m_maxSize / m_blockSize),
@@ -192,8 +201,8 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const
 }
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t num) :
-	poolAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t pool_size) :
+poolAllocator(reinterpret_cast<void*>(buff), sizeof(T)* pool_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, std::size_t N>

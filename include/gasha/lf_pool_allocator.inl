@@ -99,43 +99,52 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T* p, const std::size_t num)
 //デバッグ情報削除
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, class FUNC>
-std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, FUNC print_node)
+std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
 
-	size += sprintf(message + size, "Using:\n");
-	for (index_type index = 0; index < m_poolSize; ++index)
+	if (with_detail)
 	{
-		if (m_using[index].load() != 0)
+		size += sprintf(message + size, "Using:\n");
+		std::size_t num = 0;
+		for (index_type index = 0; index < m_poolSize; ++index)
 		{
-			size += sprintf(message + size, "[%d]", index);
-			if (m_using[index].load() != 1)
-				size += sprintf(message + size, "(using=%d)", m_using[index].load());
-			//size += sprintf(message + size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
-			T* value = reinterpret_cast<T*>(refBuff(index));
-			size += print_node(message + size, *value);
-			size += sprintf(message + size, "\n");
+			if (m_using[index].load() != 0)
+			{
+				++num;
+				size += sprintf(message + size, "[%d] ", index);
+				if (m_using[index].load() != 1)
+					size += sprintf(message + size, "(using=%d)", m_using[index].load());
+				//size += sprintf(message + size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+				T* value = reinterpret_cast<T*>(refBuff(index));
+				size += print_node(message + size, *value);
+				size += sprintf(message + size, "\n");
+			}
+			//else
+			//{
+			//	if (m_allocCount[index].load() != m_freeCount[index].load())
+			//		size += sprintf(message + size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+			//}
 		}
-		//else
-		//{
-		//	if (m_allocCount[index].load() != m_freeCount[index].load())
-		//		size += sprintf(message + size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
-		//}
+		size += sprintf(message + size, "(num=%d)\n", num);
+		size += sprintf(message + size, "Recycable pool:\n");
+		num = 0;
+		index_type recycable_index_and_tag = m_recyclableHead;
+		while (recycable_index_and_tag != INVALID_INDEX)
+		{
+			++num;
+			index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
+			index_type tag = recycable_index_and_tag >> 24;
+			size += sprintf(message + size, " [%d(tag=%d)]", recycable_index, tag);
+			recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
+			recycable_index_and_tag = recycable_pool->m_next_index.load();
+		}
+		size += sprintf(message + size, "\n");
+		size += sprintf(message + size, "(num=%d)\n", num);
 	}
-	size += sprintf(message + size, "Recycable pool:\n");
-	index_type recycable_index_and_tag = m_recyclableHead;
-	while (recycable_index_and_tag != INVALID_INDEX)
-	{
-		index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
-		index_type tag = recycable_index_and_tag >> 24;
-		size += sprintf(message + size, " [%d(tag=%d)]", recycable_index, tag);
-		recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
-		recycable_index_and_tag = recycable_pool->m_next_index.load();
-	}
-	size += sprintf(message + size, "\n");
 	size += sprintf(message + size, "----------\n");
 	return size;
 #else//GASHA_HAS_DEBUG_FEATURE
@@ -182,10 +191,10 @@ inline void* lfPoolAllocator<_MAX_POOL_SIZE>::refBuff(const typename lfPoolAlloc
 
 //コンストラクタ
 template<std::size_t _MAX_POOL_SIZE>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::size_t max_size, const std::size_t block_size, const std::size_t block_align) :
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::size_t buff_size, const std::size_t block_size, const std::size_t block_align) :
 	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
 	m_offset(static_cast<size_type>(m_buffRef - reinterpret_cast<char*>(buff))),
-	m_maxSize(static_cast<size_type>(max_size - m_offset)),
+	m_maxSize(static_cast<size_type>(buff_size - m_offset)),
 	m_blockSize(static_cast<size_type>(block_size)),
 	m_blockAlign(static_cast<size_type>(block_align)),
 	m_poolSize(m_maxSize / m_blockSize),
@@ -207,8 +216,8 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::s
 }
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T>
-inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size_t num) :
-	lfPoolAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
+inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(T* buff, const std::size_t pool_size) :
+lfPoolAllocator(reinterpret_cast<void*>(buff), sizeof(T)* pool_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, std::size_t N>
@@ -257,7 +266,7 @@ inline bool lfPoolAllocator_withType<T, _POOL_SIZE>::deleteDefault(typename lfPo
 //コンストラクタ
 template<typename T, std::size_t _POOL_SIZE>
 inline lfPoolAllocator_withType<T, _POOL_SIZE>::lfPoolAllocator_withType() :
-	lfPoolAllocator<_POOL_SIZE>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
+lfPoolAllocator<_POOL_SIZE>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
 {}
 
 //デストラクタ

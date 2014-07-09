@@ -106,8 +106,8 @@ public:
 	//※使用したバッファのサイズを返す。
 	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
 	template<typename T, class FUNC = std::function<std::size_t(char* message, const T& value)>>
-	std::size_t debugInfo(char* message, FUNC print_node);
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node);
+	std::size_t debugInfo(char* message, const bool with_detail);
 
 private:
 	//メモリ解放（共通処理）
@@ -122,9 +122,9 @@ private:
 
 public:
 	//コンストラクタ
-	inline lfPoolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
+	inline lfPoolAllocator(void* buff, const std::size_t buff_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
 	template<typename T>
-	inline lfPoolAllocator(T* buff, const std::size_t num);
+	inline lfPoolAllocator(T* buff, const std::size_t pool_size);
 	template<typename T, std::size_t N>
 	inline lfPoolAllocator(T (&buff)[N]);
 	//デストラクタ

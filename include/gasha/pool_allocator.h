@@ -99,8 +99,8 @@ public:
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
 	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
-	std::size_t debugInfo(char* message, FUNC print_node);
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node);
+	std::size_t debugInfo(char* message, const bool with_detail);
 
 private:
 	//メモリ解放（共通処理）
@@ -116,9 +116,9 @@ private:
 
 public:
 	//コンストラクタ
-	inline poolAllocator(void* buff, const std::size_t max_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
+	inline poolAllocator(void* buff, const std::size_t buff_size, const std::size_t bock_size, const std::size_t block_align = GASHA_ DEFAULT_ALIGN);
 	template<typename T>
-	inline poolAllocator(T* buff, const std::size_t num);
+	inline poolAllocator(T* buff, const std::size_t pool_size);
 	template<typename T, std::size_t N>
 	inline poolAllocator(T (&buff)[N]);
 	//デストラクタ

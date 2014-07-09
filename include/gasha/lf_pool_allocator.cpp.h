@@ -151,14 +151,14 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p)
 
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE>
-std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message)
+std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail)
 {
 	auto print_node = [](char* message, std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
 		return sprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
 	};
-	return this->template debugInfo<std::uint32_t>(message, print_node);
+	return this->template debugInfo<std::uint32_t>(message, with_detail, print_node);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

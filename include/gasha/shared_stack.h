@@ -76,7 +76,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message, std::function<std::size_t(char* message, const value_type& value)> print_node);
+	std::size_t debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const value_type& value)> print_node);
 
 private:
 	//初期化

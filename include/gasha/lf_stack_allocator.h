@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_STACK_ALLOCATOR_H
-#define GASHA_INCLUDED_STACK_ALLOCATOR_H
+#ifndef GASHA_INCLUDED_LF_STACK_ALLOCATOR_H
+#define GASHA_INCLUDED_LF_STACK_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
-//stack_allocator.h
-// スタックアロケータ【宣言部】
+//lf_stack_allocator.h
+// ロックフリースタックアロケータ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -14,10 +14,10 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
-#include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
+#include <atomic>//C++11 std::atomic
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -31,53 +31,52 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //クラス宣言
-template<class LOCK_TYPE, class AUTO_CLEAR>
-class stackAllocator;
+template<class AUTO_CLEAR>
+class lfStackAllocator;
 
 //--------------------------------------------------------------------------------
-//スタックアロケータ補助クラス
+//ロックフリースタックアロケータ補助クラス
 
 //----------------------------------------
 //スタック自動クリア
-class stackAllocatorAutoClear
+class lfStackAllocatorAutoClear
 {
 public:
 	//自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR>
+	inline void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
 };
 
 //----------------------------------------
 //スタック自動クリア（ダミー）
 //※何もしない
-class dummyStackAllocatorAutoClear
+class dummyLfStackAllocatorAutoClear
 {
 public:
 	//自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR>
+	inline void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
 };
 
 //--------------------------------------------------------------------------------
-//スタックアロケータクラス
+//ロックフリースタックアロケータクラス
 //※スタック用のバッファをコンストラクタで受け渡して使用
 //※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
-template<class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
-class stackAllocator
+template<class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
+class lfStackAllocator
 {
-	friend stackAllocatorAutoClear;//スタック自動クリア
+	friend lfStackAllocatorAutoClear;//スタック自動クリア
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
 	typedef AUTO_CLEAR auto_clear_type;//スタック自動クリア型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
 	//アクセッサ
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
-	inline size_type size() const { return  m_size; }//使用中のサイズ（バイト数）
+	inline size_type size() const { return  m_size.load(); }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline size_type allocatedCount() const { return m_allocatedCount; }//アロケート中の数
+	inline size_type allocatedCount() const { return m_allocatedCount.load(); }//アロケート中の数
 
 public:
 	//メソッド
@@ -122,16 +121,14 @@ public:
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
-	//※作成中、ロックを取得する。
+	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
 	std::size_t debugInfo(char* message);
 
 private:
 	//メモリ解放（共通処理）
-	//※ロック取得は呼び出し元で行う
 	bool _free(void* p);
 
 	//メモリクリア（共通処理）
-	//※ロック取得は呼び出し元で行う
 	inline void _clear();
 
 	//ポインタが範囲内か判定
@@ -139,43 +136,42 @@ private:
 
 public:
 	//コンストラクタ
-	inline stackAllocator(void* buff, const std::size_t max_size);
+	inline lfStackAllocator(void* buff, const std::size_t max_size);
 	template<typename T>
-	inline stackAllocator(T* buff, const std::size_t num);
+	inline lfStackAllocator(T* buff, const std::size_t num);
 	template<typename T, std::size_t N>
-	inline stackAllocator(T (&buff)[N]);
+	inline lfStackAllocator(T (&buff)[N]);
 	//デストラクタ
-	inline ~stackAllocator();
+	inline ~lfStackAllocator();
 
 private:
 	//フィールド
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
-	size_type m_size;//バッファの使用中サイズ
-	size_type m_allocatedCount;//アロケート中の数
-	lock_type m_lock;//ロックオブジェクト
+	std::atomic<size_type> m_size;//バッファの使用中サイズ
+	std::atomic<size_type> m_allocatedCount;//アロケート中の数
 };
 
 //--------------------------------------------------------------------------------
-//バッファ付きスタックアロケータクラス
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
-class stackAllocator_withBuff : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
+//バッファ付きロックフリースタックアロケータクラス
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
+class lfStackAllocator_withBuff : public lfStackAllocator<AUTO_CLEAR>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
 public:
 	//コンストラクタ
-	inline stackAllocator_withBuff();
+	inline lfStackAllocator_withBuff();
 	//デストラクタ
-	inline ~stackAllocator_withBuff();
+	inline ~lfStackAllocator_withBuff();
 private:
 	char m_buff[MAX_SIZE];//バッファ
 };
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
-class stackAllocator_withType : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
+class lfStackAllocator_withType : public lfStackAllocator<AUTO_CLEAR>
 {
 public:
 	//型
@@ -195,28 +191,27 @@ public:
 	inline bool deleteDefault(value_type*& p);
 public:
 	//コンストラクタ
-	inline stackAllocator_withType();
+	inline lfStackAllocator_withType();
 	//デストラクタ
-	inline ~stackAllocator_withType();
+	inline ~lfStackAllocator_withType();
 private:
 	GASHA_ALIGNAS_OF(value_type) char m_buff[MAX_SIZE];//バッファ
 };
 
 //----------------------------------------
-//スタックアロケータ別名定義：スマートスタックアロケータ
+//ロックフリースタックアロケータ別名定義：スマートロックフリースタックアロケータ
 //※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
 
 //※スタック用のバッファをコンストラクタで受け渡して使用
-template<class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator = stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+using lfSmartStackAllocator = lfStackAllocator<lfStackAllocatorAutoClear>;
 
 //※バッファ付き
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator_withBuff = stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
+template<std::size_t _MAX_SIZE>
+using lfSmartStackAllocator_withBuff = lfStackAllocator_withBuff<_MAX_SIZE, lfStackAllocatorAutoClear>;
 
 //※バッファ付き（基本型とその個数で指定）
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator_withType = stackAllocator_withType<T, _SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
+template<typename T, std::size_t _SIZE>
+using lfSmartStackAllocator_withType = lfStackAllocator_withType<T, _SIZE, lfStackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
@@ -224,13 +219,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/stack_allocator.inl>
+#include <gasha/lf_stack_allocator.inl>
 
 //.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
-#ifdef GASHA_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
-#include <gasha/stack_allocator.cpp.h>
-#endif//GASHA_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#ifdef GASHA_LF_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/lf_stack_allocator.cpp.h>
+#endif//GASHA_LF_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
-#endif//GASHA_INCLUDED_STACK_ALLOCATOR_H
+#endif//GASHA_INCLUDED_LF_STACK_ALLOCATOR_H
 
 // End of file

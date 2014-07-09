@@ -111,7 +111,7 @@ bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 
 //デバッグ情報作成
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
-std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, std::function<std::size_t(char* message, const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
+std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
 {
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	std::size_t size = 0;
@@ -132,7 +132,7 @@ std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 	{
 		return print_node(message, info.m_value);
 	};
-	size += m_allocator.template debugInfo<stack_t>(message + size, print_allocator_node);
+	size += m_allocator.template debugInfo<stack_t>(message + size, with_detail, print_allocator_node);
 	return size;
 #else//GASHA_HAS_DEBUG_FEATURE
 	message[0] = '\0';

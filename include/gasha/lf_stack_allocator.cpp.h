@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
-#define GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
+#ifndef GASHA_INCLUDED_LF_STACK_ALLOCATOR_CPP_H
+#define GASHA_INCLUDED_LF_STACK_ALLOCATOR_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// stack_allocator.cpp.h
-// スタックアロケータ【関数定義部】
+// lf_stack_allocator.cpp.h
+// ロックフリースタックアロケータ【関数定義部】
 //
 // ※クラスのインスタンス化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。
@@ -19,7 +19,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/stack_allocator.inl>//スタックアロケータ【インライン関数／テンプレート関数定義部】
+#include <gasha/lf_stack_allocator.inl>//ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
 
@@ -37,59 +37,62 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//スタックアロケータクラス
+//ロックフリースタックアロケータクラス
 
 //メモリ確保
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR>
+void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
 	//※要求サイズが0でも必ずメモリを割り当てる点に注意（ただし、アラインメントは守らない）
 	const std::size_t _size = size == 0 ? 1 : size;
 	const std::size_t _align = size == 0 ? 0 : align;
-	//サイズとアラインメントをチェック
-	size_type now_size = m_size;
-	char* now_ptr = m_buffRef + now_size;
-	char* new_ptr = adjustAlign(now_ptr, _align);
-	const std::size_t padding_size = new_ptr - now_ptr;
-	const size_type alloc_size = static_cast<size_type>(padding_size + _size);
-	const size_type new_size = now_size + alloc_size;
-	if (new_size > m_maxSize)
+	while (true)
 	{
-	#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
-		static const bool NOT_ENOUGH_SPACE = false;
-		assert(NOT_ENOUGH_SPACE);
-	#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
-		return nullptr;
-	}
-	
-	//使用中のサイズとメモリ確保数を更新
-	m_size += alloc_size;
-	++m_allocatedCount;
+		//サイズとアラインメントをチェック
+		size_type now_size = m_size.load();
+		char* now_ptr = m_buffRef + now_size;
+		char* new_ptr = adjustAlign(now_ptr, _align);
+		const std::size_t padding_size = new_ptr - now_ptr;
+		const size_type alloc_size = static_cast<size_type>(padding_size + _size);
+		const size_type new_size = now_size + alloc_size;
+		if (new_size > m_maxSize)
+		{
+		#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+			static const bool NOT_ENOUGH_SPACE = false;
+			assert(NOT_ENOUGH_SPACE);
+		#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+			return nullptr;
+		}
 
-	//空き領域を確保
-	return reinterpret_cast<void*>(new_ptr);
+		//使用中のサイズとメモリ確保数を更新
+		if (m_size.compare_exchange_weak(now_size, new_size))
+		{
+			m_allocatedCount.fetch_add(1);
+
+			//空き領域を確保
+			return reinterpret_cast<void*>(new_ptr);
+		}
+	}
 }
 
 //使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
+template<class AUTO_CLEAR>
+bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定
 		return false;
-	m_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
+	m_size.store(static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef));
 	return true;
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_free(void* p)
+template<class AUTO_CLEAR>
+bool lfStackAllocator<AUTO_CLEAR>::_free(void* p)
 {
 	//メモリ確保数を更新
-	--m_allocatedCount;
+	m_allocatedCount.fetch_sub(1);
 	//自動クリア呼び出し
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClear(*this);
@@ -101,65 +104,35 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //----------------------------------------
 //明示的なインスタンス化
 
-//スタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_stackAllocator() \
-	template class stackAllocator<>;
-//※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE>;
+//ロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfStackAllocator() \
+	template class lfStackAllocator<>;
 
-//スマートスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator() \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
-//※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+//スマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfSmartStackAllocator() \
+	template class lfStackAllocator<lfStackAllocatorAutoClear>;
 
-//バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_stackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE>; \
-	template class stackAllocator<>;
-//※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
+//バッファ付きロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfStackAllocator_withBuff(_MAX_SIZE) \
+	template class lfStackAllocator_withBuff<_MAX_SIZE>; \
+	template class lfStackAllocator<>;
 
-//バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
-//※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+//バッファ付きスマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfSmartStackAllocator_withBuff(_MAX_SIZE) \
+	template class lfStackAllocator_withBuff<_MAX_SIZE, lfStackAllocatorAutoClear>; \
+	template class lfStackAllocator<lfStackAllocatorAutoClear>;
 
-//型指定バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_stackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM>; \
-	template class stackAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class stackAllocator<>;
-//※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
+//型指定バッファ付きロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfStackAllocator_withType(T, _NUM) \
+	template class lfStackAllocator_withType<T, _NUM>; \
+	template class lfStackAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class lfStackAllocator<>;
 
-//型指定バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
-//※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+//型指定バッファ付きスマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
+#define GASHA_INSTANCING_lfSmartStackAllocator_withType(T, _NUM) \
+	template class lfStackAllocator_withType<T, _NUM, lfStackAllocatorAutoClear>; \
+	template class lfStackAllocator_withBuff<sizeof(T)* _NUM, lfStackAllocatorAutoClear>; \
+	template class lfStackAllocator<lfStackAllocatorAutoClear>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
@@ -208,6 +181,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
+#endif//GASHA_INCLUDED_LF_STACK_ALLOCATOR_CPP_H
 
 // End of file

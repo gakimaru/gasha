@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_STACK_ALLOCATOR_INL
-#define GASHA_INCLUDED_STACK_ALLOCATOR_INL
+#ifndef GASHA_INCLUDED_LF_STACK_ALLOCATOR_INL
+#define GASHA_INCLUDED_LF_STACK_ALLOCATOR_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// stack_allocator.inl
-// スタックアロケータ【インライン関数／テンプレート関数定義部】
+// lf_stack_allocator.inl
+// ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -15,7 +15,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/stack_allocator.h>//スタックアロケータ【宣言部】
+#include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
 #include <stdio.h>//sprintf()
@@ -36,46 +36,48 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//スタックアロケータ補助クラス
+//ロックフリースタックアロケータ補助クラス
 
 //----------------------------------------
 //スタック自動クリア
 
 //自動クリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void stackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR>
+inline void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
 {
-	if (allocator.m_allocatedCount == 0)
-		allocator.m_size = 0;
+	typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
+	if (allocator.m_allocatedCount.load() == 0)
+	{
+		allocator.m_size.compare_exchange_weak(now_size, 0);
+	}
 }
 
 //----------------------------------------
 //スタック自動クリア（ダミー）
 
 //自動クリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void dummyStackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR>
+inline void dummyLfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
 {
 	//何もしない
 }
 
 //--------------------------------------------------------------------------------
-//スタックアロケータクラス
+//ロックフリースタックアロケータクラス
 
 //メモリ解放
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
+template<class AUTO_CLEAR>
+inline bool lfStackAllocator<AUTO_CLEAR>::free(void* p)
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T, typename...Tx>
-T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObj(Tx&&... args)
+T* lfStackAllocator<AUTO_CLEAR>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -83,9 +85,9 @@ T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObj(Tx&&... args)
 	return new(p)T(std::forward<Tx>(args)...);
 }
 //※配列用
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T, typename...Tx>
-T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
+T* lfStackAllocator<AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -102,11 +104,10 @@ T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&..
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
+bool lfStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定
 		return false;
 	p->~T();//デストラクタ呼び出し
@@ -114,11 +115,10 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
+bool lfStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!inUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
@@ -132,28 +132,26 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t 
 
 //使用中のサイズを指定位置に戻す
 //※位置指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(const size_type pos)
+template<class AUTO_CLEAR>
+inline bool  lfStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
 {
 	return rewind(m_buffRef + pos);
 }
 
 //メモリクリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
+template<class AUTO_CLEAR>
+void  lfStackAllocator<AUTO_CLEAR>::clear()
 {
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	_clear();
 }
 
 //デバッグ情報作成
-template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
+template<class AUTO_CLEAR>
+std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 {
 #ifdef GASHA_HAS_DEBUG_FEATURE
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
+	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
 	size += sprintf(message + size, "----------\n");
 	return size;
@@ -164,33 +162,32 @@ std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 }
 
 //メモリクリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clear()
+template<class AUTO_CLEAR>
+void  lfStackAllocator<AUTO_CLEAR>::_clear()
 {
 	//使用中のサイズとメモリ確保数を更新
-	m_size = 0;
-	m_allocatedCount = 0;
+	m_size.store(0);
+	m_allocatedCount.store(0);
 }
 
 //ポインタが範囲内か判定
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::inUsingRange(void* p)
+template<class AUTO_CLEAR>
+inline bool lfStackAllocator<AUTO_CLEAR>::inUsingRange(void* p)
 {
 	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
-	//if (p < m_buffRef || p > m_buffRef + m_size)//範囲外のポインタなら終了 ※0バイトのアロケートに対応する場合はこっち（範囲外のアドレスを許してしまう可能性や、クリア後に先頭アドレスの解放を許してしまう可能性があり、危険）
 	{
-	#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 		static const bool IS_INVALID_POINTER = false;
 		assert(IS_INVALID_POINTER);
-	#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 		return false;
 	}
 	return true;
 }
 
 //コンストラクタ
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const std::size_t max_size) :
+template<class AUTO_CLEAR>
+inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
@@ -199,64 +196,64 @@ inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const s
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
 }
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(T* buff, const std::size_t num) :
-	stackAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
+inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(T* buff, const std::size_t num) :
+	lfStackAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
 {}
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class AUTO_CLEAR>
 template<typename T, std::size_t N>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(T(&buff)[N]) :
-stackAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
+inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(T(&buff)[N]) :
+lfStackAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::~stackAllocator()
+template<class AUTO_CLEAR>
+inline lfStackAllocator<AUTO_CLEAR>::~lfStackAllocator()
 {}
 
 //--------------------------------------------------------------------------------
-//バッファ付きスタックアロケータクラス
+//バッファ付きロックフリースタックアロケータクラス
 
 //コンストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, AUTO_CLEAR>::stackAllocator_withBuff() :
-stackAllocator<LOCK_TYPE, AUTO_CLEAR>(m_buff, MAX_SIZE)
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
+inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::lfStackAllocator_withBuff() :
+lfStackAllocator<AUTO_CLEAR>(m_buff, MAX_SIZE)
 {}
 
 //デストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, AUTO_CLEAR>::~stackAllocator_withBuff()
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
+inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::~lfStackAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
-//バッファ付きスタックアロケータクラス
+//バッファ付きロックフリースタックアロケータクラス
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR>
 template<typename... Tx>
-inline typename stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type* stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::newDefault(Tx&&... args)
+inline typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type* lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::newDefault(Tx&&... args)
 {
 	return this->template newObj<value_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::deleteDefault(typename stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type*& p)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+inline bool lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::deleteDefault(typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type*& p)
 {
 	return this->template deleteObj<value_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::stackAllocator_withType() :
-	stackAllocator<LOCK_TYPE, AUTO_CLEAR>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::lfStackAllocator_withType() :
+	lfStackAllocator<AUTO_CLEAR>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::~stackAllocator_withType()
+template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::~lfStackAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
@@ -264,6 +261,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_STACK_ALLOCATOR_INL
+#endif//GASHA_INCLUDED_LF_STACK_ALLOCATOR_INL
 
 // End of file
