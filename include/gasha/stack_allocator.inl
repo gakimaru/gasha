@@ -63,7 +63,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
 }
@@ -103,7 +103,7 @@ template<typename T>
 bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	p->~T();//デストラクタ呼び出し
 	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
@@ -115,7 +115,7 @@ template<typename T>
 bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
 	for (std::size_t i = 0; i < num; ++i, ++obj)
@@ -136,16 +136,9 @@ inline bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(const size_type pos)
 
 //メモリクリア
 template<class LOCK_TYPE, class AUTO_CLEAR>
-void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
+inline void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	_clear();
-}
-
-//メモリクリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clear()
-{
 	//使用中のサイズとメモリ確保数を更新
 	m_size = 0;
 	m_allocatedCount = 0;
@@ -153,7 +146,7 @@ void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clear()
 
 //ポインタが範囲内か判定
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::inUsingRange(void* p)
+inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
 {
 	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
 	//if (p < m_buffRef || p > m_buffRef + m_size)//範囲外のポインタなら終了 ※0バイトのアロケートに対応する場合はこっち（範囲外のアドレスを許してしまう可能性や、クリア後に先頭アドレスの解放を許してしまう可能性があり、危険）

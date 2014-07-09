@@ -74,7 +74,7 @@ private:
 	bool _free(void* p);
 
 	//ポインタが範囲内か判定
-	inline bool inUsingRange(void* p);
+	inline bool isInUsingRange(void* p);
 
 public:
 	//コンストラクタ

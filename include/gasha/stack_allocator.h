@@ -121,12 +121,8 @@ private:
 	//※ロック取得は呼び出し元で行う
 	bool _free(void* p);
 
-	//メモリクリア（共通処理）
-	//※ロック取得は呼び出し元で行う
-	inline void _clear();
-
 	//ポインタが範囲内か判定
-	inline bool inUsingRange(void* p);
+	inline bool isInUsingRange(void* p);
 
 public:
 	//コンストラクタ

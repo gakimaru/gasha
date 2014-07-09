@@ -21,8 +21,6 @@
 
 #include <gasha/stack_allocator.inl>//スタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <utility>//C++11 std::move
-
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -69,7 +67,7 @@ void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const
 	}
 	
 	//使用中のサイズとメモリ確保数を更新
-	m_size += alloc_size;
+	m_size = new_size;
 	++m_allocatedCount;
 
 	//空き領域を確保
@@ -82,7 +80,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	m_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
 	return true;

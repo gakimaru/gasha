@@ -26,6 +26,7 @@ enum allocateOrder_t
 {
 	ALLOC_ASC  = 0,//正順アロケート
 	ALLOC_DESC = 1,//逆順アロケート
+	ALLOC_UNKNOWN_ORDER = -1,//アロケート方向不明
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

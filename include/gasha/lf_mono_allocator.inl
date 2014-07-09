@@ -37,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリ解放
 inline bool lfMonoAllocator::free(void* p)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
 }
@@ -73,7 +73,7 @@ T* lfMonoAllocator::newArray(const std::size_t num, Tx&&... args)
 template<typename T>
 bool lfMonoAllocator::deleteObj(T* p)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	p->~T();//デストラクタ呼び出し
 	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
@@ -83,7 +83,7 @@ bool lfMonoAllocator::deleteObj(T* p)
 template<typename T>
 bool lfMonoAllocator::deleteArray(T* p, const std::size_t num)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
 	for (std::size_t i = 0; i < num; ++i, ++obj)
@@ -95,7 +95,7 @@ bool lfMonoAllocator::deleteArray(T* p, const std::size_t num)
 }
 
 //ポインタが範囲内か判定
-inline bool lfMonoAllocator::inUsingRange(void* p)
+inline bool lfMonoAllocator::isInUsingRange(void* p)
 {
 	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
 	{

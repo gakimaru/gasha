@@ -21,8 +21,6 @@
 
 #include <gasha/lf_stack_allocator.inl>//ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <utility>//C++11 std::move
-
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -85,7 +83,7 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 template<class AUTO_CLEAR>
 bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	m_size.store(static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef));
 	return true;

@@ -23,7 +23,6 @@
 
 #include <gasha/type_traits.h>//型特性ユーティリティ
 
-#include <utility>//C++11 std::move
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避

@@ -119,11 +119,8 @@ private:
 	//メモリ解放（共通処理）
 	bool _free(void* p);
 
-	//メモリクリア（共通処理）
-	inline void _clear();
-
 	//ポインタが範囲内か判定
-	inline bool inUsingRange(void* p);
+	inline bool isInUsingRange(void* p);
 
 public:
 	//コンストラクタ

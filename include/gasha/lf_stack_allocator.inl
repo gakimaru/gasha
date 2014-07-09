@@ -63,7 +63,7 @@ inline void dummyLfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEA
 template<class AUTO_CLEAR>
 inline bool lfStackAllocator<AUTO_CLEAR>::free(void* p)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
 }
@@ -102,7 +102,7 @@ template<class AUTO_CLEAR>
 template<typename T>
 bool lfStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	p->~T();//デストラクタ呼び出し
 	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
@@ -113,7 +113,7 @@ template<class AUTO_CLEAR>
 template<typename T>
 bool lfStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
 	for (std::size_t i = 0; i < num; ++i, ++obj)
@@ -127,21 +127,14 @@ bool lfStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 //使用中のサイズを指定位置に戻す
 //※位置指定版
 template<class AUTO_CLEAR>
-inline bool  lfStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
+inline bool lfStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
 {
 	return rewind(m_buffRef + pos);
 }
 
 //メモリクリア
 template<class AUTO_CLEAR>
-void  lfStackAllocator<AUTO_CLEAR>::clear()
-{
-	_clear();
-}
-
-//メモリクリア
-template<class AUTO_CLEAR>
-void  lfStackAllocator<AUTO_CLEAR>::_clear()
+inline void lfStackAllocator<AUTO_CLEAR>::clear()
 {
 	//使用中のサイズとメモリ確保数を更新
 	m_size.store(0);
@@ -150,7 +143,7 @@ void  lfStackAllocator<AUTO_CLEAR>::_clear()
 
 //ポインタが範囲内か判定
 template<class AUTO_CLEAR>
-inline bool lfStackAllocator<AUTO_CLEAR>::inUsingRange(void* p)
+inline bool lfStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
 {
 	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
 	{

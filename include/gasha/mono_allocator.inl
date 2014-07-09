@@ -39,7 +39,7 @@ template<class LOCK_TYPE>
 inline bool monoAllocator<LOCK_TYPE>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
 }
@@ -79,7 +79,7 @@ template<typename T>
 bool monoAllocator<LOCK_TYPE>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	p->~T();//デストラクタ呼び出し
 	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
@@ -91,7 +91,7 @@ template<typename T>
 bool monoAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
+	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
 	for (std::size_t i = 0; i < num; ++i, ++obj)
@@ -104,7 +104,7 @@ bool monoAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 
 //ポインタが範囲内か判定
 template<class LOCK_TYPE>
-inline bool monoAllocator<LOCK_TYPE>::inUsingRange(void* p)
+inline bool monoAllocator<LOCK_TYPE>::isInUsingRange(void* p)
 {
 	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
 	{

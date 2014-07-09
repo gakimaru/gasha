@@ -12,221 +12,260 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/allocator_common.h>//メモリアロケータ共通設定
+#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/dummy_lock.h>//ダミーロック
+
+#include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint32_t
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
-//--------------------------------------------------------------------------------
-//双方向スタックアロケータ
-//--------------------------------------------------------------------------------
+//クラス宣言
+template<class LOCK_TYPE, class AUTO_CLEAR>
+class dualStackAllocator;
 
-//--------------------
-//双方向スタックアロケータクラス
-template<std::size_t _STACK_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-class dualStackAllocator
+//--------------------------------------------------------------------------------
+//双方向スタックアロケータ補助クラス
+
+//----------------------------------------
+//双方向スタック自動クリア
+class dualStackAllocatorAutoClear
 {
 public:
-	//定数
-	static const std::size_t STACK_SIZE = _STACK_SIZE;//スタックサイズ
+	//正順方向の自動クリア
+	template<class LOCK_TYPE, class AUTO_CLEAR>
+	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	//逆順方向の自動クリア
+	template<class LOCK_TYPE, class AUTO_CLEAR>
+	inline void autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+};
+
+//----------------------------------------
+//双方向スタック自動クリア（ダミー）
+//※何もしない
+class dummyDualStackAllocatorAutoClear
+{
+public:
+	//正順方向の自動クリア
+	template<class LOCK_TYPE, class AUTO_CLEAR>
+	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	//逆順方向の自動クリア
+	template<class LOCK_TYPE, class AUTO_CLEAR>
+	inline void autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+};
+
+//--------------------------------------------------------------------------------
+//双方向スタックアロケータクラス
+//※双方向スタック用のバッファをコンストラクタで受け渡して使用
+//※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
+template<class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
+class dualStackAllocator
+{
+	friend dualStackAllocatorAutoClear;//双方向スタック自動クリア
+public:
+	//型
+	typedef LOCK_TYPE lock_type;//ロック型
+	typedef AUTO_CLEAR auto_clear_type;//双方向スタック自動クリア型
+	typedef std::uint32_t size_type;//サイズ型
 
 public:
 	//アクセッサ
-	std::size_t getTotal() const override { return m_buffSize; }//全体のメモリ量を取得
-	std::size_t getUsed() const override { return m_usedN + m_buffSize - m_usedR; }//使用中のメモリ量を取得
-	std::size_t getRemain() const override { return m_usedR - m_usedN; }//残りのメモリ量を取得
-	E_ORDERED getDefaultOrdered() const { return m_defaultOrdered; }//デフォルトのスタック順を取得
-	void setDefaultOrdered(const E_ORDERED ordered)//デフォルトのスタック順を更新
-	{
-		m_defaultOrdered = ordered == REVERSE ? REVERSE : NORMAL;
-	}
-	const byte* getBuff() const { return m_buffPtr; }//バッファ取得を取得
-	const byte* getNowPtrN() const { return m_buffPtr + m_usedN; }//現在のバッファ位置（正順）を取得
-	const byte* getNowPtrR() const { return m_buffPtr + m_usedR; }//現在のバッファ位置（逆順）を取得
-	const byte* getNowPtrD() const { return getNowPtr(m_defaultOrdered); }//現在のバッファ位置を取得
-	const byte* getNowPtr(const E_ORDERED ordered) const { return ordered == DEFAULT ? getNowPtrD() : ordered == REVERSE ? getNowPtrR() : getNowPtrN(); }//現在のバッファ位置を取得
-	const byte* getNowPtr() const override { return getNowPtrD(); }//現在のバッファ位置を取得
-	marker_t getMarkerN() const { return m_usedN; }//現在のマーカー（正順）を取得
-	marker_t getMarkerR() const { return m_usedR; }//現在のマーカー（逆順）を取得
-	marker_t getMarkerD() const { return getMarker(m_defaultOrdered); }//現在のマーカーを取得
-	marker_t getMarker(const E_ORDERED ordered) const { return ordered == DEFAULT ? getMarkerD() : ordered == REVERSE ? getMarkerR() : getMarkerN(); }//現在のマーカーを取得
-	marker_t getMarker() const override { return getMarkerD(); }//現在のマーカーを取得
+	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
+	inline size_type size() const { return  m_size; }//使用中のサイズ（バイト数）
+	inline size_type sizeAsc() const { return  m_sizeAsc; }//正順で使用中のサイズ（バイト数）
+	inline size_type sizeDesc() const { return  m_sizeDesc; }//逆順で使用中のサイズ（バイト数）
+	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
+	inline size_type allocatedCountAsc() const { return m_allocatedCountAsc; }//正順でアロケート中の数
+	inline size_type allocatedCountDesc() const { return m_allocatedCountDesc; }//逆順でアロケート中の数
+	inline size_type allocatedCount() const { return m_allocatedCountAsc + m_allocatedCountDesc; }//アロケート中の数
+	inline allocateOrder_t allocateOrder() const { return m_allocateOrder; }//現在のアロケート方向
+	inline void setAllocateOrder(const allocateOrder_t order){ m_allocateOrder = order; }//現在のアロケート方向を変更
+	inline void reversewAllocateOrder(){ m_allocateOrder = m_allocateOrder == ALLOC_ASC ? ALLOC_DESC : ALLOC_ASC; }//現在のアロケート方向を逆にする
+
 public:
 	//メソッド
-	//メモリ確保（正順）
-	void* allocN(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
-	{
-		const uintptr_t now_ptr = reinterpret_cast<uintptr_t>(m_buffPtr)+m_usedN;//現在のポインタ位置算出
-		const uintptr_t align_diff = align > 0 ? now_ptr % align == 0 ? 0 : align - now_ptr % align : 0;//アラインメント計算
-		const marker_t next_used = m_usedN + align_diff + size;//次のマーカー算出
-		if (next_used > m_usedR)//メモリオーバーチェック（符号なしなので、範囲チェックは大判定のみでOK）
-		{
-			printf("normal-stack overflow!(size=%d+align=%d, remain=%d)\n", size, align_diff, m_usedR - m_usedN);
-			return nullptr;
-		}
-		const uintptr_t alloc_ptr = now_ptr + align_diff;//メモリ確保アドレス算出
-		m_usedN = next_used;//マーカー更新
-		return reinterpret_cast<void*>(alloc_ptr);
-	}
-	//メモリ確保（逆順）
-	void* allocR(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
-	{
-		const uintptr_t now_ptr = reinterpret_cast<uintptr_t>(m_buffPtr)+m_usedR;//現在のポインタ位置算出
-		const uintptr_t alloc_ptr_tmp = now_ptr - size;//メモリ確保アドレス算出（暫定）
-		const uintptr_t align_diff = align > 0 ? alloc_ptr_tmp % align == 0 ? 0 : alloc_ptr_tmp % align : 0;//アラインメント計算
-		const marker_t next_used = m_usedR - size - align_diff;//次のマーカー算出
-		if (next_used < m_usedN || next_used > m_buffSize)//メモリオーバーチェック（オーバーフローして値が大きくなる可能性もチェック）
-		{
-			printf("reversed-stack overflow!(size=%d+align=%d, remain=%d)\n", size, align_diff, m_usedR - m_usedN);
-			return nullptr;
-		}
-		const uintptr_t alloc_ptr = now_ptr - size - align_diff;//メモリ確保アドレス算出
-		m_usedR = next_used;//マーカー更新
-		return reinterpret_cast<void*>(alloc_ptr);
-	}
 	//メモリ確保
-	void* allocD(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
-	{
-		return alloc(m_defaultOrdered, size, align);
-	}
-	//メモリ確保
-	void* alloc(const E_ORDERED ordered, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN)
-	{
-		return ordered == DEFAULT ? allocD(size, align) : ordered == REVERSE ? allocR(size, align) : allocN(size, align);
-	}
-	//メモリ確保
-	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN) override
-	{
-		return allocD(size, align);
-	}
-	//メモリを以前のマーカーに戻す（正順）
-	//※マーカー指定版
-	void backN(const marker_t marker_n)
-	{
-		if (marker_n > m_usedR)//符号なしなので、範囲チェックは大判定のみでOK
-			return;
-		m_usedN = marker_n;
-	}
-	//メモリを以前のマーカーに戻す（正順）
+	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
+	//※アロケート方向指定版
+	inline  void* allocOrdinal(const allocateOrder_t order, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
+
+	//メモリ解放
+	//※実際にはメモリを解放しない（できない）ので注意。
+	//※アロケート中の数を減らすだけ。
+	//※アロケート中の数を見て、正順か逆順のバッファをクリアしても良いかどうかの判断に用いる。
+	inline bool free(void* p);
+
+	//メモリ確保とコンストラクタ呼び出し
+	template<typename T, typename...Tx>
+	inline T* newObj(Tx&&... args);
+	//※アロケート方向指定版
+	template<typename T, typename...Tx>
+	T* newObjOrdinal(const allocateOrder_t order, Tx&&... args);
+	//※配列用
+	template<typename T, typename...Tx>
+	inline T* newArray(const std::size_t num, Tx&&... args);
+	//※配列用アロケート方向指定版
+	template<typename T, typename...Tx>
+	T* newArrayOrdinal(const allocateOrder_t order, const std::size_t num, Tx&&... args);
+
+	//メモリ解放とデストラクタ呼び出し
+	template<typename T>
+	bool deleteObj(T* p);
+	//※配列用（要素数の指定が必要な点に注意）
+	template<typename T>
+	bool deleteArray(T* p, const std::size_t num);
+
+	//使用中のサイズを指定位置に戻す
+	//※【注意】メモリ確保状態（アロケート中の数）と無関係に実行するので注意
+	//※【注意】自動クリア（スマート双方向スタック）使用時には使用禁止
+	//　（メモリ解放時のアドレスが不正なアドレスと見なされて、アロケート中の数が正しく更新されなくなり、
+	//　　自動クリアが機能しなくなるため）
+	//※位置指定版
+	inline bool rewind(const size_type pos);
+	//※位置指定とアロケート方向指定版
+	inline bool rewindOrdinal(const allocateOrder_t order, const size_type pos);
 	//※ポインタ指定版
-	void backN(const void* p)
-	{
-		const marker_t marker = reinterpret_cast<uintptr_t>(p)-reinterpret_cast<uintptr_t>(m_buffPtr);
-		backN(marker);
-	}
-	//メモリを以前のマーカーに戻す（逆順）
-	//※マーカー指定版
-	void backR(const marker_t marker_r)
-	{
-		if (marker_r < m_usedN || marker_r > m_buffSize)//メモリオーバーチェック
-			return;
-		m_usedR = marker_r;
-	}
-	//メモリを以前のマーカーに戻す（逆順）
-	//※ポインタ指定版
-	void backR(const void* p)
-	{
-		const marker_t marker = reinterpret_cast<uintptr_t>(p)-reinterpret_cast<uintptr_t>(m_buffPtr);
-		backR(marker);
-	}
-	//メモリを以前のマーカーに戻す
-	//※マーカー指定版
-	void backD(const marker_t marker)
-	{
-		back(m_defaultOrdered, marker);
-	}
-	//メモリを以前のマーカーに戻す
-	//※ポインタ指定版
-	void backD(const void* p)
-	{
-		back(m_defaultOrdered, p);
-	}
-	//メモリを以前のマーカーに戻す
-	//※マーカー指定版
-	void back(const E_ORDERED ordered, const marker_t marker)
-	{
-		ordered == DEFAULT ? backD(marker) : ordered == REVERSE ? backR(marker) : backN(marker);
-	}
-	//メモリを以前のマーカーに戻す
-	//※ポインタ指定版
-	void back(const E_ORDERED ordered, const void* p)
-	{
-		ordered == DEFAULT ? backD(p) : ordered == REVERSE ? backR(p) : backN(p);
-	}
-	//メモリを以前のマーカーに戻す
-	//※マーカー指定版
-	void back(const marker_t marker) override
-	{
-		backD(marker);
-	}
-	//メモリを以前のマーカーに戻す
-	//※ポインタ指定版
-	void back(const void* p) override
-	{
-		backD(p);
-	}
-	//メモリ破棄（正順）
-	void clearN()
-	{
-		m_usedN = 0;
-	}
-	//メモリ破棄（逆順）
-	void clearR()
-	{
-		m_usedR = m_buffSize;
-	}
-	//メモリ破棄
-	void clearD()
-	{
-		clear(m_defaultOrdered);
-	}
-	//メモリ破棄（両方）
-	void clearNR()
-	{
-		clearN();
-		clearR();
-	}
-	//メモリ破棄
-	void clear(const E_ORDERED ordered)
-	{
-		ordered == DEFAULT ? clearD() : ordered == REVERSE ? clearR() : clearN();
-	}
-	//メモリ破棄
-	void clear() override
-	{
-		clearD();
-	}
-	//メモリ破棄（全て）
-	void clearAll() override
-	{
-		clearNR();
-	}
+	inline bool rewind(void* p);
+
+	//メモリクリア
+	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
+	//※全て初期状態にする
+	inline void clearAll();
+	//※現在のアロケート方向のみ
+	inline void clear();
+	//※アロケート方向指定
+	inline void clearOrdinal(const allocateOrder_t order);
+	
+	//デバッグ情報作成
+	//※十分なサイズのバッファを渡す必要あり。
+	//※使用したバッファのサイズを返す。
+	//※作成中、ロックを取得する。
+	std::size_t debugInfo(char* message);
+
+private:
+	//正順メモリ確保（共通処理）
+	void* _allocAsc(const std::size_t size, const std::size_t align);
+	//逆順メモリ確保（共通処理）
+	void* _allocDesc(const std::size_t size, const std::size_t align);
+	
+	//正順メモリ解放（共通処理）
+	//※ロック取得は呼び出し元で行う
+	bool _freeAsc(void* p);
+	//逆順メモリ解放（共通処理）
+	//※ロック取得は呼び出し元で行う
+	bool _freeDesc(void* p);
+
+	//正順に使用中のサイズを指定位置に戻す（共通処理）
+	bool _rewindAsc(void* p);
+	//逆順に使用中のサイズを指定位置に戻す（共通処理）
+	bool _rewindDesc(void* p);
+
+	//メモリクリア（共通処理）
+	//※ロック取得は呼び出し元で行う
+	inline void _clearAsc();
+	inline void _clearDesc();
+
+	//ポインタが範囲内か判定
+	//※範囲に含む方向を返す。どこにも含まれない場合は ALLOC_UNKNOWN_ORDER を返す。
+	inline allocateOrder_t isInUsingRange(void* p);
+
 public:
 	//コンストラクタ
-	CDualStackAllocator(void* buff_p, const std::size_t buff_size, const E_ORDERED default_ordered = NORMAL) :
-		m_buffPtr(reinterpret_cast<byte*>(buff_p)),//バッファ先頭アドレス
-		m_buffSize(buff_size),//バッファサイズ
-		m_usedN(0),//マーカー（正順）
-		m_usedR(buff_size)//マーカー（逆順）
-	{
-		setDefaultOrdered(default_ordered);//デフォルトのスタック順を補正
-	}
+	inline dualStackAllocator(void* buff, const std::size_t max_size);
+	template<typename T>
+	inline dualStackAllocator(T* buff, const std::size_t num);
+	template<typename T, std::size_t N>
+	inline dualStackAllocator(T (&buff)[N]);
 	//デストラクタ
-	~CDualStackAllocator() override
-	{}
+	inline ~dualStackAllocator();
+
 private:
 	//フィールド
-	byte* m_buffPtr;//バッファ先頭アドレス
-	const std::size_t m_buffSize;//バッファサイズ
-	marker_t m_usedN;//マーカー（正順）
-	marker_t m_usedR;//マーカー（逆順）
-	E_ORDERED m_defaultOrdered;//デフォルトのスタック順
+	char* m_buffRef;//バッファの参照
+	const size_type m_maxSize;//バッファの全体サイズ
+	size_type m_size;//バッファの使用中サイズ（全体）
+	size_type m_sizeAsc;//バッファの使用中サイズ（正順）
+	size_type m_sizeDesc;//バッファの使用中サイズ（逆順）
+	size_type m_allocatedCountAsc;//アロケート中の数(正順)
+	size_type m_allocatedCountDesc;//アロケート中の数(逆順)
+	allocateOrder_t m_allocateOrder;//現在のアロケート方向
+	lock_type m_lock;//ロックオブジェクト
 };
+
+//--------------------------------------------------------------------------------
+//バッファ付き双方向スタックアロケータクラス
+template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
+class dualStackAllocator_withBuff : public dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>
+{
+	//定数
+	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
+public:
+	//コンストラクタ
+	inline dualStackAllocator_withBuff();
+	//デストラクタ
+	inline ~dualStackAllocator_withBuff();
+private:
+	char m_buff[MAX_SIZE];//バッファ
+};
+//----------------------------------------
+//※バッファを基本型とその個数で指定
+//※アラインメント分余計にバッファを確保するので注意
+template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
+class dualStackAllocator_withType : public dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>
+{
+public:
+	//型
+	typedef T value_type;//値の型
+public:
+	//定数
+	static const std::size_t VALUE_ALIGN = alignof(value_type);//基本型のアラインメント
+	static const std::size_t VALUE_SIZE = sizeof(value_type);//基本型のサイズ
+	static const std::size_t VALUE_NUM = _NUM;//基本型の確保可能数
+	static const std::size_t MAX_SIZE = VALUE_SIZE * VALUE_NUM + VALUE_ALIGN;//バッファの全体サイズ ※アラインメント分余計に確保する
+public:
+	//デフォルト型のメモリ確保とコンストラクタ呼び出し
+	template<typename... Tx>
+	inline value_type* newDefault(Tx&&... args);
+	template<typename... Tx>
+	inline value_type* newDefaultOrdinal(const allocateOrder_t order, Tx&&... args);
+	
+	//デフォルト型のメモリ解放とデストラクタ呼び出し
+	inline bool deleteDefault(value_type*& p);
+public:
+	//コンストラクタ
+	inline dualStackAllocator_withType();
+	//デストラクタ
+	inline ~dualStackAllocator_withType();
+private:
+	GASHA_ALIGNAS_OF(value_type) char m_buff[MAX_SIZE];//バッファ
+};
+
+//----------------------------------------
+//双方向スタックアロケータ別名定義：スマート双方向スタックアロケータ
+//※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
+
+//※双方向スタック用のバッファをコンストラクタで受け渡して使用
+template<class LOCK_TYPE = GASHA_ dummyLock>
+using smartDualStackAllocator = dualStackAllocator<LOCK_TYPE, dualStackAllocatorAutoClear>;
+
+//※バッファ付き
+template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+using smartDualStackAllocator_withBuff = dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, dualStackAllocatorAutoClear>;
+
+//※バッファ付き（基本型とその個数で指定）
+template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+using smartDualStackAllocator_withType = dualStackAllocator_withType<T, _SIZE, LOCK_TYPE, dualStackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
-
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/doual_stack_allocator.inl>
+#include <gasha/dual_stack_allocator.inl>
+
+//.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
+#ifdef GASHA_DUAL_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/dual_stack_allocator.cpp.h>
+#endif//GASHA_DUAL_STACK_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
 #endif//GASHA_INCLUDED_DUAL_STACK_ALLOCATOR_H
 
