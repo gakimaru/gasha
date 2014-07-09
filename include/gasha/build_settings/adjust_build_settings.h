@@ -193,6 +193,34 @@
 #endif//GASHA_STRNCPY_FAST_USE_SSE4_2
 
 //--------------------------------------------------------------------------------
+//【スタックアロケータ】
+
+#if defined(GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
+//【ロックフリースタックアロケータ】
+
+#if defined(GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
+//【単一アロケータ】
+
+#if defined(GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
+//【ロックフリー単一アロケータ】
+
+#if defined(GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
 //【プールアロケータ】
 
 #if defined(GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)

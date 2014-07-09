@@ -29,10 +29,6 @@
 
 #include <new>//配置new,配置delete用
 
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -144,23 +140,6 @@ void  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	_clear();
-}
-
-//デバッグ情報作成
-template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
-{
-#ifdef GASHA_HAS_DEBUG_FEATURE
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
-	size += sprintf(message + size, "----------\n");
-	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //メモリクリア

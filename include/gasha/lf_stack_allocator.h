@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_LF_STACK_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
-//lf_stack_allocator.h
+// lf_stack_allocator.h
 // ロックフリースタックアロケータ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -18,15 +18,6 @@
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
 #include <atomic>//C++11 std::atomic
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <functional> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <functional>//std::function
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -214,9 +205,6 @@ template<typename T, std::size_t _SIZE>
 using lfSmartStackAllocator_withType = lfStackAllocator_withType<T, _SIZE, lfStackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/lf_stack_allocator.inl>

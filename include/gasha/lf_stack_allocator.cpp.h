@@ -34,6 +34,10 @@
 
 #include <new>//配置new,配置delete用
 
+//【VC++】sprintf を使用すると、error C4996 が発生する
+//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+#pragma warning(disable: 4996)//C4996を抑える
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -87,6 +91,22 @@ bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
 	return true;
 }
 
+//デバッグ情報作成
+template<class AUTO_CLEAR>
+std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
+{
+#ifdef GASHA_HAS_DEBUG_FEATURE
+	std::size_t size = 0;
+	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
+	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
+	size += sprintf(message + size, "----------\n");
+	return size;
+#else//GASHA_HAS_DEBUG_FEATURE
+	message[0] = '\0';
+	return 0;
+#endif//GASHA_HAS_DEBUG_FEATURE
+}
+
 //メモリ解放（共通処理）
 template<class AUTO_CLEAR>
 bool lfStackAllocator<AUTO_CLEAR>::_free(void* p)
@@ -112,6 +132,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_lfSmartStackAllocator() \
 	template class lfStackAllocator<lfStackAllocatorAutoClear>;
 
+#if 0//不要
 //バッファ付きロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfStackAllocator_withBuff(_MAX_SIZE) \
 	template class lfStackAllocator_withBuff<_MAX_SIZE>; \
@@ -133,6 +154,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class lfStackAllocator_withType<T, _NUM, lfStackAllocatorAutoClear>; \
 	template class lfStackAllocator_withBuff<sizeof(T)* _NUM, lfStackAllocatorAutoClear>; \
 	template class lfStackAllocator<lfStackAllocatorAutoClear>;
+#endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

@@ -170,6 +170,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_lfPoolAllocator(_MAX_POOL_SIZE) \
 	template class lfPoolAllocator<_MAX_POOL_SIZE>;
 
+#if 0//不要
 //バッファ付きロックフリープールアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfPoolAllocator_withBuff(_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN) \
 	template class lfPoolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN>; \
@@ -180,6 +181,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class lfPoolAllocator_withType<T, _POOL_SIZE>; \
 	template class lfPoolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T)>; \
 	template class lfPoolAllocator<_POOL_SIZE>;
+#endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

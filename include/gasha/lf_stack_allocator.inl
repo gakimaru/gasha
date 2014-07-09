@@ -29,10 +29,6 @@
 
 #include <new>//配置new,配置delete用
 
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -46,10 +42,8 @@ template<class AUTO_CLEAR>
 inline void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
 {
 	typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
-	if (allocator.m_allocatedCount.load() == 0)
-	{
-		allocator.m_size.compare_exchange_weak(now_size, 0);
-	}
+	if (allocator.m_allocatedCount.load() == 0)//アロケート中の数がない場合
+		allocator.m_size.compare_exchange_strong(now_size, 0);//使用中のバッファサイズをクリア（他のスレッドのアロケートが割り込んでいたら失敗）
 }
 
 //----------------------------------------
@@ -143,22 +137,6 @@ template<class AUTO_CLEAR>
 void  lfStackAllocator<AUTO_CLEAR>::clear()
 {
 	_clear();
-}
-
-//デバッグ情報作成
-template<class AUTO_CLEAR>
-std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
-{
-#ifdef GASHA_HAS_DEBUG_FEATURE
-	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
-	size += sprintf(message + size, "----------\n");
-	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //メモリクリア

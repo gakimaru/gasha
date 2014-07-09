@@ -134,6 +134,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_poolAllocator_withLock(_MAX_POOL_SIZE, LOCK_TYPE) \
 	template class poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>;
 
+#if 0//不要
 //バッファ付きプールアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_poolAllocator_withBuff(_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN) \
@@ -155,6 +156,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>; \
 	template class poolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T), LOCK_TYPE>; \
 	template class poolAllocator<_POOL_SIZE, LOCK_TYPE>;
+#endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

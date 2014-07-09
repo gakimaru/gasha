@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
-#define GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
+#ifndef GASHA_INCLUDED_MONO_ALLOCATOR_CPP_H
+#define GASHA_INCLUDED_MONO_ALLOCATOR_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// stack_allocator.cpp.h
-// スタックアロケータ【関数定義部】
+// mono_allocator.cpp.h
+// 単一アロケータ【関数定義部】
 //
 // ※クラスのインスタンス化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。
@@ -19,7 +19,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/stack_allocator.inl>//スタックアロケータ【インライン関数／テンプレート関数定義部】
+#include <gasha/mono_allocator.inl>//単一アロケータ【インライン関数／テンプレート関数定義部】
+
+#include <gasha/type_traits.inl>//型特性ユーティリティ：toStr()
 
 #include <utility>//C++11 std::move
 
@@ -41,62 +43,48 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//スタックアロケータクラス
+//単一アロケータクラス
 
 //メモリ確保
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
+template<class LOCK_TYPE>
+void* monoAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	if (m_size > 0)//既にメモリ確保中なら失敗
+		return nullptr;
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
 	//※要求サイズが0でも必ずメモリを割り当てる点に注意（ただし、アラインメントは守らない）
 	const std::size_t _size = size == 0 ? 1 : size;
 	const std::size_t _align = size == 0 ? 0 : align;
 	//サイズとアラインメントをチェック
-	size_type now_size = m_size;
-	char* now_ptr = m_buffRef + now_size;
-	char* new_ptr = adjustAlign(now_ptr, _align);
-	const std::size_t padding_size = new_ptr - now_ptr;
+	char* new_ptr = adjustAlign(m_buffRef, _align);
+	const std::size_t padding_size = new_ptr - m_buffRef;
 	const size_type alloc_size = static_cast<size_type>(padding_size + _size);
-	const size_type new_size = now_size + alloc_size;
-	if (new_size > m_maxSize)
+	if (alloc_size > m_maxSize)
 	{
-	#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	#ifdef GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 		static const bool NOT_ENOUGH_SPACE = false;
 		assert(NOT_ENOUGH_SPACE);
-	#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	#endif//GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
 	}
 	
-	//使用中のサイズとメモリ確保数を更新
-	m_size += alloc_size;
-	++m_allocatedCount;
+	//使用中のサイズを更新
+	m_size = alloc_size;
 
 	//空き領域を確保
 	return reinterpret_cast<void*>(new_ptr);
 }
 
-//使用中のサイズを指定位置に戻す
-//※ポインタ指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
-{
-	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!inUsingRange(p))//正しいポインタか判定
-		return false;
-	m_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
-	return true;
-}
-
 //デバッグ情報作成
-template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
+template<class LOCK_TYPE>
+std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message)
 {
 #ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
+	size += sprintf(message + size, "----- Debug Info for monoAllocator -----\n");
+	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, isAllocated=%s\n", m_buffRef, maxSize(), this->size(), remain(), toStr(isAllocated()));
 	size += sprintf(message + size, "----------\n");
 	return size;
 #else//GASHA_HAS_DEBUG_FEATURE
@@ -106,14 +94,11 @@ std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_free(void* p)
+template<class LOCK_TYPE>
+bool monoAllocator<LOCK_TYPE>::_free(void* p)
 {
-	//メモリ確保数を更新
-	--m_allocatedCount;
-	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
-	auto_clear.autoClear(*this);
+	//バッファの使用中サイズを更新
+	m_size = 0;
 	return true;
 }
 
@@ -122,66 +107,36 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //----------------------------------------
 //明示的なインスタンス化
 
-//スタックアロケータの明示的なインスタンス化用マクロ
+//単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
-#define GASHA_INSTANCING_stackAllocator() \
-	template class stackAllocator<>;
+#define GASHA_INSTANCING_monoAllocator() \
+	template class monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE>;
-
-//スマートスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator() \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
-//※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_monoAllocator_withLock(LOCK_TYPE) \
+	template class monoAllocator<LOCK_TYPE>;
 
 #if 0//不要
-//バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
+//バッファ付き単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
-#define GASHA_INSTANCING_stackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE>; \
-	template class stackAllocator<>;
+#define GASHA_INSTANCING_monoAllocator_withBuff(_MAX_SIZE) \
+	template class monoAllocator_withBuff<_MAX_SIZE>; \
+	template class monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_monoAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
+	template class monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
+	template class monoAllocator<LOCK_TYPE>;
 
-//バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
+//型指定バッファ付き単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_monoAllocator_withType(T, _NUM) \
+	template class monoAllocator_withType<T, _NUM>; \
+	template class monoAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
-
-//型指定バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_stackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM>; \
-	template class stackAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class stackAllocator<>;
-//※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
-
-//型指定バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_smartStackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
-//※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_monoAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
+	template class monoAllocator_withType<T, _NUM, LOCK_TYPE>; \
+	template class monoAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
+	template class monoAllocator<LOCK_TYPE>;
 #endif
 
 //--------------------------------------------------------------------------------
@@ -231,6 +186,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
+#endif//GASHA_INCLUDED_MONO_ALLOCATOR_CPP_H
 
 // End of file
