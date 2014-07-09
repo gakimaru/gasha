@@ -80,17 +80,12 @@ void* monoAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::size_t 
 template<class LOCK_TYPE>
 std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for monoAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, isAllocated=%s\n", m_buffRef, maxSize(), this->size(), remain(), toStr(isAllocated()));
 	size += sprintf(message + size, "----------\n");
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //メモリ解放（共通処理）

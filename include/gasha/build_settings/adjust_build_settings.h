@@ -207,6 +207,20 @@
 #endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
+//【双方向スタックアロケータ】
+
+#if defined(GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
+//【ロックフリー双方向スタックアロケータ】
+
+#if defined(GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
 //【単一アロケータ】
 
 #if defined(GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)

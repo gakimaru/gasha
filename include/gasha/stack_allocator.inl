@@ -148,16 +148,14 @@ inline void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
 {
-	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
-	//if (p < m_buffRef || p > m_buffRef + m_size)//範囲外のポインタなら終了 ※0バイトのアロケートに対応する場合はこっち（範囲外のアドレスを許してしまう可能性や、クリア後に先頭アドレスの解放を許してしまう可能性があり、危険）
-	{
-	#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_POINTER = false;
-		assert(IS_INVALID_POINTER);
-	#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
-		return false;
-	}
-	return true;
+	if (p >= m_buffRef && p < m_buffRef + m_size)//範囲内
+		return true;
+	//範囲外のポインタ
+#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	static const bool IS_INVALID_POINTER = false;
+	assert(IS_INVALID_POINTER);
+#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
+	return false;
 }
 
 //コンストラクタ

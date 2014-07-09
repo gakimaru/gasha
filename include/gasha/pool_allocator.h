@@ -64,7 +64,7 @@ public:
 	inline size_type blockSize() const { return m_blockSize; }//ブロックサイズ
 	inline size_type blockAlign() const { return m_blockAlign; }//ブロックのアライメント
 	inline size_type poolSize() const { return m_poolSize; }//プール数（最大）
-	inline size_type size() const { return  m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
+	inline size_type size() const { return m_usingPoolSize * m_blockSize; }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
 	inline size_type usingPoolSize() const { return m_usingPoolSize; }//使用中のプール数
 	inline size_type poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数

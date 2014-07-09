@@ -102,7 +102,6 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, class FUNC>
 std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
@@ -139,10 +138,6 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, c
 	}
 	size += sprintf(message + size, "----------\n");
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //ポインタをインデックスに変換

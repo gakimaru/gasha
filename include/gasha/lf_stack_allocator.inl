@@ -39,11 +39,17 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //自動クリア
 template<class AUTO_CLEAR>
-inline void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
+void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
 {
-	typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
-	if (allocator.m_allocatedCount.load() == 0)//アロケート中の数がない場合
-		allocator.m_size.compare_exchange_strong(now_size, 0);//使用中のバッファサイズをクリア（他のスレッドのアロケートが割り込んでいたら失敗）
+	while(true)
+	{
+		typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
+		const typename lfStackAllocator<AUTO_CLEAR>::size_type new_size = 0;
+		if (allocator.m_allocatedCount.load() > 0)
+			return;
+		if (allocator.m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
+			return;
+	}
 }
 
 //----------------------------------------
@@ -132,28 +138,18 @@ inline bool lfStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
 	return rewind(m_buffRef + pos);
 }
 
-//メモリクリア
-template<class AUTO_CLEAR>
-inline void lfStackAllocator<AUTO_CLEAR>::clear()
-{
-	//使用中のサイズとメモリ確保数を更新
-	m_size.store(0);
-	m_allocatedCount.store(0);
-}
-
 //ポインタが範囲内か判定
 template<class AUTO_CLEAR>
 inline bool lfStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
 {
-	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
-	{
-	#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_POINTER = false;
-		assert(IS_INVALID_POINTER);
-	#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
-		return false;
-	}
-	return true;
+	if (p >= m_buffRef && p < m_buffRef + m_size)//範囲内
+		return true;
+	//範囲外のポインタ
+#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+	static const bool IS_INVALID_POINTER = false;
+	assert(IS_INVALID_POINTER);
+#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+	return false;
 }
 
 //コンストラクタ

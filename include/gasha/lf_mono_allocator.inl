@@ -97,15 +97,14 @@ bool lfMonoAllocator::deleteArray(T* p, const std::size_t num)
 //ポインタが範囲内か判定
 inline bool lfMonoAllocator::isInUsingRange(void* p)
 {
-	if (p < m_buffRef || p >= m_buffRef + m_size)//範囲外のポインタなら終了
-	{
-	#ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_POINTER = false;
-		assert(IS_INVALID_POINTER);
-	#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
-		return false;
-	}
-	return true;
+	if (p >= m_buffRef && p < m_buffRef + m_size)//範囲内
+		return true;
+	//範囲外のポインタ
+#ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
+	static const bool IS_INVALID_POINTER = false;
+	assert(IS_INVALID_POINTER);
+#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
+	return false;
 }
 
 //コンストラクタ

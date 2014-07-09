@@ -55,7 +55,7 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 		size_type now_size = m_size.load();
 		char* now_ptr = m_buffRef + now_size;
 		char* new_ptr = adjustAlign(now_ptr, _align);
-		const std::size_t padding_size = new_ptr - now_ptr;
+		const std::ptrdiff_t padding_size = new_ptr - now_ptr;
 		const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 		const size_type new_size = now_size + alloc_size;
 		if (new_size > m_maxSize)
@@ -68,41 +68,15 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 		}
 
 		//使用中のサイズとメモリ確保数を更新
-		if (m_size.compare_exchange_weak(now_size, new_size))
+		if (m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
 		{
-			m_allocatedCount.fetch_add(1);
+			m_allocatedCount.fetch_add(1);//アロケート数
 
 			//空き領域を確保
 			return reinterpret_cast<void*>(new_ptr);
 		}
 	}
-}
-
-//使用中のサイズを指定位置に戻す
-//※ポインタ指定版
-template<class AUTO_CLEAR>
-bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
-{
-	if (!isInUsingRange(p))//正しいポインタか判定
-		return false;
-	m_size.store(static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef));
-	return true;
-}
-
-//デバッグ情報作成
-template<class AUTO_CLEAR>
-std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
-{
-#ifdef GASHA_HAS_DEBUG_FEATURE
-	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
-	size += sprintf(message + size, "----------\n");
-	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
+	return nullptr;//ダミー
 }
 
 //メモリ解放（共通処理）
@@ -115,6 +89,52 @@ bool lfStackAllocator<AUTO_CLEAR>::_free(void* p)
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClear(*this);
 	return true;
+}
+
+//使用中のサイズを指定位置に戻す
+//※ポインタ指定版
+template<class AUTO_CLEAR>
+bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
+{
+	while(true)
+	{
+		size_type now_size = m_size.load();
+		const size_type new_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
+		if(now_size < new_size)
+			return false;
+		if(m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
+			return true;
+	}
+	return false;//ダミー
+}
+
+//メモリクリア
+template<class AUTO_CLEAR>
+void lfStackAllocator<AUTO_CLEAR>::clear()
+{
+	while(true)
+	{
+		size_type now_size = m_size.load();
+		const size_type now_count = m_allocatedCount.load();
+		const size_type new_size = 0;
+		if(m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
+		{
+			m_allocatedCount.fetch_sub(now_count);//アロケート数
+			return;
+		}
+	}
+	return;//ダミー
+}
+
+//デバッグ情報作成
+template<class AUTO_CLEAR>
+std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
+{
+	std::size_t size = 0;
+	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
+	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
+	size += sprintf(message + size, "----------\n");
+	return size;
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

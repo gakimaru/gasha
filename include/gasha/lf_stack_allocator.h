@@ -35,7 +35,7 @@ class lfStackAllocatorAutoClear
 public:
 	//自動クリア
 	template<class AUTO_CLEAR>
-	inline void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
+	void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
 };
 
 //----------------------------------------
@@ -65,7 +65,7 @@ public:
 public:
 	//アクセッサ
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
-	inline size_type size() const { return  m_size.load(); }//使用中のサイズ（バイト数）
+	inline size_type size() const { return m_size.load(); }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
 	inline size_type allocatedCount() const { return m_allocatedCount.load(); }//アロケート中の数
 
@@ -107,7 +107,7 @@ public:
 	//メモリクリア
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
 	//※初期状態にする
-	inline void clear();
+	void clear();
 	
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。

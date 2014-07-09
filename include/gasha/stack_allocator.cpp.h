@@ -54,7 +54,7 @@ void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const
 	size_type now_size = m_size;
 	char* now_ptr = m_buffRef + now_size;
 	char* new_ptr = adjustAlign(now_ptr, _align);
-	const std::size_t padding_size = new_ptr - now_ptr;
+	const std::ptrdiff_t padding_size = new_ptr - now_ptr;
 	const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 	const size_type new_size = now_size + alloc_size;
 	if (new_size > m_maxSize)
@@ -90,17 +90,12 @@ bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 template<class LOCK_TYPE, class AUTO_CLEAR>
 std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
 	size += sprintf(message + size, "----------\n");
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //メモリ解放（共通処理）

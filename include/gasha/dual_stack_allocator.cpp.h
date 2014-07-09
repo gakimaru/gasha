@@ -45,17 +45,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class LOCK_TYPE, class AUTO_CLEAR>
 std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for dualStackAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, allocatedCountAsc=%d, allocatedCountDesc=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), allocatedCountAsc(), allocatedCountDesc(), allocatedCount());
 	size += sprintf(message + size, "----------\n");
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //正順メモリ確保
@@ -71,7 +66,7 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocAsc(const std::size_t siz
 	size_type now_size = m_sizeAsc;
 	char* now_ptr = m_buffRef + now_size;
 	char* new_ptr = adjustAlign(now_ptr, _align);
-	const std::size_t padding_size = new_ptr - now_ptr;
+	const std::ptrdiff_t padding_size = new_ptr - now_ptr;
 	const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 	const size_type new_size = now_size + alloc_size;
 	const size_type new_size_all = new_size + m_sizeDesc;
@@ -157,9 +152,9 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_rewindAsc(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!isInUsingRange(p))//正しいポインタか判定
-		return false;
 	const size_type new_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
+	if(m_sizeAsc < new_size)
+		return false;
 	const size_type rewind_size = m_sizeAsc - new_size;
 	m_sizeAsc = new_size;
 	m_size -= rewind_size;
@@ -172,9 +167,9 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_rewindDesc(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	if (!isInUsingRange(p))//正しいポインタか判定
-		return false;
 	const size_type new_size = static_cast<size_type>(m_buffRef + m_maxSize - reinterpret_cast<char*>(p));
+	if(m_sizeDesc < new_size)
+		return false;
 	const size_type rewind_size = m_sizeDesc - new_size;
 	m_sizeDesc = new_size;
 	m_size -= new_size;

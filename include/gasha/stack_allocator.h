@@ -66,7 +66,7 @@ public:
 public:
 	//アクセッサ
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
-	inline size_type size() const { return  m_size; }//使用中のサイズ（バイト数）
+	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
 	inline size_type allocatedCount() const { return m_allocatedCount; }//アロケート中の数
 

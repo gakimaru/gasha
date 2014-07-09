@@ -88,7 +88,6 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
 std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for stack -----\n");
@@ -109,10 +108,6 @@ std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 	};
 	size += m_allocator.template debugInfo<stack_t>(message + size, with_detail, print_allocator_node);
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //初期化

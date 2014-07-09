@@ -273,10 +273,13 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearDesc()
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline allocateOrder_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
 {
-	if (p >= m_buffRef && p < m_buffRef + m_sizeAsc)//正順の範囲内か判定
-		return ALLOC_ASC;
-	else if (p >= m_buffRef + m_maxSize - m_sizeDesc && p < m_buffRef + m_maxSize)//逆順の範囲内か判定
-		return ALLOC_DESC;
+	if (p)
+	{
+		if (p >= m_buffRef && p < m_buffRef + m_sizeAsc)//正順の範囲内
+			return ALLOC_ASC;
+		else if (p >= m_buffRef + m_maxSize - m_sizeDesc && p < m_buffRef + m_maxSize)//逆順の範囲内
+			return ALLOC_DESC;
+	}
 	//範囲外のポインタ
 #ifdef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	static const bool IS_INVALID_POINTER = false;

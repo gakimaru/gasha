@@ -101,7 +101,6 @@ template<std::size_t _MAX_POOL_SIZE>
 template<typename T, class FUNC>
 std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
 	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
@@ -147,10 +146,6 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 	}
 	size += sprintf(message + size, "----------\n");
 	return size;
-#else//GASHA_HAS_DEBUG_FEATURE
-	message[0] = '\0';
-	return 0;
-#endif//GASHA_HAS_DEBUG_FEATURE
 }
 
 //ポインタをインデックスに変換
