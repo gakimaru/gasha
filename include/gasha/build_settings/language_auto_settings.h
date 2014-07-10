@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_
 
 //--------------------------------------------------------------------------------
-// language_auto_settings.h
+// build_settings/language_auto_settings.h
 // 言語仕様自動判別・設定
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
@@ -19,32 +19,6 @@
 
 //--------------------------------------------------------------------------------
 //言語機能自動判別・設定
-
-//----------------------------------------
-//関数名取得マクロ対応
-
-//文字列化マクロ
-#define GASHA_TO_STRING(s) #s
-#define GASHA_TO_STRING_EX(s) GASHA_TO_STRING(s)
-
-//関数名取得マクロ
-//【注意】GCCの関数名 __FUNCTION__, __PRETTY_FUNCTION__ は関数なので、
-//　　　　コンパイル時の文字列結合ができない
-#ifdef GASHA_IS_VC
-	#define __PRETTY_FUNCTION__ __FUNCSIG__
-	#define __func__ __FUNCTION__
-#endif//GASHA_IS_VC
-#ifdef GASHA_IS_GCC
-	#define __FUNCSIG__ __PRETTY_FUNCTION__
-	#define __FUNCDNAME__ ""
-#endif//GASHA_IS_GCC
-
-//関数名取得マクロ
-#define GASHA_FUNC_NAME() __PRETTY_FUNCTION__
-
-//ソースファイル名＋行番号取得マクロ
-#define GASHA_FILE_LINE() __FILE__ "(" GASHA_TO_STRING_EX(__LINE__) ")"
-#define GASHA_FILE_LINE_TIME() __FILE__ "(" GASHA_TO_STRING_EX(__LINE__) ")[" __TIMESTAMP__ "]"
 
 //----------------------------------------
 //C++11仕様対応
@@ -491,6 +465,42 @@
 	#define GASHA_ALWAYS_INLINE __attribute__ ((always_inline)) inline
 	#define GASHA_HAS_CAMOUFLAGE_NO_INLINE
 	#define GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
+#endif//GASHA_IS_GCC
+
+//----------------------------------------
+//マクロ対応
+
+//----------------------------------------
+//関数名取得マクロ
+//【注意】GCCの __FUNCTION__, __PRETTY_FUNCTION__ は関数なので、
+//　　　　コンパイル時の文字列結合ができない点に注意
+#ifdef GASHA_IS_VC
+	#define GASHA_HAS_MACRO_FILE
+	#define GASHA_HAS_MACRO_LINE
+	#define GASHA_HAS_MACRO_DATE
+	#define GASHA_HAS_MACRO_TIME
+	#define GASHA_HAS_MACRO_TIMESTAMP
+	#define GASHA_HAS_MACRO_FUNCTION
+	#define GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+	#define GASHA_HAS_CAMOUFLAGE_MACRO_func
+	#define GASHA_HAS_MACRO_FUNCSIG
+	#define GASHA_HAS_MACRO_FUNCDNAME
+	#define __PRETTY_FUNCTION__ __FUNCSIG__
+	#define __func__ __FUNCTION__
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#define GASHA_HAS_MACRO_FILE
+	#define GASHA_HAS_MACRO_LINE
+	#define GASHA_HAS_MACRO_DATE
+	#define GASHA_HAS_MACRO_TIME
+	#define GASHA_HAS_MACRO_TIMESTAMP
+	#define GASHA_HAS_MACRO_FUNCTION
+	#define GASHA_HAS_MACRO_PRETTY_FUNCTION
+	#define GASHA_HAS_MACRO_func
+	#define GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+	#define GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+	#define __FUNCSIG__ __PRETTY_FUNCTION__
+	#define __FUNCDNAME__ ""
 #endif//GASHA_IS_GCC
 
 #endif//GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_

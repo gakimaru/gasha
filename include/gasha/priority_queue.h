@@ -21,6 +21,7 @@
 #include <gasha/dummy_lock.h>//ダミーロック
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/unique_lock.h>//単一ロック
+#include <gasha/new.h>//new/delete操作
 
 #include <cstdint>//std::int32_t, std::uint32_t
 
@@ -159,7 +160,7 @@ namespace priority_queue
 		}
 
 		//デストラクタ呼び出し
-		static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
+		static void callDestructor(node_type* obj){ GASHA_ callDestructor(obj); }
 
 		//コンテナ操作型
 		struct container_ope_type
@@ -178,7 +179,7 @@ namespace priority_queue
 			};
 			
 			//デストラクタ呼び出し
-			static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
+			static void callDestructor(node_type* obj){ GASHA_ callDestructor(obj); }
 			
 			//ロック型
 			typedef dummyLock lock_type;//ロックオブジェクト型

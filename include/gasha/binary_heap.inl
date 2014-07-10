@@ -18,17 +18,9 @@
 #include <gasha/binary_heap.h>//二分ヒープコンテナ【宣言部】
 
 #include <gasha/utility.h>//汎用ユーティリティ（値の交換を使用）
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::move, std::forward
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new,配置delete用
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -554,9 +546,8 @@ namespace binary_heap
 		node_type* obj = refNew();
 		if (!obj)
 			return nullptr;
-		obj = new(obj)node_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
-		if (obj)
-			m_status = PUSH_BEGINNING;
+		GASHA_ callConstructor<node_type>(obj, std::forward<Tx>(args)...);//コンストラクタ呼び出し
+		m_status = PUSH_BEGINNING;
 		return obj;
 	}
 
@@ -604,9 +595,6 @@ namespace binary_heap
 }//namespace binary_heap
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_BINARY_HEAP_INL
 

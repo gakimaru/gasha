@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_COMPILER_AUTO_SETTINGS_H_
 
 //--------------------------------------------------------------------------------
-// compiler_auto_settings.h
+// build_settings/compiler_auto_settings.h
 // コンパイラ自動判別・設定
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）

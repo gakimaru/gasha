@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_BUIILD_SETTINGS_DIAG_INL
 
 //--------------------------------------------------------------------------------
-// build_settings_diag.inl
+// build_settings/build_settings_diag.inl
 // ビルド設定診断【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -527,9 +527,173 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 #ifdef GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
 	size += sprintf(message + size, "[Camouflage]`GASHA_ALWAYS_INLINE` is available.\n");
 #else//GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
-	size += sprintf(message + size, "[Camouflage]`GASHA_ALWAYS_INLINE` is NOT available.\n");
+	size += sprintf(message + size, "[No]        `GASHA_ALWAYS_INLINE` is NOT available.\n");
 #endif//GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
 #endif//GASHA_HAS_ALWAYS_INLINE
+
+	//マクロ
+	size += sprintf(message + size, "\n");
+
+	//マクロ：__FILE__
+#ifdef GASHA_HAS_MACRO_FILE
+	size += sprintf(message + size, "[Yes]       `__FILE__` is AVAILABLE. (ex. __FILE__ = \"%s\")\n", __FILE__);
+#else//GASHA_HAS_MACRO_FILE
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_FILE
+	size += sprintf(message + size, "[Camouflage]`__FILE__` is available. (ex. __FILE__ = \"%s\")\n", __FILE__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_FILE
+#ifdef GASHA_HAS_DUMMY_MACRO_FILE
+	size += sprintf(message + size, "[Dummy]     `__FILE__` is available. (ex. __FILE__ = \"%s\")\n", __FILE__);
+#else//GASHA_HAS_DUMMY_MACRO_FILE
+	size += sprintf(message + size, "[No]        `__FILE__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_FILE
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_FILE
+#endif//GASHA_HAS_MACRO_FILE
+
+	//マクロ：__LINE__
+#ifdef GASHA_HAS_MACRO_LINE
+	size += sprintf(message + size, "[Yes]       `__LINE__` is AVAILABLE. (ex. __LINE__ = %d)\n", __LINE__);
+#else//GASHA_HAS_MACRO_LINE
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_LINE
+	size += sprintf(message + size, "[Camouflage]`__LINE__` is available. (ex. __LINE__ = %d)\n", __LINE__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_LINE
+#ifdef GASHA_HAS_DUMMY_MACRO_LINE
+	size += sprintf(message + size, "[Dummy]     `__LINE__` is available. (ex. __LINE__ = %d)\n", __LINE__);
+#else//GASHA_HAS_DUMMY_MACRO_LINE
+	size += sprintf(message + size, "[No]        `__LINE__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_LINE
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_LINE
+#endif//GASHA_HAS_MACRO_LINE
+
+	//マクロ：__DATE__
+#ifdef GASHA_HAS_MACRO_DATE
+	size += sprintf(message + size, "[Yes]       `__DATE__` is AVAILABLE. (ex. __DATE__ = \"%s\")\n", __DATE__);
+#else//GASHA_HAS_MACRO_DATE
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_DATE
+	size += sprintf(message + size, "[Camouflage]`__DATE__` is available. (ex. __DATE__ = \"%s\")\n", __DATE__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_DATE
+#ifdef GASHA_HAS_DUMMY_MACRO_DATE
+	size += sprintf(message + size, "[Dummy]     `__DATE__` is available. (ex. __DATE__ = \"%s\")\n", __DATE__);
+#else//GASHA_HAS_DUMMY_MACRO_DATE
+	size += sprintf(message + size, "[No]        `__DATE__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_DATE
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_DATE
+#endif//GASHA_HAS_MACRO_DATE
+
+	//マクロ：__TIME__
+#ifdef GASHA_HAS_MACRO_TIME
+	size += sprintf(message + size, "[Yes]       `__TIME__` is AVAILABLE. (ex. __TIME__ = \"%s\")\n", __TIME__);
+#else//GASHA_HAS_MACRO_TIME
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_TIME
+	size += sprintf(message + size, "[Camouflage]`__TIME__` is available. (ex. __TIME__ = \"%s\")\n", __TIME__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_TIME
+#ifdef GASHA_HAS_DUMMY_MACRO_TIME
+	size += sprintf(message + size, "[Dummy]     `__TIME__` is available. (ex. __TIME__ = \"%s\")\n", __TIME__);
+#else//GASHA_HAS_DUMMY_MACRO_TIME
+	size += sprintf(message + size, "[No]        `__TIME__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_TIME
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_TIME
+#endif//GASHA_HAS_MACRO_TIME
+
+	//マクロ：__TIMESTAMP__
+#ifdef GASHA_HAS_MACRO_TIMESTAMP
+	size += sprintf(message + size, "[Yes]       `__TIMESTAMP__` is AVAILABLE. (ex. __TIMESTAMP__ = \"%s\")\n", __TIMESTAMP__);
+#else//GASHA_HAS_MACRO_TIMESTAMP
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_TIMESTAMP
+	size += sprintf(message + size, "[Camouflage]`__TIMESTAMP__` is available. (ex. __TIMESTAMP__ = \"%s\")\n", __TIMESTAMP__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_TIMESTAMP
+#ifdef GASHA_HAS_DUMMY_MACRO_TIMESTAMP
+	size += sprintf(message + size, "[Dummy]     `__TIMESTAMP__` is available. (ex. __TIMESTAMP__ = \"%s\")\n", __TIMESTAMP__);
+#else//GASHA_HAS_DUMMY_MACRO_TIMESTAMP
+	size += sprintf(message + size, "[No]        `__TIMESTAMP__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_TIMESTAMP
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_TIMESTAMP
+#endif//GASHA_HAS_MACRO_TIMESTAMP
+
+	//マクロ：__FUNCTION__
+#ifdef GASHA_HAS_MACRO_FUNCTION
+	size += sprintf(message + size, "[Yes]       `__FUNCTION__` is AVAILABLE. (ex. __FUNCTION__ = \"%s\")\n", __FUNCTION__);
+#else//GASHA_HAS_MACRO_FUNCTION
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_FUNCTION
+	size += sprintf(message + size, "[Camouflage]`__FUNCTION__` is available. (ex. __FUNCTION__ = \"%s\")\n", __FUNCTION__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCTION
+#ifdef GASHA_HAS_DUMMY_MACRO_FUNCTION
+	size += sprintf(message + size, "[Dummy]     `__FUNCTION__` is available. (ex. __FUNCTION__ = \"%s\")\n", __FUNCTION__);
+#else//GASHA_HAS_DUMMY_MACRO_FUNCTION
+	size += sprintf(message + size, "[No]        `__FUNCTION__` is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_FUNCTION
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCTION
+#endif//GASHA_HAS_MACRO_FUNCTION
+
+	//マクロ：__PRETTY_FUNCTION__
+	//※GCC固有仕様
+#ifdef GASHA_HAS_MACRO_PRETTY_FUNCTION
+	size += sprintf(message + size, "[Yes]       `__PRETTY_FUNCTION__`(GCC Style) is AVAILABLE. (ex. __PRETTY_FUNCTION__ = \"%s\")\n", __PRETTY_FUNCTION__);
+#else//GASHA_HAS_MACRO_PRETTY_FUNCTION
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+	size += sprintf(message + size, "[Camouflage]`__PRETTY_FUNCTION__`(GCC Style) is available. (ex. __PRETTY_FUNCTION__ = \"%s\")\n", __PRETTY_FUNCTION__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+#ifdef GASHA_HAS_DUMMY_MACRO_PRETTY_FUNCTION
+	size += sprintf(message + size, "[Dummy]     `__PRETTY_FUNCTION__`(GCC Style) is available. (ex. __PRETTY_FUNCTION__ = \"%s\")\n", __PRETTY_FUNCTION__);
+#else//GASHA_HAS_DUMMY_MACRO_PRETTY_FUNCTION
+	size += sprintf(message + size, "[No]        `__PRETTY_FUNCTION__`(GCC Style) is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_PRETTY_FUNCTION
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+#endif//GASHA_HAS_MACRO_PRETTY_FUNCTION
+
+	//マクロ：__func__
+	//※GCC固有仕様
+#ifdef GASHA_HAS_MACRO_func
+	size += sprintf(message + size, "[Yes]       `__func__`(GCC Style) is AVAILABLE. (ex. __func__ = \"%s\")\n", __func__);
+#else//GASHA_HAS_MACRO_func
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_func
+	size += sprintf(message + size, "[Camouflage]`__func__`(GCC Style) is available. (ex. __func__ = \"%s\")\n", __func__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_func
+#ifdef GASHA_HAS_DUMMY_MACRO_func
+	size += sprintf(message + size, "[Dummy]     `__func__`(GCC Style) is available. (ex. __func__ = \"%s\")\n", __func__);
+#else//GASHA_HAS_DUMMY_MACRO_func
+	size += sprintf(message + size, "[No]        `__func__`(GCC Style) is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_func
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_func
+#endif//GASHA_HAS_MACRO_func
+
+	//マクロ：__FUNCSIG__
+	//※VC++固有仕様
+#ifdef GASHA_HAS_MACRO_FUNCSIG
+	size += sprintf(message + size, "[Yes]       `__FUNCSIG__`(VC++ Style) is AVAILABLE. (ex. __FUNCSIG__ = \"%s\")\n", __FUNCSIG__);
+#else//GASHA_HAS_MACRO_FUNCSIG
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+	size += sprintf(message + size, "[Camouflage]`__FUNCSIG__`(VC++ Style) is available. (ex. __FUNCSIG__ = \"%s\")\n", __FUNCSIG__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+#ifdef GASHA_HAS_DUMMY_MACRO_FUNCSIG
+	size += sprintf(message + size, "[Dummy]     `__FUNCSIG__`(VC++ Style) is available. (ex. __FUNCSIG__ = \"%s\")\n", __FUNCSIG__);
+#else//GASHA_HAS_DUMMY_MACRO_FUNCSIG
+	size += sprintf(message + size, "[No]        `__FUNCSIG__`(VC++ Style) is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_FUNCSIG
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+#endif//GASHA_HAS_MACRO_FUNCSIG
+
+	//マクロ：__FUNCDNAME__
+	//※VC++固有仕様
+#ifdef GASHA_HAS_MACRO_FUNCDNAME
+	size += sprintf(message + size, "[Yes]       `__FUNCDNAME__`(VC++ Style) is AVAILABLE. (ex. __FUNCDNAME__ = \"%s\")\n", __FUNCDNAME__);
+#else//GASHA_HAS_MACRO_FUNCDNAME
+#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_FUNCDNAME
+	size += sprintf(message + size, "[Camouflage]`__FUNCDNAME__`(VC++ Style) is available. (ex. __FUNCDNAME__ = \"%s\")\n", __FUNCDNAME__);
+#else//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCDNAME
+#ifdef GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+	size += sprintf(message + size, "[Dummy]     `__FUNCDNAME__`(VC++ Style) is available. (ex. __FUNCDNAME__ = \"%s\")\n", __FUNCDNAME__);
+#else//GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+	size += sprintf(message + size, "[No]        `__FUNCDNAME__`(VC++ Style) is NOT available.\n");
+#endif//GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+#endif//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCDNAME
+#endif//GASHA_HAS_MACRO_FUNCDNAME
+
+	//独自拡張マクロ
+	size += sprintf(message + size, "\n");
+	size += sprintf(message + size, "[Yes]       `GASHA_FUNC_NAME()` is AVAILABLE. (ex. GASHA_FUNC_NAME() = \"%s\")\n", GASHA_FUNC_NAME());
+	size += sprintf(message + size, "[Yes]       `GASHA_SRC_FILE()` is AVAILABLE. (ex. GASHA_SRC_FILE() = \"%s\")\n", GASHA_SRC_FILE());
+	size += sprintf(message + size, "[Yes]       `GASHA_SRC_FILE_LINE()` is AVAILABLE. (ex. GASHA_SRC_FILE_LINE() = \"%s\")\n", GASHA_SRC_FILE_LINE());
+	size += sprintf(message + size, "[Yes]       `GASHA_SRC_FILE_LINE_TIME()` is AVAILABLE. (ex. GASHA_SRC_FILE_LINE_TIME() = \"%s\")\n", GASHA_SRC_FILE_LINE_TIME());
 
 	size += sprintf(message + size, "\n");
 	size += sprintf(message + size, "------------------------------------------------------------------------------\n");
@@ -601,7 +765,7 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 	size += sprintf(message + size, "[No]  'Symbols' are STRIPPED.");
 #endif//GASHA_IS_STRIPPED_SYMBOLS
 	size += sprintf(message + size, "\n");
-	
+
 	size += sprintf(message + size, "\n");
 	size += sprintf(message + size, "------------------------------------------------------------------------------\n");
 

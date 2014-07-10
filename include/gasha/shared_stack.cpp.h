@@ -22,6 +22,7 @@
 #include <gasha/shared_stack.inl>//共有スタック【インライン関数／テンプレート関数定義部】
 
 #include <gasha/pool_allocator.cpp.h>//プールアロケータ【関数／実体定義部】
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::move
 #include <stdio.h>//sprintf()
@@ -53,7 +54,7 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZ
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return false;//プッシュ失敗
-	stack_t* new_node = new(p)stack_t(std::move(value));//新規ノードのコンストラクタ呼び出し
+	stack_t* new_node = GASHA_ callConstructor<stack_t>(p, std::move(value));//新規ノードのコンストラクタ呼び出し
 	return _push(new_node);
 }
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
@@ -64,7 +65,7 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZ
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return false;//プッシュ失敗
-	stack_t* new_node = new(p)stack_t(value);//新規ノードのコンストラクタ呼び出し
+	stack_t* new_node = GASHA_ callConstructor<stack_t>(p, value);//新規ノードのコンストラクタ呼び出し
 	return _push(new_node);
 }
 

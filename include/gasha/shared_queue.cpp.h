@@ -22,6 +22,7 @@
 #include <gasha/shared_queue.inl>//共有キュー【インライン関数／テンプレート関数定義部】
 
 #include <gasha/pool_allocator.cpp.h>//プールアロケータ【関数／実体定義部】
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::move
 #include <stdio.h>//sprintf()
@@ -54,7 +55,7 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return false;//エンキュー失敗
-	queue_t* new_node = new(p)queue_t(std::move(value));//新規ノードのコンストラクタ呼び出し
+	queue_t* new_node = GASHA_ callConstructor<queue_t>(p, std::move(value));//新規ノードのコンストラクタ呼び出し
 	return _enqueue(new_node);
 }
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
@@ -64,7 +65,7 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return false;//エンキュー失敗
-	queue_t* new_node = new(p)queue_t(value);//新規ノードのコンストラクタ呼び出し
+	queue_t* new_node = GASHA_ callConstructor<queue_t>(p, value);//新規ノードのコンストラクタ呼び出し
 	return _enqueue(new_node);
 }
 

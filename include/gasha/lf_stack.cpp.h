@@ -22,6 +22,7 @@
 #include <gasha/lf_stack.inl>//ロックフリースタック【インライン関数／テンプレート関数定義部】
 
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::move
 #include <stdio.h>//sprintf()
@@ -70,7 +71,7 @@ bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return nullptr;//プッシュ失敗
-	stack_t* new_node = new(p)stack_t(std::move(value));//新規ノードのコンストラクタ呼び出し
+	stack_t* new_node = GASHA_ callConstructor<stack_t>(p, std::move(value));//新規ノードのコンストラクタ呼び出し
 	return _push(new_node);
 }
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
@@ -79,7 +80,7 @@ bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
 	if (!p)//メモリ確保失敗
 		return nullptr;//プッシュ失敗
-	stack_t* new_node = new(p)stack_t(value);//新規ノードのコンストラクタ呼び出し
+	stack_t* new_node = GASHA_ callConstructor<stack_t>(p, value);//新規ノードのコンストラクタ呼び出し
 	return _push(new_node);
 }
 

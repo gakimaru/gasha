@@ -17,6 +17,8 @@
 
 #include <gasha/singleton.h>//シングルトン【宣言部】
 
+//#include <gasha/new.h>//new/delete操作
+
 #include <utility>//C++11 std::forward()
 
 //【VC++】ワーニング設定を退避
@@ -26,7 +28,7 @@
 //  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
 #pragma warning(disable: 4530)//C4530を抑える
 
-#include <new>//配置new,配置delete用
+#include <new>//配置new/配置delete
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -78,6 +80,7 @@ namespace _private
 		//インスタンス生成
 		if (!m_staticInstanceIsCreated.exchange(true))
 		{
+			//m_staticInstanceRef = GASHA_ callConstructor<class_type>(m_staticInstanceBuff, std::forward<Tx>(args)...);//コンストラクタを private 化していることがあるので、共通関数を使用しない
 			m_staticInstanceRef = new(m_staticInstanceBuff)class_type(std::forward<Tx>(args)...);
 			if (m_staticInstanceRef)
 			{
@@ -107,8 +110,8 @@ namespace _private
 		//インスタンス破棄
 		if (m_staticInstanceIsCreated.exchange(false))
 		{
+			//GASHA_ callDestructor(m_staticInstanceRef);//デストラクタを private 化していることがあるので、共通関数を使用しない
 			m_staticInstanceRef->~class_type();
-			//operator delete(m_staticInstanceRef, m_staticInstanceRef);
 			m_staticInstanceRef = nullptr;
 			//シングルトンデバッグ用処理呼び出し
 			m_staticDebug.destroy(procedure_name);

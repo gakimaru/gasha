@@ -22,15 +22,9 @@
 
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::move, std::forward
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で new 演算子を使用すると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -844,15 +838,14 @@ namespace singly_linked_list
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE>::node::constructor(Tx&&... args)
 	{
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 
 	//明示的なデストラクタ呼び出し
 	template<typename VALUE_TYPE>
 	inline void simpleContainer<VALUE_TYPE>::node::destructor()
 	{
-		m_value.~core_value_type();//デストラクタ呼び出し
-		//operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+		GASHA_ callDestructor(&m_value);//デストラクタ呼び出し
 	}
 
 	//ムーブオペレータ
@@ -909,9 +902,6 @@ namespace singly_linked_list
 }//namespace singly_linked_list
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_SINGLY_LINKED_LIST_INL
 

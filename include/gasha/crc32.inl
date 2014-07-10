@@ -39,12 +39,12 @@ namespace _private
 	//--------------------
 	//CRC32多項式計算
 	//※constexpr関数内ではラムダ式が使えないため、関数を分割（ラムダ式を使用するとコンパイル時に評価されなくなる）
-	constexpr inline GASHA_ crc32_t calcPoly_core(const GASHA_ crc32_t poly)
+	inline constexpr GASHA_ crc32_t calcPoly_core(const GASHA_ crc32_t poly)
 	{
 		//多項式計算
 		return poly & 1 ? _POLYNOMIAL ^ (poly >> 1) : (poly >> 1);
 	}
-	constexpr inline GASHA_ crc32_t calcPoly(const GASHA_ crc32_t poly)
+	inline constexpr GASHA_ crc32_t calcPoly(const GASHA_ crc32_t poly)
 	{
 		//多項式計算
 		return calcPoly_core(
@@ -71,13 +71,13 @@ namespace _private
 	//--------------------
 	//文字列からCRC算出用（再帰処理）
 	//※constexpr関数内ではSSE命令に非対応（使用するとコンパイル時に評価されなくなる）
-	constexpr inline GASHA_ crc32_t calcStr(const GASHA_ crc32_t crc, const char* str)
+	inline constexpr GASHA_ crc32_t calcStr(const GASHA_ crc32_t crc, const char* str)
 	{
 		return *str == '\0' ? crc : calcStr(calcPoly(static_cast<GASHA_ crc32_t>((crc ^ *str) & 0xffu)) ^ (crc >> 8), str + 1);//CRC多項式(生成多項式から計算)を合成
 	}
 	//--------------------
 	//データ長を指定してCRC算出用（再帰処理）
-	constexpr inline GASHA_ crc32_t calcData(const GASHA_ crc32_t crc, const char* data, const std::size_t len)
+	inline constexpr GASHA_ crc32_t calcData(const GASHA_ crc32_t crc, const char* data, const std::size_t len)
 	{
 		return len == 0 ? crc : calcData(calcPoly(static_cast<crc32_t>((crc ^ *data) & 0xffu)) ^ (crc >> 8), data + 1, len - 1);//CRC多項式(生成多項式から計算)を合成
 	}
@@ -85,20 +85,20 @@ namespace _private
 
 //--------------------
 //【メタプログラミング：constexpr版】文字列から算出
-constexpr inline crc32_t calcStaticCRC32(const char* str)
+inline constexpr crc32_t calcStaticCRC32(const char* str)
 {
 	return ~_private::calcStr(~0u, str);
 }
 //--------------------
 //【メタプログラミング：constexpr版】バイナリデータから算出
-constexpr inline crc32_t calcStaticCRC32(const char* data, const std::size_t len)
+inline constexpr crc32_t calcStaticCRC32(const char* data, const std::size_t len)
 {
 	return ~_private::calcData(~0u, data, len);
 }
 #ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------
 //【メタプログラミング：ユーザー定義リテラル版】（基本的に）文字列から算出
-constexpr inline crc32_t operator "" _crc32(const char* str, const std::size_t len)
+inline constexpr crc32_t operator "" _crc32(const char* str, const std::size_t len)
 {
 	return calcStaticCRC32(str, len);
 }

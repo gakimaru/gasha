@@ -17,6 +17,8 @@
 
 #include <gasha/rb_tree.h>//赤黒木コンテナ【宣言部】
 
+#include <gasha/new.h>//new/delete操作
+
 #include <utility>//C++11 std::forward
 #include <memory.h>//memcpy()
 
@@ -2185,29 +2187,28 @@ namespace rb_tree
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const core_key_type key, Tx&&... args)
 	{
 		m_key = key;
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const char* key, Tx&&... args)
 	{
 		m_key = GASHA_ calcCRC32(key);
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::constructor(const std::string& key, Tx&&... args)
 	{
 		m_key = GASHA_ calcCRC32(key.c_str());
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 
 	//明示的なデストラクタ呼び出し
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::destructor()
 	{
-		m_value.~core_value_type();//デストラクタ呼び出し
-		//operator delete(&m_value, &m_value);//（作法として）deleteオペレータ呼び出し
+		GASHA_ callDestructor(&m_value);//デストラクタ呼び出し
 	}
 
 	//キーと値を更新
@@ -2252,21 +2253,21 @@ namespace rb_tree
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const core_key_type key, Tx&&... args)
 	{
 		m_key = key;
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const char* key, Tx&&... args)
 	{
 		m_key = GASHA_ calcCRC32(key);
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 	template<typename VALUE_TYPE, typename KEY_TYPE>
 	template<typename... Tx>
 	inline void simpleContainer<VALUE_TYPE, KEY_TYPE>::node::emplace(const std::string& key, Tx&&... args)
 	{
 		m_key = GASHA_ calcCRC32(key.c_str());
-		new(&m_value)core_value_type(std::forward<Tx>(args)...);
+		GASHA_ callConstructor<core_value_type>(&m_value, std::forward<Tx>(args)...);
 	}
 
 	//ムーブオペレータ

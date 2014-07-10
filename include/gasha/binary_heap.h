@@ -21,8 +21,8 @@
 #include <gasha/dummy_lock.h>//ダミーロック
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/unique_lock.h>//単一ロック
-
 #include <gasha/sort_basic.h>//ソート処理基本（大小比較用）
+#include <gasha/new.h>//new/delete操作
 
 #include <cstddef>//std::size_t, std::ptrdiff_t用
 
@@ -124,7 +124,7 @@ namespace binary_heap
 		};
 
 		//デストラクタ呼び出し
-		inline static void callDestructor(node_type* obj){ obj->~NODE_TYPE(); }
+		inline static void callDestructor(node_type* obj){ GASHA_ callDestructor(obj); }
 	};
 
 	//--------------------

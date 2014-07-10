@@ -719,7 +719,6 @@ namespace hash_table
 	{
 		value_type* data_p = reinterpret_cast<value_type*>(&m_table[index]);
 		ope_type::callDestructor(data_p);//デストラクタ呼び出し
-		//operator delete(data_p, data_p);//（作法として）deleteオペレータ呼び出し
 		m_deleted[index] = true;//削除済みインデックスを更新
 		++m_deletedCount;//削除済み数をカウントアップ
 	}

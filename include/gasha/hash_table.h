@@ -22,10 +22,10 @@
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
-
 #include <gasha/basic_math.h>//基本算術（素数計算）
 #include <gasha/limits.h>//限界値
 #include <gasha/crc32.h>//CRC32
+#include <gasha/new.h>//new/delete操作
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 #include <cstdint>//std::uint32_t
@@ -176,7 +176,7 @@ namespace hash_table
 		//　　　　　    }//スコープを抜ける時に自動的にロック解放
 
 		//デストラクタ呼び出し
-		static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
+		static void callDestructor(value_type* obj){ GASHA_ callDestructor(obj); }
 	};
 	
 	//--------------------

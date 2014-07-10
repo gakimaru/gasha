@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_BUIILD_SETTINGS_H
 
 //--------------------------------------------------------------------------------
-// build_settings.h
+// build_settings/build_settings.h
 // ビルド設定
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -23,6 +23,8 @@
 #include <gasha/build_settings/project_last_settings.h>//プロジェクト固有のビルド設定（最終設定） ※リポジトリ：gasha_settings
 
 #include <gasha/build_settings/adjust_build_settings.h>//ビルド設定の調整
+
+#include <gasha/build_settings/builtin_functions.h>//組み込み関数／マクロ
 
 #include <gasha/build_settings/project_default_includes.h>//プロジェクト固有のデフォルトインクルード
 

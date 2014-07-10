@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 
 //--------------------------------------------------------------------------------
-// adjust_build_settings.h
+// build_settings/adjust_build_settings.h
 // ビルド設定調整
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）
@@ -249,11 +249,11 @@
 #endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
-//【グローバルアロケータ】
+//【標準アロケータ】
 
-#if defined(GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
-	#undef GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION
-#endif//GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION
+#if defined(GASHA_STD_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】

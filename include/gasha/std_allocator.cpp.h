@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_GLOBAL_ALLOCATOR_CPP_H
-#define GASHA_INCLUDED_GLOBAL_ALLOCATOR_CPP_H
+#ifndef GASHA_INCLUDED_STD_ALLOCATOR_CPP_H
+#define GASHA_INCLUDED_STD_ALLOCATOR_CPP_H
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// global_allocator.cpp.h
-// グローバルアロケータ【関数定義部】
+// std_allocator.cpp.h
+// 標準アロケータ【関数定義部】
 //
 // ※クラスのインスタンス化が必要な場所でインクルード。
 // ※基本的に、ヘッダーファイル内でのインクルード禁止。
@@ -19,18 +19,12 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/global_allocator.inl>//グローバルアロケータ【インライン関数／テンプレート関数定義部】
+#include <gasha/std_allocator.inl>//標準アロケータ【インライン関数／テンプレート関数定義部】
 
 #include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new,配置delete用
 
 //【VC++】sprintf を使用すると、error C4996 が発生する
 //  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
@@ -39,15 +33,15 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//グローバルアロケータクラス
+//標準アロケータクラス
 
 //デバッグ情報作成
 template<class LOCK_TYPE>
-std::size_t globalAllocator<LOCK_TYPE>::debugInfo(char* message)
+std::size_t stdAllocator<LOCK_TYPE>::debugInfo(char* message)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for globalAllocator -----\n");
+	size += sprintf(message + size, "----- Debug Info for stdAllocator -----\n");
 	size += sprintf(message + size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
 	size += sprintf(message + size, "----------\n");
 	return size;
@@ -58,13 +52,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //----------------------------------------
 //明示的なインスタンス化
 
-//グローバルアロケータの明示的なインスタンス化用マクロ
+//標準アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_globalAllocator() \
-	template class globalAllocator<>;
+	template class stdAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_globalAllocator_withLock(LOCK_TYPE) \
-	template class globalAllocator<LOCK_TYPE>;
+	template class stdAllocator<LOCK_TYPE>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
@@ -113,6 +107,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_GLOBAL_ALLOCATOR_CPP_H
+#endif//GASHA_INCLUDED_STD_ALLOCATOR_CPP_H
 
 // End of file

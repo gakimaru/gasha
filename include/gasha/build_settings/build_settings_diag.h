@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_BUIILD_SETTINGS_DIAG_H
 
 //--------------------------------------------------------------------------------
-// build_settings_diag.h
+// build_settings/build_settings_diag.h
 // ビルド設定診断【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA

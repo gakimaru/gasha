@@ -22,9 +22,9 @@
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
-
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
+#include <gasha/new.h>//new/delete操作
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 
@@ -142,7 +142,7 @@ namespace dynamic_array
 		//　lock_type 型として再定義する。
 
 		//デストラクタ呼び出し
-		inline static void callDestructor(value_type* obj){ obj->~VALUE_TYPE(); }
+		inline static void callDestructor(value_type* obj){ GASHA_ callDestructor(obj); }
 		//※デストラクタの呼び出しを禁止したい場合、
 		//　baseOpeの派生クラスにて、なにもしない
 		//　callDestructor メソッドを再定義する。

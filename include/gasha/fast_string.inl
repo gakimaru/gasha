@@ -173,7 +173,7 @@ namespace _private
 	//  1 ... 16バイトアラインメント＋非16バイトアラインメント
 	//  2 ... 非16バイトアラインメント＋16バイトアラインメント
 	//  3 ... 非16バイトアラインメント＋非16バイトアラインメント
-	static inline int sse_str_pattern(const char* str1, const char* str2)
+	inline static int sse_str_pattern(const char* str1, const char* str2)
 	{
 		return (((reinterpret_cast<intptr_t>(str1)& 0xf) != 0) << 0) |
 			(((reinterpret_cast<intptr_t>(str2)& 0xf) != 0) << 1);

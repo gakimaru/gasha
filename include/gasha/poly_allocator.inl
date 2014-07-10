@@ -1,11 +1,11 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_ALLOCATOR_ADAPTER_INL
-#define GASHA_INCLUDED_ALLOCATOR_ADAPTER_INL
+#ifndef GASHA_INCLUDED_POLY_ALLOCATOR_INL
+#define GASHA_INCLUDED_POLY_ALLOCATOR_INL
 
 //--------------------------------------------------------------------------------
 // 【テンプレートライブラリ】
-// allocator_adapter.inl
-// アロケータアダプター【インライン関数／テンプレート関数定義部】
+// poly_allocator.inl
+// 多態アロケータ【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -15,7 +15,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/allocator_adapter.h>//アロケータアダプター【宣言部】
+#include <gasha/poly_allocator.h>//多態アロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
 #include <stdio.h>//sprintf()
@@ -30,46 +30,46 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//アロケータアダプタークラス
+//多態アロケータクラス
 
 //アロケータ名
 template<class ALLOCATOR>
-inline const char* allocatorAdapter<ALLOCATOR>::name() const
+inline const char* polyAllocator<ALLOCATOR>::name() const
 {
 	return m_name;
 }
 
 //バッファの全体サイズ（バイト数）
 template<class ALLOCATOR>
-inline typename allocatorAdapter<ALLOCATOR>::size_type allocatorAdapter<ALLOCATOR>::maxSize() const
+inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::maxSize() const
 {
 	return m_allocator.maxSize();
 }
 
 //使用中のサイズ（バイト数）
 template<class ALLOCATOR>
-inline typename allocatorAdapter<ALLOCATOR>::size_type allocatorAdapter<ALLOCATOR>::size() const
+inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::size() const
 {
 	return m_allocator.size();
 }
 
 //残りサイズ（バイト数）
 template<class ALLOCATOR>
-inline typename allocatorAdapter<ALLOCATOR>::size_type allocatorAdapter<ALLOCATOR>::remain() const
+inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::remain() const
 {
 	return maxSize();
 }
 
 //メモリ確保
 template<class ALLOCATOR>
-inline void* allocatorAdapter<ALLOCATOR>::alloc(const std::size_t size, const std::size_t align)
+inline void* polyAllocator<ALLOCATOR>::alloc(const std::size_t size, const std::size_t align)
 {
 	return m_allocator.alloc(size, align);
 }
 
 //メモリ解放
 template<class ALLOCATOR>
-inline bool allocatorAdapter<ALLOCATOR>::free(void* p)
+inline bool polyAllocator<ALLOCATOR>::free(void* p)
 {
 	return m_allocator.free(p);
 }
@@ -78,14 +78,14 @@ inline bool allocatorAdapter<ALLOCATOR>::free(void* p)
 //メモリ確保とコンストラクタ呼び出し
 template<class ALLOCATOR>
 template<typename T, typename...Tx>
-T* allocatorAdapter<ALLOCATOR>::newObj(Tx&&... args)
+T* polyAllocator<ALLOCATOR>::newObj(Tx&&... args)
 {
 	return m_allocator.template newObj<T>(std::forward<Tx>(args)...);
 }
 //※配列用
 template<class ALLOCATOR>
 template<typename T, typename...Tx>
-T* allocatorAdapter<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
+T* polyAllocator<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
 {
 	return m_allocator.template newArray<T>(std::forward<Tx>(args)...);
 }
@@ -93,14 +93,14 @@ T* allocatorAdapter<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
 //メモリ解放とデストラクタ呼び出し
 template<class ALLOCATOR>
 template<typename T>
-bool allocatorAdapter<ALLOCATOR>::deleteObj(T* p)
+bool polyAllocator<ALLOCATOR>::deleteObj(T* p)
 {
 	return m_allocator.deleteObj(p);
 }
 //※配列用
 template<class ALLOCATOR>
 template<typename T>
-bool allocatorAdapter<ALLOCATOR>::deleteArray(T* p, const std::size_t num)
+bool polyAllocator<ALLOCATOR>::deleteArray(T* p, const std::size_t num)
 {
 	return m_allocator.deleteArray(p, num);
 }
@@ -108,36 +108,36 @@ bool allocatorAdapter<ALLOCATOR>::deleteArray(T* p, const std::size_t num)
 
 //デバッグ情報作成
 template<class ALLOCATOR>
-inline std::size_t allocatorAdapter<ALLOCATOR>::debugInfo(char* message)
+inline std::size_t polyAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	return m_allocator.debugInfo(message);
 }
 
 //コンストラクタ
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocatorAdapter<ALLOCATOR>&& adapter) :
+inline polyAllocator<ALLOCATOR>::polyAllocator(polyAllocator<ALLOCATOR>&& adapter) :
 	m_allocator(adapter.m_allocator),
 	m_name(adapter.m_name)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(const allocatorAdapter<ALLOCATOR>& adapter) :
+inline polyAllocator<ALLOCATOR>::polyAllocator(const polyAllocator<ALLOCATOR>& adapter) :
 	m_allocator(adapter.m_allocator),
 	m_name(adapter.m_name)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type&& allocator, const char* name) :
+inline polyAllocator<ALLOCATOR>::polyAllocator(allocator_type&& allocator, const char* name) :
 	m_allocator(allocator),
 	m_name(name)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type& allocator, const char* name) :
+inline polyAllocator<ALLOCATOR>::polyAllocator(allocator_type& allocator, const char* name) :
 	m_allocator(allocator),
 	m_name(name)
 {}
 
 //デストラクタ
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::~allocatorAdapter()
+inline polyAllocator<ALLOCATOR>::~polyAllocator()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
@@ -145,6 +145,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
 
-#endif//GASHA_INCLUDED_ALLOCATOR_ADAPTER_INL
+#endif//GASHA_INCLUDED_POLY_ALLOCATOR_INL
 
 // End of file

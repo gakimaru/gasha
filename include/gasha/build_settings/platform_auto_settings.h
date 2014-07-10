@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_H
 
 //--------------------------------------------------------------------------------
-// platform_atuo_settings.h
+// build_settings/platform_atuo_settings.h
 // プラットフォーム自動判別・設定
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）

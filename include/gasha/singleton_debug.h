@@ -52,10 +52,10 @@ public:
 	};
 	struct listOpe : public linked_list::baseOpe<listOpe, accessInfo>//連結リスト操作型
 	{
-		static inline const accessInfo* getNext(const accessInfo& node){ return node.m_next; }
-		static inline const accessInfo* getPrev(const accessInfo& node){ return node.m_prev; }
-		static inline void setNext(accessInfo& node, const accessInfo* next){ node.m_next = next; }
-		static inline void setPrev(accessInfo& node, const accessInfo* prev){ node.m_prev = prev; }
+		inline static const accessInfo* getNext(const accessInfo& node){ return node.m_next; }
+		inline static const accessInfo* getPrev(const accessInfo& node){ return node.m_prev; }
+		inline static void setNext(accessInfo& node, const accessInfo* next){ node.m_next = next; }
+		inline static void setPrev(accessInfo& node, const accessInfo* prev){ node.m_prev = prev; }
 		typedef LOCK_TYPE lock_type;//ロックオブジェクト型
 	};
 	typedef linked_list::container<listOpe> list_type;//双方向連結リスト型

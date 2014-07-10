@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_CPU_X86_H
 
 //--------------------------------------------------------------------------------
-// platform_atuo_settings_cpu_x86.h
+// build_settings/platform_atuo_settings_cpu_x86.h
 // プラットフォーム自動判別・設定：【CPU系】x86用
 //
 // 依存するヘッダー：project_first_settings.h//プロジェクト固有のビルド設定（先行設定）

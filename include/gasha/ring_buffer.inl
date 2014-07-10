@@ -24,17 +24,9 @@
 
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
+#include <gasha/new.h>//new/delete操作
 
 #include <utility>//C++11 std::forward
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new,配置delete用
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -441,7 +433,7 @@ namespace ring_buffer
 			for (index_type index = m_size; index < _size; ++index)
 			{
 				value_type* value = _refElement(index);
-				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
+				GASHA_ callConstructor<value_type>(value, std::forward<Tx>(args)...);//コンストラクタ呼び出し
 			}
 		}
 		else if (_size < m_size)
@@ -450,7 +442,6 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -470,14 +461,13 @@ namespace ring_buffer
 			{
 				value_type* value = _refElement(index);
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		{
 			for (index_type index = 0; index < _size; ++index)
 			{
 				value_type* value = _refElement(index);
-				new(value)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
+				GASHA_ callConstructor<value_type>(value, std::forward<Tx>(args)...);//コンストラクタ呼び出し
 			}
 		}
 		if (m_size < _size)
@@ -494,7 +484,7 @@ namespace ring_buffer
 		value_type* obj = refFrontNew();//サイズチェック含む
 		if (!obj)
 			return nullptr;
-		new(obj)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
+		GASHA_ callConstructor<value_type>(obj, std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		++m_size;
 		m_offset = m_offset == 0 ? m_maxSize - 1 : m_offset - 1;
 		return obj;
@@ -509,7 +499,7 @@ namespace ring_buffer
 		value_type* obj = refBackNew();//サイズチェック含む
 		if (!obj)
 			return nullptr;
-		new(obj)value_type(std::forward<Tx>(args)...);//コンストラクタ呼び出し
+		GASHA_ callConstructor<value_type>(obj, std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		++m_size;
 		return obj;
 	}
@@ -538,7 +528,7 @@ namespace ring_buffer
 		for (size_type i = 0; i < _num; ++i)
 		{
 			value_type* new_value = _refElement(_index);
-			new(new_value)value_type(std::forward<Tx>(args)...);
+			GASHA_ callConstructor<value_type>(new_value, std::forward<Tx>(args)...);
 			++_index;
 		}
 		//終了
@@ -664,9 +654,6 @@ namespace ring_buffer
 }//namespace ring_buffer
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_RING_BUFFER_INL
 

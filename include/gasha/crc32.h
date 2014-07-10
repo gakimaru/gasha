@@ -27,8 +27,8 @@ typedef std::uint32_t crc32_t;//CRC32型
 //【メタプログラミング：constexpr版】CRC32算出
 //※constexpr対応コンパイラなら、コンパイル時にCRCを計算できる。
 //　（例）const crc32_t text_crc = calcStaticCRC32("text");//※変数にconstまたはconstexprを付けないと、コンパイル時に処理されないので注意（その場合、ランタイム処理になる）
-constexpr inline crc32_t calcStaticCRC32(const char* str);//文字列から算出
-constexpr inline crc32_t calcStaticCRC32(const char* data, const std::size_t len);//バイナリデータから算出
+inline constexpr crc32_t calcStaticCRC32(const char* str);//文字列から算出
+inline constexpr crc32_t calcStaticCRC32(const char* data, const std::size_t len);//バイナリデータから算出
 
 #ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------
@@ -36,7 +36,7 @@ constexpr inline crc32_t calcStaticCRC32(const char* data, const std::size_t len
 //※ユーザー定義リテラル対応コンパイラなら、コンパイル時にCRCを計算できる。
 //　（例）const crc32_t text_crc = "text"_crc32;//※変数にconstまたはconstexprを付けないと、コンパイル時に処理されないので注意（その場合、ランタイム処理になる）
 //※ユーザー定義リテラルの宣言では、operator "" の後に空白が必要なことに注意
-constexpr inline crc32_t operator "" _crc32(const char* str, const std::size_t len);//（基本的に）文字列から算出
+inline constexpr crc32_t operator "" _crc32(const char* str, const std::size_t len);//（基本的に）文字列から算出
 #endif//GASHA_HAS_USER_DEFINED_LITERAL
 
 //--------------------

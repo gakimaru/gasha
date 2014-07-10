@@ -21,14 +21,9 @@
 
 #include <gasha/dynamic_array.inl>//動的配列コンテナ【インライン関数／テンプレート関数定義部】
 
+#include <gasha/new.h>//new/delete操作
+
 #include <utility>//C++11 std::move
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で new 演算子を使用すると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -291,7 +286,6 @@ namespace dynamic_array
 			for (index_type index = max_size; index < m_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 			m_size = max_size;
 			m_maxSize = m_size;
@@ -328,7 +322,6 @@ namespace dynamic_array
 			for (index_type index = _size; index < m_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 		m_size = _size;
@@ -357,7 +350,6 @@ namespace dynamic_array
 			for (index_type index = 0; index < used_size; ++index, ++value)
 			{
 				ope_type::callDestructor(value);//デストラクタ呼び出し
-				//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 			}
 		}
 	#endif
@@ -402,7 +394,6 @@ namespace dynamic_array
 			return false;
 		value_type* value = const_cast<value_type*>(refBack());
 		ope_type::callDestructor(value);//デストラクタ呼び出し
-		//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -415,7 +406,6 @@ namespace dynamic_array
 		value_type* obj = const_cast<value_type*>(refBack());
 		value = std::move(*obj);//ムーブ
 		ope_type::callDestructor(obj);//デストラクタ呼び出し
-		//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		--m_size;
 		return true;
 	}
@@ -430,7 +420,6 @@ namespace dynamic_array
 		for (size_type i = 0; i < m_size; ++i, ++value)
 		{
 			ope_type::callDestructor(value);//デストラクタ呼び出し
-			//operator delete(value, value);//（作法として）deleteオペレータ呼び出し
 		}
 		m_size = 0;
 	}
@@ -445,7 +434,7 @@ namespace dynamic_array
 		for (size_type i = 0; i < num; ++i)
 		{
 			if (dst >= end)
-				new(dst)value_type(std::move(*src));//ムーブコンストラクタ
+				GASHA_ callConstructor<value_type>(dst, std::move(*src));//ムーブコンストラクタ
 			else
 				*dst = std::move(*src);//ムーブオペレータ
 			++dst;
@@ -463,7 +452,7 @@ namespace dynamic_array
 		for (size_type i = 0; i < num; ++i)
 		{
 			if (dst >= end)
-				new(dst)value_type(std::move(*src));//ムーブコンストラクタ
+				GASHA_ callConstructor<value_type>(dst, std::move(*src));//ムーブコンストラクタ
 			else
 				*dst = std::move(*src);//ムーブオペレータ
 			--dst;
@@ -508,7 +497,6 @@ namespace dynamic_array
 		for (size_type i = 0; i < _num; ++i, ++delete_value)
 		{
 			ope_type::callDestructor(delete_value);//デストラクタ呼び出し
-			//operator delete(delete_value, delete_value);//（作法として）deleteオペレータ呼び出し
 		}
 		//移動
 		moveAsc(index, index + _num, move_num);
@@ -638,9 +626,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------------------------------------------------------------------
 // ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
 // 　同じ内容のものをコピーしています。
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_DYNAMIC_ARRAY_CPP_H
 

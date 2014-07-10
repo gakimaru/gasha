@@ -447,7 +447,6 @@ namespace binary_heap
 		if (!obj)
 			return false;
 		ope_type::callDestructor(obj);//デストラクタ呼び出し
-		//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		m_status = POP_ENDED;
 		//根ノードがポップされたので、末端の葉ノードを根ノードに上書きした上で、それを下方に移動
 		node_type* top_obj = _refTop();
@@ -499,7 +498,6 @@ namespace binary_heap
 		for (node_type* obj = _refTop(); obj < obj_end; ++obj)
 		{
 			ope_type::callDestructor(obj);//デストラクタ呼び出し
-			//operator delete(obj, obj);//（作法として）deleteオペレータ呼び出し
 		}
 		m_used = 0;
 	}

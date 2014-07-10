@@ -18,15 +18,7 @@
 #include <gasha/dual_stack_allocator.h>//双方向スタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new,配置delete用
+#include <gasha/new.h>//new/delete操作
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -124,7 +116,7 @@ inline T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObjOrdinal(const allocat
 	void* p = allocOrdinal(order, sizeof(T), alignof(T));
 	if (!p)
 		return nullptr;
-	return new(p)T(std::forward<Tx>(args)...);
+	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
 template<class LOCK_TYPE, class AUTO_CLEAR>
@@ -144,7 +136,7 @@ T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArrayOrdinal(const allocateOrde
 	T* top_obj = nullptr;
 	for (std::size_t i = 0; i < num; ++i)
 	{
-		T* obj = new(p)T(std::forward<Tx>(args)...);
+		T* obj = GASHA_ calConstructor<T>(p, std::forward<Tx>(args)...);
 		if (!top_obj)
 			top_obj = obj;
 		p = reinterpret_cast<void*>(reinterpret_cast<char*>(p) + sizeof(T));
@@ -161,8 +153,7 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 	const allocateOrder_t order = isInUsingRange(p);//ポインタの所属を判定
 	if(order == ALLOC_UNKNOWN_ORDER)
 		return false;
-	p->~T();//デストラクタ呼び出し
-	//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+	GASHA_ callDestructor(p);//デストラクタ呼び出し
 	if(order == ALLOC_ASC)
 		return _freeAsc(p);
 	else//if(order == ALLOC_DESC)
@@ -180,8 +171,7 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::siz
 	T* obj = p;
 	for (std::size_t i = 0; i < num; ++i, ++obj)
 	{
-		obj->~T();//デストラクタ呼び出し
-		//operator delete(p, p);//（作法として）deleteオペレータ呼び出し
+		GASHA_ callDestructor(obj);//デストラクタ呼び出し
 	}
 	if(order == ALLOC_ASC)
 		return _freeAsc(p);
@@ -376,9 +366,6 @@ inline dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::~dualStackAl
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_DUAL_STACK_ALLOCATOR_INL
 

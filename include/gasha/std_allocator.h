@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_GLOBAL_ALLOCATOR_H
-#define GASHA_INCLUDED_GLOBAL_ALLOCATOR_H
+#ifndef GASHA_INCLUDED_STD_ALLOCATOR_H
+#define GASHA_INCLUDED_STD_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
-// global_allocator.h
-// グローバルアロケータ【宣言部】
+// std_allocator.h
+// 標準アロケータ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -23,11 +23,11 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//グローバルアロケータクラス
+//標準アロケータクラス
 //※内部で _aligned_malloc(), _aligned_free() を使用してメモリを確保。
 //※基本的にそのままでスレッドセーフのはずだが、コンパイラによってスレッドセーブでない場合は、ロック型を指定することができる。
 template<class LOCK_TYPE = GASHA_ dummyLock>
-class globalAllocator
+class stdAllocator
 {
 public:
 	//型
@@ -42,7 +42,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<globalAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<globalAllocator<LOCK_TYPE>> adapter(*this, "globalAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE>> adapter(*this, "stdAllocator"); return adapter; }
 
 public:
 	//メソッド
@@ -83,9 +83,9 @@ private:
 
 public:
 	//コンストラクタ
-	inline globalAllocator();
+	inline stdAllocator();
 	//デストラクタ
-	inline ~globalAllocator();
+	inline ~stdAllocator();
 
 private:
 	//フィールド
@@ -95,13 +95,13 @@ private:
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/global_allocator.inl>
+#include <gasha/std_allocator.inl>
 
 //.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
-#ifdef GASHA_GLOBAL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
-#include <gasha/global_allocator.cpp.h>
-#endif//GASHA_GLOBAL_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#ifdef GASHA_STD_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
+#include <gasha/std_allocator.cpp.h>
+#endif//GASHA_STD_ALLOCATOR_ALLWAYS_TOGETHER_CPP_H
 
-#endif//GASHA_INCLUDED_GLOBAL_ALLOCATOR_H
+#endif//GASHA_INCLUDED_STD_ALLOCATOR_H
 
 // End of file
