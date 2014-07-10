@@ -249,6 +249,13 @@
 #endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
+//【グローバルアロケータ】
+
+#if defined(GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION) && !defined(GASHA_ASSERTION_IS_ENABLED)
+	#undef GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION
+#endif//GASHA_GLOBAL_ALLOCATOR_ENABLE_ASSERTION
+
+//--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
 
 #if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_HAS_DEBUG_FEATURE)

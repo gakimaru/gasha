@@ -472,6 +472,12 @@
 #endif//GASHA_IS_GCC
 
 //--------------------
+//mallinfo
+#ifdef GASHA_IS_GCC//※暫定（GCCだからといって使えるとは限らない）
+	#define GASHA_HAS_MALLINFO
+#endif//GASHA_IS_GCC
+
+//--------------------
 //noinline / always_inline
 //※独自の共通化
 #ifdef GASHA_IS_VC

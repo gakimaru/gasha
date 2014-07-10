@@ -499,6 +499,14 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 #endif//GASHA_HASCAMOUFLAGE_ALIGNED_FREE
 #endif//GASHA_HAS_ALIGNED_FREE
 
+	//mallinfo
+	//※GCC独自実装
+#ifdef GASHA_HAS_MALLINFO
+	size += sprintf(message + size, "[Yes]       `mallinfo()`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_MALLINFO
+	size += sprintf(message + size, "[No]        `mallinfo()`(GCC style) is available.\n");
+#endif//GASHA_HAS_MALLINFO
+
 	//no_inline
 	//※C++11仕様ではなく、コンパイラ独自仕様の共通化
 #ifdef GASHA_HAS_NO_INLINE
