@@ -14,6 +14,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -65,13 +66,19 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline size_type allocatedCount() const { return m_allocatedCount; }//アロケート中の数
+	inline size_type count() const { return m_count; }//アロケート中の数
+
+public:
+	//スコープスタックアロケータ取得
+	inline GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
 
 public:
 	//メソッド
+
 	//メモリ確保
 	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
@@ -116,6 +123,13 @@ public:
 	//※作成中、ロックを取得する。
 	std::size_t debugInfo(char* message);
 
+	//使用中のサイズと数を取得
+	void getSizeAndCount(size_type& size, size_type& count);
+
+	//使用中のサイズと数をリセット
+	//※現在のサイズと数より小さい数でなければならない
+	bool resetSizeAndCount(const size_type size, const size_type count);
+
 private:
 	//メモリ解放（共通処理）
 	//※ロック取得は呼び出し元で行う
@@ -139,7 +153,7 @@ private:
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
 	size_type m_size;//バッファの使用中サイズ
-	size_type m_allocatedCount;//アロケート中の数
+	size_type m_count;//アロケート中の数
 	lock_type m_lock;//ロックオブジェクト
 };
 

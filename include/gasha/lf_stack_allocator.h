@@ -14,6 +14,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -64,13 +65,19 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size.load(); }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline size_type allocatedCount() const { return m_allocatedCount.load(); }//アロケート中の数
+	inline size_type count() const { return m_count.load(); }//アロケート中の数
+
+public:
+	//スコープスタックアロケータ取得
+	inline GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
 
 public:
 	//メソッド
+
 	//メモリ確保
 	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
@@ -107,6 +114,7 @@ public:
 	//メモリクリア
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
 	//※初期状態にする
+	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
 	void clear();
 	
 	//デバッグ情報作成
@@ -114,6 +122,14 @@ public:
 	//※使用したバッファのサイズを返す。
 	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
 	std::size_t debugInfo(char* message);
+
+	//使用中のサイズと数を取得
+	void getSizeAndCount(size_type& size, size_type& count);
+
+	//使用中のサイズと数をリセット
+	//※現在のサイズと数より小さい数でなければならない
+	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
+	bool resetSizeAndCount(const size_type size, const size_type count);
 
 private:
 	//メモリ解放（共通処理）
@@ -137,7 +153,7 @@ private:
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
 	std::atomic<size_type> m_size;//バッファの使用中サイズ
-	std::atomic<size_type> m_allocatedCount;//アロケート中の数
+	std::atomic<size_type> m_count;//アロケート中の数
 };
 
 //--------------------------------------------------------------------------------

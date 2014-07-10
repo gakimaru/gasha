@@ -59,6 +59,7 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
 	inline size_type maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
 	inline size_type blockSize() const { return m_blockSize; }//ブロックサイズ

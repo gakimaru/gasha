@@ -23,8 +23,7 @@
 
 #include <gasha/type_traits.inl>//型特性ユーティリティ：toStr()
 
-#include <utility>//C++11 std::move
-
+#include <stdio.h>//sprintf()
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -83,7 +82,7 @@ std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message)
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for monoAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, isAllocated=%s\n", m_buffRef, maxSize(), this->size(), remain(), toStr(isAllocated()));
+	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, isAllocated=%s\n", m_buffRef, maxSize(), this->size(), remain(), toStr(isAllocated()));
 	size += sprintf(message + size, "----------\n");
 	return size;
 }

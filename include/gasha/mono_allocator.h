@@ -21,10 +21,6 @@
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
-//クラス宣言
-template<class LOCK_TYPE>
-class monoAllocator;
-
 //--------------------------------------------------------------------------------
 //単一アロケータクラス
 //※バッファをコンストラクタで受け渡して使用
@@ -38,6 +34,7 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
@@ -45,6 +42,7 @@ public:
 
 public:
 	//メソッド
+
 	//メモリ確保
 	void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 

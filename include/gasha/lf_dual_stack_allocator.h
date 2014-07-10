@@ -14,6 +14,8 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ
+#include <gasha/scoped_dual_stack_allocator.h>//双方向スコープスタックアロケータ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -71,6 +73,7 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size2_type size2(const size_type size_asc, const size_type size_desc) const;//使用中のサイズ（バイト数） ※正順サイズと逆順サイズから取得
 	inline size_type sizeAsc(const size2_type size) const;//正順で使用中のサイズ（バイト数） ※サイズから取得
@@ -79,15 +82,21 @@ public:
 	inline size_type sizeAsc() const;//正順で使用中のサイズ（バイト数）
 	inline size_type sizeDesc() const;//逆順で使用中のサイズ（バイト数）
 	inline size_type remain() const;//残りサイズ（バイト数）
-	inline size_type allocatedCountAsc() const { return m_allocatedCountAsc.load(); }//正順でアロケート中の数
-	inline size_type allocatedCountDesc() const { return m_allocatedCountDesc.load(); }//逆順でアロケート中の数
-	inline size_type allocatedCount() const { return m_allocatedCountAsc.load() + m_allocatedCountDesc.load(); }//アロケート中の数
+	inline size_type count() const { return m_countAsc.load() + m_countDesc.load(); }//アロケート中の数
+	inline size_type countAsc() const { return m_countAsc.load(); }//正順でアロケート中の数
+	inline size_type countDesc() const { return m_countDesc.load(); }//逆順でアロケート中の数
 	inline allocateOrder_t allocateOrder() const { return m_allocateOrder.load(); }//現在のアロケート方向
 	inline void setAllocateOrder(const allocateOrder_t order){ m_allocateOrder.store(order); }//現在のアロケート方向を変更
 	inline void reversewAllocateOrder(){ m_allocateOrder.store(m_allocateOrder.load() == ALLOC_ASC ? ALLOC_DESC : ALLOC_ASC); }//現在のアロケート方向を逆にする
 
 public:
+	//スコープスタックアロケータ取得
+	inline GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
+
+public:
 	//メソッド
+
 	//メモリ確保
 	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 	//※アロケート方向指定版
@@ -134,6 +143,7 @@ public:
 	//メモリクリア
 	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
 	//※全て初期状態にする
+	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
 	inline void clearAll();
 	//※現在のアロケート方向のみ
 	inline void clear();
@@ -145,6 +155,17 @@ public:
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
 	std::size_t debugInfo(char* message);
+
+	//使用中のサイズと数を取得
+	void getSizeAndCount(size_type& size, size_type& count);
+	void getSizeAndCount(allocateOrder_t& order, size_type& size_asc, size_type& size_desc, size_type& count_asc, size_type& count_desc);
+
+	//使用中のサイズと数をリセット
+	//※現在のサイズと数より小さい数でなければならない
+	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
+	inline bool resetSizeAndCount(const size_type size, const size_type count);//※サイズと数の取得時とアロケート方向が同じであることを前提としている
+	bool resetSizeAndCount(const allocateOrder_t order, const size_type size_asc, const size_type size_desc, const size_type count_asc, const size_type count_desc);
+	bool resetSizeAndCount(const allocateOrder_t order, const size_type size, const size_type count);
 
 private:
 	//正順メモリ確保（共通処理）
@@ -188,8 +209,8 @@ private:
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
 	std::atomic<size2_type> m_size;//バッファの使用中サイズ（正順＋逆準）
-	std::atomic<size_type> m_allocatedCountAsc;//アロケート中の数(正順)
-	std::atomic<size_type> m_allocatedCountDesc;//アロケート中の数(逆順)
+	std::atomic<size_type> m_countAsc;//アロケート中の数(正順)
+	std::atomic<size_type> m_countDesc;//アロケート中の数(逆順)
 	std::atomic<allocateOrder_t> m_allocateOrder;//現在のアロケート方向
 };
 

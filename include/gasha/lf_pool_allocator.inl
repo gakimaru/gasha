@@ -103,7 +103,7 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
+	size += sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
 
 	if (with_detail)
 	{

@@ -21,6 +21,7 @@
 
 #include <gasha/stack_allocator.inl>//スタックアロケータ【インライン関数／テンプレート関数定義部】
 
+#include <stdio.h>//sprintf()
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -68,7 +69,7 @@ void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const
 	
 	//使用中のサイズとメモリ確保数を更新
 	m_size = new_size;
-	++m_allocatedCount;
+	++m_count;
 
 	//空き領域を確保
 	return reinterpret_cast<void*>(new_ptr);
@@ -77,7 +78,7 @@ void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const
 //使用中のサイズを指定位置に戻す
 //※ポインタ指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
-bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
+bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
@@ -93,9 +94,32 @@ std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
+	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
 	size += sprintf(message + size, "----------\n");
 	return size;
+}
+
+//使用中のサイズと数を取得
+template<class LOCK_TYPE, class AUTO_CLEAR>
+void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size, typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	//使用中のサイズとメモリ確保数を取得
+	size = m_size;
+	count = m_count;
+}
+
+//使用中のサイズと数をリセット
+template<class LOCK_TYPE, class AUTO_CLEAR>
+bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size, const typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	if (m_size < size || m_count < count)//現在の値の方が小さい場合は失敗
+		return false;
+	//使用中のサイズとメモリ確保数を更新
+	m_size = size;
+	m_count = count;
+	return true;
 }
 
 //メモリ解放（共通処理）
@@ -103,7 +127,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_free(void* p)
 {
 	//メモリ確保数を更新
-	--m_allocatedCount;
+	--m_count;
 	//自動クリア呼び出し
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClear(*this);

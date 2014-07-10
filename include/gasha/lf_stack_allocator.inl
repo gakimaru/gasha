@@ -18,7 +18,6 @@
 #include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -45,7 +44,7 @@ void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocato
 	{
 		typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
 		const typename lfStackAllocator<AUTO_CLEAR>::size_type new_size = 0;
-		if (allocator.m_allocatedCount.load() > 0)
+		if (allocator.m_count.load() > 0)
 			return;
 		if (allocator.m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
 			return;
@@ -158,7 +157,7 @@ inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(void* buff, const std::siz
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
-	m_allocatedCount(0)
+	m_count(0)
 {
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);

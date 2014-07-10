@@ -18,7 +18,6 @@
 #include <gasha/stack_allocator.h>//スタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -41,7 +40,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void stackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
 {
-	if (allocator.m_allocatedCount == 0)
+	if (allocator.m_count == 0)
 		allocator.m_size = 0;
 }
 
@@ -141,7 +140,7 @@ inline void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を更新
 	m_size = 0;
-	m_allocatedCount = 0;
+	m_count = 0;
 }
 
 //ポインタが範囲内か判定
@@ -164,7 +163,7 @@ inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const s
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
-	m_allocatedCount(0)
+	m_count(0)
 {
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);

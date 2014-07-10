@@ -18,7 +18,6 @@
 #include <gasha/dual_stack_allocator.h>//双方向スタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -41,7 +40,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocatorAutoClear::autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
 {
-	if (allocator.m_allocatedCountAsc == 0)
+	if (allocator.m_countAsc == 0)
 	{
 		allocator.m_size -= allocator.m_sizeAsc;
 		allocator.m_sizeAsc = 0;
@@ -52,7 +51,7 @@ inline void dualStackAllocatorAutoClear::autoClearAsc(dualStackAllocator<LOCK_TY
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocatorAutoClear::autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
 {
-	if (allocator.m_allocatedCountDesc == 0)
+	if (allocator.m_countDesc == 0)
 	{
 		allocator.m_size -= allocator.m_sizeDesc;
 		allocator.m_sizeDesc = 0;
@@ -230,8 +229,8 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearAll()
 	m_size = 0;
 	m_sizeAsc = 0;
 	m_sizeDesc = 0;
-	m_allocatedCountAsc = 0;
-	m_allocatedCountDesc = 0;
+	m_countAsc = 0;
+	m_countDesc = 0;
 }
 //※現在のアロケート方向のみ
 template<class LOCK_TYPE, class AUTO_CLEAR>
@@ -250,6 +249,13 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearOrdinal(const alloca
 		return _clearDesc();
 }
 
+//使用中のサイズと数をリセット
+template<class LOCK_TYPE, class AUTO_CLEAR>
+inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count)
+{
+	return resetSizeAndCount(m_allocateOrder, size, count);
+}
+
 //正順のメモリクリア
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearAsc()
@@ -257,7 +263,7 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearAsc()
 	//使用中のサイズとメモリ確保数を更新
 	m_size -= m_sizeAsc;
 	m_sizeAsc = 0;
-	m_allocatedCountAsc = 0;
+	m_countAsc = 0;
 }
 //逆順のメモリクリア
 template<class LOCK_TYPE, class AUTO_CLEAR>
@@ -266,7 +272,7 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearDesc()
 	//使用中のサイズとメモリ確保数を更新
 	m_size -= m_sizeDesc;
 	m_sizeDesc = 0;
-	m_allocatedCountDesc = 0;
+	m_countDesc = 0;
 }
 
 //ポインタが範囲内か判定
@@ -296,8 +302,8 @@ inline dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::dualStackAllocator(void* buff,
 	m_size(0),
 	m_sizeAsc(0),
 	m_sizeDesc(0),
-	m_allocatedCountAsc(0),
-	m_allocatedCountDesc(0)
+	m_countAsc(0),
+	m_countDesc(0)
 {
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);

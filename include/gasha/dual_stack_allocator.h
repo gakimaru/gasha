@@ -14,6 +14,8 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ
+#include <gasha/scoped_dual_stack_allocator.h>//双方向スコープスタックアロケータ
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -71,20 +73,27 @@ public:
 
 public:
 	//アクセッサ
+	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
 	inline size_type sizeAsc() const { return m_sizeAsc; }//正順で使用中のサイズ（バイト数）
 	inline size_type sizeDesc() const { return m_sizeDesc; }//逆順で使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
-	inline size_type allocatedCountAsc() const { return m_allocatedCountAsc; }//正順でアロケート中の数
-	inline size_type allocatedCountDesc() const { return m_allocatedCountDesc; }//逆順でアロケート中の数
-	inline size_type allocatedCount() const { return m_allocatedCountAsc + m_allocatedCountDesc; }//アロケート中の数
+	inline size_type count() const { return m_countAsc + m_countDesc; }//アロケート中の数
+	inline size_type countAsc() const { return m_countAsc; }//正順でアロケート中の数
+	inline size_type countDesc() const { return m_countDesc; }//逆順でアロケート中の数
 	inline allocateOrder_t allocateOrder() const { return m_allocateOrder; }//現在のアロケート方向
 	inline void setAllocateOrder(const allocateOrder_t order){ m_allocateOrder = order; }//現在のアロケート方向を変更
 	inline void reversewAllocateOrder(){ m_allocateOrder = m_allocateOrder == ALLOC_ASC ? ALLOC_DESC : ALLOC_ASC; }//現在のアロケート方向を逆にする
 
 public:
+	//スコープスタックアロケータ取得
+	inline GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
+
+public:
 	//メソッド
+
 	//メモリ確保
 	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 	//※アロケート方向指定版
@@ -143,6 +152,16 @@ public:
 	//※作成中、ロックを取得する。
 	std::size_t debugInfo(char* message);
 
+	//使用中のサイズと数を取得
+	void getSizeAndCount(size_type& size, size_type& count);
+	void getSizeAndCount(allocateOrder_t& order, size_type& size_asc, size_type& size_desc, size_type& count_asc, size_type& count_desc);
+
+	//使用中のサイズと数をリセット
+	//※現在のサイズと数より小さい数でなければならない
+	inline bool resetSizeAndCount(const size_type size, const size_type count);
+	bool resetSizeAndCount(const allocateOrder_t order, const size_type size_asc, const size_type size_desc, const size_type count_asc, const size_type count_desc);
+	bool resetSizeAndCount(const allocateOrder_t order, const size_type size, const size_type count);
+
 private:
 	//正順メモリ確保（共通処理）
 	void* _allocAsc(const std::size_t size, const std::size_t align);
@@ -187,8 +206,8 @@ private:
 	size_type m_size;//バッファの使用中サイズ（全体）
 	size_type m_sizeAsc;//バッファの使用中サイズ（正順）
 	size_type m_sizeDesc;//バッファの使用中サイズ（逆順）
-	size_type m_allocatedCountAsc;//アロケート中の数(正順)
-	size_type m_allocatedCountDesc;//アロケート中の数(逆順)
+	size_type m_countAsc;//アロケート中の数(正順)
+	size_type m_countDesc;//アロケート中の数(逆順)
 	allocateOrder_t m_allocateOrder;//現在のアロケート方向
 	lock_type m_lock;//ロックオブジェクト
 };

@@ -18,7 +18,6 @@
 #include <gasha/mono_allocator.h>//単一アロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

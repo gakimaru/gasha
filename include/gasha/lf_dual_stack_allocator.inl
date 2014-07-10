@@ -18,7 +18,6 @@
 #include <gasha/lf_dual_stack_allocator.h>//ロックフリー双方向スタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -44,7 +43,7 @@ void lfDualStackAllocatorAutoClear::autoClearAsc(lfDualStackAllocator<AUTO_CLEAR
 	while(true)
 	{
 		typename lfDualStackAllocator<AUTO_CLEAR>::size2_type now_size2 = allocator.m_size.load();
-		if (allocator.m_allocatedCountAsc.load() > 0)
+		if (allocator.m_countAsc.load() > 0)
 			return;
 		typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.sizeAsc(now_size2);
 		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size_desc = allocator.sizeDesc(now_size2);
@@ -62,7 +61,7 @@ void lfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEA
 	while(true)
 	{
 		typename lfDualStackAllocator<AUTO_CLEAR>::size2_type now_size2 = allocator.m_size.load();
-		if (allocator.m_allocatedCountDesc.load() > 0)
+		if (allocator.m_countDesc.load() > 0)
 			return;
 		typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.sizeDesc(now_size2);
 		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size_asc = allocator.sizeAsc(now_size2);
@@ -303,6 +302,12 @@ inline void lfDualStackAllocator<AUTO_CLEAR>::clearOrdinal(const allocateOrder_t
 	else if(order == ALLOC_DESC)
 		return _clearDesc();
 }
+//使用中のサイズと数をリセット
+template<class AUTO_CLEAR>
+bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count)
+{
+	return resetSizeAndCount(m_allocateOrder.load(), size, count);
+}
 
 //ポインタが範囲内か判定
 template<class AUTO_CLEAR>
@@ -333,8 +338,8 @@ inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(void* buff, const 
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
-	m_allocatedCountAsc(0),
-	m_allocatedCountDesc(0)
+	m_countAsc(0),
+	m_countDesc(0)
 {
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);

@@ -21,6 +21,7 @@
 
 #include <gasha/lf_stack_allocator.inl>//ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 
+#include <stdio.h>//sprintf()
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -68,13 +69,14 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 		}
 
 		//使用中のサイズとメモリ確保数を更新
+		m_count.fetch_add(1);//アロケート数
 		if (m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
 		{
-			m_allocatedCount.fetch_add(1);//アロケート数
-
 			//空き領域を確保
 			return reinterpret_cast<void*>(new_ptr);
 		}
+		//リトライのためにアロケート数を戻す
+		m_count.fetch_sub(1);//アロケート数
 	}
 	return nullptr;//ダミー
 }
@@ -84,7 +86,7 @@ template<class AUTO_CLEAR>
 bool lfStackAllocator<AUTO_CLEAR>::_free(void* p)
 {
 	//メモリ確保数を更新
-	m_allocatedCount.fetch_sub(1);
+	m_count.fetch_sub(1);
 	//自動クリア呼び出し
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClear(*this);
@@ -115,12 +117,18 @@ void lfStackAllocator<AUTO_CLEAR>::clear()
 	while(true)
 	{
 		size_type now_size = m_size.load();
-		const size_type now_count = m_allocatedCount.load();
-		const size_type new_size = 0;
-		if(m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
-		{
-			m_allocatedCount.fetch_sub(now_count);//アロケート数
+		size_type now_count = m_count.load();
+		if (now_count == 0 && now_size == 0)
 			return;
+		const size_type new_size = 0;
+		const size_type new_count = 0;
+
+		if (m_count.compare_exchange_weak(now_count, new_count))//アロケート数のCAS
+		{
+			if (m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
+				return;
+			//リトライのためにアロケート数を戻す
+			m_count.fetch_add(now_count);//アロケート数
 		}
 	}
 	return;//ダミー
@@ -132,9 +140,47 @@ std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, remain=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), remain(), allocatedCount());
+	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
 	size += sprintf(message + size, "----------\n");
 	return size;
+}
+
+//使用中のサイズと数を取得
+template<class LOCK_TYPE>
+void lfStackAllocator<LOCK_TYPE>::getSizeAndCount(typename lfStackAllocator<LOCK_TYPE>::size_type& size, typename lfStackAllocator<LOCK_TYPE>::size_type& count)
+{
+	//使用中のサイズとメモリ確保数を取得
+	while (true)
+	{
+		size = m_size.load();
+		count = m_count.load();
+		if (size == m_size.load() && count == m_count.load())//他のスレッドの割り込みがなく、取得した値に不整合が無いと見なす
+			break;
+	}
+}
+
+//使用中のサイズと数をリセット
+template<class LOCK_TYPE>
+bool lfStackAllocator<LOCK_TYPE>::resetSizeAndCount(const typename lfStackAllocator<LOCK_TYPE>::size_type size, const typename lfStackAllocator<LOCK_TYPE>::size_type count)
+{
+	while (true)
+	{
+		size_type now_size = m_size.load();
+		size_type now_count = m_count.load();
+		if (now_size == size && now_count == count)//現在の値と一致するなら終了
+			return true;
+		if (now_size < size || now_count < count)//現在の値の方が小さい場合は失敗
+			return false;
+		//使用中のサイズとメモリ確保数を更新
+		if (m_count.compare_exchange_weak(now_count, count))//アロケート数のCAS
+		{
+			if (m_size.compare_exchange_weak(now_size, size))//サイズのCAS
+				return true;
+			//リトライのためにアロケート数を戻す
+			m_count.fetch_add(now_count - count);//アロケート数
+		}
+	}
+	return false;//ダミー
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

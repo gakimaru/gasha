@@ -21,6 +21,7 @@
 
 #include <gasha/dual_stack_allocator.inl>//双方向スタックアロケータ【インライン関数／テンプレート関数定義部】
 
+#include <stdio.h>//sprintf()
 #include <assert.h>//assert()
 
 //【VC++】ワーニング設定を退避
@@ -48,9 +49,76 @@ std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for dualStackAllocator -----\n");
-	size += sprintf(message + size, "buffRef=%p, maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, allocatedCountAsc=%d, allocatedCountDesc=%d, allocatedCount=%d\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), allocatedCountAsc(), allocatedCountDesc(), allocatedCount());
+	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, countAsc=%d, countDesc=%d, count=%d, allocate-order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), countAsc(), countDesc(), count(), allocateOrder() == ALLOC_ASC ? "ASC" : "DESC");
 	size += sprintf(message + size, "----------\n");
 	return size;
+}
+
+//使用中のサイズと数を取得
+template<class LOCK_TYPE, class AUTO_CLEAR>
+void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	//使用中のサイズとメモリ確保数を取得
+	if (m_allocateOrder == ALLOC_ASC)
+	{
+		size = m_sizeAsc;
+		count = m_countAsc;
+	}
+	else//if (m_allocateOrder == ALLOC_DESC)
+	{
+		size = m_sizeDesc;
+		count = m_countDesc;
+	}
+}
+template<class LOCK_TYPE, class AUTO_CLEAR>
+void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(allocateOrder_t& order, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size_asc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size_desc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count_asc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count_desc)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	//使用中のサイズとメモリ確保数を取得
+	order = m_allocateOrder;
+	size_asc = m_sizeAsc;
+	count_asc = m_countAsc;
+	size_desc = m_sizeDesc;
+	count_desc = m_countDesc;
+}
+
+//使用中のサイズと数をリセット
+template<class LOCK_TYPE, class AUTO_CLEAR>
+bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocateOrder_t order, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size_asc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size_desc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count_asc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count_desc)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	if (m_sizeAsc < size_asc || m_countAsc < count_asc || m_sizeDesc < size_desc || m_countDesc < count_desc)//現在の値の方が小さい場合は失敗
+		return false;
+	//使用中のサイズとメモリ確保数を更新
+	m_allocateOrder = order;
+	m_sizeAsc = size_asc;
+	m_countAsc = count_asc;
+	m_sizeDesc = size_desc;
+	m_countDesc = count_desc;
+	return true;
+}
+template<class LOCK_TYPE, class AUTO_CLEAR>
+bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocateOrder_t order, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count)
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	if (order == ALLOC_ASC)
+	{
+		if (m_sizeAsc < size || m_countAsc < count)//現在の値の方が小さい場合は失敗
+			return false;
+		//使用中のサイズとメモリ確保数を更新
+		m_sizeAsc = size;
+		m_countAsc = count;
+	}
+	else//if (order == ALLOC_DESC)
+	{
+		if (m_sizeDesc < size || m_countDesc < count)//現在の値の方が小さい場合は失敗
+			return false;
+		//使用中のサイズとメモリ確保数を更新
+		m_sizeDesc = size;
+		m_countDesc = count;
+	}
+	return true;
 }
 
 //正順メモリ確保
@@ -82,7 +150,7 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocAsc(const std::size_t siz
 	//使用中のサイズとメモリ確保数を更新
 	m_sizeAsc = new_size;
 	m_size += alloc_size;
-	++m_allocatedCountAsc;
+	++m_countAsc;
 
 	//空き領域を確保
 	return reinterpret_cast<void*>(new_ptr);
@@ -116,7 +184,7 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocDesc(const std::size_t si
 	//使用中のサイズとメモリ確保数を更新
 	m_sizeDesc = new_size;
 	m_size += alloc_size;
-	++m_allocatedCountDesc;
+	++m_countDesc;
 
 	//空き領域を確保
 	return reinterpret_cast<void*>(new_ptr);
@@ -127,7 +195,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_freeAsc(void* p)
 {
 	//メモリ確保数を更新
-	--m_allocatedCountAsc;
+	--m_countAsc;
 	//自動クリア呼び出し
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClearAsc(*this);
@@ -139,7 +207,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_freeDesc(void* p)
 {
 	//メモリ確保数を更新
-	--m_allocatedCountDesc;
+	--m_countDesc;
 	//自動クリア呼び出し
 	AUTO_CLEAR auto_clear;
 	auto_clear.autoClearDesc(*this);
