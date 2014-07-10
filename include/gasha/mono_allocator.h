@@ -43,7 +43,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(*this); return adapter; }
+	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(*this, "monoAllocator"); return adapter; }
 
 public:
 	//メソッド

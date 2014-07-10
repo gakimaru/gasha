@@ -32,6 +32,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //スコープスタックアロケータクラス
 
+//アロケータ名
+template<class ALLOCATOR>
+inline const char* allocatorAdapter<ALLOCATOR>::name() const
+{
+	return m_name;
+}
+
 //バッファの全体サイズ（バイト数）
 template<class ALLOCATOR>
 inline typename allocatorAdapter<ALLOCATOR>::size_type allocatorAdapter<ALLOCATOR>::maxSize() const
@@ -109,19 +116,23 @@ inline std::size_t allocatorAdapter<ALLOCATOR>::debugInfo(char* message)
 //コンストラクタ
 template<class ALLOCATOR>
 inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocatorAdapter<ALLOCATOR>&& adapter) :
-m_allocator(adapter.m_allocator)
+	m_allocator(adapter.m_allocator),
+	m_name(adapter.m_name)
 {}
 template<class ALLOCATOR>
 inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(const allocatorAdapter<ALLOCATOR>& adapter) :
-m_allocator(adapter.m_allocator)
+	m_allocator(adapter.m_allocator),
+	m_name(adapter.m_name)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type&& allocator) :
-	m_allocator(allocator)
+inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type&& allocator, const char* name) :
+	m_allocator(allocator),
+	m_name(name)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type& allocator) :
-m_allocator(allocator)
+inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type& allocator, const char* name) :
+	m_allocator(allocator),
+	m_name(name)
 {}
 
 //デストラクタ

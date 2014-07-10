@@ -94,7 +94,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this); return adapter; }
+	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, "dualStackAllocator"); return adapter; }
 
 public:
 	//メソッド

@@ -41,7 +41,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfMonoAllocator> adapter(){ GASHA_ allocatorAdapter<lfMonoAllocator> adapter(*this); return adapter; }
+	inline GASHA_ allocatorAdapter<lfMonoAllocator> adapter(){ GASHA_ allocatorAdapter<lfMonoAllocator> adapter(*this, "lfMonoAllocator"); return adapter; }
 
 public:
 	//メソッド

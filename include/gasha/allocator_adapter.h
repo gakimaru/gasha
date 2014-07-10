@@ -30,6 +30,7 @@ public:
 
 public:
 	//アクセッサ
+	virtual const char* name() const = 0;//アロケータ名
 	virtual size_type maxSize() const = 0;//バッファの全体サイズ（バイト数）
 	virtual size_type size() const = 0;//使用中のサイズ（バイト数）
 	virtual size_type remain() const = 0;//残りサイズ（バイト数）
@@ -76,9 +77,10 @@ public:
 
 public:
 	//アクセッサ
-	inline size_type maxSize() const;//バッファの全体サイズ（バイト数）
-	inline size_type size() const;//使用中のサイズ（バイト数）
-	inline size_type remain() const;//残りサイズ（バイト数）
+	inline const char* name() const override;//アロケータ名
+	inline size_type maxSize() const override;//バッファの全体サイズ（バイト数）
+	inline size_type size() const override;//使用中のサイズ（バイト数）
+	inline size_type remain() const override;//残りサイズ（バイト数）
 
 public:
 	//メソッド
@@ -111,13 +113,14 @@ public:
 	//コンストラクタ
 	inline allocatorAdapter(allocatorAdapter<ALLOCATOR>&& allocator);
 	inline allocatorAdapter(const allocatorAdapter<ALLOCATOR>& allocator);
-	inline allocatorAdapter(allocator_type&& allocator);
-	inline allocatorAdapter(allocator_type& allocator);
+	inline allocatorAdapter(allocator_type&& allocator, const char* name = "(unknown)");
+	inline allocatorAdapter(allocator_type& allocator, const char* name = "(unknown)");
 	//デストラクタ
 	inline ~allocatorAdapter();
 private:
 	//フィールド
 	allocator_type& m_allocator;//アロケータ
+	const char* m_name;//アロケータ名
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

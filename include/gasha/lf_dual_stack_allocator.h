@@ -97,7 +97,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(*this); return adapter; }
+	inline GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(*this, "lfDualStackAllocator"); return adapter; }
 
 public:
 	//メソッド

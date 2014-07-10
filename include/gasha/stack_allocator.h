@@ -79,7 +79,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this); return adapter; }
+	inline GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, "stackAllocator"); return adapter; }
 
 public:
 	//メソッド
