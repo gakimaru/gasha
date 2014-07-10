@@ -60,6 +60,8 @@ public:
 
 public:
 	//アクセッサ
+	const char* name() const { return "poolAllocator"; }
+	const char* mode() const { return "-"; }
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type offset() const { return m_offset; }//プールバッファのオフセット（アラインメント調整用）
 	inline size_type maxSize() const { return m_maxSize; }//プールバッファの全体サイズ（バイト数）
@@ -73,7 +75,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(*this, "poolAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド

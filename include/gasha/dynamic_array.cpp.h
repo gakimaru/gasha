@@ -21,7 +21,7 @@
 
 #include <gasha/dynamic_array.inl>//動的配列コンテナ【インライン関数／テンプレート関数定義部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
 

@@ -12,74 +12,172 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/allocator_common.h>//メモリアロケータ共通設定
+#include <gasha/i_allocator_adapter.h>//アロケータアダプターインターフェース
+#include <gasha/allocator_adapter.h>//アロケータアダプター
+#include <gasha/std_allocator.h>//標準アロケータ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
 
+//【VC++】ワーニング設定を退避
+#pragma warning(push)
+
+//【VC++】例外を無効化した状態で <functional> をインクルードすると、warning C4530 が発生する
+//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+#pragma warning(disable: 4530)//C4530を抑える
+
+#include <functional>//std::function
+
+//【VC++】例外を無効化した状態で例外つきのnewをオーバーロードすると、warning C4290 が発生する
+//warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
+#pragma warning(disable: 4290)//C4290を抑える
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//多態アロケータクラス
-//※アロケータの実装を隠ぺいして、共通インターフェースでアロケータを利用できるようにする。
-//※既存のアロケータをコンストラクタで受け渡して使用する。
-template<class ALLOCATOR>
-class polyAllocator : public IAllocatorAdapter
+//多態アロケータ
+//※アロケータの実装を隠ぺいして、共通インターフェースで様々なアロケータを利用できるようにする。
+//※標準 new / delete の中身が、多態アロケータからのメモリ確保／解放に置き換わる。
+//※多態アロケータにセットしたい既存のアロケータを、コンストラクタで受け渡して使用する。
+//※デストラクタで変更前のアロケータに戻る。
+//※他のスレッドには影響しない。
+
+//--------------------
+//アロケート用デバッグ情報
+struct debugAllocationInfo
 {
-public:
-	//型
-	typedef ALLOCATOR allocator_type;//アロケータ型
-	typedef std::uint32_t size_type;//サイズ型
+#ifdef GASHA_HAS_DEBUG_FEATURE
+	const char* m_fileName;//ファイル名
+	const char* m_funcName;//関数名
+	const char* m_callPointName;//コールポイント名
+	double m_time;//プログラム経過時間
+	const char* m_typeName;//型名
+	std::size_t m_typeSize;//型のサイズ
+	std::size_t m_arrayNum;//配列サイズ
+#endif//GASHA_HAS_DEBUG_FEATURE
+
+	//コンストラクタ
+	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
+};
+
+//--------------------
+//デバッグ用メモリアロケート観察者
+enum newMethod_t//new時の状況
+{
+	methodOfNew,//new時
+	methodOfNewArrays,//new[]時
+};
+enum deleteMethod_t//delete時の状況
+{
+	methodOfDelete,//delete時
+	methodOfDeleteArrays,//delete[]時
+};
+struct debugAllocationObserver
+{
+	//new時のコールバック関数
+	std::function<void(const IAllocatorAdapter& adapter, const void* p, std::size_t size, std::size_t align, const newMethod_t method, const debugAllocationInfo* info)> m_atNew;
+	
+	//delete時のコールバック関数
+	std::function<void(const IAllocatorAdapter& adapter, const void* p, const deleteMethod_t method, const debugAllocationInfo* info)> m_atDelete;
+	
+	//アロケータアダプター変更時のコールバック関数 
+	std::function<void(const IAllocatorAdapter& adapter, const IAllocatorAdapter& next_adapter)> m_atChangeAllocator;
+
+	//アロケータアダプター復帰時のコールバック関数 
+	std::function<void(const IAllocatorAdapter& adapter, const IAllocatorAdapter& prev_adapter)> m_atReturnAllocator;
+
+	//コンストラクタ
+	inline debugAllocationObserver();
+};
+
+//--------------------
+//クラス宣言
+namespace _private
+{
+	template<class T>
+	struct newFunctor;
+	struct deleteFunctor;
+	struct deleteArrayFunctor;
+};
+
+//--------------------
+//多態アロケータクラス
+class polyAllocator
+{
+	friend void* ::operator new(const std::size_t size) GASHA_STDNEW_THROW;
+	friend void* ::operator new[](const std::size_t size) GASHA_STDNEW_THROW;
+	friend void ::operator delete(void* p) GASHA_STDDELETE_THROW;
+	friend void ::operator delete[](void* p) GASHA_STDDELETE_THROW;
+	template<class T>
+	friend struct GASHA_ _private::newFunctor;
+	friend struct GASHA_ _private::deleteFunctor;
+	friend struct GASHA_ _private::deleteArrayFunctor;
 
 public:
-	//アクセッサ
-	inline const char* name() const override;//アロケータ名
-	inline size_type maxSize() const override;//バッファの全体サイズ（バイト数）
-	inline size_type size() const override;//使用中のサイズ（バイト数）
-	inline size_type remain() const override;//残りサイズ（バイト数）
+	//オペレータ
+	inline const GASHA_ IAllocatorAdapter& operator*() const;
+	inline GASHA_ IAllocatorAdapter& operator*();
+	inline const GASHA_ IAllocatorAdapter* operator->() const;
+	inline GASHA_ IAllocatorAdapter* operator->();
 
 public:
-	//メソッド
-	//メモリ確保
-	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN) override;
+	//デバッグ観察者を変更
+	inline const GASHA_ debugAllocationObserver* debugObserver() const;
+	//デバッグ観察者を更新
+	inline void setDebugObserver(const GASHA_ debugAllocationObserver& observer) const;
+	inline void resetDebugObserver() const;
 
-	//メモリ解放
-	inline bool free(void* p) override;
+private:
+	//アライメントサイズを取得
+	inline std::size_t align() const;
+	//アライメントサイズを変更
+	inline void setAlign(const std::size_t align) const;
+	inline void resetAlign() const;
+	//デバッグ情報を変更
+	inline const GASHA_ debugAllocationInfo* debugInfo() const;
+	//デバッグ情報を更新
+	inline void setDebugInfo(const GASHA_ debugAllocationInfo* info) const;
+	inline void resetDebugInfo() const;
 
-#if 0//※テンプレート関数は仮想化不可（一定のvtableが確定できないため）
-	//メモリ確保とコンストラクタ呼び出し
-	template<typename T, typename...Tx>
-	inline T* newObj(Tx&&... args) override;
-	//※配列用
-	template<typename T, typename...Tx>
-	inline T* newArray(const std::size_t num, Tx&&... args) override;
-
-	//メモリ解放とデストラクタ呼び出し
-	template<typename T>
-	inline bool deleteObj(T* p) override;
-	//※配列用（要素数の指定が必要な点に注意）
-	template<typename T>
-	inline bool deleteArray(T* p, const std::size_t num) override;
-#endif//DELETE
-
-	//デバッグ情報作成
-	inline std::size_t debugInfo(char* message) override;
+private:
+	//コールバック
+	void callbackAtNew(void *p, std::size_t size, const GASHA_ newMethod_t method);
+	void callbackAtDelete(void *p, const GASHA_ deleteMethod_t method);
+	void callbackAtChangeAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& next_adapter);//アロケータアダプター変更時のコールバック
+	void callbackAtReturnAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
 
 public:
 	//コンストラクタ
-	inline polyAllocator(polyAllocator<ALLOCATOR>&& allocator);
-	inline polyAllocator(const polyAllocator<ALLOCATOR>& allocator);
-	inline polyAllocator(allocator_type&& allocator, const char* name = "(unknown)");
-	inline polyAllocator(allocator_type& allocator, const char* name = "(unknown)");
+	inline polyAllocator(GASHA_ IAllocatorAdapter& adapter);
+	//デフォルトコンストラクタ
+	//現在のアダプター、および、観察者を操作可能。
+	//※標準アロケータアダプターの強制初期化（二重に呼び出されても問題ない）
+	inline polyAllocator();
+	void initlaizeStdAllocatorAdapter();
 	//デストラクタ
 	inline ~polyAllocator();
+
 private:
 	//フィールド
-	allocator_type& m_allocator;//アロケータ
-	const char* m_name;//アロケータ名
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	GASHA_ IAllocatorAdapter* m_prevAdapter;//変更前のアロケータ
+	const GASHA_ debugAllocationObserver* m_prevObserver;//変更前の観察者
+	//静的フィールド
+	static GASHA_ stdAllocator<> m_stdAllocator;//標準アロケータ
+	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプター
+	thread_local static GASHA_ IAllocatorAdapter* m_adapter;//現在のアロケータアダプター
+	thread_local static const GASHA_ debugAllocationObserver* m_observer;//現在の観察者
+	thread_local static std::size_t m_align;//現在のアラインメントサイズ（一時利用のみ）
+	thread_local static const GASHA_ debugAllocationInfo* m_debugInfo;//現在のデバッグ情報（一時利用のみ）
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+	static GASHA_ IAllocatorAdapter* m_dummyAdapter;//アロケータアダプターダミー
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//【VC++】ワーニング設定を復元
+#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/poly_allocator.inl>

@@ -3,6 +3,7 @@
 #define GASHA_INCLUDED_STD_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
+// 【テンプレートライブラリ】
 // std_allocator.h
 // 標準アロケータ【宣言部】
 //
@@ -13,7 +14,6 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
-#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
 #include <gasha/allocator_adapter.h>//アロケータアダプター
 #include <gasha/dummy_lock.h>//ダミーロック
 
@@ -23,26 +23,58 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
+//標準アロケータ実装部クラス
+
+//----------------------------------------
+//アラインメント非対応版（デフォルト）
+class stdAllocatorImpl_NoAlign
+{
+public:
+	//名前
+	inline static const char* name(){ return "NoAlign"; }
+	//メモリ確保
+	inline static void* alloc(const std::size_t size, const std::size_t align);
+	//メモリ解放
+	inline static void free(void* p);
+};
+
+//----------------------------------------
+//アライメント対応版
+class stdAllocatorImpl_Align
+{
+public:
+	//名前
+	inline static const char* name(){ return "Align"; }
+	//メモリ確保
+	inline static void* alloc(const std::size_t size, const std::size_t align);
+	//メモリ解放
+	inline static void free(void* p);
+};
+
+//--------------------------------------------------------------------------------
 //標準アロケータクラス
 //※内部で _aligned_malloc(), _aligned_free() を使用してメモリを確保。
 //※基本的にそのままでスレッドセーフのはずだが、コンパイラによってスレッドセーブでない場合は、ロック型を指定することができる。
-template<class LOCK_TYPE = GASHA_ dummyLock>
+template<class LOCK_TYPE = GASHA_ dummyLock, class IMPL = stdAllocatorImpl_NoAlign>
 class stdAllocator
 {
 public:
 	//型
 	typedef LOCK_TYPE lock_type;//ロック型
+	typedef IMPL implemnt_type;//実装型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
 	//アクセッサ
+	const char* name() const { return "stdAllocator"; }
+	const char* mode() const { return implemnt_type::name(); }
 	inline size_type maxSize() const;//バッファの全体サイズ（バイト数）
 	inline size_type size() const;//使用中のサイズ（バイト数）
 	inline size_type remain() const;//残りサイズ（バイト数）
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE>> adapter(*this, "stdAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE, IMPL>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE, IMPL>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -91,6 +123,12 @@ private:
 	//フィールド
 	lock_type m_lock;//ロックオブジェクト
 };
+
+//----------------------------------------
+//標準アロケータ別名定義：アライメント対応標準アロケータ
+
+template<class LOCK_TYPE = GASHA_ dummyLock>
+using stdAlignAllocator = stdAllocator<LOCK_TYPE, stdAllocatorImpl_Align>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

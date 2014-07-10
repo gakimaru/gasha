@@ -3,6 +3,7 @@
 #define GASHA_INCLUDED_DUAL_STACK_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
+// 【テンプレートライブラリ】
 // dual_stack_allocator.h
 // 双方向スタックアロケータ【宣言部】
 //
@@ -36,6 +37,8 @@ class dualStackAllocator;
 class dualStackAllocatorAutoClear
 {
 public:
+	//名前
+	static const char* name(){ return "AutoClear"; }
 	//正順方向の自動クリア
 	template<class LOCK_TYPE, class AUTO_CLEAR>
 	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
@@ -50,6 +53,8 @@ public:
 class dummyDualStackAllocatorAutoClear
 {
 public:
+	//名前
+	static const char* name(){ return "ManualClear"; }
 	//正順方向の自動クリア
 	template<class LOCK_TYPE, class AUTO_CLEAR>
 	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
@@ -74,6 +79,8 @@ public:
 
 public:
 	//アクセッサ
+	const char* name() const { return "dualStackAllocator"; }//アロケータ名
+	const char* mode() const { return auto_clear_type::name(); }//実装モード名
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
@@ -94,7 +101,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, "dualStackAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -132,7 +139,7 @@ public:
 
 	//使用中のサイズを指定位置に戻す
 	//※【注意】メモリ確保状態（アロケート中の数）と無関係に実行するので注意
-	//※【注意】自動クリア（スマート双方向スタック）使用時には使用禁止
+	//※【注意】自動クリア時（スマートスタックアロケータ使用時）は、このメソッドの使用禁止
 	//　（メモリ解放時のアドレスが不正なアドレスと見なされて、アロケート中の数が正しく更新されなくなり、
 	//　　自動クリアが機能しなくなるため）
 	//※位置指定版
@@ -143,8 +150,8 @@ public:
 	inline bool rewind(void* p);
 
 	//メモリクリア
-	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
-	//※全て初期状態にする
+	//※初期状態にする
+	//※【注意】メモリ確保状態（アロケート中の数）と無関係に実行するので注意
 	inline void clearAll();
 	//※現在のアロケート方向のみ
 	inline void clear();
@@ -158,11 +165,13 @@ public:
 	std::size_t debugInfo(char* message);
 
 	//使用中のサイズと数を取得
+	//※スコープスタックアロケータで使用されるメソッド
 	void getSizeAndCount(size_type& size, size_type& count);
 	void getSizeAndCount(allocateOrder_t& order, size_type& size_asc, size_type& size_desc, size_type& count_asc, size_type& count_desc);
 
 	//使用中のサイズと数をリセット
-	//※現在のサイズと数より小さい数でなければならない
+	//※スコープスタックアロケータで使用されるメソッド
+	//※【注意】現在のサイズと数より小さい数でなければならない
 	inline bool resetSizeAndCount(const size_type size, const size_type count);
 	bool resetSizeAndCount(const allocateOrder_t order, const size_type size_asc, const size_type size_desc, const size_type count_asc, const size_type count_desc);
 	bool resetSizeAndCount(const allocateOrder_t order, const size_type size, const size_type count);

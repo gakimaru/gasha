@@ -3,6 +3,7 @@
 #define GASHA_INCLUDED_MONO_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
+// 【テンプレートライブラリ】
 // mono_allocator.h
 // 単一アロケータ【宣言部】
 //
@@ -35,6 +36,8 @@ public:
 
 public:
 	//アクセッサ
+	const char* name() const { return "monoAllocator"; }
+	const char* mode() const { return "-"; }
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
@@ -43,7 +46,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(*this, "monoAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド

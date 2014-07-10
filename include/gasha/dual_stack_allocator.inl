@@ -17,8 +17,9 @@
 
 #include <gasha/dual_stack_allocator.h>//双方向スタックアロケータ【宣言部】
 
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+
 #include <utility>//C++11 std::forward
-#include <gasha/new.h>//new/delete操作
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -136,7 +137,7 @@ T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArrayOrdinal(const allocateOrde
 	T* top_obj = nullptr;
 	for (std::size_t i = 0; i < num; ++i)
 	{
-		T* obj = GASHA_ calConstructor<T>(p, std::forward<Tx>(args)...);
+		T* obj = GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 		if (!top_obj)
 			top_obj = obj;
 		p = reinterpret_cast<void*>(reinterpret_cast<char*>(p) + sizeof(T));

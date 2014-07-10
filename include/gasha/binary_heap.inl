@@ -18,7 +18,7 @@
 #include <gasha/binary_heap.h>//二分ヒープコンテナ【宣言部】
 
 #include <gasha/utility.h>//汎用ユーティリティ（値の交換を使用）
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move, std::forward
 

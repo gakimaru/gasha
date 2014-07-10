@@ -36,8 +36,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //標準アロケータクラス
 
 //デバッグ情報作成
-template<class LOCK_TYPE>
-std::size_t stdAllocator<LOCK_TYPE>::debugInfo(char* message)
+template<class LOCK_TYPE, class IMPL>
+std::size_t stdAllocator<LOCK_TYPE, IMPL>::debugInfo(char* message)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
@@ -53,12 +53,20 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //明示的なインスタンス化
 
 //標準アロケータの明示的なインスタンス化用マクロ
-//※ロックなし版
-#define GASHA_INSTANCING_globalAllocator() \
-	template class stdAllocator<>;
-//※ロック指定版
-#define GASHA_INSTANCING_globalAllocator_withLock(LOCK_TYPE) \
-	template class stdAllocator<LOCK_TYPE>;
+
+//※アラインメントなし＋ロックなし版
+#define GASHA_INSTANCING_stdAllocator() \
+	template class stdAllocator<GASHA_ dummyLock, stdAllocatorImpl_NoAlign>;
+//※アラインメントなし＋ロック指定版
+#define GASHA_INSTANCING_stdAllocator_withLock(LOCK_TYPE) \
+	template class stdAllocator<LOCK_TYPE, stdAllocatorImpl_NoAlign>;
+
+//※アラインメントあり＋ロックなし版
+#define GASHA_INSTANCING_stdAlignAllocator() \
+	template class stdAllocator<GASHA_ dummyLock, stdAllocatorImpl_Align>;
+//※アラインメントあり＋ロック指定版
+#define GASHA_INSTANCING_stdAlignAllocator_withLock(LOCK_TYPE) \
+	template class stdAllocator<LOCK_TYPE, stdAllocatorImpl_Align>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

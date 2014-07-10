@@ -22,7 +22,7 @@
 
 #include <gasha/linear_search.h>//線形探索
 #include <gasha/binary_search.h>//二分探索
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move, std::forward
 

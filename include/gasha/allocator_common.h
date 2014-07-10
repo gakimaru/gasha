@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // allocator_common.h
-// メモリアロケータ共通設定【宣言部】
+// メモリアロケータ共通設定・処理【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -12,14 +12,13 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <cstddef>//C++11 std::size_t
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //メモリアロケータ共通設定
 
-static const int DEFAULT_ALIGN = sizeof(int);//デフォルトのメモリアライメント
+//デフォルトのメモリアライメント
+static const int DEFAULT_ALIGN = sizeof(int);
 
 //アロケート方向
 enum allocateOrder_t
@@ -29,7 +28,28 @@ enum allocateOrder_t
 	ALLOC_UNKNOWN_ORDER = -1,//アロケート方向不明
 };
 
+//--------------------------------------------------------------------------------
+//明示的なコンストラクタ／デストラクタ呼び出し
+//--------------------------------------------------------------------------------
+
+//--------------------
+//明示的なコンストラクタ呼び出し
+template<class T, typename... Tx>
+inline T* callConstructor(void* buff, Tx&&... args) GASHA_NOEXCEPT;
+template<class T, typename... Tx>
+inline T* callConstructor(T* buff, Tx&&... args) GASHA_NOEXCEPT;
+
+//--------------------
+//明示的なデストラクタ呼び出し
+template<class T>
+inline void callDestructor(T* obj) GASHA_NOEXCEPT;
+template<class T>
+inline void callDestructor(void* obj) GASHA_NOEXCEPT;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/allocator_common.inl>
 
 #endif//GASHA_INCLUDED_ALLOCATOR_COMMON_H
 

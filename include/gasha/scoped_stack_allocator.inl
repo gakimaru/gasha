@@ -32,6 +32,20 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //スコープスタックアロケータクラス
 
+//名前
+template<class ALLOCATOR>
+inline const char* scopedStackAllocator<ALLOCATOR>::name() const
+{
+	return m_allocator.name();
+}
+
+//実装モード
+template<class ALLOCATOR>
+inline const char* scopedStackAllocator<ALLOCATOR>::mode() const
+{
+	return m_allocator.mode();
+}
+
 //バッファの全体サイズ（バイト数）
 template<class ALLOCATOR>
 inline typename scopedStackAllocator<ALLOCATOR>::size_type scopedStackAllocator<ALLOCATOR>::maxSize() const

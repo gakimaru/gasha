@@ -3,7 +3,6 @@
 #define GASHA_INCLUDED_LF_MONO_ALLOCATOR_INL
 
 //--------------------------------------------------------------------------------
-// 【テンプレートライブラリ】
 // lf_mono_allocator.inl
 // ロックフリー単一アロケータ【インライン関数／テンプレート関数定義部】
 //
@@ -17,7 +16,7 @@
 
 #include <gasha/lf_mono_allocator.h>//ロックフリー単一アロケータ【宣言部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
 

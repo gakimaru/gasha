@@ -17,7 +17,7 @@
 
 #include <gasha/pool_allocator.h>//プールアロケータ【宣言部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
 #include <stdio.h>//sprintf()

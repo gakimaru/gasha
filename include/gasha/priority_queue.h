@@ -21,7 +21,7 @@
 #include <gasha/dummy_lock.h>//ダミーロック
 #include <gasha/lock_guard.h>//スコープロック
 #include <gasha/unique_lock.h>//単一ロック
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <cstdint>//std::int32_t, std::uint32_t
 

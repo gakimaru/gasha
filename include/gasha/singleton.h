@@ -17,7 +17,6 @@
 
 #include <gasha/dummy_shared_lock.h>//ダミー共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
-#include <gasha/new.h>//new/delete操作
 
 #include <atomic>//C++11 std::atomic_flag
 #include <type_traits>//c++11 std::is_default_constructible, std::conditional

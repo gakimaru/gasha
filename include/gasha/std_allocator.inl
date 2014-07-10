@@ -17,22 +17,51 @@
 
 #include <gasha/std_allocator.h>//標準アロケータ【宣言部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
-
-#ifdef GASHA_HAS_MALLINFO
-#include <malloc.h>
-#endif//GASHA_HAS_MALLINFO
+#include <malloc.h>//malloc(),free()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//--------------------------------------------------------------------------------
+//標準アロケータ実装部クラス
+
+//----------------------------------------
+//アラインメント非対応版（デフォルト）
+
+//メモリ確保
+inline void* stdAllocatorImpl_NoAlign::alloc(const std::size_t size, const std::size_t align)
+{
+	return malloc(size);
+}
+//メモリ解放
+inline void stdAllocatorImpl_NoAlign::free(void* p)
+{
+	return ::free(p);
+}
+
+//----------------------------------------
+//アライメント対応版
+
+//メモリ確保
+inline void* stdAllocatorImpl_Align::alloc(const std::size_t size, const std::size_t align)
+{
+	return _aligned_malloc(size, align);
+}
+//メモリ解放
+inline void stdAllocatorImpl_Align::free(void* p)
+{
+	return _aligned_free(p);
+}
 
 //--------------------------------------------------------------------------------
 //標準アロケータクラス
 
 //バッファの全体サイズ（バイト数）
-template<class LOCK_TYPE>
-inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::maxSize() const
+template<class LOCK_TYPE, class IMPL>
+inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::maxSize() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -44,8 +73,8 @@ inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::maxS
 }
 
 //使用中のサイズ（バイト数）
-template<class LOCK_TYPE>
-inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::size() const
+template<class LOCK_TYPE, class IMPL>
+inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::size() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -57,8 +86,8 @@ inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::size
 }
 
 //残りサイズ（バイト数）
-template<class LOCK_TYPE>
-inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::remain() const
+template<class LOCK_TYPE, class IMPL>
+inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::remain() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -70,10 +99,10 @@ inline typename stdAllocator<LOCK_TYPE>::size_type stdAllocator<LOCK_TYPE>::rema
 }
 
 //メモリ確保
-template<class LOCK_TYPE>
-inline void* stdAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::size_t align)
+template<class LOCK_TYPE, class IMPL>
+inline void* stdAllocator<LOCK_TYPE, IMPL>::alloc(const std::size_t size, const std::size_t align)
 {
-	void* p = _aligned_malloc(size, align);
+	void* p = implemnt_type::alloc(size, align);
 	if (!p)
 	{
 	#ifdef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
@@ -86,8 +115,8 @@ inline void* stdAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::s
 }
 
 //メモリ解放
-template<class LOCK_TYPE>
-inline bool stdAllocator<LOCK_TYPE>::free(void* p)
+template<class LOCK_TYPE, class IMPL>
+inline bool stdAllocator<LOCK_TYPE, IMPL>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
@@ -96,9 +125,9 @@ inline bool stdAllocator<LOCK_TYPE>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class LOCK_TYPE>
+template<class LOCK_TYPE, class IMPL>
 template<typename T, typename...Tx>
-T* stdAllocator<LOCK_TYPE>::newObj(Tx&&... args)
+T* stdAllocator<LOCK_TYPE, IMPL>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -106,9 +135,9 @@ T* stdAllocator<LOCK_TYPE>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class LOCK_TYPE>
+template<class LOCK_TYPE, class IMPL>
 template<typename T, typename...Tx>
-T* stdAllocator<LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
+T* stdAllocator<LOCK_TYPE, IMPL>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -125,9 +154,9 @@ T* stdAllocator<LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class LOCK_TYPE>
+template<class LOCK_TYPE, class IMPL>
 template<typename T>
-bool stdAllocator<LOCK_TYPE>::deleteObj(T* p)
+bool stdAllocator<LOCK_TYPE, IMPL>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
@@ -136,9 +165,9 @@ bool stdAllocator<LOCK_TYPE>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class LOCK_TYPE>
+template<class LOCK_TYPE, class IMPL>
 template<typename T>
-bool stdAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
+bool stdAllocator<LOCK_TYPE, IMPL>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
@@ -152,16 +181,16 @@ bool stdAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE>
-inline bool stdAllocator<LOCK_TYPE>::_free(void* p)
+template<class LOCK_TYPE, class IMPL>
+inline bool stdAllocator<LOCK_TYPE, IMPL>::_free(void* p)
 {
-	_aligned_free(p);
+	implemnt_type::free(p);
 	return true;
 }
 
 //ポインタが範囲内か判定
-template<class LOCK_TYPE>
-inline bool stdAllocator<LOCK_TYPE>::isInUsingRange(void* p)
+template<class LOCK_TYPE, class IMPL>
+inline bool stdAllocator<LOCK_TYPE, IMPL>::isInUsingRange(void* p)
 {
 	return true;//判定できないので常に true を返す
 
@@ -176,13 +205,13 @@ inline bool stdAllocator<LOCK_TYPE>::isInUsingRange(void* p)
 }
 
 //コンストラクタ
-template<class LOCK_TYPE>
-inline stdAllocator<LOCK_TYPE>::stdAllocator()
+template<class LOCK_TYPE, class IMPL>
+inline stdAllocator<LOCK_TYPE, IMPL>::stdAllocator()
 {}
 
 //デストラクタ
-template<class LOCK_TYPE>
-inline stdAllocator<LOCK_TYPE>::~stdAllocator()
+template<class LOCK_TYPE, class IMPL>
+inline stdAllocator<LOCK_TYPE, IMPL>::~stdAllocator()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

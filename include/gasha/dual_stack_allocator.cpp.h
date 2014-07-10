@@ -21,7 +21,7 @@
 
 #include <gasha/dual_stack_allocator.inl>//双方向スタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <stdio.h>//sprintf()
 #include <assert.h>//assert()

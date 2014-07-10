@@ -22,6 +22,17 @@
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
+//組み込み関数
+
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//----------------------------------------
+//ソースファイル名のファイル名部分の抜き出し
+inline constexpr const char* getStaticFileName(const char* str);
+
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//--------------------------------------------------------------------------------
 //組み込みマクロ
 
 //----------------------------------------
@@ -35,20 +46,9 @@
 
 //----------------------------------------
 //ソースファイル名＋行番号取得マクロ
-#define GASHA_SRC_FILE()           getStaticFileName(__FILE__)
-#define GASHA_SRC_FILE_LINE()      getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")")
-#define GASHA_SRC_FILE_LINE_TIME() getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")[" __TIMESTAMP__ "]")
-
-//--------------------------------------------------------------------------------
-//組み込み関数
-
-GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
-
-//----------------------------------------
-//ソースファイル名のファイル名部分の抜き出し
-inline constexpr const char* getStaticFileName(const char* str);
-
-GASHA_NAMESPACE_END;//ネームスペース：終了
+#define GASHA_SRC_FILE()           GASHA_ getStaticFileName(__FILE__)
+#define GASHA_SRC_FILE_LINE()      GASHA_ getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")")
+#define GASHA_SRC_FILE_LINE_TIME() GASHA_ getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")[" __TIMESTAMP__ "]")
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/build_settings/builtin_functions.inl>

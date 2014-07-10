@@ -18,132 +18,174 @@
 #include <gasha/poly_allocator.h>//多態アロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
-//--------------------------------------------------------------------------------
+//--------------------
+//アロケート用デバッグ情報
+
+//コンストラクタ
+#ifdef GASHA_HAS_DEBUG_FEATURE
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
+m_fileName(file_name),
+m_funcName(func_name),
+m_callPointName(call_point_name),
+m_time(time),
+m_typeName(type_name),
+m_typeSize(type_size),
+m_arrayNum(array_num)
+{}
+#else//GASHA_HAS_DEBUG_FEATURE
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
+{}
+#endif//GASHA_HAS_DEBUG_FEATURE
+
+//--------------------
+//デバッグ用メモリアロケート観察者
+
+//コンストラクタ
+debugAllocationObserver::debugAllocationObserver():
+	m_atNew(nullptr),
+	m_atDelete(nullptr),
+	m_atChangeAllocator(nullptr),
+	m_atReturnAllocator(nullptr)
+{}
+
+//--------------------
 //多態アロケータクラス
 
-//アロケータ名
-template<class ALLOCATOR>
-inline const char* polyAllocator<ALLOCATOR>::name() const
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_adapter; }
+inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_adapter; }
+inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return m_adapter; }
+inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return m_adapter; }
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_dummyAdapter; }
+inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_dummyAdapter; }
+inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return nullptr; }
+inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return nullptr; }
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
+
+//デバッグ観察者を変更
+inline const GASHA_ debugAllocationObserver* polyAllocator::debugObserver() const
 {
-	return m_name;
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	return m_observer;
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+	return nullptr;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
-//バッファの全体サイズ（バイト数）
-template<class ALLOCATOR>
-inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::maxSize() const
+//デバッグ観察者を更新
+inline void polyAllocator::setDebugObserver(const GASHA_ debugAllocationObserver& observer) const
 {
-	return m_allocator.maxSize();
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_observer = &observer;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
+}
+inline void polyAllocator::resetDebugObserver() const
+{
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_observer = nullptr;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
-//使用中のサイズ（バイト数）
-template<class ALLOCATOR>
-inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::size() const
+//アライメントサイズを取得
+inline std::size_t polyAllocator::align() const
 {
-	return m_allocator.size();
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	return m_align;
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+	return 0;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
-//残りサイズ（バイト数）
-template<class ALLOCATOR>
-inline typename polyAllocator<ALLOCATOR>::size_type polyAllocator<ALLOCATOR>::remain() const
+//アライメントサイズを変更
+inline void polyAllocator::setAlign(const std::size_t align) const
 {
-	return maxSize();
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_align = align;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
+}
+inline void polyAllocator::resetAlign() const
+{
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_align = DEFAULT_ALIGN;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
-//メモリ確保
-template<class ALLOCATOR>
-inline void* polyAllocator<ALLOCATOR>::alloc(const std::size_t size, const std::size_t align)
+//デバッグ情報取得
+inline const debugAllocationInfo* polyAllocator::debugInfo() const
 {
-	return m_allocator.alloc(size, align);
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	return m_debugInfo;
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+	return nullptr;
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
-//メモリ解放
-template<class ALLOCATOR>
-inline bool polyAllocator<ALLOCATOR>::free(void* p)
+//デバッグ情報を変更
+inline void polyAllocator::setDebugInfo(const GASHA_ debugAllocationInfo* info) const
 {
-	return m_allocator.free(p);
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_debugInfo = info;
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
-
-#if 0//※テンプレート関数は仮想化不可（一定のvtableが確定できないため）
-//メモリ確保とコンストラクタ呼び出し
-template<class ALLOCATOR>
-template<typename T, typename...Tx>
-T* polyAllocator<ALLOCATOR>::newObj(Tx&&... args)
+inline void polyAllocator::resetDebugInfo() const
 {
-	return m_allocator.template newObj<T>(std::forward<Tx>(args)...);
-}
-//※配列用
-template<class ALLOCATOR>
-template<typename T, typename...Tx>
-T* polyAllocator<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
-{
-	return m_allocator.template newArray<T>(std::forward<Tx>(args)...);
-}
-
-//メモリ解放とデストラクタ呼び出し
-template<class ALLOCATOR>
-template<typename T>
-bool polyAllocator<ALLOCATOR>::deleteObj(T* p)
-{
-	return m_allocator.deleteObj(p);
-}
-//※配列用
-template<class ALLOCATOR>
-template<typename T>
-bool polyAllocator<ALLOCATOR>::deleteArray(T* p, const std::size_t num)
-{
-	return m_allocator.deleteArray(p, num);
-}
-#endif//DELETE
-
-//デバッグ情報作成
-template<class ALLOCATOR>
-inline std::size_t polyAllocator<ALLOCATOR>::debugInfo(char* message)
-{
-	return m_allocator.debugInfo(message);
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	m_debugInfo = nullptr;
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
 
 //コンストラクタ
-template<class ALLOCATOR>
-inline polyAllocator<ALLOCATOR>::polyAllocator(polyAllocator<ALLOCATOR>&& adapter) :
-	m_allocator(adapter.m_allocator),
-	m_name(adapter.m_name)
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter) :
+	m_prevAdapter(m_adapter),
+	m_prevObserver(m_observer)
+{
+	callbackAtReturnAllocator(*m_adapter, adapter);
+	m_adapter = &adapter;
+	m_observer = nullptr;
+}
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter)
 {}
-template<class ALLOCATOR>
-inline polyAllocator<ALLOCATOR>::polyAllocator(const polyAllocator<ALLOCATOR>& adapter) :
-	m_allocator(adapter.m_allocator),
-	m_name(adapter.m_name)
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
+
+//デフォルトコンストラクタ
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::polyAllocator() :
+	m_prevAdapter(nullptr),
+	m_prevObserver(nullptr)
+{
+	if (!m_adapter)
+		initlaizeStdAllocatorAdapter();//強制初期化
+}
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::polyAllocator()
 {}
-template<class ALLOCATOR>
-inline polyAllocator<ALLOCATOR>::polyAllocator(allocator_type&& allocator, const char* name) :
-	m_allocator(allocator),
-	m_name(name)
-{}
-template<class ALLOCATOR>
-inline polyAllocator<ALLOCATOR>::polyAllocator(allocator_type& allocator, const char* name) :
-	m_allocator(allocator),
-	m_name(name)
-{}
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 
 //デストラクタ
-template<class ALLOCATOR>
-inline polyAllocator<ALLOCATOR>::~polyAllocator()
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::~polyAllocator()
+{
+	if (m_prevAdapter)
+	{
+		callbackAtReturnAllocator(*m_prevAdapter, *m_adapter);
+		m_adapter = m_prevAdapter;
+		m_observer = m_prevObserver;
+	}
+}
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+inline polyAllocator::~polyAllocator()
 {}
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_POLY_ALLOCATOR_INL
 

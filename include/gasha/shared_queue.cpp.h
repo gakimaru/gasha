@@ -22,7 +22,7 @@
 #include <gasha/shared_queue.inl>//共有キュー【インライン関数／テンプレート関数定義部】
 
 #include <gasha/pool_allocator.cpp.h>//プールアロケータ【関数／実体定義部】
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
 #include <stdio.h>//sprintf()

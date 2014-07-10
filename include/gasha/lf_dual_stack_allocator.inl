@@ -17,7 +17,7 @@
 
 #include <gasha/lf_dual_stack_allocator.h>//ロックフリー双方向スタックアロケータ【宣言部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
 

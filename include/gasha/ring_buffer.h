@@ -24,7 +24,7 @@
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 #include <gasha/sort_basic.h>//ソート処理基本
 #include <gasha/search_basic.h>//探索処理基本
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 

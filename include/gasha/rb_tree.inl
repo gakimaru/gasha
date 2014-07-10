@@ -17,7 +17,7 @@
 
 #include <gasha/rb_tree.h>//赤黒木コンテナ【宣言部】
 
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
 #include <memory.h>//memcpy()

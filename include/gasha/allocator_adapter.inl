@@ -39,6 +39,13 @@ inline const char* allocatorAdapter<ALLOCATOR>::name() const
 	return m_name;
 }
 
+//アロケータの実装モード名
+template<class ALLOCATOR>
+inline const char* allocatorAdapter<ALLOCATOR>::mode() const
+{
+	return m_mode;
+}
+
 //バッファの全体サイズ（バイト数）
 template<class ALLOCATOR>
 inline typename allocatorAdapter<ALLOCATOR>::size_type allocatorAdapter<ALLOCATOR>::maxSize() const
@@ -117,22 +124,26 @@ inline std::size_t allocatorAdapter<ALLOCATOR>::debugInfo(char* message)
 template<class ALLOCATOR>
 inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocatorAdapter<ALLOCATOR>&& adapter) :
 	m_allocator(adapter.m_allocator),
-	m_name(adapter.m_name)
+	m_name(adapter.m_name),
+	m_mode(adapter.m_mode)
 {}
 template<class ALLOCATOR>
 inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(const allocatorAdapter<ALLOCATOR>& adapter) :
 	m_allocator(adapter.m_allocator),
-	m_name(adapter.m_name)
+	m_name(adapter.m_name),
+	m_mode(adapter.m_mode)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type&& allocator, const char* name) :
+inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type&& allocator, const char* name, const char* mode) :
 	m_allocator(allocator),
-	m_name(name)
+	m_name(name),
+	m_mode(mode)
 {}
 template<class ALLOCATOR>
-inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type& allocator, const char* name) :
+inline allocatorAdapter<ALLOCATOR>::allocatorAdapter(allocator_type& allocator, const char* name, const char* mode) :
 	m_allocator(allocator),
-	m_name(name)
+	m_name(name),
+	m_mode(mode)
 {}
 
 //デストラクタ

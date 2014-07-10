@@ -33,6 +33,8 @@ public:
 
 public:
 	//アクセッサ
+	const char* name() const { return "lfMonoAllocator"; }
+	const char* mode() const { return "-"; }
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size.load(); }//使用中のサイズ（バイト数）
@@ -41,7 +43,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfMonoAllocator> adapter(){ GASHA_ allocatorAdapter<lfMonoAllocator> adapter(*this, "lfMonoAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<lfMonoAllocator> adapter(){ GASHA_ allocatorAdapter<lfMonoAllocator> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド

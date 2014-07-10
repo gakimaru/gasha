@@ -12,56 +12,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/allocator_common.h>//メモリアロケータ共通設定
-
-#include <cstddef>//std::size_t
-#include <cstdint>//C++11 std::uint32_t
+#include <gasha/i_allocator_adapter.h>//メモリアダプターインターフェース
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
-
-//--------------------------------------------------------------------------------
-//アロケータアダプターインターフェースクラス
-//※アロケータの実装を隠ぺいして、アロケータを共通利用できるようにするためのインターフェース。
-class IAllocatorAdapter
-{
-public:
-	//型
-	typedef std::uint32_t size_type;//サイズ型
-
-public:
-	//アクセッサ
-	virtual const char* name() const = 0;//アロケータ名
-	virtual size_type maxSize() const = 0;//バッファの全体サイズ（バイト数）
-	virtual size_type size() const = 0;//使用中のサイズ（バイト数）
-	virtual size_type remain() const = 0;//残りサイズ（バイト数）
-
-public:
-	//メソッド
-	//メモリ確保
-	virtual void* alloc(const std::size_t size, const std::size_t align) = 0;
-
-	//メモリ解放
-	virtual bool free(void* p) = 0;
-
-#if 0//※テンプレート関数は仮想化不可（一定のvtableが確定できないため）
-	//メモリ確保とコンストラクタ呼び出し
-	template<typename T, typename...Tx>
-	virtual T* newObj(Tx&&... args) = 0;
-	//※配列用
-	template<typename T, typename...Tx>
-	virtual T* newArray(const std::size_t num, Tx&&... args) = 0;
-
-	//メモリ解放とデストラクタ呼び出し
-	template<typename T>
-	virtual bool deleteObj(T* p) = 0;
-	//※配列用（要素数の指定が必要な点に注意）
-	template<typename T>
-	virtual bool deleteArray(T* p, const std::size_t num) = 0;
-#endif//DELETE
-
-	//デバッグ情報作成
-	virtual std::size_t debugInfo(char* message) = 0;
-};
 
 //--------------------------------------------------------------------------------
 //アロケータアダプタークラス
@@ -78,6 +31,7 @@ public:
 public:
 	//アクセッサ
 	inline const char* name() const override;//アロケータ名
+	inline const char* mode() const override;//アロケータの実装モード名
 	inline size_type maxSize() const override;//バッファの全体サイズ（バイト数）
 	inline size_type size() const override;//使用中のサイズ（バイト数）
 	inline size_type remain() const override;//残りサイズ（バイト数）
@@ -113,14 +67,15 @@ public:
 	//コンストラクタ
 	inline allocatorAdapter(allocatorAdapter<ALLOCATOR>&& allocator);
 	inline allocatorAdapter(const allocatorAdapter<ALLOCATOR>& allocator);
-	inline allocatorAdapter(allocator_type&& allocator, const char* name = "(unknown)");
-	inline allocatorAdapter(allocator_type& allocator, const char* name = "(unknown)");
+	inline allocatorAdapter(allocator_type&& allocator, const char* name = "(unknown)", const char* mode = "-");
+	inline allocatorAdapter(allocator_type& allocator, const char* name = "(unknown)", const char* mode = "-");
 	//デストラクタ
 	inline ~allocatorAdapter();
 private:
 	//フィールド
 	allocator_type& m_allocator;//アロケータ
 	const char* m_name;//アロケータ名
+	const char* m_mode;//アロケータの実装モード名
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

@@ -35,6 +35,8 @@ public:
 
 public:
 	//アクセッサ
+	inline const char* name() const;//名前
+	inline const char* mode() const;//実装モード
 	inline size_type maxSize() const;//バッファの全体サイズ（バイト数）
 	inline size_type size() const;//使用中のサイズ（バイト数）
 	inline size_type sizeAsc() const;//正順で使用中のサイズ（バイト数）

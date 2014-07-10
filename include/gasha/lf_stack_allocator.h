@@ -3,6 +3,7 @@
 #define GASHA_INCLUDED_LF_STACK_ALLOCATOR_H
 
 //--------------------------------------------------------------------------------
+// 【テンプレートライブラリ】
 // lf_stack_allocator.h
 // ロックフリースタックアロケータ【宣言部】
 //
@@ -35,6 +36,8 @@ class lfStackAllocator;
 class lfStackAllocatorAutoClear
 {
 public:
+	//名前
+	inline static const char* name(){ return "AutoClear"; }
 	//自動クリア
 	template<class AUTO_CLEAR>
 	void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
@@ -46,6 +49,8 @@ public:
 class dummyLfStackAllocatorAutoClear
 {
 public:
+	//名前
+	inline static const char* name(){ return "ManualClear"; }
 	//自動クリア
 	template<class AUTO_CLEAR>
 	inline void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
@@ -66,6 +71,8 @@ public:
 
 public:
 	//アクセッサ
+	const char* name() const { return "lfStackAllocator"; }
+	const char* mode() const { return auto_clear_type::name(); }
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
 	inline size_type size() const { return m_size.load(); }//使用中のサイズ（バイト数）
@@ -78,7 +85,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(*this, "lfStackAllocator"); return adapter; }
+	inline GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -108,7 +115,7 @@ public:
 
 	//使用中のサイズを指定位置に戻す
 	//※【注意】メモリ確保状態（アロケート中の数）と無関係に実行するので注意
-	//※【注意】自動クリア（スマートスタック）使用時には使用禁止
+	//※【注意】自動クリア時（スマートスタックアロケータ使用時）は、このメソッドの使用禁止
 	//　（メモリ解放時のアドレスが不正なアドレスと見なされて、アロケート中の数が正しく更新されなくなり、
 	//　　自動クリアが機能しなくなるため）
 	//※位置指定版
@@ -117,9 +124,9 @@ public:
 	bool rewind(void* p);
 
 	//メモリクリア
-	//※メモリ確保状態（アロケート中の数）と無関係に実行するので注意
 	//※初期状態にする
-	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
+	//※【注意】メモリ確保状態（アロケート中の数）と無関係に実行するので注意
+	//※【注意】他のスレッドのクリア／自動クリア処理と衝突すると、情報の不整合が起こるので注意
 	void clear();
 	
 	//デバッグ情報作成
@@ -129,11 +136,13 @@ public:
 	std::size_t debugInfo(char* message);
 
 	//使用中のサイズと数を取得
+	//※スコープスタックアロケータで使用されるメソッド。
 	void getSizeAndCount(size_type& size, size_type& count);
 
 	//使用中のサイズと数をリセット
-	//※現在のサイズと数より小さい数でなければならない
-	//※他のスレッドのクリア処理と衝突すると、使用中のサイズと数の関係に不整合を引き起こす可能性があるので注意
+	//※スコープスタックアロケータで使用されるメソッド
+	//※【注意】現在のサイズと数より小さい数でなければならない
+	//※【注意】他のスレッドのクリア／自動クリア処理と衝突すると、情報の不整合が起こるので注意
 	bool resetSizeAndCount(const size_type size, const size_type count);
 
 private:

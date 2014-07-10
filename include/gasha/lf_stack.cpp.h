@@ -22,7 +22,7 @@
 #include <gasha/lf_stack.inl>//ロックフリースタック【インライン関数／テンプレート関数定義部】
 
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
-#include <gasha/new.h>//new/delete操作
+#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
 #include <stdio.h>//sprintf()

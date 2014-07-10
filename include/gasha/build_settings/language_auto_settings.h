@@ -357,6 +357,7 @@
 		#define GASHA_NOTHROW throw()
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+
 //--------------------
 //【C++11仕様】alignas：アラインメント修飾子
 //【注意】修飾子の指定位置がコンパイラによって異なる
@@ -465,6 +466,17 @@
 	#define GASHA_ALWAYS_INLINE __attribute__ ((always_inline)) inline
 	#define GASHA_HAS_CAMOUFLAGE_NO_INLINE
 	#define GASHA_HAS_CAMOUFLAGE_ALWAYS_INLINE
+#endif//GASHA_IS_GCC
+
+//--------------------
+//標準new/deleteの例外指定
+#ifdef GASHA_IS_VC
+	#define GASHA_STDNEW_THROW throw()
+	#define GASHA_STDDELETE_THROW throw()
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#define GASHA_STDNEW_THROW
+	#define GASHA_STDDELETE_THROW throw()
 #endif//GASHA_IS_GCC
 
 //----------------------------------------
