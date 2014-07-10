@@ -15,6 +15,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/allocator_adapter.h>//アロケータアダプター
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -71,6 +72,10 @@ public:
 	inline size_type poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
 
 public:
+	//アロケータアダプター取得
+	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(*this); return adapter; }
+
+public:
 	//メソッド
 
 	//メモリ確保
@@ -102,6 +107,7 @@ public:
 	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
 	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node);
 	std::size_t debugInfo(char* message, const bool with_detail);
+	inline std::size_t debugInfo(char* message);
 
 private:
 	//メモリ解放（共通処理）

@@ -127,7 +127,7 @@ inline void scopedStackAllocator<ALLOCATOR>::clear()
 
 //デバッグ情報作成
 template<class ALLOCATOR>
-inline std::size_t scopedStackAllocator<ALLOCATOR>::debugInfo(char* message)
+std::size_t scopedStackAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for scopedStackAllocator -----\n");

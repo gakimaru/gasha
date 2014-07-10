@@ -96,7 +96,7 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T* p, const std::size_t num)
 	return free(p, index);
 }
 
-//デバッグ情報削除
+//デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, class FUNC>
 std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
@@ -146,6 +146,11 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 	}
 	size += sprintf(message + size, "----------\n");
 	return size;
+}
+template<std::size_t _MAX_POOL_SIZE>
+inline std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message)
+{
+	return debugInfo(message, false);
 }
 
 //ポインタをインデックスに変換

@@ -139,6 +139,12 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, c
 	size += sprintf(message + size, "----------\n");
 	return size;
 }
+//デバッグ情報作成
+template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message)
+{
+	return debugInfo(message, false);
+}
 
 //ポインタをインデックスに変換
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>

@@ -15,6 +15,7 @@
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
 #include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ
+#include <gasha/allocator_adapter.h>//アロケータアダプター
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -75,6 +76,10 @@ public:
 public:
 	//スコープスタックアロケータ取得
 	inline GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
+
+public:
+	//アロケータアダプター取得
+	inline GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this); return adapter; }
 
 public:
 	//メソッド

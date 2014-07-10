@@ -225,7 +225,7 @@ inline void scopedDualStackAllocator<ALLOCATOR>::clearOrdinal(const allocateOrde
 
 //デバッグ情報作成
 template<class ALLOCATOR>
-inline std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
+std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for scopedDualStackAllocator -----\n");

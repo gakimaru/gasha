@@ -93,7 +93,7 @@ public:
 	inline void clearOrdinal(const allocateOrder_t order);
 	
 	//デバッグ情報作成
-	inline std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message);
 
 public:
 	//コンストラクタ

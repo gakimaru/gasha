@@ -14,6 +14,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/allocator_adapter.h>//アロケータアダプター
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -38,6 +39,10 @@ public:
 	inline size_type maxSize() const;//バッファの全体サイズ（バイト数）
 	inline size_type size() const;//使用中のサイズ（バイト数）
 	inline size_type remain() const;//残りサイズ（バイト数）
+
+public:
+	//アロケータアダプター取得
+	inline GASHA_ allocatorAdapter<globalAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<globalAllocator<LOCK_TYPE>> adapter(*this); return adapter; }
 
 public:
 	//メソッド
