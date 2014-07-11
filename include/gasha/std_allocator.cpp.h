@@ -43,7 +43,7 @@ std::size_t stdAllocator<LOCK_TYPE, IMPL>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for stdAllocator -----\n");
 	size += sprintf(message + size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "---------------------------------------\n");
 	return size;
 }
 

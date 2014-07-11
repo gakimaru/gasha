@@ -102,7 +102,7 @@ std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 		size += sprintf(message + size, "\n");
 		node = node->m_next;
 	}
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "--------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

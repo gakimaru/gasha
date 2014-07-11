@@ -220,7 +220,7 @@ std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 	size += sprintf(message + size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
 	size += print_node(message + size, tail->m_value);
 	size += sprintf(message + size, "\n");
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "----------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

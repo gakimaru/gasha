@@ -135,7 +135,7 @@ std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
 	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "-------------------------------------------\n");
 	return size;
 }
 

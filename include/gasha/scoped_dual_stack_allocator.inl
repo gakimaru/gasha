@@ -244,7 +244,7 @@ std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for scopedDualStackAllocator -----\n");
 	size += sprintf(message + size, "maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, count=%d, countAsc=%d, countDesc=%d, allocate-order=%s (buff=%p, initAllocateOrder=%s, initSizeAsc=%d, initSizeDesc=%d, initCountAsc=%d, initCountDesc=%d)\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocateOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc, m_initSizeDesc, m_initCountAsc, m_initCountDesc);
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "---------------------------------------------------\n");
 	return size;
 }
 

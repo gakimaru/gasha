@@ -105,7 +105,7 @@ std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 	size += sprintf(message + size, "[tail](%p)", m_tail);
 	size += print_node(message + size, m_tail->m_value);
 	size += sprintf(message + size, "\n");
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "--------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

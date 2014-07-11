@@ -46,7 +46,7 @@ std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for dualStackAllocator -----\n");
 	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, countAsc=%d, countDesc=%d, count=%d, allocate-order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), countAsc(), countDesc(), count(), allocateOrder() == ALLOC_ASC ? "ASC" : "DESC");
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "---------------------------------------------\n");
 	return size;
 }
 

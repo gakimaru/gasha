@@ -25,12 +25,12 @@
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
+//--------------------------------------------------------------------------------
+//ロックフリー双方向スタックアロケータ補助クラス
+
 //クラス宣言
 template<class AUTO_CLEAR>
 class lfDualStackAllocator;
-
-//--------------------------------------------------------------------------------
-//ロックフリー双方向スタックアロケータ補助クラス
 
 //----------------------------------------
 //ロックフリー双方向スタック自動クリア
@@ -281,15 +281,14 @@ private:
 //※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
 
 //※ロックフリー双方向スタック用のバッファをコンストラクタで受け渡して使用
-template<class LOCK_TYPE = GASHA_ dummyLock>
 using lfSmartDualStackAllocator = lfDualStackAllocator<lfDualStackAllocatorAutoClear>;
 
 //※バッファ付き
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+template<std::size_t _MAX_SIZE>
 using lfSmartDualStackAllocator_withBuff = lfDualStackAllocator_withBuff<_MAX_SIZE, lfDualStackAllocatorAutoClear>;
 
 //※バッファ付き（基本型とその個数で指定）
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+template<typename T, std::size_t _SIZE>
 using lfSmartDualStackAllocator_withType = lfDualStackAllocator_withType<T, _SIZE, lfDualStackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

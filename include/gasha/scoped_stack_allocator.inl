@@ -100,7 +100,7 @@ template<class ALLOCATOR>
 template<typename T, typename...Tx>
 T* scopedStackAllocator<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
 {
-	return m_allocator.template newArray<T>(std::forward<Tx>(args)...);
+	return m_allocator.template newArray<T>(num, std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
@@ -146,7 +146,7 @@ std::size_t scopedStackAllocator<ALLOCATOR>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for scopedStackAllocator -----\n");
 	size += sprintf(message + size, "maxSize=%d, size=%d, remain=%d, count=%d (buff=%p, initSize=%d, initCount=%d)\n", maxSize(), this->size(), remain(), count(), m_allocator.buff(), m_initSize, m_initCount);
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "-----------------------------------------------\n");
 	return size;
 }
 

@@ -117,7 +117,7 @@ std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message)
 			size += sprintf(message + size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "-----------------------------------------\n");
 	return size;
 }
 

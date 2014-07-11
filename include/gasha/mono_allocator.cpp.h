@@ -77,7 +77,7 @@ std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message)
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for monoAllocator -----\n");
 	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, isAllocated=%s\n", m_buffRef, maxSize(), this->size(), remain(), toStr(isAllocated()));
-	size += sprintf(message + size, "----------\n");
+	size += sprintf(message + size, "----------------------------------------\n");
 	return size;
 }
 
