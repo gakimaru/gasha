@@ -38,13 +38,13 @@ inline std::size_t strlen_sse(const char* str);//SSE版
 //strnlen
 //※最大長までの長さを計測
 inline std::size_t strnlen_fast(const char* str, const std::size_t max_len);//高速版
-#ifdef GASHA_IS_GCC
+#if !defined(GASHA_STDSTRNLENFUNC)
 inline std::size_t strnlen(const char* str, const std::size_t max_len);//通常版
-#else//GASHA_IS_GCC
+#else//GASHA_STDSTRNLENFUNC
 #ifdef GASHA_USE_NAME_SPACE
 inline std::size_t strnlen(const char* str, const std::size_t max_len);//通常版
 #endif//GASHA_USE_NAME_SPACE
-#endif//GASHA_IS_GCC
+#endif//GASHA_STDSTRNLENFUNC
 inline std::size_t strnlen_sse(const char* str, const std::size_t max_len);//SSE版
 
 //----------------------------------------

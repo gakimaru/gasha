@@ -83,15 +83,15 @@ public:
 	const char* mode() const { return auto_clear_type::name(); }//実装モード名
 	inline const void* buff() const { return reinterpret_cast<const void*>(m_buffRef); }//バッファの先頭アドレス
 	inline size_type maxSize() const { return m_maxSize; }//バッファの全体サイズ（バイト数）
-	inline size_type size() const { return m_size; }//使用中のサイズ（バイト数）
+	inline size_type size() const { return m_sizeAsc + m_sizeDesc; }//使用中のサイズ（バイト数）
 	inline size_type sizeAsc() const { return m_sizeAsc; }//正順で使用中のサイズ（バイト数）
 	inline size_type sizeDesc() const { return m_sizeDesc; }//逆順で使用中のサイズ（バイト数）
 	inline size_type remain() const { return m_maxSize - size(); }//残りサイズ（バイト数）
 	inline size_type count() const { return m_countAsc + m_countDesc; }//アロケート中の数
 	inline size_type countAsc() const { return m_countAsc; }//正順でアロケート中の数
 	inline size_type countDesc() const { return m_countDesc; }//逆順でアロケート中の数
-	inline allocateOrder_t allocateOrder() const { return m_allocateOrder; }//現在のアロケート方向
-	inline void setAllocateOrder(const allocateOrder_t order){ m_allocateOrder = order; }//現在のアロケート方向を変更
+	inline allocationOrder_t allocationOrder() const { return m_allocateOrder; }//現在のアロケート方向
+	inline void setAllocateOrder(const allocationOrder_t order){ m_allocateOrder = order; }//現在のアロケート方向を変更
 	inline void reversewAllocateOrder(){ m_allocateOrder = m_allocateOrder == ALLOC_ASC ? ALLOC_DESC : ALLOC_ASC; }//現在のアロケート方向を逆にする
 
 public:
@@ -109,7 +109,7 @@ public:
 	//メモリ確保
 	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 	//※アロケート方向指定版
-	inline  void* allocOrdinal(const allocateOrder_t order, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
+	inline  void* allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
 	//メモリ解放
 	//※実際にはメモリを解放しない（できない）ので注意。
@@ -122,13 +122,13 @@ public:
 	inline T* newObj(Tx&&... args);
 	//※アロケート方向指定版
 	template<typename T, typename...Tx>
-	T* newObjOrdinal(const allocateOrder_t order, Tx&&... args);
+	T* newObjOrd(const allocationOrder_t order, Tx&&... args);
 	//※配列用
 	template<typename T, typename...Tx>
 	inline T* newArray(const std::size_t num, Tx&&... args);
 	//※配列用アロケート方向指定版
 	template<typename T, typename...Tx>
-	T* newArrayOrdinal(const allocateOrder_t order, const std::size_t num, Tx&&... args);
+	T* newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args);
 
 	//メモリ解放とデストラクタ呼び出し
 	template<typename T>
@@ -145,7 +145,7 @@ public:
 	//※位置指定版
 	inline bool rewind(const size_type pos);
 	//※位置指定とアロケート方向指定版
-	inline bool rewindOrdinal(const allocateOrder_t order, const size_type pos);
+	inline bool rewindOrd(const allocationOrder_t order, const size_type pos);
 	//※ポインタ指定版
 	inline bool rewind(void* p);
 
@@ -156,7 +156,7 @@ public:
 	//※現在のアロケート方向のみ
 	inline void clear();
 	//※アロケート方向指定
-	inline void clearOrdinal(const allocateOrder_t order);
+	inline void clearOrd(const allocationOrder_t order);
 	
 	//デバッグ情報作成
 	//※十分なサイズのバッファを渡す必要あり。
@@ -167,14 +167,14 @@ public:
 	//使用中のサイズと数を取得
 	//※スコープスタックアロケータで使用されるメソッド
 	void getSizeAndCount(size_type& size, size_type& count);
-	void getSizeAndCount(allocateOrder_t& order, size_type& size_asc, size_type& size_desc, size_type& count_asc, size_type& count_desc);
+	void getSizeAndCount(allocationOrder_t& order, size_type& size_asc, size_type& size_desc, size_type& count_asc, size_type& count_desc);
 
 	//使用中のサイズと数をリセット
 	//※スコープスタックアロケータで使用されるメソッド
 	//※【注意】現在のサイズと数より小さい数でなければならない
 	inline bool resetSizeAndCount(const size_type size, const size_type count);
-	bool resetSizeAndCount(const allocateOrder_t order, const size_type size_asc, const size_type size_desc, const size_type count_asc, const size_type count_desc);
-	bool resetSizeAndCount(const allocateOrder_t order, const size_type size, const size_type count);
+	bool resetSizeAndCount(const allocationOrder_t order, const size_type size_asc, const size_type size_desc, const size_type count_asc, const size_type count_desc);
+	bool resetSizeAndCount(const allocationOrder_t order, const size_type size, const size_type count);
 
 private:
 	//正順メモリ確保（共通処理）
@@ -201,7 +201,7 @@ private:
 
 	//ポインタが範囲内か判定
 	//※範囲に含む方向を返す。どこにも含まれない場合は ALLOC_UNKNOWN_ORDER を返す。
-	inline allocateOrder_t isInUsingRange(void* p);
+	inline allocationOrder_t isInUsingRange(void* p);
 
 public:
 	//コンストラクタ
@@ -217,12 +217,11 @@ private:
 	//フィールド
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
-	size_type m_size;//バッファの使用中サイズ（全体）
 	size_type m_sizeAsc;//バッファの使用中サイズ（正順）
 	size_type m_sizeDesc;//バッファの使用中サイズ（逆順）
 	size_type m_countAsc;//アロケート中の数(正順)
 	size_type m_countDesc;//アロケート中の数(逆順)
-	allocateOrder_t m_allocateOrder;//現在のアロケート方向
+	allocationOrder_t m_allocateOrder;//現在のアロケート方向
 	lock_type m_lock;//ロックオブジェクト
 };
 
@@ -261,7 +260,7 @@ public:
 	template<typename... Tx>
 	inline value_type* newDefault(Tx&&... args);
 	template<typename... Tx>
-	inline value_type* newDefaultOrdinal(const allocateOrder_t order, Tx&&... args);
+	inline value_type* newDefaultOrd(const allocationOrder_t order, Tx&&... args);
 	
 	//デフォルト型のメモリ解放とデストラクタ呼び出し
 	inline bool deleteDefault(value_type*& p);

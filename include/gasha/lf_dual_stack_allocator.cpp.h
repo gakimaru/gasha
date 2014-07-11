@@ -42,7 +42,7 @@ std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for lfDualStackAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, countAsc=%d, countDesc=%d, count=%d, allocate-order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), countAsc(), countDesc(), count(), allocateOrder() == ALLOC_ASC ? "ASC" : "DESC");
+	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
 	size += sprintf(message + size, "-----------------------------------------------\n");
 	return size;
 }
@@ -72,7 +72,7 @@ void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(typename lfDualStackAlloc
 	}
 }
 template<class AUTO_CLEAR>
-void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(allocateOrder_t& order, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_desc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_desc)
+void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(allocationOrder_t& order, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_desc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_desc)
 {
 	while(true)
 	{
@@ -90,7 +90,7 @@ void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(allocateOrder_t& order, t
 
 //使用中のサイズと数をリセット
 template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocateOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_desc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_desc)
+bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_desc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_desc)
 {
 	while (true)
 	{
@@ -125,7 +125,7 @@ bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocateOrder_t o
 	return false;//ダミー
 }
 template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocateOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count)
+bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count)
 {
 	while (true)
 	{

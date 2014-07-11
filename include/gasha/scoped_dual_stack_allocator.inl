@@ -102,14 +102,14 @@ inline typename scopedDualStackAllocator<ALLOCATOR>::size_type scopedDualStackAl
 
 //現在のアロケート方向
 template<class ALLOCATOR>
-inline allocateOrder_t scopedDualStackAllocator<ALLOCATOR>::allocateOrder() const
+inline allocationOrder_t scopedDualStackAllocator<ALLOCATOR>::allocationOrder() const
 {
-	return m_allocator.allocateOrder();
+	return m_allocator.allocationOrder();
 }
 
 //現在のアロケート方向を変更
 template<class ALLOCATOR>
-inline void scopedDualStackAllocator<ALLOCATOR>::setAllocateOrder(const allocateOrder_t order)
+inline void scopedDualStackAllocator<ALLOCATOR>::setAllocateOrder(const allocationOrder_t order)
 {
 	return m_allocator.setAllocateOrder(order);
 }
@@ -129,9 +129,9 @@ inline void* scopedDualStackAllocator<ALLOCATOR>::alloc(const std::size_t size, 
 }
 //※アロケート方向指定版
 template<class ALLOCATOR>
-inline void* scopedDualStackAllocator<ALLOCATOR>::allocOrdinal(const allocateOrder_t order, const std::size_t size, const std::size_t align)
+inline void* scopedDualStackAllocator<ALLOCATOR>::allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align)
 {
-	return m_allocator.allocOrdinal(order, size, align);
+	return m_allocator.allocOrd(order, size, align);
 }
 
 //メモリ解放
@@ -153,14 +153,14 @@ template<class ALLOCATOR>
 template<typename T, typename...Tx>
 T* scopedDualStackAllocator<ALLOCATOR>::newArray(const std::size_t num, Tx&&... args)
 {
-	return m_allocator.template newArray<T>(std::forward<Tx>(args)...);
+	return m_allocator.template newArray<T>(num, std::forward<Tx>(args)...);
 }
 //※アロケート方向指定版
 template<class ALLOCATOR>
 template<typename T, typename...Tx>
-T* scopedDualStackAllocator<ALLOCATOR>::newObjOrdinal(const allocateOrder_t order, Tx&&... args)
+T* scopedDualStackAllocator<ALLOCATOR>::newObjOrd(const allocationOrder_t order, Tx&&... args)
 {
-	return m_allocator.template newObjOrdinal<T>(order, std::forward<Tx>(args)...);
+	return m_allocator.template newObjOrd<T>(order, std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
@@ -180,9 +180,9 @@ bool scopedDualStackAllocator<ALLOCATOR>::deleteArray(T* p, const std::size_t nu
 //※配列用アロケート方向指定版
 template<class ALLOCATOR>
 template<typename T, typename...Tx>
-T* scopedDualStackAllocator<ALLOCATOR>::newArrayOrdinal(const allocateOrder_t order, const std::size_t num, Tx&&... args)
+T* scopedDualStackAllocator<ALLOCATOR>::newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args)
 {
-	return m_allocator.template newArrayOrdinal<T>(order, num, std::forward<Tx>(args)...);
+	return m_allocator.template newArrayOrd<T>(order, num, std::forward<Tx>(args)...);
 }
 
 //使用中のサイズを指定位置に戻す
@@ -197,12 +197,12 @@ inline bool scopedDualStackAllocator<ALLOCATOR>::rewind(const typename scopedDua
 }
 //※位置指定とアロケート方向指定版
 template<class ALLOCATOR>
-inline bool scopedDualStackAllocator<ALLOCATOR>::rewindOrdinal(const allocateOrder_t order, const typename scopedDualStackAllocator<ALLOCATOR>::size_type pos)
+inline bool scopedDualStackAllocator<ALLOCATOR>::rewindOrd(const allocationOrder_t order, const typename scopedDualStackAllocator<ALLOCATOR>::size_type pos)
 {
 	if(order == ALLOC_ASC)
-		return m_allocator.rewindOrdinal(order, m_initSizeAsc + pos);
+		return m_allocator.rewindOrd(order, m_initSizeAsc + pos);
 	else//if(order == ALLOC_DESC)
-		return m_allocator.rewindOrdinal(order, m_initSizeDesc + pos);
+		return m_allocator.rewindOrd(order, m_initSizeDesc + pos);
 }
 //※ポインタ指定版
 template<class ALLOCATOR>
@@ -216,20 +216,20 @@ inline bool  scopedDualStackAllocator<ALLOCATOR>::rewind(void* p)
 template<class ALLOCATOR>
 inline void scopedDualStackAllocator<ALLOCATOR>::clearAll()
 {
-	m_allocator.resetSizeAndCount(m_initAllocateOrder, m_initSizeAsc, m_initSizeDesc, m_initCountAsc, m_initCountDesc);
+	m_allocator.resetSizeAndCount(allocationOrder(), m_initSizeAsc, m_initSizeDesc, m_initCountAsc, m_initCountDesc);
 }
 //※現在のアロケート方向のみ
 template<class ALLOCATOR>
 inline void scopedDualStackAllocator<ALLOCATOR>::clear()
 {
-	if(allocateOrder() == ALLOC_ASC)
+	if(allocationOrder() == ALLOC_ASC)
 		m_allocator.resetSizeAndCount(ALLOC_ASC, m_initSizeAsc, m_initCountAsc);
-	else//if(allocateOrder() == ALLOC_DESC)
+	else//if(allocationOrder() == ALLOC_DESC)
 		m_allocator.resetSizeAndCount(ALLOC_DESC, m_initSizeDesc, m_initCountDesc);
 }
 //※アロケート方向指定
 template<class ALLOCATOR>
-inline void scopedDualStackAllocator<ALLOCATOR>::clearOrdinal(const allocateOrder_t order)
+inline void scopedDualStackAllocator<ALLOCATOR>::clearOrd(const allocationOrder_t order)
 {
 	if(order == ALLOC_ASC)
 		m_allocator.resetSizeAndCount(ALLOC_ASC, m_initSizeAsc, m_initCountAsc);
@@ -243,7 +243,7 @@ std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
 	size += sprintf(message + size, "----- Debug Info for scopedDualStackAllocator -----\n");
-	size += sprintf(message + size, "maxSize=%d, size=%d, sizeAsc=%d, sizeDesc=%d, remain=%d, count=%d, countAsc=%d, countDesc=%d, allocate-order=%s (buff=%p, initAllocateOrder=%s, initSizeAsc=%d, initSizeDesc=%d, initCountAsc=%d, initCountDesc=%d)\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocateOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc, m_initSizeDesc, m_initCountAsc, m_initCountDesc);
+	size += sprintf(message + size, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
 	size += sprintf(message + size, "---------------------------------------------------\n");
 	return size;
 }
@@ -260,7 +260,7 @@ inline scopedDualStackAllocator<ALLOCATOR>::scopedDualStackAllocator(allocator_t
 template<class ALLOCATOR>
 inline scopedDualStackAllocator<ALLOCATOR>::~scopedDualStackAllocator()
 {
-	clearAll();
+	m_allocator.resetSizeAndCount(m_initAllocateOrder, m_initSizeAsc, m_initSizeDesc, m_initCountAsc, m_initCountDesc);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

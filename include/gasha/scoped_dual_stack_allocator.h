@@ -46,8 +46,8 @@ public:
 	inline size_type count() const;//アロケート中の数
 	inline size_type countAsc() const;//正順でアロケート中の数
 	inline size_type countDesc() const;//逆順でアロケート中の数
-	inline allocateOrder_t allocateOrder() const;//現在のアロケート方向
-	inline void setAllocateOrder(const allocateOrder_t order);//現在のアロケート方向を変更
+	inline allocationOrder_t allocationOrder() const;//現在のアロケート方向
+	inline void setAllocateOrder(const allocationOrder_t order);//現在のアロケート方向を変更
 	inline void reversewAllocateOrder();//現在のアロケート方向を逆にする
 
 public:
@@ -55,7 +55,7 @@ public:
 	//メモリ確保
 	inline void* alloc(const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 	//※アロケート方向指定版
-	inline  void* allocOrdinal(const allocateOrder_t order, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
+	inline  void* allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align = GASHA_ DEFAULT_ALIGN);
 
 	//メモリ解放
 	inline bool free(void* p);
@@ -65,13 +65,13 @@ public:
 	inline T* newObj(Tx&&... args);
 	//※アロケート方向指定版
 	template<typename T, typename...Tx>
-	T* newObjOrdinal(const allocateOrder_t order, Tx&&... args);
+	T* newObjOrd(const allocationOrder_t order, Tx&&... args);
 	//※配列用
 	template<typename T, typename...Tx>
 	inline T* newArray(const std::size_t num, Tx&&... args);
 	//※配列用アロケート方向指定版
 	template<typename T, typename...Tx>
-	T* newArrayOrdinal(const allocateOrder_t order, const std::size_t num, Tx&&... args);
+	T* newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args);
 
 	//メモリ解放とデストラクタ呼び出し
 	template<typename T>
@@ -83,7 +83,7 @@ public:
 	//使用中のサイズを指定位置に戻す
 	inline bool rewind(const size_type pos);
 	//※位置指定とアロケート方向指定版
-	inline bool rewindOrdinal(const allocateOrder_t order, const size_type pos);
+	inline bool rewindOrd(const allocationOrder_t order, const size_type pos);
 	//※ポインタ指定版（スコープの範囲内に制限しないので注意）
 	inline bool rewind(void* p);
 
@@ -93,7 +93,7 @@ public:
 	//※現在のアロケート方向のみ
 	inline void clear();
 	//※アロケート方向指定
-	inline void clearOrdinal(const allocateOrder_t order);
+	inline void clearOrd(const allocationOrder_t order);
 	
 	//デバッグ情報作成
 	std::size_t debugInfo(char* message);
@@ -106,7 +106,7 @@ public:
 private:
 	//フィールド
 	allocator_type& m_allocator;//アロケータ
-	allocateOrder_t m_initAllocateOrder;//初期アロケート方向
+	allocationOrder_t m_initAllocateOrder;//初期アロケート方向
 	size_type m_initSizeAsc;//初期正順使用サイズ
 	size_type m_initSizeDesc;//初期逆順使用サイズ
 	size_type m_initCountAsc;//初期正順アロケート数

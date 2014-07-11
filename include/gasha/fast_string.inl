@@ -54,7 +54,7 @@ inline std::size_t strlen_fast(const char* str)
 #ifdef GASHA_USE_NAME_SPACE
 inline std::size_t strlen(const char* str)
 {
-	return std::strlen(str);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strlen(str);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -113,7 +113,7 @@ inline std::size_t strnlen_fast(const char* str, const std::size_t max_len)
 
 //----------------------------------------
 //通常版strnlen
-#ifdef GASHA_IS_GCC
+#if !defined(GASHA_STDSTRNLENFUNC)
 inline std::size_t strnlen(const char* str, const std::size_t max_len)
 {
 	//nullチェックしない
@@ -129,14 +129,14 @@ inline std::size_t strnlen(const char* str, const std::size_t max_len)
 	}
 	return max_len;
 }
-#else//GASHA_IS_GCC
+#else//GASHA_STDSTRNLENFUNC
 #ifdef GASHA_USE_NAME_SPACE
 inline std::size_t strnlen(const char* str, const std::size_t max_len)
 {
-	return ::strnlen(str, max_len);
+	return GASHA_STDSTRNLENFUNC(str, max_len);
 }
 #endif//GASHA_USE_NAME_SPACE
-#endif//GASHA_IS_GCC
+#endif//GASHA_STDSTRNLENFUNC
 
 //----------------------------------------
 //SSE版strnlen
@@ -214,7 +214,7 @@ inline int strcmp_fast(const char* str1, const char* str2)
 //通常版strcmp
 inline int strcmp(const char* str1, const char* str2)
 {
-	return std::strcmp(str1, str2);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strcmp(str1, str2);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -272,7 +272,7 @@ inline int strncmp_fast(const char* str1, const char* str2, const std::size_t ma
 //通常版strncmp
 inline int strncmp(const char* str1, const char* str2, const std::size_t max_len)
 {
-	return std::strncmp(str1, str2, max_len);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strncmp(str1, str2, max_len);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -318,7 +318,7 @@ inline const char* strchr_fast(const char* str, const char c)
 //通常版strchr
 inline const char* strchr(const char* str, const char c)
 {
-	return std::strchr(str, c);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strchr(str, c);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -386,7 +386,7 @@ inline const char* strrchr_fast(const char* str, const char c)
 //通常版strrchr
 inline const char* strrchr(const char* str, const char c)
 {
-	return std::strrchr(str, c);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strrchr(str, c);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -455,7 +455,7 @@ inline const char* strstr_fast(const char* str, const char* pattern)
 //通常版strstr
 inline const char* strstr(const char* str, const char* pattern)
 {
-	return std::strstr(str, pattern);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strstr(str, pattern);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -575,7 +575,7 @@ inline const char* strcpy_fast(char* dst, const char* src)
 //通常版strcpy
 inline const char* strcpy(char* dst, const char* src)
 {
-	return std::strcpy(dst, src);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strcpy(dst, src);
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -619,7 +619,7 @@ inline const char* strncpy_fast(char* dst, const char* src, const std::size_t ma
 //通常版strcpy
 inline const char* strncpy(char* dst, const char* src, const std::size_t max_len)
 {
-	return std::strncpy(dst, src, max_len);
+	return GASHA_STDSTRFUNC_NAMESPACE_ strncpy(dst, src, max_len);
 }
 #endif//GASHA_USE_NAME_SPACE
 

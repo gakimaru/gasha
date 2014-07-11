@@ -34,10 +34,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocatorAutoClear::autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
 {
 	if (allocator.m_countAsc == 0)
-	{
-		allocator.m_size -= allocator.m_sizeAsc;
 		allocator.m_sizeAsc = 0;
-	}
 }
 
 //逆順方向の自動クリア
@@ -45,10 +42,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocatorAutoClear::autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
 {
 	if (allocator.m_countDesc == 0)
-	{
-		allocator.m_size -= allocator.m_sizeDesc;
 		allocator.m_sizeDesc = 0;
-	}
 }
 
 //----------------------------------------
@@ -75,12 +69,12 @@ inline void dummyDualStackAllocatorAutoClear::autoClearDesc(dualStackAllocator<L
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
 {
-	return allocOrdinal(m_allocateOrder, size, align);
+	return allocOrd(m_allocateOrder, size, align);
 }
 
 //※アロケート方向指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline  void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::allocOrdinal(const allocateOrder_t order, const std::size_t size, const std::size_t align)
+inline  void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align)
 {
 	if(order == ALLOC_ASC)
 		return _allocAsc(size, align);
@@ -93,7 +87,7 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const allocateOrder_t order = isInUsingRange(p);//ポインタの所属を判定
+	const allocationOrder_t order = isInUsingRange(p);//ポインタの所属を判定
 	if(order == ALLOC_ASC)
 		return _freeAsc(p);
 	else if(order == ALLOC_DESC)
@@ -107,14 +101,14 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T, typename...Tx>
 inline T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObj(Tx&&... args)
 {
-	return this->template newObjOrdinal<T>(m_allocateOrder, std::forward<Tx>(args)...);
+	return this->template newObjOrd<T>(m_allocateOrder, std::forward<Tx>(args)...);
 }
 //※アロケート方向指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T, typename...Tx>
-inline T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObjOrdinal(const allocateOrder_t order, Tx&&... args)
+inline T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObjOrd(const allocationOrder_t order, Tx&&... args)
 {
-	void* p = allocOrdinal(order, sizeof(T), alignof(T));
+	void* p = allocOrd(order, sizeof(T), alignof(T));
 	if (!p)
 		return nullptr;
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
@@ -124,14 +118,14 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T, typename...Tx>
 inline T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
 {
-	return this->template newArrayOrdinal<T>(m_allocateOrder, num, std::forward<Tx>(args)...);
+	return this->template newArrayOrd<T>(m_allocateOrder, num, std::forward<Tx>(args)...);
 }
 //※配列用アロケート方向指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T, typename...Tx>
-T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArrayOrdinal(const allocateOrder_t order, const std::size_t num, Tx&&... args)
+T* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args)
 {
-	void* p = allocOrdinal(order, sizeof(T) * num, alignof(T));
+	void* p = allocOrd(order, sizeof(T) * num, alignof(T));
 	if (!p)
 		return nullptr;
 	T* top_obj = nullptr;
@@ -151,7 +145,7 @@ template<typename T>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const allocateOrder_t order = isInUsingRange(p);//ポインタの所属を判定
+	const allocationOrder_t order = isInUsingRange(p);//ポインタの所属を判定
 	if(order == ALLOC_UNKNOWN_ORDER)
 		return false;
 	GASHA_ callDestructor(p);//デストラクタ呼び出し
@@ -166,7 +160,7 @@ template<typename T>
 bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	const allocateOrder_t order = isInUsingRange(p);
+	const allocationOrder_t order = isInUsingRange(p);
 	if(order == ALLOC_UNKNOWN_ORDER)//ポインタの所属を判定
 		return false;
 	T* obj = p;
@@ -185,11 +179,11 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::siz
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(const size_type pos)
 {
-	return rewindOrdinal(m_allocateOrder, pos);
+	return rewindOrd(m_allocateOrder, pos);
 }
 //※位置指定とアロケート方向指定版
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewindOrdinal(const allocateOrder_t order, const size_type pos)
+inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewindOrd(const allocationOrder_t order, const size_type pos)
 {
 	if(order == ALLOC_ASC)
 		return _rewindAsc(m_buffRef + pos);
@@ -202,7 +196,7 @@ inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewindOrdinal(const alloc
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 {
-	const allocateOrder_t order = isInUsingRange(p);
+	const allocationOrder_t order = isInUsingRange(p);
 	if(order == ALLOC_ASC)
 		return _rewindAsc(p);
 	else if(order == ALLOC_DESC)
@@ -217,7 +211,6 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearAll()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を更新
-	m_size = 0;
 	m_sizeAsc = 0;
 	m_sizeDesc = 0;
 	m_countAsc = 0;
@@ -227,11 +220,11 @@ inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearAll()
 template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 {
-	return clearOrdinal(m_allocateOrder);
+	return clearOrd(m_allocateOrder);
 }
 //※アロケート方向指定
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearOrdinal(const allocateOrder_t order)
+inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::clearOrd(const allocationOrder_t order)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if(order == ALLOC_ASC)
@@ -252,7 +245,6 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearAsc()
 {
 	//使用中のサイズとメモリ確保数を更新
-	m_size -= m_sizeAsc;
 	m_sizeAsc = 0;
 	m_countAsc = 0;
 }
@@ -261,14 +253,13 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_clearDesc()
 {
 	//使用中のサイズとメモリ確保数を更新
-	m_size -= m_sizeDesc;
 	m_sizeDesc = 0;
 	m_countDesc = 0;
 }
 
 //ポインタが範囲内か判定
 template<class LOCK_TYPE, class AUTO_CLEAR>
-inline allocateOrder_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
+inline allocationOrder_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
 {
 	if (p)
 	{
@@ -290,7 +281,6 @@ template<class LOCK_TYPE, class AUTO_CLEAR>
 inline dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::dualStackAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
-	m_size(0),
 	m_sizeAsc(0),
 	m_sizeDesc(0),
 	m_countAsc(0),
@@ -343,9 +333,9 @@ inline typename dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::val
 //※アロケート方向指定版
 template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
 template<typename... Tx>
-inline typename dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type* dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::newDefaultOrdinal(const allocateOrder_t order, Tx&&... args)
+inline typename dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type* dualStackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::newDefaultOrd(const allocationOrder_t order, Tx&&... args)
 {
-	return this->template newObjOrdinal<value_type>(order, std::forward<Tx>(args)...);
+	return this->template newObjOrd<value_type>(order, std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し

@@ -21,7 +21,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 static const int DEFAULT_ALIGN = sizeof(int);
 
 //アロケート方向
-enum allocateOrder_t
+enum allocationOrder_t
 {
 	ALLOC_ASC  = 0,//正順アロケート
 	ALLOC_DESC = 1,//逆順アロケート
