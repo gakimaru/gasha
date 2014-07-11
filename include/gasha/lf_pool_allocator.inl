@@ -18,6 +18,7 @@
 #include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ【宣言部】
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/utility.h>//汎用ユーティリティ：min()
 
 #include <utility>//C++11 std::forward
 #include <stdio.h>//sprintf()
@@ -191,13 +192,12 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::s
 	m_maxSize(static_cast<size_type>(buff_size - m_offset)),
 	m_blockSize(static_cast<size_type>(block_size)),
 	m_blockAlign(static_cast<size_type>(block_align)),
-	m_poolSize(m_maxSize / m_blockSize),
+	m_poolSize(static_cast<size_type>(GASHA_ min(m_maxSize / m_blockSize, _MAX_POOL_SIZE))),
 	m_vacantHead(0),
 	m_recyclableHead(INVALID_INDEX),
 	m_usingPoolSize(0)
 {
 	assert(m_buffRef != nullptr);
-	assert(m_poolSize <= MAX_POOL_SIZE);
 	assert(m_maxSize > 0);
 	assert(m_poolSize > 0);
 	
