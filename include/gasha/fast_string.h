@@ -14,7 +14,6 @@
 //--------------------------------------------------------------------------------
 
 #include <cstddef>//std::size_t
-#include <string.h>//strlen(), strcmp(), strncmp(), strchr(), strrchr(), strstr(), strcpy(), strncpy()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -30,7 +29,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //strlen
 inline std::size_t strlen_fast(const char* str);//高速版
-//std::size_t strlen(const char* str);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline std::size_t strlen(const char* str);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline std::size_t strlen_sse(const char* str);//SSE版
 
 //----------------------------------------
@@ -40,42 +41,54 @@ inline std::size_t strnlen_fast(const char* str, const std::size_t max_len);//�
 #ifdef GASHA_IS_GCC
 inline std::size_t strnlen(const char* str, const std::size_t max_len);//通常版
 #else//GASHA_IS_GCC
-//std::size_t strnlen(const char* str, const std::size_t max_len);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline std::size_t strnlen(const char* str, const std::size_t max_len);//通常版
+#endif//GASHA_USE_NAME_SPACE
 #endif//GASHA_IS_GCC
 inline std::size_t strnlen_sse(const char* str, const std::size_t max_len);//SSE版
 
 //----------------------------------------
 //strcmp
 inline int strcmp_fast(const char* str1, const char* str2);//高速版
-//int strcmp(const char* str1, const char* str2);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline int strcmp(const char* str1, const char* str2);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline int strcmp_sse(const char* str1, const char* str2);//SSE版
 
 //----------------------------------------
-//高速版strncmp
+//strncmp
 inline int strncmp_fast(const char* str1, const char* str2, const std::size_t max_len);//高速版
-//int strncmp(const char* str1, const char* str2, const std::size_t max_len);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline int strncmp(const char* str1, const char* str2, const std::size_t max_len);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline int strncmp_sse(const char* str1, const char* str2, const std::size_t max_len);//SSE版
 
 //----------------------------------------
-//高速版strchr
+//strchr
 inline const char* strchr_fast(const char* str, const char c);//高速版
-//const char* strchr(const char* str, const char c);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline const char* strchr(const char* str, const char c);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline const char* strchr_sse(const char* str, const char c);//SSE版
 
 //----------------------------------------
-//高速版strrchr
+//strrchr
 inline const char* strrchr_fast(const char* str, const char c);//高速版
-//const char* strrchr(const char* str, const char c);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline const char* strrchr(const char* str, const char c);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline const char* strrchr_sse(const char* str, const char c);//SSE版
 
 //----------------------------------------
-//高速版strstr
+//strstr
 inline const char* strstr_fast(const char* str, const char* pattern);//高速版
-//const char* strstr(const char* str, const char* pattern);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline const char* strstr(const char* str, const char* pattern);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline const char* strstr_sse(const char* str, const char* pattern);//SSE版
 
 //----------------------------------------
-//高速版strstr(BM法)
+//strstr(BM法)
 //※BM法（Boyer-Moore法）バージョン
 //※文字列が長い時（とくにパターンが長い時）には有利なアルゴリズムだが、
 //　短い場合は、スキップ文字数を事前計算する分遅くなる。
@@ -90,7 +103,7 @@ const char* strstrbm(const char* str, const char* pattern, std::function<bool(co
 inline const char* strstrbm_sse(const char* str, const char* pattern, std::function<bool(const char*, const char*)> found_it);//SSE版
 
 //----------------------------------------
-//高速版strstr0
+//strstr0
 //※strの先頭からのみpatternを照合する
 //※strがpatternより長くても、patternの全文が先頭にあれば一致と見なす。
 inline const char* strstr0_fast(const char* str, const char* pattern);//高速版
@@ -98,15 +111,19 @@ inline const char* strstr0(const char* str, const char* pattern);//通常版
 inline const char* strstr0_sse(const char* str, const char* pattern);//SSE版
 
 //----------------------------------------
-//高速版strcpy
+//strcpy
 inline const char* strcpy_fast(char* dst, const char* src);//高速版
-//const char* strcpy(char* dst, const char* src);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline const char* strcpy(char* dst, const char* src);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline const char* strcpy_sse(char* dst, const char* src);//SSE版
 
 //----------------------------------------
-//高速版strncpy
+//strncpy
 inline const char* strncpy_fast(char* dst, const char* src, const std::size_t max_len);//高速版
-//const char* strncpy(char* dst, const char* src, const std::size_t max_len);//通常版
+#ifdef GASHA_USE_NAME_SPACE
+inline const char* strncpy(char* dst, const char* src, const std::size_t max_len);//通常版
+#endif//GASHA_USE_NAME_SPACE
 inline const char* strncpy_sse(char* dst, const char* src, const std::size_t max_len);//SSE版
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

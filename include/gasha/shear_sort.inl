@@ -54,7 +54,7 @@ std::size_t shearSort(T* array, const std::size_t size, PREDICATE predicate)
 	T* now;
 	T* next;
 	bool is_odd;
-	std::size_t rows = static_cast<std::size_t>(sqrt(fastestA_f(static_cast<float>(size))));//正方形のデータとして扱うための行数算出
+	std::size_t rows = static_cast<std::size_t>(GASHA_ sqr(fastestA_f(static_cast<float>(size))));//正方形のデータとして扱うための行数算出
 	std::size_t over = size % rows;//余り算出
 	if (over > 0 && (rows & 0x1) == 0x1)//余りが出た場合、（余りを除く）行数が偶数になるように調整
 	{

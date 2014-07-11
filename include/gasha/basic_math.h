@@ -420,7 +420,7 @@ template<>                 struct calcStaticNearPow2LE<0>{ static const int valu
 //※fast_math.hをインクルードすることで、float型の時に特殊化して、高速演算を利用可能
 //--------------------------------------------------------------------------------
 
-template<typename T> inline T sqrt(const T value);
+template<typename T> inline T sqr(const T value);
 
 //--------------------------------------------------------------------------------
 //テンプレートベクトル演算

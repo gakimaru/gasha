@@ -93,7 +93,7 @@ inline unsigned int calcNearPow2LE(const unsigned int value)
 
 //----------------------------------------
 //平方根
-template<typename T> inline T sqrt(const T value){ return std::sqrt(value); }
+template<typename T> inline T sqr(const T value){ return std::sqrt(value); }
 
 //--------------------------------------------------------------------------------
 //テンプレートベクトル演算
@@ -107,7 +107,7 @@ inline T norm(const T(&vec)[N])
 	T norm_sq = 0.f;
 	for (int i = 0; i < N; ++i)
 		norm_sq += vec[i] * vec[i];
-	return GASHA_ sqrt(norm_sq);
+	return GASHA_ sqr(norm_sq);
 }
 
 //----------------------------------------
@@ -150,7 +150,7 @@ inline T length(const T(&vec1)[N], const T(&vec2)[N])
 		const T diff = vec1[i] - vec2[i];
 		len_sq += diff * diff;
 	}
-	return GASHA_ sqrt(len_sq);
+	return GASHA_ sqr(len_sq);
 }
 
 //----------------------------------------

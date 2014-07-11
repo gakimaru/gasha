@@ -1127,17 +1127,17 @@ template<> inline __m256d operator/(const dummyA<__m256d>&& lvalue, const dummyA
 
 //----------------------------------------
 //高速平方根
-template<typename T> inline fastA<T> sqrt(const fastA<T>&& value){ return std::sqrt(value); }
-template<typename T> inline fastestA<T> sqrt(const fastestA<T>&& value){ return std::sqrt(value); }
-template<typename T> inline semiA<T> sqrt(const semiA<T>&& value){ return std::sqrt(value); }
-template<typename T> inline sseA<T> sqrt(const sseA<T>&& value){ return std::sqrt(value); }
-template<typename T> inline normA<T> sqrt(const normA<T>&& value){ return std::sqrt(value); }
-template<typename T> inline T sqrt(const dummyA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline fastA<T> sqr(const fastA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline fastestA<T> sqr(const fastestA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline semiA<T> sqr(const semiA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline sseA<T> sqr(const sseA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline normA<T> sqr(const normA<T>&& value){ return std::sqrt(value); }
+template<typename T> inline T sqr(const dummyA<T>&& value){ return std::sqrt(value); }
 
 //----------------------------------------
 //高速平方根：特殊化
 #ifdef GASHA_FAST_ARITH_USE_SSE
-template<> inline fastA<float> sqrt(const fastA<float>&& value)
+template<> inline fastA<float> sqr(const fastA<float>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1156,7 +1156,7 @@ template<> inline fastA<float> sqrt(const fastA<float>&& value)
 	return _mm_sqrt_ss(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline fastestA<float> sqrt(const fastestA<float>&& value)
+template<> inline fastestA<float> sqr(const fastestA<float>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1166,7 +1166,7 @@ template<> inline fastestA<float> sqrt(const fastestA<float>&& value)
 	return _mm_sqrt_ss(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline semiA<float> sqrt(const semiA<float>&& value)
+template<> inline semiA<float> sqr(const semiA<float>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1180,12 +1180,12 @@ template<> inline semiA<float> sqrt(const semiA<float>&& value)
 	return _mm_sqrt_ss(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline sseA<float> sqrt(const sseA<float>&& value)
+template<> inline sseA<float> sqr(const sseA<float>&& value)
 {
 	return _mm_sqrt_ss(value);
 }
 
-template<> inline fastA<__m128> sqrt(const fastA<__m128>&& value)
+template<> inline fastA<__m128> sqr(const fastA<__m128>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1198,7 +1198,7 @@ template<> inline fastA<__m128> sqrt(const fastA<__m128>&& value)
 	return _mm_sqrt_ps(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline fastestA<__m128> sqrt(const fastestA<__m128>&& value)
+template<> inline fastestA<__m128> sqr(const fastestA<__m128>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1208,7 +1208,7 @@ template<> inline fastestA<__m128> sqrt(const fastestA<__m128>&& value)
 	return _mm_sqrt_ps(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline semiA<__m128> sqrt(const semiA<__m128>&& value)
+template<> inline semiA<__m128> sqr(const semiA<__m128>&& value)
 {
 #ifdef GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 	const __m128 value_m128 = value;
@@ -1222,109 +1222,109 @@ template<> inline semiA<__m128> sqrt(const semiA<__m128>&& value)
 	return _mm_sqrt_ps(value);
 #endif//GASHA_FAST_ARITH_USE_RECIPROCAL_FOR_DIVISION//逆数で平方根算出
 }
-template<> inline sseA<__m128> sqrt(const sseA<__m128>&& value)
+template<> inline sseA<__m128> sqr(const sseA<__m128>&& value)
 {
 	return _mm_sqrt_ps(value);
 }
-template<> inline normA<__m128> sqrt(const normA<__m128>&& value)
+template<> inline normA<__m128> sqr(const normA<__m128>&& value)
 {
 	return _mm_sqrt_ps(value);
 }
-template<> inline __m128 sqrt(const dummyA<__m128>&& value)
+template<> inline __m128 sqr(const dummyA<__m128>&& value)
 {
 	return _mm_sqrt_ps(value);
 }
 #endif//GASHA_FAST_ARITH_USE_SSE
 #ifdef GASHA_FAST_ARITH_USE_SSE2
-template<> inline fastA<double> sqrt(const fastA<double>&& value)
+template<> inline fastA<double> sqr(const fastA<double>&& value)
 {
 	return _mm_sqrt_sd(value, value);
 }
-template<> inline fastestA<double> sqrt(const fastestA<double>&& value)
+template<> inline fastestA<double> sqr(const fastestA<double>&& value)
 {
 	return _mm_sqrt_sd(value, value);
 }
-template<> inline semiA<double> sqrt(const semiA<double>&& value)
+template<> inline semiA<double> sqr(const semiA<double>&& value)
 {
 	return _mm_sqrt_sd(value, value);
 }
-template<> inline sseA<double> sqrt(const sseA<double>&& value)
+template<> inline sseA<double> sqr(const sseA<double>&& value)
 {
 	return _mm_sqrt_sd(value, value);
 }
 
-template<> inline fastA<__m128d> sqrt(const fastA<__m128d>&& value)
+template<> inline fastA<__m128d> sqr(const fastA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
-template<> inline fastestA<__m128d> sqrt(const fastestA<__m128d>&& value)
+template<> inline fastestA<__m128d> sqr(const fastestA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
-template<> inline semiA<__m128d> sqrt(const semiA<__m128d>&& value)
+template<> inline semiA<__m128d> sqr(const semiA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
-template<> inline sseA<__m128d> sqrt(const sseA<__m128d>&& value)
+template<> inline sseA<__m128d> sqr(const sseA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
-template<> inline normA<__m128d> sqrt(const normA<__m128d>&& value)
+template<> inline normA<__m128d> sqr(const normA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
-template<> inline __m128d sqrt(const dummyA<__m128d>&& value)
+template<> inline __m128d sqr(const dummyA<__m128d>&& value)
 {
 	return _mm_sqrt_pd(value);
 }
 #endif//GASHA_FAST_ARITH_USE_SSE2
 #ifdef GASHA_FAST_ARITH_USE_AVX
-template<> inline fastA<__m256> sqrt(const fastA<__m256>&& value)
+template<> inline fastA<__m256> sqr(const fastA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
-template<> inline fastestA<__m256> sqrt(const fastestA<__m256>&& value)
+template<> inline fastestA<__m256> sqr(const fastestA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
-template<> inline semiA<__m256> sqrt(const semiA<__m256>&& value)
+template<> inline semiA<__m256> sqr(const semiA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
-template<> inline sseA<__m256> sqrt(const sseA<__m256>&& value)
+template<> inline sseA<__m256> sqr(const sseA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
-template<> inline normA<__m256> sqrt(const normA<__m256>&& value)
+template<> inline normA<__m256> sqr(const normA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
-template<> inline __m256 sqrt(const dummyA<__m256>&& value)
+template<> inline __m256 sqr(const dummyA<__m256>&& value)
 {
 	return _mm256_sqrt_ps(value);
 }
 
-template<> inline fastA<__m256d> sqrt(const fastA<__m256d>&& value)
+template<> inline fastA<__m256d> sqr(const fastA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
-template<> inline fastestA<__m256d> sqrt(const fastestA<__m256d>&& value)
+template<> inline fastestA<__m256d> sqr(const fastestA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
-template<> inline semiA<__m256d> sqrt(const semiA<__m256d>&& value)
+template<> inline semiA<__m256d> sqr(const semiA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
-template<> inline sseA<__m256d> sqrt(const sseA<__m256d>&& value)
+template<> inline sseA<__m256d> sqr(const sseA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
-template<> inline normA<__m256d> sqrt(const normA<__m256d>&& value)
+template<> inline normA<__m256d> sqr(const normA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
-template<> inline __m256d sqrt(const dummyA<__m256d>&& value)
+template<> inline __m256d sqr(const dummyA<__m256d>&& value)
 {
 	return _mm256_sqrt_pd(value);
 }
