@@ -13,6 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
+#include <gasha/allocator_adapter.h>//アロケータアダプター
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -49,6 +50,10 @@ public:
 	inline allocationOrder_t allocationOrder() const;//現在のアロケート方向
 	inline void setAllocateOrder(const allocationOrder_t order);//現在のアロケート方向を変更
 	inline void reversewAllocateOrder();//現在のアロケート方向を逆にする
+
+public:
+	//アロケータアダプター取得
+	inline GASHA_ allocatorAdapter<scopedStackAllocator<ALLOCATOR>> adapter(){ GASHA_ allocatorAdapter<scopedStackAllocator<ALLOCATOR>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド

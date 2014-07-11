@@ -94,10 +94,9 @@ namespace _private
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
 		const double time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
-		GASHA_ polyAllocator allocator;
-		allocator.setDebugInfo(&info);//デバッグ情報
+		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete p;//メモリ破棄
-		allocator.resetDebugInfo();//デバッグ情報リセット
+		GASHA_ polyAllocator::resetDebugInfo();//デバッグ情報リセット
 	}
 	inline deleteFunctor::deleteFunctor(const char* file_name, const char* func_name) :
 		m_fileName(file_name),
@@ -110,10 +109,9 @@ namespace _private
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
 		const double time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
-		GASHA_ polyAllocator allocator;
-		allocator.setDebugInfo(&info);//デバッグ情報
+		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete[] p;//メモリ破棄
-		allocator.resetDebugInfo();//デバッグ情報リセット
+		GASHA_ polyAllocator::resetDebugInfo();//デバッグ情報リセット
 	}
 	inline deleteArrayFunctor::deleteArrayFunctor(const char* file_name, const char* func_name) :
 		m_fileName(file_name),

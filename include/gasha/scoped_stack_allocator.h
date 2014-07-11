@@ -13,6 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
+#include <gasha/allocator_adapter.h>//アロケータアダプター
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -42,6 +43,10 @@ public:
 	inline size_type size() const;//使用中のサイズ（バイト数）
 	inline size_type remain() const;//残りサイズ（バイト数）
 	inline size_type count() const;//アロケート中の数
+
+public:
+	//アロケータアダプター取得
+	inline GASHA_ allocatorAdapter<scopedStackAllocator<ALLOCATOR>> adapter(){ GASHA_ allocatorAdapter<scopedStackAllocator<ALLOCATOR>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド

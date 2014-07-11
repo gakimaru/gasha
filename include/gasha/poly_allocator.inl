@@ -55,15 +55,41 @@ debugAllocationObserver::debugAllocationObserver():
 //多態アロケータクラス
 
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
+
+//アクセッサ
+inline const char* polyAllocator::name() const{ return m_adapter->name(); };//アロケータ名
+inline const char* polyAllocator::mode() const{ return m_adapter->mode(); };//アロケータの実装モード名
+inline const GASHA_ IAllocatorAdapter* polyAllocator::adapter() const{ return m_adapter; };//アダプター
+inline GASHA_ IAllocatorAdapter* polyAllocator::adapter(){ return m_adapter; };//アダプター
+
+//オペレータ
 inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_adapter; }
 inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_adapter; }
 inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return m_adapter; }
 inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return m_adapter; }
+
+//キャストオペレータ
+inline polyAllocator::operator const GASHA_ IAllocatorAdapter&() const { return *m_adapter; }
+inline polyAllocator::operator GASHA_ IAllocatorAdapter&() { return *m_adapter; }
+
 #else//GASHA_ENABLE_POLY_ALLOCATOR
+
+//アクセッサ
+inline const char* polyAllocator::name() const{ return nullptr; };//アロケータ名
+inline const char* polyAllocator::mode() const{ return nullptr; };//アロケータの実装モード名
+inline const GASHA_ IAllocatorAdapter* polyAllocator::adapter() const{ return nullptr; };//アダプター
+inline GASHA_ IAllocatorAdapter* polyAllocator::adapter(){ return nullptr; };//アダプター
+
+//オペレータ
 inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_dummyAdapter; }
 inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_dummyAdapter; }
 inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return nullptr; }
 inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return nullptr; }
+
+//キャストオペレータ
+inline polyAllocator::operator const GASHA_ IAllocatorAdapter&() const { return *m_dummyAdapter; }
+inline polyAllocator::operator GASHA_ IAllocatorAdapter&() { return *m_dummyAdapter; }
+
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 
 //デバッグ観察者を変更
@@ -91,7 +117,7 @@ inline void polyAllocator::resetDebugObserver() const
 }
 
 //アライメントサイズを取得
-inline std::size_t polyAllocator::align() const
+inline std::size_t polyAllocator::align()
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	return m_align;
@@ -101,13 +127,13 @@ inline std::size_t polyAllocator::align() const
 }
 
 //アライメントサイズを変更
-inline void polyAllocator::setAlign(const std::size_t align) const
+inline void polyAllocator::setAlign(const std::size_t align)
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	m_align = align;
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
-inline void polyAllocator::resetAlign() const
+inline void polyAllocator::resetAlign()
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	m_align = DEFAULT_ALIGN;
@@ -115,7 +141,7 @@ inline void polyAllocator::resetAlign() const
 }
 
 //デバッグ情報取得
-inline const debugAllocationInfo* polyAllocator::debugInfo() const
+inline const debugAllocationInfo* polyAllocator::debugInfo()
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	return m_debugInfo;
@@ -125,14 +151,14 @@ inline const debugAllocationInfo* polyAllocator::debugInfo() const
 }
 
 //デバッグ情報を変更
-inline void polyAllocator::setDebugInfo(const GASHA_ debugAllocationInfo* info) const
+inline void polyAllocator::setDebugInfo(const GASHA_ debugAllocationInfo* info)
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	m_debugInfo = info;
 #else//GASHA_ENABLE_POLY_ALLOCATOR
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 }
-inline void polyAllocator::resetDebugInfo() const
+inline void polyAllocator::resetDebugInfo()
 {
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	m_debugInfo = nullptr;
@@ -146,7 +172,7 @@ inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter) :
 	m_prevAdapter(m_adapter),
 	m_prevObserver(m_observer)
 {
-	callbackAtReturnAllocator(*m_adapter, adapter);
+	callbackAtChangeAllocator(*m_adapter, adapter);
 	m_adapter = &adapter;
 	m_observer = nullptr;
 }

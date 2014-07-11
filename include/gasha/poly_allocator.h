@@ -41,6 +41,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※多態アロケータにセットしたい既存のアロケータを、コンストラクタで受け渡して使用する。
 //※デストラクタで変更前のアロケータに戻る。
 //※他のスレッドには影響しない。
+//※new / delete オペレータを直接使用してもよいが、GASHA_NEW / GASHA_DELETE マクロを使用すると、
+//　アラインメントを保証し、かつ、デバッグ情報／デバッグコールバックを使用できるようになる。
 
 //--------------------
 //アロケート用デバッグ情報
@@ -106,6 +108,8 @@ class polyAllocator
 {
 	friend void* ::operator new(const std::size_t size) GASHA_STDNEW_THROW;
 	friend void* ::operator new[](const std::size_t size) GASHA_STDNEW_THROW;
+	friend void* ::operator new(const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;
+	friend void* ::operator new[](const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;
 	friend void ::operator delete(void* p) GASHA_STDDELETE_THROW;
 	friend void ::operator delete[](void* p) GASHA_STDDELETE_THROW;
 	template<class T>
@@ -114,11 +118,23 @@ class polyAllocator
 	friend struct GASHA_ _private::deleteArrayFunctor;
 
 public:
+	//アクセッサ
+	inline const char* name() const;//アロケータ名
+	inline const char* mode() const;//アロケータの実装モード名
+	inline const GASHA_ IAllocatorAdapter* adapter() const;//アダプター
+	inline GASHA_ IAllocatorAdapter* adapter();//アダプター
+
+public:
 	//オペレータ
 	inline const GASHA_ IAllocatorAdapter& operator*() const;
 	inline GASHA_ IAllocatorAdapter& operator*();
 	inline const GASHA_ IAllocatorAdapter* operator->() const;
 	inline GASHA_ IAllocatorAdapter* operator->();
+
+public:
+	//キャストオペレータ
+	inline operator const GASHA_ IAllocatorAdapter&() const;
+	inline operator GASHA_ IAllocatorAdapter&();
 
 public:
 	//デバッグ観察者を変更
@@ -129,15 +145,15 @@ public:
 
 private:
 	//アライメントサイズを取得
-	inline std::size_t align() const;
+	inline static std::size_t align();
 	//アライメントサイズを変更
-	inline void setAlign(const std::size_t align) const;
-	inline void resetAlign() const;
+	inline static void setAlign(const std::size_t align);
+	inline static void resetAlign();
 	//デバッグ情報を変更
-	inline const GASHA_ debugAllocationInfo* debugInfo() const;
+	inline static const GASHA_ debugAllocationInfo* debugInfo();
 	//デバッグ情報を更新
-	inline void setDebugInfo(const GASHA_ debugAllocationInfo* info) const;
-	inline void resetDebugInfo() const;
+	inline static void setDebugInfo(const GASHA_ debugAllocationInfo* info);
+	inline static void resetDebugInfo();
 
 private:
 	//コールバック

@@ -32,6 +32,8 @@
 
 void* operator new(const std::size_t size) GASHA_STDNEW_THROW;//new
 void* operator new[](const std::size_t size) GASHA_STDNEW_THROW;//配列new
+void* operator new(const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;//new
+void* operator new[](const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;//配列new
 void operator delete(void* p) GASHA_STDDELETE_THROW;//delete
 void operator delete[](void* p) GASHA_STDDELETE_THROW;//配列版delete
 

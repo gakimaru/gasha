@@ -472,10 +472,12 @@
 //標準new/deleteの例外指定
 #ifdef GASHA_IS_VC
 	#define GASHA_STDNEW_THROW throw()
+	#define GASHA_STDNEW_NOTHROW throw()
 	#define GASHA_STDDELETE_THROW throw()
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
 	#define GASHA_STDNEW_THROW
+	#define GASHA_STDNEW_NOTHROW throw()
 	#define GASHA_STDDELETE_THROW throw()
 #endif//GASHA_IS_GCC
 
