@@ -389,6 +389,15 @@
 #endif//GASHA_IS_GCC
 
 //--------------------
+//【C++11仕様】alignasの限界値
+#ifdef GASHA_IS_WIN
+	#define GASHA_ALIGNAS_LIMIT 128
+#endif//GASHA_IS_WIN
+#ifdef GASHA_IS_GCC
+	#define GASHA_ALIGNAS_LIMIT 256
+#endif//GASHA_IS_GCC
+
+//--------------------
 //【C++11仕様】alignof：アラインメント取得関数
 #ifdef GASHA_IS_WIN
 	#if _MSC_VER > 1800//VC++12.0(2013)以後（暫定）

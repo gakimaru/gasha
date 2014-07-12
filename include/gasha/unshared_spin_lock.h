@@ -35,13 +35,13 @@ public:
 
 	//単一ロック取得
 	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique();
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ with_lock_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ with_lock_shared_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ try_to_lock_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ try_to_lock_shared_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ adopt_lock_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ adopt_shared_lock_t);
-	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ defer_lock_t);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ with_lock_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ with_lock_shared_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ try_to_lock_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ try_to_lock_shared_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ adopt_lock_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ adopt_shared_lock_t&);
+	inline GASHA_ unique_shared_lock<unsharedSpinLock> lockUnique(const GASHA_ defer_lock_t&);
 
 	//排他ロック（ライトロック）取得
 	void lock(const int spin_count = DEFAULT_SPIN_COUNT);

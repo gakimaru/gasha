@@ -286,10 +286,10 @@ namespace priority_queue
 		//メソッド：ロック取得系
 		//単一ロック取得
 		inline GASHA_ unique_lock<lock_type> lockUnique() const { GASHA_ unique_lock<lock_type> lock(*this); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
-		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ with_lock_t&) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ with_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ try_to_lock_t&) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ try_to_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ adopt_lock_t&) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ adopt_lock); return lock; }
+		inline GASHA_ unique_lock<lock_type> lockUnique(const GASHA_ defer_lock_t&) const { GASHA_ unique_lock<lock_type> lock(*this, GASHA_ defer_lock); return lock; }
 		//スコープロック取得
 		inline GASHA_ lock_guard<lock_type> lockScoped() const { GASHA_ lock_guard<lock_type> lock(*this); return lock; }
 	public:

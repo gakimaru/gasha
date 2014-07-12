@@ -13,7 +13,6 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/i_allocator_adapter.h>//アロケータアダプターインターフェース
-#include <gasha/allocator_adapter.h>//アロケータアダプター
 #include <gasha/std_allocator.h>//標準アロケータ
 
 #include <cstddef>//std::size_t
@@ -178,6 +177,7 @@ private:
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 	GASHA_ IAllocatorAdapter* m_prevAdapter;//変更前のアロケータ
 	const GASHA_ debugAllocationObserver* m_prevObserver;//変更前の観察者
+	bool m_isChanged;//アロケータ変更時
 	//静的フィールド
 	static GASHA_ stdAllocator<> m_stdAllocator;//標準アロケータ
 	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプター

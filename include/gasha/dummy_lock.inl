@@ -23,10 +23,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //単一ロック取得
 inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(){ GASHA_ unique_lock<dummyLock> lock(*this); return lock; }
-inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
-inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ try_to_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_to_lock); return lock; }
-inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
-inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
+inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ with_lock_t&){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ with_lock); return lock; }
+inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ try_to_lock_t&){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ try_to_lock); return lock; }
+inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ adopt_lock_t&){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ adopt_lock); return lock; }
+inline GASHA_ unique_lock<dummyLock> dummyLock::lockUnique(const GASHA_ defer_lock_t&){ GASHA_ unique_lock<dummyLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 //ロック取得
 inline void dummyLock::lock(const int dummy_count)

@@ -450,6 +450,9 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 	size += sprintf(message + size, "[No]        `alignas()` is NOT available.\n");
 #endif//GASHA_HAS_CAMOUFLAGE_ALIGNAS
 #endif//GASHA_HAS_ALIGNAS
+#ifdef GASHA_ALIGNAS_LIMIT
+	size += sprintf(message + size, "            liomit of `alignas()` = %d\n", GASHA_ALIGNAS_LIMIT);
+#endif//GASHA_ALIGNAS_LIMIT
 
 	//【C++11仕様】alignof
 #ifdef GASHA_HAS_ALIGNOF

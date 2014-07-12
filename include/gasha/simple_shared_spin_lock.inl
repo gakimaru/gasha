@@ -23,13 +23,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //単一ロック取得
 inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_shared_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_shared_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock_shared); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_shared_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
-inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ defer_lock_t){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ with_lock_shared_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ with_lock_shared); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ try_to_lock_shared_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ try_to_lock_shared); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_lock_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ adopt_shared_lock_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ adopt_shared_lock); return lock; }
+inline GASHA_ unique_shared_lock<simpleSharedSpinLock> simpleSharedSpinLock::lockUnique(const GASHA_ defer_lock_t&){ GASHA_ unique_shared_lock<simpleSharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 //排他ロック（ライトロック）用のロックガード取得
 inline GASHA_ lock_guard<simpleSharedSpinLock> simpleSharedSpinLock::lockScoped(const int spin_count)

@@ -31,10 +31,10 @@ public:
 
 	//単一ロック取得
 	inline GASHA_ unique_lock<dummyLock> lockUnique();
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ with_lock_t);
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ try_to_lock_t);
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ adopt_lock_t);
-	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ with_lock_t&);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ try_to_lock_t&);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ adopt_lock_t&);
+	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t&);
 
 	//ロック取得
 	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT);

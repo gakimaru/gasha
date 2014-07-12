@@ -27,13 +27,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //コンストラクタ
 #ifdef GASHA_HAS_DEBUG_FEATURE
 inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
-m_fileName(file_name),
-m_funcName(func_name),
-m_callPointName(call_point_name),
-m_time(time),
-m_typeName(type_name),
-m_typeSize(type_size),
-m_arrayNum(array_num)
+	m_fileName(file_name),
+	m_funcName(func_name),
+	m_callPointName(call_point_name),
+	m_time(time),
+	m_typeName(type_name),
+	m_typeSize(type_size),
+	m_arrayNum(array_num)
 {}
 #else//GASHA_HAS_DEBUG_FEATURE
 inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
@@ -170,7 +170,8 @@ inline void polyAllocator::resetDebugInfo()
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter) :
 	m_prevAdapter(m_adapter),
-	m_prevObserver(m_observer)
+	m_prevObserver(m_observer),
+	m_isChanged(true)
 {
 	callbackAtChangeAllocator(*m_adapter, adapter);
 	m_adapter = &adapter;
@@ -185,7 +186,8 @@ inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter)
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 inline polyAllocator::polyAllocator() :
 	m_prevAdapter(nullptr),
-	m_prevObserver(nullptr)
+	m_prevObserver(nullptr),
+	m_isChanged(false)
 {
 	if (!m_adapter)
 		initlaizeStdAllocatorAdapter();//強制初期化
@@ -199,9 +201,10 @@ inline polyAllocator::polyAllocator()
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 inline polyAllocator::~polyAllocator()
 {
-	if (m_prevAdapter)
+	if (m_isChanged)
 	{
-		callbackAtReturnAllocator(*m_prevAdapter, *m_adapter);
+		if (m_prevAdapter)
+			callbackAtReturnAllocator(*m_prevAdapter, *m_adapter);
 		m_adapter = m_prevAdapter;
 		m_observer = m_prevObserver;
 	}
