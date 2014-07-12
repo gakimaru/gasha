@@ -256,6 +256,28 @@
 #endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
+//【コンソール】
+
+#if defined(GASHA_USE_WINDOWS_CONSOLE) && !defined(GASHA_IS_WIN)
+	#undef GASHA_USE_WINDOWS_CONSOLE
+#endif//GASHA_USE_WINDOWS_CONSOLE
+
+#if defined(GASHA_USE_VS_CONSOLE) && (!defined(GASHA_IS_WIN) || !defined(GASHA_HAS_DEBUG_FEATURE))
+	#undef GASHA_USE_VS_CONSOLE
+#endif//GASHA_USE_VS_CONSOLE
+
+//--------------------------------------------------------------------------------
+//【コンソールカラー】
+
+#if defined(GASHA_USE_ESCAPE_SEQUENCE) && defined(GASHA_IS_WIN)
+	#undef GASHA_USE_ESCAPE_SEQUENCE
+#endif//GASHA_USE_ESCAPE_SEQUENCE
+
+#if defined(GASHA_USE_WINDOWS_CONSOLE_COLOR) && !defined(GASHA_IS_WIN)
+	#undef GASHA_USE_WINDOWS_CONSOLE_COLOR
+#endif//GASHA_USE_WINDOWS_CONSOLE_COLOR
+
+//--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
 
 #if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_HAS_DEBUG_FEATURE)
