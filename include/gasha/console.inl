@@ -36,11 +36,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<typename... Tx>
 inline int console::printf(const char* fmt, Tx&&... args) const
 {
+#ifdef GASHA_USE_VS_CONSOLE
 	if (m_type == VS)
 	{
 		::OutputDebugStringA(fmt);
 		return 0;
 	}
+#endif//GASHA_USE_VS_CONSOLE
 	if (m_handleTTY == nullptr)
 		return ::printf(fmt, std::forward<Tx>(args)...);
 	else
@@ -49,10 +51,13 @@ inline int console::printf(const char* fmt, Tx&&... args) const
 
 //コンストラクタ：TTY端末向け
 inline console::console(const console::TTY_t&, FILE* handle) :
+#ifdef GASHA_USE_WINDOWS_CONSOLE
+	m_type(TTY),
+	m_handleTTY(handle),
+	m_handleWin(INVALID_HANDLE_VALUE)
+#else//GASHA_USE_WINDOWS_CONSOLE
 	m_type(TTY),
 	m_handleTTY(handle)
-#ifdef GASHA_USE_WINDOWS_CONSOLE
-	, m_handleWin(INVALID_HANDLE_VALUE)
 #endif//GASHA_USE_WINDOWS_CONSOLE
 {}
 
