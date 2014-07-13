@@ -222,7 +222,7 @@ public:
 		//コピーコンストラクタ
 		inline iterator(const iterator& ite);
 		//コンストラクタ
-		inline iterator(const logLevel::level_type value);
+		iterator(const logLevel::level_type value);
 		//デフォルトコンストラクタ
 		inline iterator();
 		//デストラクタ
@@ -277,7 +277,7 @@ public:
 		//コピーコンストラクタ
 		inline reverse_iterator(const reverse_iterator& ite);
 		//コンストラクタ
-		inline reverse_iterator(const logLevel::level_type value);
+		reverse_iterator(const logLevel::level_type value);
 		//デフォルトコンストラクタ
 		inline reverse_iterator();
 		//デストラクタ
@@ -350,8 +350,8 @@ public:
 
 //----------------------------------------
 //既定のログレベル用定数
-#define MAKE_LOG_LEVEL_VALUE(output_level, sub) (logLevel::NORMAL_MIN + output_level * 2 + sub)
-#define MAKE_SPECIAL_LOG_LEVEL_VALUE(value) (logLevel::SPECIAL_MIN + value)
+#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (logLevel::NORMAL_MIN + OUTPUT_LEVEL * 2 + SUB_VALIE)
+#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (logLevel::SPECIAL_MIN + VALUE)
 enum levelEnum : logLevel::level_type
 {
 	asNormal = MAKE_LOG_LEVEL_VALUE(1, 0),//通常メッセージ

@@ -58,9 +58,9 @@ inline logLevel::logLevel(const logLevel& obj) :
 //コンテナ登録済みインスタンス取得用コンストラクタ
 inline logLevel::logLevel(const logLevel::level_type value)
 {
-#ifdef GASHA_SECURE_CONTAINER_INITIALIZE
+#ifdef GASHA_LOG_LEVEL_CONTAINER_SECURE_INITIALIZE
 	logLevelContainer con;//コンテナをインスタンス化することで、確実に初期化を実行する
-#endif//GASHA_SECURE_CONTAINER_INITIALIZE
+#endif//GASHA_LOG_LEVEL_CONTAINER_SECURE_INITIALIZE
 	m_info = logLevelContainer::getInfo(value);//登録済みのログレベル情報を取得
 }
 
@@ -120,16 +120,6 @@ inline logLevelContainer::iterator::iterator(const logLevelContainer::iterator& 
 	m_isEnd(ite.m_isEnd)
 {}
 
-//コンストラクタ
-inline logLevelContainer::iterator::iterator(const logLevel::level_type value) :
-	m_value(value),
-	m_logLevel(logLevelContainer::getInfo(value)),
-	m_isEnd(value == logLevel::END)
-{
-	if (!m_isEnd && !m_logLevel)
-		m_value = logLevel::INVALID;
-}
-
 //デフォルトコンストラクタ
 inline logLevelContainer::iterator::iterator() :
 	m_value(logLevel::END),
@@ -182,16 +172,6 @@ inline logLevelContainer::reverse_iterator::reverse_iterator(const logLevelConta
 	m_logLevel(ite.m_logLevel),
 	m_isEnd(ite.m_isEnd)
 {}
-
-//コンストラクタ
-inline logLevelContainer::reverse_iterator::reverse_iterator(const logLevel::level_type value) :
-	m_value(value),
-	m_logLevel(logLevelContainer::getInfo(value - 1)),
-	m_isEnd(value == logLevel::BEGIN)
-{
-	if (!m_isEnd && !m_logLevel)
-		m_value = logLevel::INVALID;
-}
 
 //デフォルトコンストラクタ
 inline logLevelContainer::reverse_iterator::reverse_iterator() :
