@@ -87,6 +87,9 @@ inline void defaultContextSwitch(){ contextSwitch(); }//ゼロスリープでコ
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/lock_common.inl>
+
 #endif//GASHA_INCLUDED_LOCK_COMMON_H
 
 // End of file

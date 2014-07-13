@@ -70,7 +70,7 @@ public:
 	inline allocatorAdapter(allocator_type&& allocator, const char* name = "(unknown)", const char* mode = "-");
 	inline allocatorAdapter(allocator_type& allocator, const char* name = "(unknown)", const char* mode = "-");
 	//デストラクタ
-	inline ~allocatorAdapter();
+	inline ~allocatorAdapter() override;
 private:
 	//フィールド
 	allocator_type& m_allocator;//アロケータ

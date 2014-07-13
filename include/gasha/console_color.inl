@@ -22,84 +22,55 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //コンソールカラー
 //--------------------------------------------------------------------------------
 
+#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+
 //----------------------------------------
 //コンソールカラークラス
-
-//カラー変更
-inline void consoleColor::changeColor()
-{
-	changeColor(m_fore, m_back, m_bold, m_underline);
-}
-inline void consoleColor::resetColor()
-{
-	changeColor(standard, standard, false, false);
-}
-inline void consoleColor::changeColor(const consoleColor::color_t fore, const consoleColor::color_t back, const bool bold, const bool underline)
-{
-	if (*m_console == console_TTY)
-		changeColorTTY(fore, back, bold, underline);
-	else if (*m_console == console_WIN)
-		changeColorWIN(fore, back, bold, underline);
-	else if (*m_console == console_VS)
-		changeColorWIN(fore, back, bold, underline);
-}
 
 //ムーブオペレータ
 inline consoleColor& consoleColor::operator=(consoleColor&& rhs)
 {
-	m_console = rhs.m_console;
 	m_fore = rhs.m_fore;
 	m_back = rhs.m_back;
-	m_bold = rhs.m_bold;
-	m_underline = rhs.m_underline;
+	m_attr = rhs.m_attr;
 	return *this;
 }
 
 //コピーオペレータ
 inline consoleColor& consoleColor::operator=(const consoleColor& rhs)
 {
-	m_console = rhs.m_console;
 	m_fore = rhs.m_fore;
 	m_back = rhs.m_back;
-	m_bold = rhs.m_bold;
-	m_underline = rhs.m_underline;
+	m_attr = rhs.m_attr;
 	return *this;
 }
+
 //ムーブコンストラクタ
 inline consoleColor::consoleColor(consoleColor&& obj) :
-	m_console(obj.m_console),
 	m_fore(obj.m_fore),
 	m_back(obj.m_back),
-	m_bold(obj.m_bold),
-	m_underline(obj.m_underline)
+	m_attr(obj.m_attr)
 {}
+
 //コピーコンストラクタ
 inline consoleColor::consoleColor(const consoleColor& obj) :
-	m_console(obj.m_console),
 	m_fore(obj.m_fore),
 	m_back(obj.m_back),
-	m_bold(obj.m_bold),
-	m_underline(obj.m_underline)
+	m_attr(obj.m_attr)
 {}
-//デフォルトコンストラクタ
-inline consoleColor::consoleColor() :
-	m_console(nullptr),
-	m_fore(standard),
-	m_back(standard),
-	m_bold(false),
-	m_underline(false)
-{}
+
 //コンストラクタ
-inline consoleColor::consoleColor(const GASHA_ console& _console, const consoleColor::color_t fore, const consoleColor::color_t back, const bool bold, const bool underline) :
-	m_console(&_console),
+inline consoleColor::consoleColor(const consoleColor::color_t fore, const consoleColor::color_t back, const attr_t attr) :
 	m_fore(fore),
 	m_back(back),
-	m_bold(bold),
-	m_underline(underline)
+	m_attr(attr)
 {}
+
 //デストラクタ
 inline consoleColor::~consoleColor()
 {}
+
+#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

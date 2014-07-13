@@ -1,0 +1,76 @@
+﻿#pragma once
+#ifndef GASHA_INCLUDED_I_CONSOLE_H
+#define GASHA_INCLUDED_I_CONSOLE_H
+
+//--------------------------------------------------------------------------------
+// i_console.h
+// コンソールインターフェース【宣言部】
+//
+// Gakimaru's researched and standard library for C++ - GASHA
+//   Copyright (c) 2014 Itagaki Mamoru
+//   Released under the MIT license.
+//     https://github.com/gakimaru/gasha/blob/master/LICENSE
+//--------------------------------------------------------------------------------
+
+#include <gasha/console_color.h>//コンソールカラー
+
+GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//--------------------------------------------------------------------------------
+//コンソールインターフェース
+//--------------------------------------------------------------------------------
+
+#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+
+//----------------------------------------
+//コンソールインターフェースクラス
+class IConsole
+{
+public:
+	//アクセッサ
+	virtual const char* name() const = 0;
+
+public:
+	//メソッド
+
+	//出力開始
+	virtual void beginOutput() = 0;
+
+	//出力終了
+	//※フラッシュ可能な状態
+	virtual void endOutput() = 0;
+
+	//出力
+	virtual void output(const char* str) = 0;
+
+	//書式付き出力
+	//※バッファも受け渡す必要あり
+	template<typename... Tx>
+	inline int printf(char* message, const char* fmt, Tx&&... args);
+
+	//改行出力
+	//※改行前にカラーリセットも行う
+	inline void outputCr();
+
+	//カラー変更
+	virtual void changeColor(const GASHA_ consoleColor& color) = 0;
+	
+	//カラーリセット
+	virtual void resetColor() = 0;
+
+public:
+	//デストラクタ
+	virtual ~IConsole()
+	{}
+};
+
+#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/i_console.inl>
+
+#endif//GASHA_INCLUDED_I_CONSOLE_H
+
+// End of file

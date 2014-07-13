@@ -12,13 +12,13 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/console.h>//コンソール
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //コンソールカラー
 //--------------------------------------------------------------------------------
+
+#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //コンソールカラークラス
@@ -29,7 +29,7 @@ public:
 	//カラー値
 	enum color_t : unsigned char
 	{
-		standard = 0x10,//標準カラー
+		STANDARD = 0x10,//標準カラー
 
 		R = 0x01,//Red:赤
 		G = 0x02,//Green:緑
@@ -40,24 +40,39 @@ public:
 		RGBI = 0x0f,//RGB+Iマスク
 
 		//カラー
-		black = 0,//黒
-		blue = B,//青
-		red = R,//赤
-		magenta = R | B,//紫
-		green = G,//緑
-		cyan = G | B,//水
-		yellow = G | R,//黄
-		white = G | R | B,//白
+		BLACK = 0,//黒
+		BLUE = B,//青
+		RED = R,//赤
+		MAGENTA = R | B,//紫
+		GREEN = G,//緑
+		
+		CYAN= G | B,//水
+		YELLOW = G | R,//黄
+		WHITE = G | R | B,//白
 
 		//鮮やかなカラー
-		iBlack = I | black,//黒
-		iBlue = I | blue,//青
-		iRed = I | red,//赤
-		iMagenta = I | magenta,//紫
-		iGreen = I | green,//緑
-		iCyan = I | cyan,//水
-		iYellow = I | yellow ,//黄
-		iWhite = I | white,//白
+		iBLACK = I | BLACK,//黒
+		iBLUE = I | BLUE,//青
+		iRED = I | RED,//赤
+		iMAGENTA = I | MAGENTA,//紫
+		iGREEN = I | GREEN,//緑
+		iCYAN = I | CYAN,//水
+		iYELLOW = I | YELLOW,//黄
+		iWHITE = I | WHITE,//白
+	};
+	//属性
+	enum attr_t : unsigned char
+	{
+		NOATTR = 0x00,//属性なし
+
+		BOLD = 0x01,//強調 ※エスケープシーケンス時のみ対応
+		UNDERLINE = 0x02,//下線 ※エスケープシーケンス時のみ対応
+		REVERSE = 0x04,//反転 ※エスケープシーケンス時のみ対応
+
+		BOLD_UNDERLINE = BOLD | UNDERLINE,//強調＋下線
+		BOLD_REVERSE = BOLD | REVERSE,//強調＋反転
+		UNDERLINE_REVERSE = UNDERLINE | REVERSE,//下線＋反転
+		BOLD_UNDERLINE_REVERSE = BOLD | UNDERLINE | REVERSE,//強調＋下線＋反転
 	};
 public:
 	//アクセッサ
@@ -65,22 +80,7 @@ public:
 	inline color_t& fore(){ return m_fore; }//前景色
 	inline color_t back() const { return m_back; }//背景色
 	inline color_t& back(){ return m_back; }//背景色
-	inline bool bold() const { return m_bold; }//強調
-	inline bool& bold(){ return m_bold; }//強調
-	inline bool underline() const { return m_underline; }//アンダーライン
-	inline bool& underline(){ return m_underline; }//アンダーライン
-
-public:
-	//メソッド
-	
-	//カラー変更
-	inline void changeColor();//カラー変更
-	inline void resetColor();//カラーリセット
-	inline void changeColor(const color_t fore, const color_t back = standard, const bool bold = false, const bool underline = false);//カラー変更
-private:
-	void changeColorTTY(const color_t fore, const color_t back, const bool bold, const bool underline);//TTY用のカラー変更
-	void changeColorWIN(const color_t fore, const color_t back, const bool bold, const bool underline);//Windowsコマンドプロンプト用のカラー変更
-	void changeColorVS(const color_t fore, const color_t back, const bool bold, const bool underline);//Visual Studio 出力ウインドウ用のカラー変更
+	inline attr_t attr() const { return m_attr; }//属性
 
 public:
 	//ムーブオペレータ
@@ -92,20 +92,19 @@ public:
 	inline consoleColor(consoleColor&& obj);
 	//コピーコンストラクタ
 	inline consoleColor(const consoleColor& obj) ;
-	//デフォルトコンストラクタ
-	inline consoleColor();
 	//コンストラクタ
-	inline consoleColor(const GASHA_ console& _console, const color_t fore = standard, const color_t back = standard, const bool bold = false, const bool underline = false);
+	//※デフォルトコンストラクタを兼ねる
+	inline consoleColor(const color_t fore = STANDARD, const color_t back = STANDARD, const attr_t attr = NOATTR);
 	//デストラクタ
 	inline ~consoleColor();
 private:
 	//フィールド
-	const GASHA_ console* m_console;//コンソール
 	color_t m_fore;//前景色
 	color_t m_back;//背景色
-	bool m_bold;//強調
-	bool m_underline;//アンダーライン
+	attr_t m_attr;//属性
 };
+
+#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

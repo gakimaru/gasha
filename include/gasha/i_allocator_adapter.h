@@ -62,9 +62,17 @@ public:
 
 	//デバッグ情報作成
 	virtual std::size_t debugInfo(char* message) = 0;
+
+public:
+	//デストラクタ
+	virtual ~IAllocatorAdapter()
+	{}
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
+
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/i_allocator_adapter.inl>
 
 #endif//GASHA_INCLUDED_I_ALLOCATOR_ADAPTER_H
 
