@@ -54,6 +54,7 @@ CXXFLAGS := \
 	-mavx \
 	-fabi-version=0 \
 	-fopenmp \
+	-U__STRICT_ANSI__ \
 
 #【補足】C++コンパイルオプションの警告オプション
 # 以下、-Wallに含まれるもの
@@ -78,6 +79,7 @@ CXXFLAGS := \
 #  -wavx ... AVX有効化
 #  -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
 #  -fopenmp ... OpenMP有効化
+#  -U__STRICT_ANSI__ ... fdopen() を使用可能にするための対処
 # 以下、必要に応じて使用
 #  -Winline ... インライン指定されていながら、インライン化されなかった関数を警告
 #  -fpermissive ... テンプレートのインスタンス化重複エラーなど、「非適合なコード」のエラーを警告に格下げする

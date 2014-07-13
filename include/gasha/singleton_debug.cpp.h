@@ -105,19 +105,19 @@ template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for singletonDebug -----\n");
-	size += sprintf(message + size, "Accessing Count: %d\n", m_accessCount.load());
-	size += sprintf(message + size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
-	size += sprintf(message + size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
+	size += std::sprintf(message + size, "----- Debug Info for singletonDebug -----\n");
+	size += std::sprintf(message + size, "Accessing Count: %d\n", m_accessCount.load());
+	size += std::sprintf(message + size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
+	size += std::sprintf(message + size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
 	{
 		auto lock = m_list.lockSharedScoped();
-		size += sprintf(message + size, "Access Info: (Count=%d)\n", m_list.size());
+		size += std::sprintf(message + size, "Access Info: (Count=%d)\n", m_list.size());
 		for (auto& info : m_list)
 		{
-			size += sprintf(message + size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
+			size += std::sprintf(message + size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
-	size += sprintf(message + size, "-----------------------------------------\n");
+	size += std::sprintf(message + size, "-----------------------------------------\n");
 	return size;
 }
 

@@ -18,7 +18,7 @@
 #include <gasha/allocator_adapter.h>//アロケータアダプター【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

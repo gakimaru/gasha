@@ -21,7 +21,7 @@
 
 #include <gasha/std_allocator.inl>//標準アロケータ【インライン関数／テンプレート関数定義部】
 
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -41,9 +41,9 @@ std::size_t stdAllocator<LOCK_TYPE, IMPL>::debugInfo(char* message)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stdAllocator -----\n");
-	size += sprintf(message + size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
-	size += sprintf(message + size, "---------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for stdAllocator -----\n");
+	size += std::sprintf(message + size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
+	size += std::sprintf(message + size, "---------------------------------------\n");
 	return size;
 }
 

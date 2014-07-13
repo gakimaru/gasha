@@ -493,12 +493,10 @@
 //--------------------
 //文字列関数
 #ifdef GASHA_IS_VC
-	#define GASHA_STDSTRFUNC_NAMESPACE_ std::
 	#define GASHA_STDSTRNLENFUNC ::strnlen
-	#define GASHA_HAS_STDSTRNLENFUNC
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-	#define GASHA_STDSTRFUNC_NAMESPACE_ ::
+	//#define GASHA_STDSTRNLENFUNC 
 #endif//GASHA_IS_GCC
 
 //----------------------------------------

@@ -309,9 +309,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 			if (m_hasPushed)
 				++m_logLevelHasChangedG;
 			if (call_point)
-				memcpy(m_logLevel, call_point->m_logLevel, sizeof(m_logLevel));//一時ログレベル
+				std::memcpy(m_logLevel, call_point->m_logLevel, sizeof(m_logLevel));//一時ログレベル
 			else
-				memcpy(m_logLevel, m_logLevelG, sizeof(m_logLevel));//一時ログレベル
+				std::memcpy(m_logLevel, m_logLevelG, sizeof(m_logLevel));//一時ログレベル
 		}
 		//一時ログレベルのコピー状態を解除
 		//※本来のログレベルに戻す
@@ -442,9 +442,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 			if (m_hasPushed)
 				++m_noticeLevelHasChangedG;
 			if (call_point)
-				memcpy(m_noticeLevel, call_point->m_noticeLevel, sizeof(m_noticeLevel));//一時ログレベル
+				std::memcpy(m_noticeLevel, call_point->m_noticeLevel, sizeof(m_noticeLevel));//一時ログレベル
 			else
-				memcpy(m_noticeLevel, m_noticeLevelG, sizeof(m_noticeLevel));//一時ログレベル
+				std::memcpy(m_noticeLevel, m_noticeLevelG, sizeof(m_noticeLevel));//一時ログレベル
 		}
 		//一時画面通知レベルのコピー状態を解除
 		//※本来の画面通知レベルに戻す

@@ -22,8 +22,8 @@
 #include <gasha/rb_tree.inl>//赤黒木コンテナ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
-
-#include <assert.h>//assert()
+#include <cstring>//memcpy()
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -94,7 +94,7 @@ namespace rb_tree
 	{
 		m_depth = rhs.m_depth;
 		if (m_depth > 0)
-			memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
+			std::memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
 		return *this;
 	}
 	//コピーオペレータ
@@ -104,7 +104,7 @@ namespace rb_tree
 		//return operator=(std::move(rhs));
 		m_depth = rhs.m_depth;
 		if (m_depth > 0)
-			memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
+			std::memcpy(m_array, rhs.m_array, sizeof(info_t)* m_depth);
 		return *this;
 	}
 	//ムーブコンストラクタ
@@ -113,7 +113,7 @@ namespace rb_tree
 		m_depth(obj.m_depth)
 	{
 		if (m_depth > 0)
-			memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
+			std::memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
 	}
 	//コピーコンストラクタ
 	template<class OPE_TYPE>
@@ -121,7 +121,7 @@ namespace rb_tree
 		m_depth(obj.m_depth)
 	{
 		if (m_depth > 0)
-			memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
+			std::memcpy(m_array, obj.m_array, sizeof(info_t)* m_depth);
 	}
 	
 	//----------------------------------------

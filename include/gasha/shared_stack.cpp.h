@@ -25,7 +25,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -91,18 +91,18 @@ std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stack -----\n");
-	size += sprintf(message + size, "Stack:\n");
+	size += std::sprintf(message + size, "----- Debug Info for stack -----\n");
+	size += std::sprintf(message + size, "Stack:\n");
 	int no = 0;
 	stack_t* node = m_head;
 	while (node)
 	{
-		size += sprintf(message + size, "[%d](%p) ", no++, node);
+		size += std::sprintf(message + size, "[%d](%p) ", no++, node);
 		size += print_node(message + size, node->m_value);
-		size += sprintf(message + size, "\n");
+		size += std::sprintf(message + size, "\n");
 		node = node->m_next;
 	}
-	size += sprintf(message + size, "--------------------------------\n");
+	size += std::sprintf(message + size, "--------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

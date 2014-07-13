@@ -21,7 +21,7 @@
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 #include <utility>//std:forward
-#include <stdio.h>//fprintf()
+#include <cstdio>//fprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

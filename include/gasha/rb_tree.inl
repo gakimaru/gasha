@@ -20,12 +20,10 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
-#include <memory.h>//memcpy()
-
-#include <assert.h>//assert()
+#include <cassert>//assert()
 
 #if defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD) || defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE)
-#include <stdio.h>//printf()
+#include <cstdio>//printf()
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD, GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

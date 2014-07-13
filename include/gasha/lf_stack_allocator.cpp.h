@@ -21,8 +21,8 @@
 
 #include <gasha/lf_stack_allocator.inl>//ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <stdio.h>//sprintf()
-#include <assert.h>//assert()
+#include <cstdio>//sprintf()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -133,9 +133,9 @@ template<class AUTO_CLEAR>
 std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
-	size += sprintf(message + size, "-------------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for lfStackAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
+	size += std::sprintf(message + size, "-------------------------------------------\n");
 	return size;
 }
 

@@ -21,8 +21,8 @@
 
 #include <gasha/stack_allocator.inl>//スタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <stdio.h>//sprintf()
-#include <assert.h>//assert()
+#include <cstdio>//sprintf()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -87,9 +87,9 @@ std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
-	size += sprintf(message + size, "-----------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for stackAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
+	size += std::sprintf(message + size, "-----------------------------------------\n");
 	return size;
 }
 

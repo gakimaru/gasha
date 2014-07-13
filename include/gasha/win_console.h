@@ -18,7 +18,7 @@
 #include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
-#include <stdio.h>//FILE, stdout, stderr
+#include <cstdio>//FILE, stdout, stderr
 
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 #include <Windows.h>//HANDLE, CONSOLE_SCREEN_BUFFER_INFO

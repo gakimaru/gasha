@@ -17,11 +17,11 @@
 
 #include <gasha/std_allocator.h>//標準アロケータ【宣言部】
 
-#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
+#include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign(), _aligned_malloc(), _aligned_free()
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
-#include <malloc.h>//malloc(),free()
+#include <cstdlib>//malloc(), free()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -34,12 +34,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリ確保
 inline void* stdAllocatorImpl_NoAlign::alloc(const std::size_t size, const std::size_t align)
 {
-	return malloc(size);
+	return std::malloc(size);
 }
 //メモリ解放
 inline void stdAllocatorImpl_NoAlign::free(void* p)
 {
-	return ::free(p);
+	return std::free(p);
 }
 
 //----------------------------------------

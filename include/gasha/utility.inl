@@ -20,7 +20,7 @@
 #include <type_traits>//c++11 std::conditional
 
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY
-#include <memory.h>//memcpy()
+#include <cstring>//memcpy()
 #endif//GASHA_SWAP_VALUES_USE_MEMCPY
 
 #include <utility>//C++11 std::move, std::forward
@@ -105,9 +105,9 @@ namespace _private
 		{
 		#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 			char tmp[sizeof(T)];
-			memcpy(tmp, &val2, sizeof(T));
-			memcpy(&val2, &val1, sizeof(T));
-			memcpy(&val1, tmp, sizeof(T));
+			std::memcpy(tmp, &val2, sizeof(T));
+			std::memcpy(&val2, &val1, sizeof(T));
+			std::memcpy(&val1, tmp, sizeof(T));
 		#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
 			T tmp = std::move(val2);
 			val2 = std::move(val1);
@@ -145,9 +145,9 @@ inline void iteratorSwapValues(ITERATOR val1, ITERATOR val2)
 	typedef typename ITERATOR::value_type value_type;
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 	char tmp[sizeof(value_type)];
-	memcpy(tmp, &*val2, sizeof(value_type));
-	memcpy(&*val2, &*val1, sizeof(value_type));
-	memcpy(&*val1, tmp, sizeof(value_type));
+	std::memcpy(tmp, &*val2, sizeof(value_type));
+	std::memcpy(&*val2, &*val1, sizeof(value_type));
+	std::memcpy(&*val1, tmp, sizeof(value_type));
 #else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え（#include <utility> の std::swap() と同じ）
 	value_type tmp = std::move(*val2);
 	*val2 = std::move(*val1);
@@ -199,14 +199,14 @@ namespace _private
 		{
 		#ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 			char tmp[sizeof(T)];
-			memcpy(tmp, val2, sizeof(T));
+			std::memcpy(tmp, val2, sizeof(T));
 			while (val1 != val2)
 			{
 				T* val2_prev = val2 - step;
-				memcpy(val2, val2_prev, sizeof(T));
+				std::memcpy(val2, val2_prev, sizeof(T));
 				val2 = val2_prev;
 			}
-			memcpy(val1, tmp, sizeof(T));
+			std::memcpy(val1, tmp, sizeof(T));
 		#else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
 			T tmp = std::move(*val2);
 			while (val1 != val2)
@@ -250,14 +250,14 @@ inline void iteratorRotateValues(ITERATOR val1, ITERATOR val2, typename ITERATOR
 	typedef typename ITERATOR::value_type value_type;
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY//コンストラクタ／オペレータの呼び出しを避けて単純なメモリコピー
 	char tmp[sizeof(value_type)];
-	memcpy(tmp, &*val2, sizeof(value_type));
+	std::memcpy(tmp, &*val2, sizeof(value_type));
 	while (val1 != val2)
 	{
 		ITERATOR val2_prev = val2 - step;
-		memcpy(&*val2, &*val2_prev, sizeof(value_type));
+		std::memcpy(&*val2, &*val2_prev, sizeof(value_type));
 		val2 = val2_prev;
 	}
-	memcpy(&*val1, tmp, sizeof(value_type));
+	std::memcpy(&*val1, tmp, sizeof(value_type));
 #else//GASHA_SWAP_VALUES_USE_MEMCPY//ムーブコンストラクタとムーブオペレータを使用して入れ替え
 	value_type tmp = std::move(*val2);
 	while (val1 != val2)

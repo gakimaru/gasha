@@ -22,7 +22,7 @@
 
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
 #include <utility>//C++11 std::move
-#include <memory.h>//memset()
+#include <cstring>//memset()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -192,7 +192,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 				//次の基数別にキーを集める
 				--key_len;
 				bucket_tbl_t child_tbl;
-				memset(child_tbl, 0, sizeof(child_tbl));
+				std::memset(child_tbl, 0, sizeof(child_tbl));
 				const key_t* key_p = key_list;
 				while (key_p)
 				{
@@ -215,7 +215,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 			//基数別にキーを集める
 			--key_len;
 			bucket_tbl_t child_tbl;
-			memset(child_tbl, 0, sizeof(child_tbl));
+			std::memset(child_tbl, 0, sizeof(child_tbl));
 			const key_t* key_p = key_tbl;
 			for (std::size_t index = 0; index < size; ++index, ++key_p)
 				child_tbl[calcDigit(key_p->key, key_len)].add(key_p);
@@ -349,7 +349,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 		//初期化
 		inline bucket_t* init()
 		{
-			memset(this, 0, sizeof(bucket_set_t));
+			std::memset(this, 0, sizeof(bucket_set_t));
 			return bucket_tbl;
 		}
 		//指定の桁の分布位置計算

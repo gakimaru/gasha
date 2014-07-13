@@ -23,7 +23,7 @@
 
 #include <gasha/type_traits.h>//型特性ユーティリティ
 
-#include <assert.h>//assert()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -149,7 +149,7 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 	auto print_node = [](char* message, std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
-		return sprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
+		return std::sprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
 	};
 	return this->template debugInfo<std::uint32_t>(message, with_detail, print_node);
 }

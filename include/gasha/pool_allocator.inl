@@ -21,7 +21,7 @@
 #include <gasha/utility.h>//汎用ユーティリティ：min()
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -99,39 +99,39 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, c
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
+	size += std::sprintf(message + size, "----- Debug Info for poolAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
 
 	if (with_detail)
 	{
-		size += sprintf(message + size, "Using:\n");
+		size += std::sprintf(message + size, "Using:\n");
 		std::size_t num = 0;
 		for (index_type index = 0; index < m_poolSize; ++index)
 		{
 			if (m_using[index])
 			{
 				++num;
-				size += sprintf(message + size, "[%d] ", index);
+				size += std::sprintf(message + size, "[%d] ", index);
 				T* value = reinterpret_cast<T*>(refBuff(index));
 				size += print_node(message + size, *value);
-				size += sprintf(message + size, "\n");
+				size += std::sprintf(message + size, "\n");
 			}
 		}
-		size += sprintf(message + size, "(num=%d)\n", num);
-		size += sprintf(message + size, "Recycable pool:\n");
+		size += std::sprintf(message + size, "(num=%d)\n", num);
+		size += std::sprintf(message + size, "Recycable pool:\n");
 		num = 0;
 		index_type recycable_index = m_recyclableHead;
 		while (recycable_index != INVALID_INDEX)
 		{
 			++num;
-			size += sprintf(message + size, " [%d]", recycable_index);
+			size += std::sprintf(message + size, " [%d]", recycable_index);
 			recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
 			recycable_index = recycable_pool->m_next_index;
 		}
-		size += sprintf(message + size, "\n");
-		size += sprintf(message + size, "(num=%d)\n", num);
+		size += std::sprintf(message + size, "\n");
+		size += std::sprintf(message + size, "(num=%d)\n", num);
 	}
-	size += sprintf(message + size, "----------------------------------------\n");
+	size += std::sprintf(message + size, "----------------------------------------\n");
 	return size;
 }
 //デバッグ情報作成

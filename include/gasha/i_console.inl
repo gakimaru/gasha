@@ -15,7 +15,7 @@
 #include <gasha/i_console.h>//コンソールカラー【宣言部】
 
 #include <utility>//C++11 std::forward, std::move
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -39,7 +39,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<typename... Tx>
 inline int IConsole::printf(char* message, const char* fmt, Tx&&... args)
 {
-	const int ret = sprintf(message, fmt, std::forward<Tx>(args)...);
+	const int ret = std::sprintf(message, fmt, std::forward<Tx>(args)...);
 	output(message);
 	return ret;
 }

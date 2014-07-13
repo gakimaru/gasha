@@ -19,7 +19,7 @@
 
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
 
-#include <assert.h>//assert()
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

@@ -25,7 +25,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -115,19 +115,19 @@ template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int 
 std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfStack -----\n");
-	size += sprintf(message + size, "Stack:\n");
+	size += std::sprintf(message + size, "----- Debug Info for lfStack -----\n");
+	size += std::sprintf(message + size, "Stack:\n");
 	int no = 0;
 	stack_ptr_t node_tag_ptr = m_head.load();
 	while (node_tag_ptr.isNotNull())
 	{
 		const stack_t* node = node_tag_ptr;
-		size += sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		size += std::sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
 		size += print_node(message + size, node->m_value);
-		size += sprintf(message + size, "\n");
+		size += std::sprintf(message + size, "\n");
 		node_tag_ptr = node->m_next;
 	}
-	size += sprintf(message + size, "----------------------------------\n");
+	size += std::sprintf(message + size, "----------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

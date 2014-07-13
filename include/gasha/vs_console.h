@@ -20,7 +20,7 @@
 #else//GASHA_USE_WINDOWS_CONSOLE
 #include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
-#include <stdio.h>//stdout
+#include <cstdio>//stdout
 #endif//GASHA_USE_VS_CONSOLE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

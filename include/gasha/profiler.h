@@ -91,7 +91,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 					char* buff = new char[len + 1];//delete は destroyTable()でまとめて行う
 					if (buff)
 					{
-						memcpy(buff, str, size);
+						std::memcpy(buff, str, size);
 						m_strTable->emplace(crc, buff);
 						m_str = buff;
 					}
@@ -144,7 +144,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 			//コピー演算子
 			TIME& operator=(TIME& rhs)
 			{
-				memcpy(this, &rhs, sizeof(*this));
+				std::memcpy(this, &rhs, sizeof(*this));
 				return *this;
 			}
 			//ムーブコンストラクタ

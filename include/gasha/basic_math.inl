@@ -18,8 +18,7 @@
 #include <gasha/basic_math.h>//基本算術【宣言部】
 
 #include <cmath>//std::sqrt()
-
-#include <assert.h>//assert()
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

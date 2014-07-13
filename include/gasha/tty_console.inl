@@ -17,7 +17,7 @@
 #include <gasha/tty_console.h>//TTY端末【宣言部】
 
 #include <utility>//std:forward
-#include <stdio.h>//fprintf()
+#include <cstdio>//fprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

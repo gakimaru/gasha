@@ -19,7 +19,7 @@
 //#include <memory>//C++11 std::align
 
 #ifdef GASHA_IS_GCC
-#include <stdlib.h>//posix_memalign()
+#include <stdlib.h>//posix_memalign(), free()
 #endif//GASHA_IS_GCC
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

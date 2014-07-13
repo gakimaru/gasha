@@ -16,8 +16,7 @@
 #include <gasha/basic_math.h>//基本算術
 
 #include <cstddef>//std::size_t
-
-#include <malloc.h>//_aligned_malloc(), _aligned_free(), free()
+#include <malloc.h>//_aligned_malloc(), _aligned_free()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

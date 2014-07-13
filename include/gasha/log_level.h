@@ -16,8 +16,7 @@
 #include <gasha/std_console.h>//標準コンソール
 
 #include <utility>//C++11 std::move
-#include <memory.h>//memcpy()
-#include <assert.h>//assert()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

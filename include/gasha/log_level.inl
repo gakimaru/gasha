@@ -16,6 +16,8 @@
 
 #include <gasha/log_level.h>//ログレベル【宣言部】
 
+#include <cstring>//std::memcpy()
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -30,7 +32,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //コピーオペレータ
 inline logLevel& logLevel::operator = (const logLevel& rhs)
 {
-	memcpy(this, &rhs, sizeof(*this));//強制更新
+	std::memcpy(this, &rhs, sizeof(*this));//強制更新
 	return *this;
 }
 

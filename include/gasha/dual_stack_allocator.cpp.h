@@ -23,8 +23,8 @@
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
-#include <stdio.h>//sprintf()
-#include <assert.h>//assert()
+#include <cstdio>//sprintf()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -44,9 +44,9 @@ std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for dualStackAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
-	size += sprintf(message + size, "---------------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for dualStackAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
+	size += std::sprintf(message + size, "---------------------------------------------\n");
 	return size;
 }
 

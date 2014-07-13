@@ -14,7 +14,7 @@
 
 #include <gasha/i_console.h>//コンソールインターフェース
 
-#include <stdio.h>//FILE, stdout, stderr
+#include <cstdio>//FILE, stdout, stderr
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

@@ -21,8 +21,8 @@
 
 #include <gasha/lf_dual_stack_allocator.inl>//ロックフリー双方向スタックアロケータ【インライン関数／テンプレート関数定義部】
 
-#include <stdio.h>//sprintf()
-#include <assert.h>//assert()
+#include <cstdio>//sprintf()
+#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -41,9 +41,9 @@ template<class AUTO_CLEAR>
 std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfDualStackAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
-	size += sprintf(message + size, "-----------------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for lfDualStackAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
+	size += std::sprintf(message + size, "-----------------------------------------------\n");
 	return size;
 }
 

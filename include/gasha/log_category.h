@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // log_category.h
-// プロファイラ【宣言部】
+// ログカテゴリ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -15,11 +15,11 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//プロファイラ
+//ログカテゴリ
 //--------------------------------------------------------------------------------
 
 	//----------------------------------------
-	//カテゴリクラス
+	//ログカテゴリクラス
 	class category
 	{
 	public:
@@ -139,7 +139,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 		//コピーオペレータ
 		category& operator=(const category& rhs)
 		{
-			memcpy(this, &rhs, sizeof(*this));
+			std::memcpy(this, &rhs, sizeof(*this));
 			return *this;
 		}
 	public:
@@ -347,7 +347,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 		//静的変数を初期化
 		m_isInitialized = true;
 		m_isAlreadyPool.reset();
-		memset(m_pool, 0, sizeof(m_pool));
+		std::memset(m_pool, 0, sizeof(m_pool));
 		m_poolPtr = reinterpret_cast<category*>(m_pool);
 		//要素を初期化
 		for (category::value_t value = 0; value < category::NUM; ++value)

@@ -34,7 +34,8 @@ template<class ITERATOR> inline typename ITERATOR::difference_type iteratorDiffe
 //----------------------------------------
 //for-each
 template<class ITERATOR, class FUNCTOR>            inline void forEach(ITERATOR begin, ITERATOR end, FUNCTOR functor);
-template<class CONTAINER, class FUNCTOR>           inline void forEach(CONTAINER& container, FUNCTOR functor);
+template<class CONTAINER, class FUNCTOR>           inline void forEach(const CONTAINER& container, FUNCTOR functor);
+template<class CONTAINER, class FUNCTOR>           inline void forEach(CONTAINER&& container, FUNCTOR functor);
 template<typename T, std::size_t N, class FUNCTOR> inline void forEach(T(&array)[N], FUNCTOR functor);
 template<typename T, std::size_t N, class FUNCTOR> inline void forEach(const T(&array)[N], FUNCTOR functor);
 template<typename T, class FUNCTOR>                inline void forEach(T* array, const std::size_t size, FUNCTOR functor);
@@ -43,7 +44,8 @@ template<typename T, class FUNCTOR>                inline void forEach(const T* 
 //----------------------------------------
 //reverse for-each
 template<class ITERATOR, class FUNCTOR>            inline void reverseForEach(ITERATOR begin, ITERATOR end, FUNCTOR functor);
-template<class CONTAINER, class FUNCTOR>           inline void reverseForEach(CONTAINER& container, FUNCTOR functor);
+template<class CONTAINER, class FUNCTOR>           inline void reverseForEach(const CONTAINER& container, FUNCTOR functor);
+template<class CONTAINER, class FUNCTOR>           inline void reverseForEach(CONTAINER&& container, FUNCTOR functor);
 template<typename T, std::size_t N, class FUNCTOR> inline void reverseForEach(T(&array)[N], FUNCTOR functor);
 template<typename T, std::size_t N, class FUNCTOR> inline void reverseForEach(const T(&array)[N], FUNCTOR functor);
 template<typename T, class FUNCTOR>                inline void reverseForEach(T* array, const std::size_t size, FUNCTOR functor);

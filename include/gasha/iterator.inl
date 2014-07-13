@@ -78,7 +78,7 @@ inline void forEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
 	}
 }
 template<class CONTAINER, class FUNCTOR>
-inline void forEach(CONTAINER& container, FUNCTOR functor)
+inline void forEach(const CONTAINER& container, FUNCTOR functor)
 {
 	auto begin = container.begin();
 	auto end = container.end();
@@ -131,7 +131,7 @@ inline void reverseForEach(ITERATOR begin, ITERATOR end, FUNCTOR functor)
 	}
 }
 template<class CONTAINER, class FUNCTOR>
-inline void reverseForEach(CONTAINER& container, FUNCTOR functor)
+inline void reverseForEach(const CONTAINER& container, FUNCTOR functor)
 {
 	auto rbegin = container.rbegin();
 	auto rend = container.rend();

@@ -25,7 +25,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::move
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -203,24 +203,24 @@ template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int 
 std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfQueue -----\n");
-	size += sprintf(message + size, "Queue:\n");
+	size += std::sprintf(message + size, "----- Debug Info for lfQueue -----\n");
+	size += std::sprintf(message + size, "Queue:\n");
 	int no = 0;
 	queue_ptr_t node_tag_ptr = m_head;
 	while (node_tag_ptr.isNotNull())
 	{
 		queue_t* node = node_tag_ptr;
-		size += sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		size += std::sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
 		size += print_node(message + size, node->m_value);
-		size += sprintf(message + size, "\n");
+		size += std::sprintf(message + size, "\n");
 		node_tag_ptr = node->m_next.load();
 	}
 	queue_ptr_t tail_tag_ptr = m_tail.load();
 	queue_t* tail = tail_tag_ptr;
-	size += sprintf(message + size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
+	size += std::sprintf(message + size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
 	size += print_node(message + size, tail->m_value);
-	size += sprintf(message + size, "\n");
-	size += sprintf(message + size, "----------------------------------\n");
+	size += std::sprintf(message + size, "\n");
+	size += std::sprintf(message + size, "----------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);

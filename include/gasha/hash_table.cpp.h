@@ -22,6 +22,7 @@
 #include <gasha/hash_table.inl>//ハッシュテーブルコンテナ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
+#include <cstring>//memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -765,7 +766,7 @@ namespace hash_table
 			#if 1
 				*value_new = std::move(*value);//ムーブ演算子で移動
 			#else
-				memcpy(value_new, value, sizeof(value_type));//memcpyで移動
+				std::memcpy(value_new, value, sizeof(value_type));//memcpyで移動
 			#endif
 			}
 		}

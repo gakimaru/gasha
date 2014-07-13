@@ -21,7 +21,7 @@
 #include <gasha/utility.h>//汎用ユーティリティ：min()
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -97,34 +97,34 @@ template<typename T, class FUNC>
 std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
-	size += sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(),poolRemain(),  this->size(), remain(), m_vacantHead.load());
+	size += std::sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
+	size += std::sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead.load());
 
 	if (with_detail)
 	{
-		size += sprintf(message + size, "Using:\n");
+		size += std::sprintf(message + size, "Using:\n");
 		std::size_t num = 0;
 		for (index_type index = 0; index < m_poolSize; ++index)
 		{
 			if (m_using[index].load() != 0)
 			{
 				++num;
-				size += sprintf(message + size, "[%d] ", index);
+				size += std::sprintf(message + size, "[%d] ", index);
 				if (m_using[index].load() != 1)
-					size += sprintf(message + size, "(using=%d)", m_using[index].load());
-				//size += sprintf(message + size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+					size += std::sprintf(message + size, "(using=%d)", m_using[index].load());
+				//size += std::sprintf(message + size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 				T* value = reinterpret_cast<T*>(refBuff(index));
 				size += print_node(message + size, *value);
-				size += sprintf(message + size, "\n");
+				size += std::sprintf(message + size, "\n");
 			}
 			//else
 			//{
 			//	if (m_allocCount[index].load() != m_freeCount[index].load())
-			//		size += sprintf(message + size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+			//		size += std::sprintf(message + size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 			//}
 		}
-		size += sprintf(message + size, "(num=%d)\n", num);
-		size += sprintf(message + size, "Recycable pool:\n");
+		size += std::sprintf(message + size, "(num=%d)\n", num);
+		size += std::sprintf(message + size, "Recycable pool:\n");
 		num = 0;
 		index_type recycable_index_and_tag = m_recyclableHead;
 		while (recycable_index_and_tag != INVALID_INDEX)
@@ -132,14 +132,14 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 			++num;
 			index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
 			index_type tag = recycable_index_and_tag >> 24;
-			size += sprintf(message + size, " [%d(tag=%d)]", recycable_index, tag);
+			size += std::sprintf(message + size, " [%d(tag=%d)]", recycable_index, tag);
 			recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
 			recycable_index_and_tag = recycable_pool->m_next_index.load();
 		}
-		size += sprintf(message + size, "\n");
-		size += sprintf(message + size, "(num=%d)\n", num);
+		size += std::sprintf(message + size, "\n");
+		size += std::sprintf(message + size, "(num=%d)\n", num);
 	}
-	size += sprintf(message + size, "------------------------------------------\n");
+	size += std::sprintf(message + size, "------------------------------------------\n");
 	return size;
 }
 template<std::size_t _MAX_POOL_SIZE>

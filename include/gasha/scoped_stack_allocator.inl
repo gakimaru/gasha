@@ -18,7 +18,7 @@
 #include <gasha/scoped_stack_allocator.h>//スコープスタックアロケータ【宣言部】
 
 #include <utility>//C++11 std::forward
-#include <stdio.h>//sprintf()
+#include <cstdio>//sprintf()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -144,9 +144,9 @@ template<class ALLOCATOR>
 std::size_t scopedStackAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += sprintf(message + size, "----- Debug Info for scopedStackAllocator -----\n");
-	size += sprintf(message + size, "maxSize=%d, size=%d, remain=%d, count=%d (INIT: buff=%p, size=%d, count=%d)\n", maxSize(), this->size(), remain(), count(), m_allocator.buff(), m_initSize, m_initCount);
-	size += sprintf(message + size, "-----------------------------------------------\n");
+	size += std::sprintf(message + size, "----- Debug Info for scopedStackAllocator -----\n");
+	size += std::sprintf(message + size, "maxSize=%d, size=%d, remain=%d, count=%d (INIT: buff=%p, size=%d, count=%d)\n", maxSize(), this->size(), remain(), count(), m_allocator.buff(), m_initSize, m_initCount);
+	size += std::sprintf(message + size, "-----------------------------------------------\n");
 	return size;
 }
 
