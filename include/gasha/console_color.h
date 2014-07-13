@@ -45,7 +45,6 @@ public:
 		RED = R,//赤
 		MAGENTA = R | B,//紫
 		GREEN = G,//緑
-		
 		CYAN= G | B,//水
 		YELLOW = G | R,//黄
 		WHITE = G | R | B,//白
@@ -60,6 +59,7 @@ public:
 		iYELLOW = I | YELLOW,//黄
 		iWHITE = I | WHITE,//白
 	};
+	
 	//属性
 	enum attr_t : unsigned char
 	{
@@ -74,6 +74,7 @@ public:
 		UNDERLINE_REVERSE = UNDERLINE | REVERSE,//下線＋反転
 		BOLD_UNDERLINE_REVERSE = BOLD | UNDERLINE | REVERSE,//強調＋下線＋反転
 	};
+
 public:
 	//アクセッサ
 	inline color_t fore() const { return m_fore; }//前景色
@@ -81,6 +82,11 @@ public:
 	inline color_t back() const { return m_back; }//背景色
 	inline color_t& back(){ return m_back; }//背景色
 	inline attr_t attr() const { return m_attr; }//属性
+
+public:
+	//文字列作成
+	const char* toStr(const color_t color) const;
+	const char* toStr(char* str) const;
 
 public:
 	//ムーブオペレータ

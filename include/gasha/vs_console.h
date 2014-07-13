@@ -1,9 +1,9 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_VS_H
-#define GASHA_INCLUDED_CONSOLE_VS_H
+#ifndef GASHA_INCLUDED_VS_CONSOLE_H
+#define GASHA_INCLUDED_VS_CONSOLE_H
 
 //--------------------------------------------------------------------------------
-// console_vs.h
+// vs_console.h
 // Visual Studio出力ウインドウ【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -16,9 +16,9 @@
 
 #ifndef GASHA_USE_VS_CONSOLE
 #ifdef GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_win.h>//Windowsコマンドプロンプト
+#include <gasha/win_console.h>//Windowsコマンドプロンプト
 #else//GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_tty.h>//TTY端末
+#include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
 #include <stdio.h>//stdout
 #endif//GASHA_USE_VS_CONSOLE
@@ -36,11 +36,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_USE_VS_CONSOLE
 //Visual Studio出力ウインドウクラス有効時
-class consoleVS : public GASHA_ IConsole
+class vsConsole : public GASHA_ IConsole
 {
 public:
 	//アクセッサ
-	const char* name() const override { return "VS"; }
+	const char* name() const override { return m_name; }
 
 public:
 	//メソッド
@@ -56,16 +56,21 @@ public:
 	void output(const char* str) override;
 
 	//カラー変更
-	void changeColor(const GASHA_ consoleColor& color) override;
+	void changeColor(GASHA_ consoleColor&& color) override;
+	inline void changeColor(const GASHA_ consoleColor& color);
 	
 	//カラーリセット
 	void resetColor() override;
 
 public:
 	//コンストラクタ
-	inline consoleVS();
+	inline vsConsole(const char* name = "VS-console");
 	//デストラクタ
-	~consoleVS() override;
+	~vsConsole() override;
+
+private:
+	//フィールド
+	const char* m_name;//名前
 };
 
 #else//GASHA_USE_VS_CONSOLE
@@ -73,29 +78,29 @@ public:
 
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 //Windowsコマンドプロンプトに委譲
-class consoleVS : public consoleWin
+class vsConsole : public winConsole
 {
 public:
 	//コンストラクタ
-	consoleVS():
-		consoleWin(stdout)
+	vsConsole(const char* name = "Win-console"):
+		winConsole(stdout, name)
 	{}
 	//デストラクタ
-	~consoleVS() override
+	~vsConsole() override
 	{}
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
 //TTY端末に委譲
-class consoleVS : public consoleTTY
+class vsConsole : public ttyConsole
 {
 public:
 	//コンストラクタ
-	consoleVS() :
-		consoleTTY(stdout)
+	vsConsole(const char* name = "TTY-console") :
+		ttyConsole(stdout, name)
 	{}
 	//デストラクタ
-	~consoleVS() override
+	~vsConsole() override
 	{}
 };
 
@@ -108,8 +113,8 @@ public:
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/console_vs.inl>
+#include <gasha/vs_console.inl>
 
-#endif//GASHA_INCLUDED_CONSOLE_VS_H
+#endif//GASHA_INCLUDED_VS_CONSOLE_H
 
 // End of file

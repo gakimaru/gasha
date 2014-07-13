@@ -269,9 +269,9 @@
 //--------------------------------------------------------------------------------
 //【コンソールカラー】
 
-#if defined(GASHA_USE_ESCAPE_SEQUENCE) && defined(GASHA_IS_WIN)
-	#undef GASHA_USE_ESCAPE_SEQUENCE
-#endif//GASHA_USE_ESCAPE_SEQUENCE
+//#if defined(GASHA_USE_ESCAPE_SEQUENCE) && defined(GASHA_IS_WIN)
+//	#undef GASHA_USE_ESCAPE_SEQUENCE
+//#endif//GASHA_USE_ESCAPE_SEQUENCE
 
 #if defined(GASHA_USE_WINDOWS_CONSOLE_COLOR) && !defined(GASHA_IS_WIN)
 	#undef GASHA_USE_WINDOWS_CONSOLE_COLOR

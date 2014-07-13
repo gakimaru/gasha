@@ -1,9 +1,9 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_STD_INL
-#define GASHA_INCLUDED_CONSOLE_STD_INL
+#ifndef GASHA_INCLUDED_STD_CONSOLE_INL
+#define GASHA_INCLUDED_STD_CONSOLE_INL
 
 //--------------------------------------------------------------------------------
-// console_stds.inl
+// std_console.inl
 // 標準コンソール【インライン関数／テンプレート関数定義部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/console_std.h>//標準コンソール【宣言部】
+#include <gasha/std_console.h>//標準コンソール【宣言部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -28,6 +28,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_CONSOLE_STD_H
+#endif//GASHA_INCLUDED_STD_CONSOLE_H
 
 // End of file

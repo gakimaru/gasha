@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_TTY_INL
-#define GASHA_INCLUDED_CONSOLE_TTY_INL
+#ifndef GASHA_INCLUDED_VS_CONSOLE_INL
+#define GASHA_INCLUDED_VS_CONSOLE_INL
 
 //--------------------------------------------------------------------------------
-// console_tty.inl
-// TTY端末【インライン関数／テンプレート関数定義部】
+// vs_console.inl
+// Visual Studio出力ウインドウ【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -14,38 +14,47 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/console_tty.h>//TTY端末【宣言部】
+#include <gasha/vs_console.h>//Visual Studio出力ウインドウ【宣言部】
 
-#include <utility>//std:forward
-#include <stdio.h>//fprintf()
+#ifndef GASHA_USE_VS_CONSOLE
+#ifdef GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/win_console.inl>//Windowsコマンドプロンプト
+#else//GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/tty_console.inl>//TTY端末
+#endif//GASHA_USE_WINDOWS_CONSOLE
+#endif//GASHA_USE_VS_CONSOLE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//TTY端末
+//Visual Studio出力ウインドウ
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
-//TTY端末クラス
+//Visual Studio出力ウインドウクラス
 
-//書式付き出力
-template<typename... Tx>
-inline int consoleTTY::printf(const char* fmt, Tx&&... args) const
+#ifdef GASHA_USE_VS_CONSOLE
+//Visual Studio出力ウインドウクラス有効時
+
+//カラー変更
+inline void vsConsole::changeColor(const GASHA_ consoleColor& color)
 {
-	return ::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
+	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 
 //コンストラクタ
-inline consoleTTY::consoleTTY(FILE* handle) :
-	m_handle(handle)
+inline vsConsole::vsConsole(const char* name) :
+	m_name(name)
 {}
+
+#endif//GASHA_USE_VS_CONSOLE
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_CONSOLE_TTY_INL
+#endif//GASHA_INCLUDED_VS_CONSOLE_INL
 
 // End of file

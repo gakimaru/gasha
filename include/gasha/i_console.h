@@ -53,8 +53,9 @@ public:
 	inline void outputCr();
 
 	//カラー変更
-	virtual void changeColor(const GASHA_ consoleColor& color) = 0;
-	
+	virtual void changeColor(GASHA_ consoleColor&& color) = 0;
+	inline void changeColor(const GASHA_ consoleColor& color);
+
 	//カラーリセット
 	virtual void resetColor() = 0;
 

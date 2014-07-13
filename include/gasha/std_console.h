@@ -1,9 +1,9 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_STD_H
-#define GASHA_INCLUDED_CONSOLE_STD_H
+#ifndef GASHA_INCLUDED_STD_CONSOLE_H
+#define GASHA_INCLUDED_STD_CONSOLE_H
 
 //--------------------------------------------------------------------------------
-// console_stds.h
+// std_console.h
 // 標準コンソール【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -15,9 +15,9 @@
 #include <gasha/i_console.h>//コンソールインターフェース
 
 #ifdef GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_win.h>//Windowsコマンドプロンプト
+#include <gasha/win_console.h>//Windowsコマンドプロンプト
 #else//GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_tty.h>//TTY端末
+#include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 #include <stdio.h>//stdout, stderr
@@ -35,76 +35,103 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //標準コンソール
 //※Windowsコマンドプロンプトに委譲
-class consoleStd : public consoleWin
+class stdConsole : public winConsole
 {
 public:
+	//静的アクセッサ
+	inline static stdConsole& instance(){ return s_instance; }
+
+public:
 	//コンストラクタ
-	consoleStd():
-		consoleWin(stdout)
+	stdConsole():
+		winConsole(stdout)
 	{}
 	//デストラクタ
-	~consoleStd() override
+	~stdConsole() override
 	{}
+
+private:
+	//静的フィールド
+	static stdConsole s_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
 //※Windowsコマンドプロンプトに委譲
-class consoleStdForNotice : public consoleWin
+class stdConsoleForNotice : public winConsole
 {
 public:
+	//静的アクセッサ
+	inline static stdConsoleForNotice& instance(){ return s_instance; }
+
+public:
 	//コンストラクタ
-	consoleStdForNotice():
-		consoleWin(stderr)
+	stdConsoleForNotice():
+		winConsole(stderr)
 	{}
 	//デストラクタ
-	~consoleStdForNotice() override
+	~stdConsoleForNotice() override
 	{}
+
+private:
+	//静的フィールド
+	static stdConsoleForNotice s_instance;
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
 
 //----------------------------------------
 //標準コンソール
-//TTY端末に委譲
-class consoleStd : public consoleTTY
+//※TTY端末に委譲
+class stdConsole : public ttyConsole
 {
 public:
+	//静的アクセッサ
+	inline static stdConsole& instance(){ return s_instance; }
+
+public:
 	//コンストラクタ
-	consoleStd():
-		consoleTTY(stdout)
+	stdConsole():
+		ttyConsole(stdout)
 	{}
 	//デストラクタ
-	~consoleStd() override
+	~stdConsole() override
 	{}
+
+private:
+	//静的フィールド
+	static stdConsole s_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
-//TTY端末に委譲
-class consoleStdForNotice : public consoleTTY
+//※TTY端末に委譲
+class stdConsoleForNotice : public ttyConsole
 {
 public:
+	//静的アクセッサ
+	inline static stdConsoleForNotice& instance(){ return s_instance; }
+
+public:
 	//コンストラクタ
-	consoleStdForNotice():
-		consoleTTY(stderr)
+	stdConsoleForNotice():
+		ttyConsole(stderr)
 	{}
 	//デストラクタ
-	~consoleStdForNotice() override
+	~stdConsoleForNotice() override
 	{}
+
+private:
+	//静的フィールド
+	static stdConsoleForNotice s_instance;
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
-
-//----------------------------------------
-//標準コンソールのインスタンス
-extern consoleStd g_consoleStd;//標準コンソール
-extern consoleStdForNotice g_consoleStdForNotice;//画面通知用標準コンソール
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_CONSOLE_STD_H
+#endif//GASHA_INCLUDED_STD_CONSOLE_H
 
 // End of file

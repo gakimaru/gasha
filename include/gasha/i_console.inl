@@ -14,7 +14,7 @@
 
 #include <gasha/i_console.h>//コンソールカラー【宣言部】
 
-#include <utility>//C++11 std::forward
+#include <utility>//C++11 std::forward, std::move
 #include <stdio.h>//sprintf()
 
 //【VC++】ワーニング設定を退避
@@ -50,6 +50,12 @@ inline void IConsole::outputCr()
 {
 	resetColor();
 	output("\n");
+}
+
+//カラー変更
+inline void IConsole::changeColor(const GASHA_ consoleColor& color)
+{
+	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化

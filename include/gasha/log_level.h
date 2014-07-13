@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/i_console.h>//コンソールインターフェース
-#include <gasha/console_std.h>//標準コンソールー
+#include <gasha/std_console.h>//標準コンソール
 
 #include <utility>//C++11 std::move
 #include <memory.h>//memcpy()
@@ -108,7 +108,7 @@ public:
 			while (m_value != container::endValue())
 			{
 				++m_value;
-				m_ref = container::staticAt(m_value);
+				m_ref = container::_at(m_value);
 				if (m_ref)
 					return;
 			}
@@ -130,11 +130,11 @@ public:
 			while (m_value != container::beginValue())
 			{
 				--m_value;
-				m_ref = container::staticAt(m_value);
+				m_ref = container::_at(m_value);
 				if (m_ref)
 					return;
 			}
-			m_ref = container::staticAt(m_value);
+			m_ref = container::_at(m_value);
 			if (!m_ref)
 				m_value = container::invalidValue();
 			return;
@@ -159,7 +159,7 @@ public:
 		//コンストラクタ
 		iterator(const level_type value) :
 			m_value(value),
-			m_ref(container::staticAt(value)),
+			m_ref(container::_at(value)),
 			m_isEnd(value == container::endValue())
 		{
 			if (!m_isEnd && !m_ref)
@@ -215,7 +215,7 @@ public:
 			while (m_value != container::beginValue())
 			{
 				--m_value;
-				m_ref = container::staticAt(m_value - 1);
+				m_ref = container::_at(m_value - 1);
 				if (m_ref)
 					return;
 			}
@@ -237,11 +237,11 @@ public:
 			while (m_value != container::endValue())
 			{
 				++m_value;
-				m_ref = container::staticAt(m_value - 1);
+				m_ref = container::_at(m_value - 1);
 				if (m_ref)
 					return;
 			}
-			m_ref = container::staticAt(m_value - 1);
+			m_ref = container::_at(m_value - 1);
 			if (!m_ref)
 				m_value = container::invalidValue();
 			return;
@@ -272,7 +272,7 @@ public:
 		//コンストラクタ
 		reverse_iterator(const level_type value) :
 			m_value(value),
-			m_ref(container::staticAt(value - 1)),
+			m_ref(container::_at(value - 1)),
 			m_isEnd(value == container::endValue())
 		{
 			if (!m_isEnd && !m_ref)
@@ -307,16 +307,16 @@ public:
 		typedef logLevel::const_reverse_iterator const_reverse_iterator;
 	public:
 		//アクセッサ
-		const logLevel* at(const level_type value) const { return staticAt(value); }
-		logLevel* at(const level_type value){ return staticAt(value); }
-		const logLevel* operator[](const level_type value) const { return staticAt(value); }
-		logLevel* operator[](const level_type value){ return staticAt(value); }
+		const logLevel* at(const level_type value) const { return _at(value); }
+		logLevel* at(const level_type value){ return _at(value); }
+		const logLevel* operator[](const level_type value) const { return _at(value); }
+		logLevel* operator[](const level_type value){ return _at(value); }
 	private:
 		//メソッド
 		static const level_type beginValue(){ return BEGIN; }//開始値取得
 		static const level_type endValue(){ return END; }//終端値取得
 		static const level_type invalidValue(){ return INVALID; }//無効な値取得
-		static logLevel* staticAt(const level_type value){ if (value < MIN || value > MAX || !m_isAlreadyPool[value]) return nullptr; return &m_poolPtr[value]; }//要素を取得
+		static logLevel* _at(const level_type value){ if (value < MIN || value > MAX || !m_isAlreadyPool[value]) return nullptr; return &m_poolPtr[value]; }//要素を取得
 		static bool update(const level_type value, const logLevel& obj)//要素を更新
 		{
 			if (value >= MIN && value <= MAX && !container::m_isAlreadyPool[value])
@@ -342,6 +342,24 @@ public:
 		reverse_iterator rend(){ return reverse_iterator(beginValue()); }//終端イテレータを取得
 		const_reverse_iterator crbegin() const { return reverse_iterator(endValue()); }//開始constイテレータを取得
 		const_reverse_iterator crend() const { return reverse_iterator(beginValue()); }//終端constイテレータを取得
+		//全てのログレベルのコンソールを変更
+		static void setAllConsole(IConsole* console)
+		{
+			for (level_type value = 0; value < NUM; ++value)
+			{
+				logLevel& level = m_poolPtr[value];
+				level.console() = console;
+			}
+		}
+		//全てのログレベルの画面通知用コンソールを変更
+		static void setAllConsoleForNotice(IConsole* console)
+		{
+			for (level_type value = 0; value < NUM; ++value)
+			{
+				logLevel& level = m_poolPtr[value];
+				level.consoleForNotice() = console;
+			}
+		}
 		//初期化メソッド（一回限り）
 		static void initializeOnce();
 	private:
@@ -382,17 +400,20 @@ public:
 	bool forNotice() const { return m_forNotice; }//画面通知レベルとして使用可能か？
 	bool forMask() const { return m_forMask; }//出力レベルマスクとして使用可能か？
 	const GASHA_ IConsole* console() const { return m_console; }//コンソール
-	GASHA_ IConsole* console(){ return m_console; }//コンソール
+	GASHA_ IConsole*& console(){ return m_console; }//コンソール
 	const GASHA_ IConsole* consoleForNotice() const { return m_consoleForNotice; }//画面通知用コンソール
-	GASHA_ IConsole* consoleForNotice(){ return m_consoleForNotice; }//画面通知用コンソール
+	GASHA_ IConsole*& consoleForNotice(){ return m_consoleForNotice; }//画面通知用コンソール
 	const consoleColor& color() const { return m_color; }//カラー取得
 	consoleColor& color(){ return m_color; }//カラー取得
 	const consoleColor& colorForNotice() const { return m_colorForNotice; }//カラー取得（画面通知用）
 	consoleColor& colorForNotice(){ return m_colorForNotice; }//カラー取得（画面通知用）
 public:
+	//静的アクセッサ（ショートカット用）
+	static logLevel* at(const level_type value){ return container::_at(value); }//指定のログレベルを取得
+	static void setAllConsole(IConsole* console){ container::setAllConsole(console); }//全てのログレベルのコンソールを変更
+	static void setAllConsoleForNotice(IConsole* console){ container::setAllConsoleForNotice(console); }//全てのログレベルの画面通知用コンソールを変更
+public:
 	//メソッド
-	//コンテナ要素を取得（ショートカット用）
-	static const logLevel* at(const level_type value){ return container::staticAt(value); }
 	//前のレベルを取得
 	logLevel* prev() const
 	{
@@ -458,7 +479,7 @@ public:
 		m_consoleForNotice(nullptr)
 	{
 		assert(value >= BEGIN && value <= END);
-		logLevel* obj = container::staticAt(m_value);//コンテナから取得して自身にコピー
+		logLevel* obj = container::_at(m_value);//コンテナから取得して自身にコピー
 		if (obj)
 			*this = *obj;
 	}
@@ -507,7 +528,7 @@ public:
 public:
 	//コンストラクタ
 	normalLogLevel(const char* name, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice) :
-		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ g_consoleStd, &GASHA_ g_consoleStdForNotice, std::move(color), std::move(color_for_notice))
+		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(color), std::move(color_for_notice))
 	{}
 };
 //----------------------------------------
@@ -525,7 +546,7 @@ public:
 public:
 	//コンストラクタ
 	specialLogLevel(const char* name) :
-		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ g_consoleStd, &GASHA_ g_consoleStdForNotice, std::move(consoleColor()), std::move(consoleColor()))
+		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(consoleColor()), std::move(consoleColor()))
 	{}
 };
 //----------------------------------------
@@ -581,7 +602,7 @@ void logLevel::container::initializeOnce()
 	//要素を初期化
 	for (logLevel::level_type value = 0; value < logLevel::NUM; ++value)
 	{
-		logLevel(value, "(undefined)", false, false, false, nullptr, nullptr, GASHA_ consoleColor(), GASHA_ consoleColor());
+		logLevel(value, "(undefined)", false, false, false, & GASHA_ stdConsole::instance(), & GASHA_ stdConsole::instance(), GASHA_ consoleColor(), GASHA_ consoleColor());
 		m_isAlreadyPool[value] = false;
 	}
 	//割り当て済みレベルを設定（コンストラクタで要素を登録）

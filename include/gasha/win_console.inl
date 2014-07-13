@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_VS_INL
-#define GASHA_INCLUDED_CONSOLE_VS_INL
+#ifndef GASHA_INCLUDED_WIN_CONSOLE_INL
+#define GASHA_INCLUDED_WIN_CONSOLE_INL
 
 //--------------------------------------------------------------------------------
-// console_vs.inl
-// Visual Studio出力ウインドウ【インライン関数／テンプレート関数定義部】
+// win_console.inl
+// Windowsコマンドプロントプト【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -14,40 +14,48 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/console_vs.h>//Visual Studio出力ウインドウ【宣言部】
+#include <gasha/win_console.h>//Windowsコマンドプロントプト【宣言部】
 
-#ifndef GASHA_USE_VS_CONSOLE
-#ifdef GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_win.inl>//Windowsコマンドプロンプト
-#else//GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_tty.inl>//TTY端末
+#ifndef GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/tty_console.inl>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
-#endif//GASHA_USE_VS_CONSOLE
+
+#include <utility>//std:forward
+#include <stdio.h>//fprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//Visual Studio出力ウインドウ
+//Windowsコマンドプロントプト
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
-//Visual Studio出力ウインドウクラス
+//Windowsコマンドプロントプトクラス
 
-#ifdef GASHA_USE_VS_CONSOLE
-//Visual Studio出力ウインドウクラス有効時
+#ifdef GASHA_USE_WINDOWS_CONSOLE
+//Windowsコマンドプロンプトクラス有効時
 
-//コンストラクタ
-inline consoleVS::consoleVS()
-{}
+//書式付き出力
+template<typename... Tx>
+inline int winConsole::printf(const char* fmt, Tx&&... args) const
+{
+	return ::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
+}
 
-#endif//GASHA_USE_VS_CONSOLE
+//カラー変更
+inline void winConsole::changeColor(const GASHA_ consoleColor& color)
+{
+	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
+}
+
+#endif//GASHA_USE_WINDOWS_CONSOLE
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_CONSOLE_VS_INL
+#endif//GASHA_INCLUDED_WIN_CONSOLE_INL
 
 // End of file

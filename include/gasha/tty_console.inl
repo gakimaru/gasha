@@ -1,10 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_CONSOLE_WIN_INL
-#define GASHA_INCLUDED_CONSOLE_WIN_INL
+#ifndef GASHA_INCLUDED_TTY_CONSOLE_INL
+#define GASHA_INCLUDED_TTY_CONSOLE_INL
 
 //--------------------------------------------------------------------------------
-// console_win.inl
-// Windowsコマンドプロントプト【インライン関数／テンプレート関数定義部】
+// tty_console.inl
+// TTY端末【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -14,11 +14,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/console_win.h>//Windowsコマンドプロントプト【宣言部】
-
-#ifndef GASHA_USE_WINDOWS_CONSOLE
-#include <gasha/console_tty.inl>//TTY端末
-#endif//GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/tty_console.h>//TTY端末【宣言部】
 
 #include <utility>//std:forward
 #include <stdio.h>//fprintf()
@@ -26,30 +22,36 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//Windowsコマンドプロントプト
+//TTY端末
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
-//Windowsコマンドプロントプトクラス
-
-#ifdef GASHA_USE_WINDOWS_CONSOLE
-//Windowsコマンドプロンプトクラス有効時
+//TTY端末クラス
 
 //書式付き出力
 template<typename... Tx>
-inline int consoleWin::printf(const char* fmt, Tx&&... args) const
+inline int ttyConsole::printf(const char* fmt, Tx&&... args) const
 {
 	return ::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
 }
 
-#endif//GASHA_USE_WINDOWS_CONSOLE
+//カラー変更
+inline void ttyConsole::changeColor(const GASHA_ consoleColor& color)
+{
+	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
+}
+//コンストラクタ
+inline ttyConsole::ttyConsole(FILE* handle, const char* name) :
+	m_name(name),
+	m_handle(handle)
+{}
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_CONSOLE_WIN_INL
+#endif//GASHA_INCLUDED_TTY_CONSOLE_INL
 
 // End of file
