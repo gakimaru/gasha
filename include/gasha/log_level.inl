@@ -16,7 +16,9 @@
 
 #include <gasha/log_level.h>//ログレベル【宣言部】
 
-#include <cstring>//std::memcpy()
+#include <gasha/std_console.h>//標準コンソール
+
+#include <cstring>//memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -27,221 +29,250 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
-//ログレベルクラス
+//ログレベル
 
-//コピーオペレータ
-inline logLevel& logLevel::operator = (const logLevel& rhs)
+//ムーブオペレータ
+inline logLevel& logLevel::operator=(logLevel&& rhs)
 {
-	std::memcpy(this, &rhs, sizeof(*this));//強制更新
+	m_info = rhs.m_info;
 	return *this;
 }
 
-//前のレベルを取得
-inline logLevel* logLevel::prev() const
+//コピーオペレータ
+inline logLevel& logLevel::operator=(const logLevel& rhs)
 {
-	iterator ite(m_value);
-	--ite;
-	return ite.m_ref;
+	m_info = rhs.m_info;
+	return *this;
 }
 
-//次のレベルを取得
-inline logLevel* logLevel::next() const
-{
-	iterator ite(m_value);
-	++ite;
-	return ite.m_ref;
-}
-
-	//ムーブコンストラクタ
+//ムーブコンストラクタ
 inline logLevel::logLevel(logLevel&& obj) :
-	m_name(obj.m_name),
-	m_value(obj.m_value),
-	m_forLog(obj.m_forLog),
-	m_forNotice(obj.m_forNotice),
-	m_forMask(obj.m_forMask),
-	m_console(obj.m_console),
-	m_consoleForNotice(obj.m_consoleForNotice),
-	m_color(std::move(obj.m_color)),
-	m_colorForNotice(std::move(obj.m_colorForNotice))
+	m_info(obj.m_info)
 {}
 
 //コピーコンストラクタ
 inline logLevel::logLevel(const logLevel& obj) :
-	m_name(obj.m_name),
-	m_value(obj.m_value),
-	m_forLog(obj.m_forLog),
-	m_forNotice(obj.m_forNotice),
-	m_forMask(obj.m_forMask),
-	m_console(obj.m_console),
-	m_consoleForNotice(obj.m_consoleForNotice),
-	m_color(obj.m_color),
-	m_colorForNotice(obj.m_colorForNotice)
+	m_info(obj.m_info)
 {}
 
-//コンストラクタ
-inline logLevel::logLevel(const logLevel::level_type value, const char* name, const bool for_log, const bool for_notice, const bool for_mask, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice) :
-	m_name(name),
-	m_value(value),
-	m_forLog(for_log),
-	m_forNotice(for_notice),
-	m_forMask(for_mask),
-	m_console(console),
-	m_consoleForNotice(console_for_notice),
-	m_color(std::move(color)),
-	m_colorForNotice(std::move(color_for_notice))
-{
-	assert(value >= BEGIN && value <= END);
-	container::update(m_value, *this);//コンテナに登録
-}
-
 //コンテナ登録済みインスタンス取得用コンストラクタ
-inline logLevel::logLevel(const logLevel::level_type value) :
-	m_name(nullptr),
-	m_value(value),
-	m_forLog(false),
-	m_forNotice(false),
-	m_forMask(false),
-	m_console(nullptr),
-	m_consoleForNotice(nullptr)
+inline logLevel::logLevel(const logLevel::level_type value)
 {
-	assert(value >= BEGIN && value <= END);
-	logLevel* obj = container::_at(m_value);//コンテナから取得して自身にコピー
-	if (obj)
-		*this = *obj;
+#ifdef GASHA_SECURE_CONTAINER_INITIALIZE
+	logLevelContainer con;//コンテナをインスタンス化することで、確実に初期化を実行する
+#endif//GASHA_SECURE_CONTAINER_INITIALIZE
+	m_info = logLevelContainer::getInfo(value);//登録済みのログレベル情報を取得
 }
 
 //デフォルトコンストラクタ
 inline logLevel::logLevel() :
-	m_name(nullptr),
-	m_value(0),
-	m_forLog(false),
-	m_forNotice(false),
-	m_forMask(false),
-	m_console(nullptr),
-	m_consoleForNotice(nullptr)
+	m_info(nullptr)
 {}
 
 //デストラクタ
 inline logLevel::~logLevel()
 {}
 
+//（プライベート）コピーオペレータ
+inline logLevel& logLevel::operator=(info*info)
+{
+	m_info = info;
+	return *this;
+}
+
+//（プライベート）コンストラクタ
+inline logLevel::logLevel(info* info) :
+	m_info(info)
+{}
+
 //--------------------
 //イテレータ
 
+//ムーブオペレータ
+inline logLevelContainer::iterator& logLevelContainer::iterator::operator = (logLevelContainer::iterator&& rhs)
+{
+	m_value = rhs.m_value;
+	m_logLevel = rhs.m_logLevel;
+	m_isEnd = rhs.m_isEnd;
+	return *this;
+}
+
+//コピーオペレータ
+inline logLevelContainer::iterator& logLevelContainer::iterator::operator=(const logLevelContainer::iterator& rhs)
+{
+	m_value = rhs.m_value;
+	m_logLevel = rhs.m_logLevel;
+	m_isEnd = rhs.m_isEnd;
+	return *this;
+}
+
 //ムーブコンストラクタ
-inline logLevel::iterator::iterator(logLevel::iterator&& ite) :
+inline logLevelContainer::iterator::iterator(logLevelContainer::iterator&& ite) :
 	m_value(ite.m_value),
-	m_ref(ite.m_ref),
+	m_logLevel(ite.m_logLevel),
 	m_isEnd(ite.m_isEnd)
 {}
 
 //コピーコンストラクタ
-inline logLevel::iterator::iterator(const logLevel::iterator& ite) :
+inline logLevelContainer::iterator::iterator(const logLevelContainer::iterator& ite) :
 	m_value(ite.m_value),
-	m_ref(ite.m_ref),
+	m_logLevel(ite.m_logLevel),
 	m_isEnd(ite.m_isEnd)
 {}
 
 //コンストラクタ
-inline logLevel::iterator::iterator(const logLevel::level_type value) :
+inline logLevelContainer::iterator::iterator(const logLevel::level_type value) :
 	m_value(value),
-	m_ref(container::_at(value)),
-	m_isEnd(value == container::endValue())
+	m_logLevel(logLevelContainer::getInfo(value)),
+	m_isEnd(value == logLevel::END)
 {
-	if (!m_isEnd && !m_ref)
-		m_value = container::beginValue();
+	if (!m_isEnd && !m_logLevel)
+		m_value = logLevel::INVALID;
 }
 
 //デフォルトコンストラクタ
-inline logLevel::iterator::iterator() :
-	m_value(container::endValue()),
-	m_ref(nullptr),
+inline logLevelContainer::iterator::iterator() :
+	m_value(logLevel::END),
+	m_logLevel(nullptr),
 	m_isEnd(true)
 {}
 
 //デストラクタ
-inline logLevel::iterator::~iterator()
+inline logLevelContainer::iterator::~iterator()
 {}
 
 //--------------------
 //リバースイテレータ
 
 //ベースイテレータを取得
-inline logLevel::iterator logLevel::reverse_iterator::base() const
+inline logLevelContainer::iterator logLevelContainer::reverse_iterator::base() const
 {
-	logLevel::iterator ite(m_value);
+	logLevelContainer::iterator ite(m_value);
 	return ite;
 }
 
+//ムーブオペレータ
+inline logLevelContainer::reverse_iterator& logLevelContainer::reverse_iterator::operator=(logLevelContainer::reverse_iterator&& rhs)
+{
+	m_value = rhs.m_value;
+	m_logLevel = rhs.m_logLevel;
+	m_isEnd = rhs.m_isEnd;
+	return *this;
+}
+
+//コピーオペレータ
+inline logLevelContainer::reverse_iterator& logLevelContainer::reverse_iterator::operator=(const logLevelContainer::reverse_iterator& rhs)
+{
+	m_value = rhs.m_value;
+	m_logLevel = rhs.m_logLevel;
+	m_isEnd = rhs.m_isEnd;
+	return *this;
+}
+
 //ムーブコンストラクタ
-inline logLevel::reverse_iterator::reverse_iterator(logLevel::reverse_iterator&& ite) :
+inline logLevelContainer::reverse_iterator::reverse_iterator(logLevelContainer::reverse_iterator&& ite) :
 	m_value(ite.m_value),
-	m_ref(ite.m_ref),
+	m_logLevel(ite.m_logLevel),
 	m_isEnd(ite.m_isEnd)
 {}
 
 //コピーコンストラクタ
-inline logLevel::reverse_iterator::reverse_iterator(const logLevel::reverse_iterator& ite) :
+inline logLevelContainer::reverse_iterator::reverse_iterator(const logLevelContainer::reverse_iterator& ite) :
 	m_value(ite.m_value),
-	m_ref(ite.m_ref),
+	m_logLevel(ite.m_logLevel),
 	m_isEnd(ite.m_isEnd)
 {}
 
 //コンストラクタ
-inline logLevel::reverse_iterator::reverse_iterator(const logLevel::level_type value) :
+inline logLevelContainer::reverse_iterator::reverse_iterator(const logLevel::level_type value) :
 	m_value(value),
-	m_ref(container::_at(value - 1)),
-	m_isEnd(value == container::endValue())
+	m_logLevel(logLevelContainer::getInfo(value - 1)),
+	m_isEnd(value == logLevel::BEGIN)
 {
-	if (!m_isEnd && !m_ref)
-		m_value = container::beginValue();
+	if (!m_isEnd && !m_logLevel)
+		m_value = logLevel::INVALID;
 }
 
 //デフォルトコンストラクタ
-inline logLevel::reverse_iterator::reverse_iterator() :
-	m_value(container::endValue()),
-	m_ref(nullptr),
+inline logLevelContainer::reverse_iterator::reverse_iterator() :
+m_value(logLevel::BEGIN),
+m_logLevel(nullptr),
 	m_isEnd(true)
 {}
 
 //デストラクタ
-inline logLevel::reverse_iterator::~reverse_iterator()
+inline logLevelContainer::reverse_iterator::~reverse_iterator()
 {}
 
 //--------------------
 //コンテナ（イテレータ用）
 
 //要素を取得
-inline logLevel* logLevel::container::_at(const logLevel::level_type value)
+inline logLevel::info* logLevelContainer::getInfo(const logLevel::level_type value)
 {
-	if (value < MIN || value > MAX || !m_isAlreadyPool[value])
+	if (value < logLevel::MIN || value > logLevel::MAX || !m_isAlreadyPool[value])
 		return nullptr;
-	return &m_poolPtr[value];
+	return &m_pool[value];
 }
 
 //コンストラクタ
-inline logLevel::container::container()
+inline logLevelContainer::logLevelContainer()
 {
-	container::initializeOnce();//コンテナ初期化（一回限り）
+	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
 }
 
-//----------------------------------------
-//レベル定義用テンプレートクラス：通常レベル用
-
-//コンストラクタ
-template<unsigned char V, bool _FOR_LOG, bool _FOR_NOTICE>
-inline normalLogLevel<V, _FOR_LOG, _FOR_NOTICE>::normalLogLevel(const char* name, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice) :
-	logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(color), std::move(color_for_notice))
+//デストラクタ
+inline logLevelContainer::~logLevelContainer()
 {}
 
 //----------------------------------------
-//レベル定義用テンプレートクラス：特殊レベル用
+//ログレベル登録テンプレートクラス
 
 //コンストラクタ
-template<unsigned char V>
-inline specialLogLevel<V>::specialLogLevel(const char* name) :
-	logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(consoleColor()), std::move(consoleColor()))
-{}
+template<unsigned char _LEVEL>
+inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice)
+{
+	logLevel::info info =
+	{
+		name,
+		LEVEL,
+		console,
+		console_for_notice,
+		color,
+		color_for_notice
+	};
+	return logLevelContainer::regist(info);
+}
+
+namespace _private
+{
+	//----------------------------------------
+	//特殊ログレベル登録用テンプレートクラス
+	//※テンプレートクラスにより、有効範囲内の値かコンパイル時にチェックする。
+	template<unsigned char _LEVEL>
+	class regSpecialLogLevel
+	{
+	public:
+		//定数
+		static const logLevel::level_type LEVEL = _LEVEL;//値（レベル）
+		static_assert(LEVEL >= logLevel::SPECIAL_MIN && LEVEL <= logLevel::SPECIAL_MAX, "Out of range of special-log-level");//値の範囲チェック
+	public:
+		//関数オペレータ
+		inline bool operator()(const char* name)
+		{
+			logLevel::info info =
+			{
+				name,
+				LEVEL,
+				nullptr,
+				nullptr,
+				consoleColor(stdConsoleColor),
+				consoleColor(stdConsoleColor)
+			};
+			return logLevelContainer::regist(info);
+		}
+	};
+}
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 

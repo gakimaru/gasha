@@ -27,6 +27,14 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //コンソールカラークラス
 
+//初期状態にする
+inline void consoleColor::reset()
+{
+	m_fore = STANDARD;
+	m_back = STANDARD;
+	m_attr = NOATTR;
+}
+
 //ムーブオペレータ
 inline consoleColor& consoleColor::operator=(consoleColor&& rhs)
 {
@@ -64,6 +72,18 @@ inline consoleColor::consoleColor(const consoleColor::color_t fore, const consol
 	m_fore(fore),
 	m_back(back),
 	m_attr(attr)
+{}
+
+//リセット用コンストラクタ
+inline consoleColor::consoleColor(const stdConsoleColor_t&) :
+	m_fore(STANDARD),
+	m_back(STANDARD),
+	m_attr(NOATTR)
+{}
+
+//デフォルトコンストラクタ
+//※何もしない
+inline consoleColor::consoleColor()
 {}
 
 //デストラクタ

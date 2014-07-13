@@ -21,6 +21,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
+//コンソールカラーリセット用構造体
+struct stdConsoleColor_t
+{};
+extern const stdConsoleColor_t stdConsoleColor;
+
+//----------------------------------------
 //コンソールカラークラス
 class consoleColor
 {
@@ -89,6 +95,10 @@ public:
 	const char* toStr(char* str) const;
 
 public:
+	//初期状態にする
+	inline void reset();
+
+public:
 	//ムーブオペレータ
 	inline consoleColor& operator=(consoleColor&& rhs);
 	//コピーオペレータ
@@ -99,8 +109,11 @@ public:
 	//コピーコンストラクタ
 	inline consoleColor(const consoleColor& obj) ;
 	//コンストラクタ
-	//※デフォルトコンストラクタを兼ねる
-	inline consoleColor(const color_t fore = STANDARD, const color_t back = STANDARD, const attr_t attr = NOATTR);
+	inline consoleColor(const color_t fore, const color_t back = STANDARD, const attr_t attr = NOATTR);
+	//リセット用コンストラクタ
+	inline consoleColor(const stdConsoleColor_t&);
+	//デフォルトコンストラクタ
+	inline consoleColor();
 	//デストラクタ
 	inline ~consoleColor();
 private:
