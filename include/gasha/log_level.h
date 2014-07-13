@@ -35,8 +35,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログレベル
 //--------------------------------------------------------------------------------
 
+#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+
 //----------------------------------------
 //ログレベルクラス
+//※ログ出力レベルと出力先（コンソール）、および、カラーを扱う。
+//※出力先、カラーはいつでも変更可能。
 class logLevel
 {
 public:
@@ -64,7 +68,7 @@ public:
 	static const level_type POOL_NUM = NUM;//レベル記録数
 	static const level_type OUTPUT_LEVEL_MIN = CALC_TO_OUTPUT_LEVEL(NORMAL_MIN);//出力レベル最小値
 	static const level_type OUTPUT_LEVEL_MAX = CALC_TO_OUTPUT_LEVEL(NORMAL_MAX);//出力レベル最大値
-	static_assert(SPECIAL_MAX == MAX, "invalid category numbers.");//定数チェック
+	static_assert(SPECIAL_MAX == MAX, "Invalid level-constants.");//定数チェック
 public:
 	//型
 	//--------------------
@@ -94,86 +98,24 @@ public:
 		inline iterator operator--(int) const { iterator ite(m_value); dec(); return ite; }
 	private:
 		//インクリメント
-		void inc() const
-		{
-			if (m_value == container::invalidValue())
-				return;
-			else if (m_value == container::endValue())
-			{
-				m_value = container::invalidValue();
-				m_ref = nullptr;
-				m_isEnd = false;
-				return;
-			}
-			while (m_value != container::endValue())
-			{
-				++m_value;
-				m_ref = container::_at(m_value);
-				if (m_ref)
-					return;
-			}
-			m_ref = nullptr;
-			m_isEnd = true;
-		}
+		void inc() const;
 		//デクリメント
-		void dec() const
-		{
-			m_isEnd = false;
-			if (m_value == container::invalidValue())
-				return;
-			else if (m_value == container::beginValue())
-			{
-				m_value = container::invalidValue();
-				m_ref = nullptr;
-				return;
-			}
-			while (m_value != container::beginValue())
-			{
-				--m_value;
-				m_ref = container::_at(m_value);
-				if (m_ref)
-					return;
-			}
-			m_ref = container::_at(m_value);
-			if (!m_ref)
-				m_value = container::invalidValue();
-			return;
-		}
+		void dec() const;
 	public:
 		//キャストオペレータ
 		operator const logLevel&() const { return *m_ref; }//値（レベル）
 		operator logLevel&(){ return *m_ref; }//値（レベル）
 	public:
 		//ムーブコンストラクタ
-		iterator(iterator&& ite) :
-			m_value(ite.m_value),
-			m_ref(ite.m_ref),
-			m_isEnd(ite.m_isEnd)
-		{}
+		inline iterator(iterator&& ite);
 		//コピーコンストラクタ
-		iterator(const iterator& ite) :
-			m_value(ite.m_value),
-			m_ref(ite.m_ref),
-			m_isEnd(ite.m_isEnd)
-		{}
+		inline iterator(const iterator& ite);
 		//コンストラクタ
-		iterator(const level_type value) :
-			m_value(value),
-			m_ref(container::_at(value)),
-			m_isEnd(value == container::endValue())
-		{
-			if (!m_isEnd && !m_ref)
-				m_value = container::beginValue();
-		}
+		inline iterator(const level_type value);
 		//デフォルトコンストラクタ
-		iterator() :
-			m_value(container::endValue()),
-			m_ref(nullptr),
-			m_isEnd(true)
-		{}
+		inline iterator();
 		//デストラクタ
-		~iterator()
-		{}
+		inline ~iterator();
 	private:
 		//フィールド
 		mutable level_type m_value;//値（レベル）
@@ -201,92 +143,27 @@ public:
 		inline reverse_iterator operator--(int) const { reverse_iterator ite(m_value); dec(); return ite; }
 	private:
 		//インクリメント
-		void inc() const
-		{
-			if (m_value == container::invalidValue())
-				return;
-			else if (m_value == container::beginValue())
-			{
-				m_value = container::invalidValue();
-				m_ref = nullptr;
-				m_isEnd = false;
-				return;
-			}
-			while (m_value != container::beginValue())
-			{
-				--m_value;
-				m_ref = container::_at(m_value - 1);
-				if (m_ref)
-					return;
-			}
-			m_ref = nullptr;
-			m_isEnd = true;
-		}
+		void inc() const;
 		//デクリメント
-		void dec() const
-		{
-			m_isEnd = false;
-			if (m_value == container::invalidValue())
-				return;
-			else if (m_value == container::endValue())
-			{
-				m_value = container::invalidValue();
-				m_ref = nullptr;
-				return;
-			}
-			while (m_value != container::endValue())
-			{
-				++m_value;
-				m_ref = container::_at(m_value - 1);
-				if (m_ref)
-					return;
-			}
-			m_ref = container::_at(m_value - 1);
-			if (!m_ref)
-				m_value = container::invalidValue();
-			return;
-		}
+		void dec() const;
 	public:
 		//キャストオペレータ
 		operator const logLevel&() const { return *m_ref; }//値（レベル）
 		operator logLevel&(){ return *m_ref; }//値（レベル）
 	public:
-		logLevel::iterator base() const
-		{
-			logLevel::iterator ite(m_value);
-			return ite;
-		}
+		//ベースイテレータを取得
+		inline logLevel::iterator base() const;
 	public:
 		//ムーブコンストラクタ
-		reverse_iterator(reverse_iterator&& ite) :
-			m_value(ite.m_value),
-			m_ref(ite.m_ref),
-			m_isEnd(ite.m_isEnd)
-		{}
+		inline reverse_iterator(reverse_iterator&& ite);
 		//コピーコンストラクタ
-		reverse_iterator(const reverse_iterator& ite) :
-			m_value(ite.m_value),
-			m_ref(ite.m_ref),
-			m_isEnd(ite.m_isEnd)
-		{}
+		inline reverse_iterator(const reverse_iterator& ite);
 		//コンストラクタ
-		reverse_iterator(const level_type value) :
-			m_value(value),
-			m_ref(container::_at(value - 1)),
-			m_isEnd(value == container::endValue())
-		{
-			if (!m_isEnd && !m_ref)
-				m_value = container::beginValue();
-		}
+		inline reverse_iterator(const level_type value);
 		//デフォルトコンストラクタ
-		reverse_iterator() :
-			m_value(container::endValue()),
-			m_ref(nullptr),
-			m_isEnd(true)
-		{}
+		inline reverse_iterator();
 		//デストラクタ
-		~reverse_iterator()
-		{}
+		inline ~reverse_iterator();
 	private:
 		//フィールド
 		mutable level_type m_value;//値（レベル）
@@ -294,7 +171,9 @@ public:
 		mutable bool m_isEnd;//終端
 	};
 	//--------------------
-	//コンテナ（イテレータ用）
+	//コンテナ
+	//※静的メンバーに既定のログレベルを登録
+	//※イテレータで全ログレベルを列挙可能
 	class container
 	{
 		friend class logLevel;
@@ -307,61 +186,44 @@ public:
 		typedef logLevel::const_reverse_iterator const_reverse_iterator;
 	public:
 		//アクセッサ
-		const logLevel* at(const level_type value) const { return _at(value); }
-		logLevel* at(const level_type value){ return _at(value); }
-		const logLevel* operator[](const level_type value) const { return _at(value); }
-		logLevel* operator[](const level_type value){ return _at(value); }
+		inline const logLevel* at(const level_type value) const { return _at(value); }
+		inline logLevel* at(const level_type value){ return _at(value); }
+		inline const logLevel* operator[](const level_type value) const { return _at(value); }
+		inline logLevel* operator[](const level_type value){ return _at(value); }
 	private:
-		//メソッド
-		static const level_type beginValue(){ return BEGIN; }//開始値取得
-		static const level_type endValue(){ return END; }//終端値取得
-		static const level_type invalidValue(){ return INVALID; }//無効な値取得
-		static logLevel* _at(const level_type value){ if (value < MIN || value > MAX || !m_isAlreadyPool[value]) return nullptr; return &m_poolPtr[value]; }//要素を取得
-		static bool update(const level_type value, const logLevel& obj)//要素を更新
-		{
-			if (value >= MIN && value <= MAX && !container::m_isAlreadyPool[value])
-			{
-				container::m_poolPtr[value] = obj;
-				container::m_isAlreadyPool[value] = true;
-				return true;
-			}
-			return false;
-		}
+		//静的メソッド
+		inline static const level_type beginValue(){ return BEGIN; }//開始値取得
+		inline static const level_type endValue(){ return END; }//終端値取得
+		inline static const level_type invalidValue(){ return INVALID; }//無効な値取得
+		inline static logLevel* _at(const level_type value);//要素を取得
+		static bool update(const level_type value, const logLevel& obj);//要素を更新
 	public:
+		//通常メソッド
 		//イテレータ取得
-		const iterator begin() const { return iterator(beginValue()); }//開始イテレータを取得
-		const iterator end() const { return iterator(endValue()); }//終端イテレータを取得
-		iterator begin(){ return iterator(beginValue()); }//開始イテレータを取得
-		iterator end(){ return iterator(endValue()); }//終端イテレータを取得
-		const_iterator cbegin() const { return iterator(beginValue()); }//開始constイテレータを取得
-		const_iterator cend() const { return iterator(endValue()); }//終端constイテレータを取得
+		inline const iterator begin() const { return iterator(beginValue()); }//開始イテレータを取得
+		inline const iterator end() const { return iterator(endValue()); }//終端イテレータを取得
+		inline iterator begin(){ return iterator(beginValue()); }//開始イテレータを取得
+		inline iterator end(){ return iterator(endValue()); }//終端イテレータを取得
+		inline const_iterator cbegin() const { return iterator(beginValue()); }//開始constイテレータを取得
+		inline const_iterator cend() const { return iterator(endValue()); }//終端constイテレータを取得
 		//リバースイテレータ取得
-		const reverse_iterator rbegin() const { return reverse_iterator(endValue()); }//開始イテレータを取得
-		const reverse_iterator rend() const { return reverse_iterator(beginValue()); }//終端イテレータを取得
-		reverse_iterator rbegin(){ return reverse_iterator(endValue()); }//開始イテレータを取得
-		reverse_iterator rend(){ return reverse_iterator(beginValue()); }//終端イテレータを取得
-		const_reverse_iterator crbegin() const { return reverse_iterator(endValue()); }//開始constイテレータを取得
-		const_reverse_iterator crend() const { return reverse_iterator(beginValue()); }//終端constイテレータを取得
+		inline const reverse_iterator rbegin() const { return reverse_iterator(endValue()); }//開始イテレータを取得
+		inline const reverse_iterator rend() const { return reverse_iterator(beginValue()); }//終端イテレータを取得
+		inline reverse_iterator rbegin(){ return reverse_iterator(endValue()); }//開始イテレータを取得
+		inline reverse_iterator rend(){ return reverse_iterator(beginValue()); }//終端イテレータを取得
+		inline const_reverse_iterator crbegin() const { return reverse_iterator(endValue()); }//開始constイテレータを取得
+		inline const_reverse_iterator crend() const { return reverse_iterator(beginValue()); }//終端constイテレータを取得
+	public:
+		//静的メソッド
 		//全てのログレベルのコンソールを変更
-		static void setAllConsole(IConsole* console)
-		{
-			for (level_type value = 0; value < NUM; ++value)
-			{
-				logLevel& level = m_poolPtr[value];
-				level.console() = console;
-			}
-		}
+		static void setAllConsole(IConsole* console);
 		//全てのログレベルの画面通知用コンソールを変更
-		static void setAllConsoleForNotice(IConsole* console)
-		{
-			for (level_type value = 0; value < NUM; ++value)
-			{
-				logLevel& level = m_poolPtr[value];
-				level.consoleForNotice() = console;
-			}
-		}
+		static void setAllConsoleForNotice(IConsole* console);
 		//初期化メソッド（一回限り）
 		static void initializeOnce();
+	public:
+		//コンストラクタ
+		inline container();
 	private:
 		//フィールド
 		static bool m_isInitialized;//初期化済み
@@ -372,132 +234,63 @@ public:
 public:
 	//オペレータ
 	//※出力レベルで比較する
-	bool operator ==(const logLevel& rhs) const { return outputLevel() == rhs.outputLevel(); }
-	bool operator !=(const logLevel& rhs) const { return outputLevel() != rhs.outputLevel(); }
-	bool operator >(const logLevel& rhs) const { return outputLevel() > rhs.outputLevel(); }
-	bool operator >=(const logLevel& rhs) const { return outputLevel() >= rhs.outputLevel(); }
-	bool operator <(const logLevel& rhs) const { return outputLevel() < rhs.outputLevel(); }
-	bool operator <=(const logLevel& rhs) const { return outputLevel() <= rhs.outputLevel(); }
+	inline bool operator ==(const logLevel& rhs) const { return outputLevel() == rhs.outputLevel(); }
+	inline bool operator !=(const logLevel& rhs) const { return outputLevel() != rhs.outputLevel(); }
+	inline bool operator >(const logLevel& rhs) const { return outputLevel() > rhs.outputLevel(); }
+	inline bool operator >=(const logLevel& rhs) const { return outputLevel() >= rhs.outputLevel(); }
+	inline bool operator <(const logLevel& rhs) const { return outputLevel() < rhs.outputLevel(); }
+	inline bool operator <=(const logLevel& rhs) const { return outputLevel() <= rhs.outputLevel(); }
 private:
 	//コピーオペレータ
-	logLevel& operator=(const logLevel& rhs)
-	{
-		memcpy(this, &rhs, sizeof(*this));//強制更新
-		return *this;
-	}
+	inline logLevel& operator=(const logLevel& rhs);
 public:
 	//キャストオペレータ
-	operator int() const { return static_cast<int>(m_value); }//値（レベル）
-	operator level_type() const { return m_value; }//値（レベル）
-	operator const char*() const { return m_name; }//名前
+	inline operator int() const { return static_cast<int>(m_value); }//値（レベル）
+	inline operator level_type() const { return m_value; }//値（レベル）
+	inline operator const char*() const { return m_name; }//名前
+private:
+	//静的メソッド（アクセッサ補助要）
+	inline static level_type calcToOutputLevel(const level_type value){ return CALC_TO_OUTPUT_LEVEL(value); }//出力レベル計算
 public:
 	//アクセッサ
-	level_type value() const { return m_value; }//値（レベル）取得
-	const char* name() const { return m_name; }//名前取得
-	static level_type calcToOutputLevel(const level_type value){ return CALC_TO_OUTPUT_LEVEL(value); }//出力レベル計算
-	level_type outputLevel() const { return CALC_TO_OUTPUT_LEVEL(m_value); }//出力レベル取得
-	bool forLog() const { return m_forLog; }//ログレベルとして使用可能か？
-	bool forNotice() const { return m_forNotice; }//画面通知レベルとして使用可能か？
-	bool forMask() const { return m_forMask; }//出力レベルマスクとして使用可能か？
-	const GASHA_ IConsole* console() const { return m_console; }//コンソール
-	GASHA_ IConsole*& console(){ return m_console; }//コンソール
-	const GASHA_ IConsole* consoleForNotice() const { return m_consoleForNotice; }//画面通知用コンソール
-	GASHA_ IConsole*& consoleForNotice(){ return m_consoleForNotice; }//画面通知用コンソール
-	const consoleColor& color() const { return m_color; }//カラー取得
-	consoleColor& color(){ return m_color; }//カラー取得
-	const consoleColor& colorForNotice() const { return m_colorForNotice; }//カラー取得（画面通知用）
-	consoleColor& colorForNotice(){ return m_colorForNotice; }//カラー取得（画面通知用）
+	inline level_type value() const { return m_value; }//値（レベル）取得
+	inline const char* name() const { return m_name; }//名前取得
+	inline level_type outputLevel() const { return CALC_TO_OUTPUT_LEVEL(m_value); }//出力レベル取得
+	inline bool forLog() const { return m_forLog; }//ログレベルとして使用可能か？
+	inline bool forNotice() const { return m_forNotice; }//画面通知レベルとして使用可能か？
+	inline bool forMask() const { return m_forMask; }//出力レベルマスクとして使用可能か？
+	inline const GASHA_ IConsole* console() const { return m_console; }//コンソール
+	inline GASHA_ IConsole*& console(){ return m_console; }//コンソール
+	inline const GASHA_ IConsole* consoleForNotice() const { return m_consoleForNotice; }//画面通知用コンソール
+	inline GASHA_ IConsole*& consoleForNotice(){ return m_consoleForNotice; }//画面通知用コンソール
+	inline const consoleColor& color() const { return m_color; }//カラー取得
+	inline consoleColor& color(){ return m_color; }//カラー取得
+	inline const consoleColor& colorForNotice() const { return m_colorForNotice; }//カラー取得（画面通知用）
+	inline consoleColor& colorForNotice(){ return m_colorForNotice; }//カラー取得（画面通知用）
 public:
 	//静的アクセッサ（ショートカット用）
-	static logLevel* at(const level_type value){ return container::_at(value); }//指定のログレベルを取得
-	static void setAllConsole(IConsole* console){ container::setAllConsole(console); }//全てのログレベルのコンソールを変更
-	static void setAllConsoleForNotice(IConsole* console){ container::setAllConsoleForNotice(console); }//全てのログレベルの画面通知用コンソールを変更
+	inline static logLevel* at(const level_type value){ return container::_at(value); }//指定のログレベルを取得
+	inline static void setAllConsole(IConsole* console){ container::setAllConsole(console); }//全てのログレベルのコンソールを変更
+	inline static void setAllConsoleForNotice(IConsole* console){ container::setAllConsoleForNotice(console); }//全てのログレベルの画面通知用コンソールを変更
 public:
 	//メソッド
 	//前のレベルを取得
-	logLevel* prev() const
-	{
-		iterator ite(m_value);
-		--ite;
-		return ite.m_ref;
-	}
+	inline logLevel* prev() const;
 	//次のレベルを取得
-	logLevel* next() const
-	{
-		iterator ite(m_value);
-		++ite;
-		return ite.m_ref;
-	}
+	inline logLevel* next() const;
 public:
 	//ムーブコンストラクタ
-	logLevel(logLevel&& obj) :
-		m_name(obj.m_name),
-		m_value(obj.m_value),
-		m_forLog(obj.m_forLog),
-		m_forNotice(obj.m_forNotice),
-		m_forMask(obj.m_forMask),
-		m_console(obj.m_console),
-		m_consoleForNotice(obj.m_consoleForNotice),
-		m_color(std::move(obj.m_color)),
-		m_colorForNotice(std::move(obj.m_colorForNotice))
-	{}
+	inline logLevel(logLevel&& obj);
 	//コピーコンストラクタ
-	logLevel(const logLevel& obj) :
-		m_name(obj.m_name),
-		m_value(obj.m_value),
-		m_forLog(obj.m_forLog),
-		m_forNotice(obj.m_forNotice),
-		m_forMask(obj.m_forMask),
-		m_console(obj.m_console),
-		m_consoleForNotice(obj.m_consoleForNotice),
-		m_color(obj.m_color),
-		m_colorForNotice(obj.m_colorForNotice)
-	{}
+	inline logLevel(const logLevel& obj);
 	//コンストラクタ
-	logLevel(const level_type value, const char* name, const bool for_log, const bool for_notice, const bool for_mask, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice) :
-		m_name(name),
-		m_value(value),
-		m_forLog(for_log),
-		m_forNotice(for_notice),
-		m_forMask(for_mask),
-		m_console(console),
-		m_consoleForNotice(console_for_notice),
-		m_color(std::move(color)),
-		m_colorForNotice(std::move(color_for_notice))
-	{
-		assert(value >= BEGIN && value <= END);
-		container::update(m_value, *this);//コンテナに登録
-	}
-	//コンテナから取得用コンストラクタ
-	logLevel(const level_type value) :
-		m_name(nullptr),
-		m_value(value),
-		m_forLog(false),
-		m_forNotice(false),
-		m_forMask(false),
-		m_console(nullptr),
-		m_consoleForNotice(nullptr)
-	{
-		assert(value >= BEGIN && value <= END);
-		logLevel* obj = container::_at(m_value);//コンテナから取得して自身にコピー
-		if (obj)
-			*this = *obj;
-	}
+	inline logLevel(const level_type value, const char* name, const bool for_log, const bool for_notice, const bool for_mask, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice);
+	//コンテナ登録済みインスタンス取得用コンストラクタ
+	inline logLevel(const level_type value);
 	//デフォルトコンストラクタ
-	logLevel() :
-		m_name(nullptr),
-		m_value(0),
-		m_forLog(false),
-		m_forNotice(false),
-		m_forMask(false),
-		m_console(nullptr),
-		m_consoleForNotice(nullptr)
-	{
-		container::initializeOnce();//コンテナ初期化（一回限り）
-	}
+	inline logLevel();
 	//デストラクタ
-	~logLevel()
-	{}
+	inline ~logLevel();
 private:
 	//フィールド
 	const char* m_name;//名前
@@ -513,24 +306,24 @@ private:
 	#undef CALC_TO_OUTPUT_LEVEL
 	#undef CALC_FROM_OUTPUT_LEVEL
 };
+
 //----------------------------------------
 //レベル定義用テンプレートクラス：通常レベル用
-template<unsigned char V, bool for_log, bool for_notice>
+template<unsigned char V, bool _FOR_LOG, bool _FOR_NOTICE>
 class normalLogLevel : public logLevel
 {
 public:
 	//定数
 	static const level_type VALUE = V;//値（レベル）
 	static_assert(VALUE >= NORMAL_MIN && VALUE <= NORMAL_MAX, "out of range of logLevel");//値の範囲チェック
-	static const bool FOR_LOG = for_log;//ログレベルとして使用可能か？
-	static const bool FOR_NOTICE = for_notice;//画面通知レベルとして使用可能か？
+	static const bool FOR_LOG = _FOR_LOG;//ログレベルとして使用可能か？
+	static const bool FOR_NOTICE = _FOR_NOTICE;//画面通知レベルとして使用可能か？
 	static const bool FOR_MASK = true;//出力レベルマスクとして使用可能か？
 public:
 	//コンストラクタ
-	normalLogLevel(const char* name, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice) :
-		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(color), std::move(color_for_notice))
-	{}
+	inline normalLogLevel(const char* name, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice);
 };
+
 //----------------------------------------
 //レベル定義用テンプレートクラス：特殊レベル用
 template<unsigned char V>
@@ -545,12 +338,11 @@ public:
 	static const bool FOR_MASK = true;//出力レベルマスクとして使用可能か？
 public:
 	//コンストラクタ
-	specialLogLevel(const char* name) :
-		logLevel(VALUE, name, FOR_LOG, FOR_NOTICE, FOR_MASK, &GASHA_ stdConsole::instance(), &GASHA_ stdConsoleForNotice::instance(), std::move(consoleColor()), std::move(consoleColor()))
-	{}
+	inline specialLogLevel(const char* name);
 };
+
 //----------------------------------------
-//レベル定数
+//既定のログレベル用定数
 #define MAKE_LOG_LEVEL_VALUE(output_level, sub) (logLevel::NORMAL_MIN + output_level * 2 + sub)
 #define MAKE_SPECIAL_LOG_LEVEL_VALUE(value) (logLevel::SPECIAL_MIN + value)
 enum levelEnum : logLevel::level_type
@@ -566,59 +358,13 @@ enum levelEnum : logLevel::level_type
 	asSilent = MAKE_SPECIAL_LOG_LEVEL_VALUE(0),//絶対メッセージ（ログレベルに関係なく出力したいメッセージ）
 	asSilentAbsolutely = MAKE_SPECIAL_LOG_LEVEL_VALUE(1),//絶対静寂（全てのメッセージを出力しない）
 };
+
 //----------------------------------------
-//レベル定義
+//既定のログレベル定義
 #define DECLARE_LOG_LEVEL(value, for_log, for_notice, fore_color, back_color, fore_color_for_notice, back_color_for_notice) struct level_##value : public normalLogLevel<value, for_log, for_notice>{ level_##value () : normalLogLevel<value, for_log, for_notice>(#value, GASHA_ consoleColor(GASHA_ consoleColor::fore_color, GASHA_ consoleColor::back_color), GASHA_ consoleColor(GASHA_ consoleColor::fore_color_for_notice, GASHA_ consoleColor::back_color_for_notice)){} }
 #define DECLARE_SPECIAL_LOG_LEVEL(value) struct level_##value : public specialLogLevel<value>{ level_##value () : specialLogLevel<value>(#value){} }
-//※以下、ヘッダーで公開する必要なし
-DECLARE_LOG_LEVEL(asNormal, true, true, STANDARD, STANDARD, BLACK, iWHITE);//通常メッセージ
-DECLARE_LOG_LEVEL(asVerbose, true, false, iBLACK, STANDARD, iBLACK, iWHITE);//冗長メッセージ
-DECLARE_LOG_LEVEL(asDetail, true, false, iBLACK, STANDARD, iBLACK, iWHITE);//詳細メッセージ
-DECLARE_LOG_LEVEL(asImportant, true, true, iBLUE, STANDARD, iBLUE, iWHITE);//重要メッセージ
-DECLARE_LOG_LEVEL(asWarning, true, true, iMAGENTA, STANDARD, BLACK, iMAGENTA);//警告メッセージ
-DECLARE_LOG_LEVEL(asCritical, true, true, iRED, STANDARD, iYELLOW, iRED);//重大メッセージ
-DECLARE_LOG_LEVEL(asAbsolute, true, false, STANDARD, STANDARD, STANDARD, STANDARD);//絶対メッセージ（ログレベルに関係なく出力したいメッセージ）
-//以下、ログレベル／画面通知レベル変更用
-DECLARE_SPECIAL_LOG_LEVEL(asSilent);//静寂（絶対メッセ―ジ以外出力しない）
-DECLARE_SPECIAL_LOG_LEVEL(asSilentAbsolutely);//絶対静寂（全てのメッセージを出力しない）
-//----------------------------------------
-//レベルコンテナの静的変数をインスタンス化
-bool logLevel::container::m_isInitialized = false;
-logLevel* logLevel::container::m_poolPtr = nullptr;
-logLevel::byte logLevel::container::m_pool[(POOL_NUM)* sizeof(logLevel)];
-std::bitset<logLevel::POOL_NUM> logLevel::container::m_isAlreadyPool;
-//----------------------------------------
-//レベルコンテナ初期化（一回限り）
-void logLevel::container::initializeOnce()
-{
-	//初期化済みチェック
-	if (m_isInitialized)
-		return;
-	//静的変数を初期化
-	m_isInitialized = true;
-	m_isAlreadyPool.reset();
-	memset(m_pool, 0, sizeof(m_pool));
-	m_poolPtr = reinterpret_cast<logLevel*>(m_pool);
-	//要素を初期化
-	for (logLevel::level_type value = 0; value < logLevel::NUM; ++value)
-	{
-		logLevel(value, "(undefined)", false, false, false, & GASHA_ stdConsole::instance(), & GASHA_ stdConsole::instance(), GASHA_ consoleColor(), GASHA_ consoleColor());
-		m_isAlreadyPool[value] = false;
-	}
-	//割り当て済みレベルを設定（コンストラクタで要素を登録）
-	level_asNormal();//通常メッセージ
-	level_asVerbose();//冗長メッセージ
-	level_asDetail();//詳細メッセージ
-	level_asImportant();//重要メッセージ
-	level_asWarning();//警告メッセージ
-	level_asCritical();//重大メッセージ
-	level_asAbsolute();//絶対メッセージ（ログレベルに関係なく出力したいメッセージ）
-	level_asSilent();//静寂（絶対メッセ―ジ以外出力しない）
-	level_asSilentAbsolutely();//絶対静寂（全てのメッセージを出力しない）
-}
-//----------------------------------------
-//レベル用変数
-static logLevel s_levelForInitialize;//初期化処理実行のためのインスタンス
+
+#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
