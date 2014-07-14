@@ -87,7 +87,7 @@ inline logCategory::logCategory(info* info) :
 //イテレータ
 
 //ムーブオペレータ
-inline logCategoryContainer::iterator& logCategoryContainer::iterator::operator = (logCategoryContainer::iterator&& rhs)
+inline logCategoryContainer::iterator& logCategoryContainer::iterator::operator=(logCategoryContainer::iterator&& rhs)
 {
 	m_value = rhs.m_value;
 	m_logCategory = rhs.m_logCategory;
@@ -193,10 +193,18 @@ inline logCategory::info* logCategoryContainer::getInfo(const logCategory::categ
 	return &m_pool[value];
 }
 
-//コンストラクタ
-inline logCategoryContainer::logCategoryContainer()
+//明示的な初期化用コンストラクタ
+inline logCategoryContainer::logCategoryContainer(const explicitInitialize_t&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
+}
+
+//デフォルトコンストラクタ
+inline logCategoryContainer::logCategoryContainer()
+{
+#ifdef GASHA_LOG_CATEGORY_CONTAINER_SECURE_INITIALIZE
+	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
+#endif//GASHA_LOG_CATEGORY_CONTAINER_SECURE_INITIALIZE
 }
 
 //デストラクタ

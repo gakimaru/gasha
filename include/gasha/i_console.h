@@ -31,6 +31,13 @@ public:
 	virtual const char* name() const = 0;
 
 public:
+	//判定オペレータ
+	inline bool operator==(const IConsole& rhs) const { return isSame(&rhs); }
+	inline bool operator==(const IConsole* rhs) const { return isSame(rhs); }
+	inline bool operator!=(const IConsole& rhs) const { return !isSame(&rhs); }
+	inline bool operator!=(const IConsole* rhs) const { return !isSame(rhs); }
+
+public:
 	//メソッド
 
 	//出力開始
@@ -58,6 +65,9 @@ public:
 
 	//カラーリセット
 	virtual void resetColor() = 0;
+
+	//出力先が同じか判定
+	virtual bool isSame(const IConsole* rhs) const = 0;
 
 public:
 	//デストラクタ

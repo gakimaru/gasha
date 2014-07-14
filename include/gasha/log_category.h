@@ -12,6 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/log_common.h>//ログ共通設定
+
 #include <gasha/i_console.h>//コンソールインターフェース
 #include <gasha/console_color.h>//コンソールカラー
 
@@ -74,13 +76,12 @@ private:
 	{
 		const char* m_name;//名前
 		category_type m_value;//値（カテゴリ）
-		GASHA_ IConsole* m_console;//出力先コンソール
-		GASHA_ IConsole* m_consoleForNotice;//画面通知先コンソール
+		GASHA_ IConsole* m_console[GASHA_ LOG_PURPOSE_NUM];//出力先コンソール
 	};
 public:
 	//定数
-	static const category_type NORMAL_NUM = 64;//通常ログカテゴリ数
-	static const category_type SPECIAL_NUM = 8;//特殊ログカテゴリ数
+	static const category_type NORMAL_NUM = GASHA_LOG_CATEGORY_NUM;//通常ログカテゴリ数
+	static const category_type SPECIAL_NUM = 3;//特殊ログカテゴリ数
 	static const category_type NUM = NORMAL_NUM + SPECIAL_NUM;//ログカテゴリ総数
 	static const category_type MIN = 0;//ログカテゴリ最小値
 	static const category_type MAX = NUM - 1;//ログカテゴリ最大値
@@ -88,7 +89,7 @@ public:
 	static const category_type NORMAL_MAX = NORMAL_MIN + NORMAL_NUM - 1;//通常ログカテゴリ最大値
 	static const category_type SPECIAL_MIN = NORMAL_MAX + 1;//特殊ログカテゴリ最小値
 	static const category_type SPECIAL_MAX = SPECIAL_MIN + SPECIAL_NUM - 1;//特殊ログカテゴリ最大値
-	static const category_type FOR_ALL_MASK = SPECIAL_MIN;//全体マスク用ログカテゴリ
+	static const category_type FOR_EVERY = SPECIAL_MIN;//全体マスク用ログカテゴリ
 	static const category_type BEGIN = MIN;//ログカテゴリ開始値（イテレータ用）
 	static const category_type END = NUM;//ログカテゴリ終端値（イテレータ用）
 	static const category_type INVALID = NUM + 1;//無効なログカテゴリ（イテレータ用）
@@ -99,8 +100,8 @@ public:
 	#undef FROM_OUTPUT_CATEGORY
 public:
 	//比較オペレータ
-	inline bool operator ==(const logCategory& rhs) const { return value() == rhs.value(); }
-	inline bool operator !=(const logCategory& rhs) const { return value() != rhs.value(); }
+	inline bool operator==(const logCategory& rhs) const { return value() == rhs.value(); }
+	inline bool operator!=(const logCategory& rhs) const { return value() != rhs.value(); }
 public:
 	//キャストオペレータ
 	inline operator bool() const { return isExist(); }//正しいログカテゴリか？
@@ -111,13 +112,11 @@ public:
 	//アクセッサ
 	inline bool isExist() const { return m_info != nullptr; }//正しいログカテゴリか？
 	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊カテゴリか？
-	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_ALL_MASK; }//マスク操作可能なカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
+	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
 	inline category_type value() const { return m_info->m_value; }//値（カテゴリ）取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
-	inline const GASHA_ IConsole* console() const { return m_info->m_console; }//コンソール
-	inline GASHA_ IConsole*& console(){ return m_info->m_console; }//コンソール
-	inline const GASHA_ IConsole* consoleForNotice() const { return m_info->m_consoleForNotice; }//画面通知用コンソール
-	inline GASHA_ IConsole*& consoleForNotice(){ return m_info->m_consoleForNotice; }//画面通知用コンソール
+	inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose) const { return m_info->m_console[purpose]; }//コンソール
+	inline GASHA_ IConsole*& console(const GASHA_ logPurpose purpose){ return m_info->m_console[purpose]; }//コンソール
 public:
 	//ムーブオペレータ
 	inline logCategory& operator=(logCategory&& rhs);
@@ -157,6 +156,8 @@ class logCategoryContainer
 	template<unsigned char _CATEGORY>
 	friend class _private::regSpecialLogCategory;
 public:
+	//型
+	struct explicitInitialize_t{};//明示的な初期化用構造体
 	//--------------------
 	//イテレータ宣言
 	class iterator;
@@ -171,6 +172,7 @@ public:
 	public:
 		//オペレータ
 		inline bool isExist() const { return m_logCategory.isExist(); }
+		inline bool isSpecial() const { return m_logCategory.isSpecial(); }
 		inline const logCategory* operator->() const { return &m_logCategory; }
 		inline logCategory* operator->(){ return &m_logCategory; }
 		inline const logCategory& operator*() const { return m_logCategory; }
@@ -191,6 +193,9 @@ public:
 	public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
+		inline operator logCategory::category_type() const { return m_value; }
+		inline operator const logCategory*() const { return &m_logCategory; }//値（カテゴリ）
+		inline operator logCategory*(){ return &m_logCategory; }//値（カテゴリ）
 		inline operator const logCategory&() const { return m_logCategory; }//値（カテゴリ）
 		inline operator logCategory&(){ return m_logCategory; }//値（カテゴリ）
 	public:
@@ -223,6 +228,7 @@ public:
 	public:
 		//オペレータ
 		inline bool isExist() const { return m_logCategory.isExist(); }
+		inline bool isSpecial() const { return m_logCategory.isSpecial(); }
 		inline const logCategory* operator->() const { return &m_logCategory; }
 		inline logCategory* operator->(){ return &m_logCategory; }
 		inline const logCategory& operator*() const { return m_logCategory; }
@@ -243,6 +249,9 @@ public:
 	public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
+		inline operator logCategory::category_type() const { return m_value == logCategory::INVALID ? logCategory::INVALID : m_logCategory.m_info ? m_logCategory.m_info->m_value : logCategory::END; }
+		inline operator const logCategory*() const { return &m_logCategory; }//値（カテゴリ）
+		inline operator logCategory*(){ return &m_logCategory; }//値（カテゴリ）
 		inline operator const logCategory&() const { return m_logCategory; }//値（カテゴリ）
 		inline operator logCategory&(){ return m_logCategory; }//値（カテゴリ）
 	public:
@@ -281,7 +290,6 @@ private:
 	inline static logCategory::info* getInfo(const logCategory::category_type value);//要素を取得
 	static bool regist(const logCategory::info& info);//要素を登録
 public:
-	//通常メソッド
 	//イテレータ取得
 	inline const iterator begin() const { return iterator(logCategory::BEGIN); }//開始イテレータを取得
 	inline const iterator end() const { return iterator(logCategory::END); }//終端イテレータを取得
@@ -296,18 +304,19 @@ public:
 	inline reverse_iterator rend(){ return reverse_iterator(logCategory::BEGIN); }//終端イテレータを取得
 	inline const_reverse_iterator crbegin() const { return reverse_iterator(logCategory::END); }//開始constイテレータを取得
 	inline const_reverse_iterator crend() const { return reverse_iterator(logCategory::BEGIN); }//終端constイテレータを取得
-	//全てのログカテゴリのコンソールを変更
-	void setAllConsole(IConsole* console);
-	//全てのログカテゴリの画面通知用コンソールを変更
-	void setAllConsoleForNotice(IConsole* console);
 private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
 public:
-	//コンストラクタ
+	//明示的な初期化用コンストラクタ
+	inline logCategoryContainer(const explicitInitialize_t&);
+	//デフォルトコンストラクタ
 	inline logCategoryContainer();
 	//デストラクタ
 	inline ~logCategoryContainer();
+public:
+	//静的フィールド
+	static const explicitInitialize_t explicitInitialize;//明示的な初期化指定用
 private:
 	//フィールド
 	static std::once_flag m_initialized;//初期化済み

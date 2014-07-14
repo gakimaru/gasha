@@ -70,6 +70,9 @@ public:
 	//カラーリセット
 	void resetColor() override;
 
+	//出力先が同じか判定
+	bool isSame(const IConsole* rhs) const override;
+
 public:
 	//コンストラクタ
 	winConsole(FILE* handle, const char* name = "Win-console");

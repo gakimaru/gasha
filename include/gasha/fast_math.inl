@@ -1624,7 +1624,7 @@ GASHA_FAST_VECTOR_SET_SSE_SPECIALIZATION_INSTANCING(sseA, float, 4);
 
 #endif//GASHA_FAST_ARITH_USE_SSE4_1
 
-#ifdef GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE
+#ifdef GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE4_1
 //fastArithと無関係に、常にSSE命令を有効にする場合
 
 void mm_store_vec3(float(&dst)[3], const __m128 src)
@@ -1795,7 +1795,7 @@ template<> inline void cross<float, 4>(float(&result)[4], const float(&vec1)[4],
 	_mm_storeu_ps(result, m128_cross(vec1_m128, vec2_m128));
 }
 
-#endif//GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE
+#endif//GASHA_VECTOR_OPERATION_ALWAYS_USE_SSE4_1
 
 #endif//GASHA_USE_SSE4_1
 
@@ -1995,7 +1995,7 @@ GASHA_FAST_MATRIX_SET_SSE_SPECIALIZATION4_1_INSTANCING(sseA, float, 4, 4);
 
 #endif//GASHA_FAST_ARITH_USE_SSE4_1
 
-#ifdef GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE
+#ifdef GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE4_1
 
 //----------
 //行列の加算
@@ -2061,7 +2061,7 @@ void mul<float, 4, 4, 4>(float(&mat_result)[4][4], const float(&mat1)[4][4], con
 }
 #endif//GASHA_USE_SSE4_1
 
-#endif//GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE
+#endif//GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE4_1
 
 #endif//GASHA_USE_SSE
 

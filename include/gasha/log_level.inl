@@ -89,7 +89,7 @@ inline logLevel::logLevel(info* info) :
 //イテレータ
 
 //ムーブオペレータ
-inline logLevelContainer::iterator& logLevelContainer::iterator::operator = (logLevelContainer::iterator&& rhs)
+inline logLevelContainer::iterator& logLevelContainer::iterator::operator=(logLevelContainer::iterator&& rhs)
 {
 	m_value = rhs.m_value;
 	m_logLevel = rhs.m_logLevel;
@@ -175,8 +175,8 @@ inline logLevelContainer::reverse_iterator::reverse_iterator(const logLevelConta
 
 //デフォルトコンストラクタ
 inline logLevelContainer::reverse_iterator::reverse_iterator() :
-m_value(logLevel::BEGIN),
-m_logLevel(nullptr),
+	m_value(logLevel::BEGIN),
+	m_logLevel(nullptr),
 	m_isEnd(true)
 {}
 
@@ -195,10 +195,18 @@ inline logLevel::info* logLevelContainer::getInfo(const logLevel::level_type val
 	return &m_pool[value];
 }
 
-//コンストラクタ
-inline logLevelContainer::logLevelContainer()
+//明示的な初期化用コンストラクタ
+inline logLevelContainer::logLevelContainer(const explicitInitialize_t&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
+}
+
+//デフォルトコンストラクタ
+inline logLevelContainer::logLevelContainer()
+{
+#ifdef GASHA_LOG_LEVEL_CONTAINER_SECURE_INITIALIZE
+	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
+#endif//GASHA_LOG_LEVEL_CONTAINER_SECURE_INITIALIZE
 }
 
 //デストラクタ

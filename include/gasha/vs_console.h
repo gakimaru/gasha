@@ -62,6 +62,9 @@ public:
 	//カラーリセット
 	void resetColor() override;
 
+	//出力先が同じか判定
+	bool isSame(const IConsole* rhs) const override;
+
 public:
 	//コンストラクタ
 	inline vsConsole(const char* name = "VS-console");

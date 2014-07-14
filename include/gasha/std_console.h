@@ -33,97 +33,143 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 
 //----------------------------------------
-//標準コンソール
+//標準出力コンソール
 //※Windowsコマンドプロンプトに委譲
-class stdConsole : public winConsole
+class stdOutConsole : public winConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdConsole& instance(){ return s_instance; }
+	inline static stdOutConsole& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsole():
-		winConsole(stdout)
+	stdOutConsole() :
+		winConsole(stdout, "Win(stdout)")
 	{}
 	//デストラクタ
-	~stdConsole() override
+	~stdOutConsole() override
 	{}
 
 private:
 	//静的フィールド
-	static stdConsole s_instance;
+	static stdOutConsole s_instance;
+};
+
+//----------------------------------------
+//標準エラーコンソール
+//※Windowsコマンドプロンプトに委譲
+class stdErrConsole : public winConsole
+{
+public:
+	//静的アクセッサ
+	inline static stdErrConsole& instance(){ return s_instance; }
+
+public:
+	//コンストラクタ
+	stdErrConsole() :
+		winConsole(stderr, "Win(stderr)")
+	{}
+	//デストラクタ
+	~stdErrConsole() override
+	{}
+
+private:
+	//静的フィールド
+	static stdErrConsole s_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
 //※Windowsコマンドプロンプトに委譲
-class stdConsoleForNotice : public winConsole
+class stdConsoleOfNotice : public winConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdConsoleForNotice& instance(){ return s_instance; }
+	inline static stdConsoleOfNotice& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsoleForNotice():
-		winConsole(stderr)
+	stdConsoleOfNotice():
+		winConsole(stderr, "Win(stderr)")
 	{}
 	//デストラクタ
-	~stdConsoleForNotice() override
+	~stdConsoleOfNotice() override
 	{}
 
 private:
 	//静的フィールド
-	static stdConsoleForNotice s_instance;
+	static stdConsoleOfNotice s_instance;
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
 
 //----------------------------------------
-//標準コンソール
+//標準出力コンソール
 //※TTY端末に委譲
-class stdConsole : public ttyConsole
+class stdOutConsole : public ttyConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdConsole& instance(){ return s_instance; }
+	inline static stdOutConsole& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsole():
-		ttyConsole(stdout)
+	stdOutConsole():
+		ttyConsole(stdout, "TTY(stdout)")
 	{}
 	//デストラクタ
-	~stdConsole() override
+	~stdOutConsole() override
 	{}
 
 private:
 	//静的フィールド
-	static stdConsole s_instance;
+	static stdOutConsole s_instance;
+};
+
+//----------------------------------------
+//標準エラーコンソール
+//※TTY端末に委譲
+class stdErrConsole : public ttyConsole
+{
+public:
+	//静的アクセッサ
+	inline static stdErrConsole& instance(){ return s_instance; }
+
+public:
+	//コンストラクタ
+	stdErrConsole():
+		ttyConsole(stderr, "TTY(stderr)")
+	{}
+	//デストラクタ
+	~stdErrConsole() override
+	{}
+
+private:
+	//静的フィールド
+	static stdErrConsole s_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
 //※TTY端末に委譲
-class stdConsoleForNotice : public ttyConsole
+class stdConsoleOfNotice : public ttyConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdConsoleForNotice& instance(){ return s_instance; }
+	inline static stdConsoleOfNotice& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsoleForNotice():
-		ttyConsole(stderr)
+	stdConsoleOfNotice():
+		ttyConsole(stderr, "TTY(stderr)")
 	{}
 	//デストラクタ
-	~stdConsoleForNotice() override
+	~stdConsoleOfNotice() override
 	{}
 
 private:
 	//静的フィールド
-	static stdConsoleForNotice s_instance;
+	static stdConsoleOfNotice s_instance;
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
