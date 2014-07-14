@@ -45,6 +45,8 @@ class regLogCategory;
 namespace _private
 {
 	template<unsigned char _CATEGORY>
+	class regLogCategory;
+	template<unsigned char _CATEGORY>
 	class regSpecialLogCategory;
 }
 
@@ -59,6 +61,8 @@ class logCategory
 	friend class logCategoryContainer;
 	template<unsigned char _CATEGORY>
 	friend class regLogCategory;
+	template<unsigned char _CATEGORY>
+	friend class _private::regLogCategory;
 	template<unsigned char _CATEGORY>
 	friend class _private::regSpecialLogCategory;
 public:
@@ -148,6 +152,8 @@ class logCategoryContainer
 	friend class logCategory;
 	template<unsigned char _CATEGORY>
 	friend class regLogCategory;
+	template<unsigned char _CATEGORY>
+	friend class _private::regLogCategory;
 	template<unsigned char _CATEGORY>
 	friend class _private::regSpecialLogCategory;
 public:
@@ -321,7 +327,7 @@ public:
 	static_assert(CATEGORY >= logCategory::NORMAL_MIN && CATEGORY <= logCategory::NORMAL_MAX, "Out of range of normal-log-category");//値の範囲チェック
 public:
 	//関数オペレータ
-	inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice);
+	inline bool operator()(const char* name, IConsole* console = nullptr, IConsole* console_for_notice = nullptr);
 };
 
 //----------------------------------------

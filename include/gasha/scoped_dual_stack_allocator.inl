@@ -17,15 +17,9 @@
 
 #include <gasha/scoped_dual_stack_allocator.h>//スコープ双方向スタックアロケータ【宣言部】
 
+#include <gasha/string.h>//文字列処理：spprintf()
+
 #include <utility>//C++11 std::forward
-#include <cstdio>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -242,9 +236,9 @@ template<class ALLOCATOR>
 std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += std::sprintf(message + size, "----- Debug Info for scopedDualStackAllocator -----\n");
-	size += std::sprintf(message + size, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
-	size += std::sprintf(message + size, "---------------------------------------------------\n");
+	GASHA_ spprintf(message, size, "----- Debug Info for scopedDualStackAllocator -----\n");
+	GASHA_ spprintf(message, size, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
+	GASHA_ spprintf(message, size, "---------------------------------------------------\n");
 	return size;
 }
 
@@ -264,9 +258,6 @@ inline scopedDualStackAllocator<ALLOCATOR>::~scopedDualStackAllocator()
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_SCOPED_DUAL_STACK_ALLOCATOR_INL
 

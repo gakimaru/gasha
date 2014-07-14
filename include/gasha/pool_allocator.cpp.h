@@ -22,15 +22,9 @@
 #include <gasha/pool_allocator.inl>//プールアロケータ【インライン関数／テンプレート関数定義部】
 
 #include <gasha/type_traits.h>//型特性ユーティリティ
+#include <gasha/string.h>//文字列処理：spprintf
 
 #include <cassert>//assert()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -109,7 +103,7 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, c
 	auto print_node = [](char* message, std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
-		return std::sprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
+		return GASHA_ spprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
 	};
 	return this->template debugInfo<std::uint32_t>(message, with_detail, print_node);
 }
@@ -194,9 +188,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------------------------------------------------------------------
 // ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
 // 　同じ内容のものをコピーしています。
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_POOL_ALLOCATOR_CPP_H
 

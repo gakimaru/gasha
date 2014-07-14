@@ -19,16 +19,9 @@
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 #include <gasha/utility.h>//汎用ユーティリティ：min()
+#include <gasha/string.h>//文字列処理：spprintf()
 
 #include <utility>//C++11 std::forward
-#include <cstdio>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -97,34 +90,34 @@ template<typename T, class FUNC>
 std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node)
 {
 	std::size_t size = 0;
-	size += std::sprintf(message + size, "----- Debug Info for lfPoolAllocator -----\n");
-	size += std::sprintf(message + size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead.load());
+	GASHA_ spprintf(message, size, "----- Debug Info for lfPoolAllocator -----\n");
+	GASHA_ spprintf(message, size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead.load());
 
 	if (with_detail)
 	{
-		size += std::sprintf(message + size, "Using:\n");
+		GASHA_ spprintf(message, size, "Using:\n");
 		std::size_t num = 0;
 		for (index_type index = 0; index < m_poolSize; ++index)
 		{
 			if (m_using[index].load() != 0)
 			{
 				++num;
-				size += std::sprintf(message + size, "[%d] ", index);
+				GASHA_ spprintf(message, size, "[%d] ", index);
 				if (m_using[index].load() != 1)
-					size += std::sprintf(message + size, "(using=%d)", m_using[index].load());
-				//size += std::sprintf(message + size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+					GASHA_ spprintf(message, size, "(using=%d)", m_using[index].load());
+				//GASHA_ spprintf(message, size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 				T* value = reinterpret_cast<T*>(refBuff(index));
 				size += print_node(message + size, *value);
-				size += std::sprintf(message + size, "\n");
+				GASHA_ spprintf(message, size, "\n");
 			}
 			//else
 			//{
 			//	if (m_allocCount[index].load() != m_freeCount[index].load())
-			//		size += std::sprintf(message + size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+			//		GASHA_ spprintf(message, size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 			//}
 		}
-		size += std::sprintf(message + size, "(num=%d)\n", num);
-		size += std::sprintf(message + size, "Recycable pool:\n");
+		GASHA_ spprintf(message, size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, size, "Recycable pool:\n");
 		num = 0;
 		index_type recycable_index_and_tag = m_recyclableHead;
 		while (recycable_index_and_tag != INVALID_INDEX)
@@ -132,14 +125,14 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 			++num;
 			index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
 			index_type tag = recycable_index_and_tag >> 24;
-			size += std::sprintf(message + size, " [%d(tag=%d)]", recycable_index, tag);
+			GASHA_ spprintf(message, size, " [%d(tag=%d)]", recycable_index, tag);
 			recycable_t* recycable_pool = reinterpret_cast<recycable_t*>(refBuff(recycable_index));
 			recycable_index_and_tag = recycable_pool->m_next_index.load();
 		}
-		size += std::sprintf(message + size, "\n");
-		size += std::sprintf(message + size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, size, "\n");
+		GASHA_ spprintf(message, size, "(num=%d)\n", num);
 	}
-	size += std::sprintf(message + size, "------------------------------------------\n");
+	GASHA_ spprintf(message, size, "------------------------------------------\n");
 	return size;
 }
 template<std::size_t _MAX_POOL_SIZE>
@@ -269,9 +262,6 @@ inline lfPoolAllocator_withType<T, _POOL_SIZE>::~lfPoolAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_LOCKFREE_POOL_ALLOCATOR_INL
 

@@ -3,7 +3,6 @@
 #define GASHA_INCLUDED_FAST_STRING_INL
 
 //--------------------------------------------------------------------------------
-//【テンプレートライブラリ含む】
 // fast_string.inl
 // 高速文字列処理【インライン関数／テンプレート関数定義部】
 //
@@ -17,21 +16,17 @@
 
 #include <gasha/fast_string.h>//高速文字列処理【宣言部】
 
-#include <cstring>//strlen(), strcmp(), strncmp(), strchr(), strrchr(), strstr(), strcpy(), strncpy()
-                  //strnlen() ※VC++のみ
+#include <gasha/string.h>//文字列処理
 
 #ifdef GASHA_USE_SSE4_2
 #include <nmmintrin.h>//SSE4.2
 #endif//GASHA_USE_SSE4_2
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】str*** を使用すると、error C4996 が発生する
-//  error C4996: 'str***': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//------------------------------------------------------------------------------
+//高速版
+//------------------------------------------------------------------------------
 
 //----------------------------------------
 //高速版strlen
@@ -45,13 +40,118 @@ inline std::size_t strlen_fast(const char* str)
 }
 
 //----------------------------------------
-//通常版strlen
-#ifdef GASHA_USE_NAME_SPACE
-inline std::size_t strlen(const char* str)
+//高速版strnlen
+inline std::size_t strnlen_fast(const char* str, const std::size_t max_len)
 {
-	return std::strlen(str);
+#ifdef GASHA_STRNLEN_FAST_USE_SSE4_2
+	return GASHA_ strnlen_sse(str, max_len);
+#else//GASHA_STRNLEN_FAST_USE_SSE4_2
+	return GASHA_ strnlen(str, max_len);
+#endif//GASHA_STRNLEN_FAST_USE_SSE4_2
 }
-#endif//GASHA_USE_NAME_SPACE
+
+//----------------------------------------
+//高速版strcmp
+inline int strcmp_fast(const char* str1, const char* str2)
+{
+#ifdef GASHA_STRCMP_FAST_USE_SSE4_2
+	return GASHA_ strcmp_sse(str1, str2);
+#else//GASHA_STRCMP_FAST_USE_SSE4_2
+	return GASHA_ strcmp(str1, str2);
+#endif//GASHA_STRCMP_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strncmp
+inline int strncmp_fast(const char* str1, const char* str2, const std::size_t max_len)
+{
+#ifdef GASHA_STRNCMP_FAST_USE_SSE4_2
+	return GASHA_ strncmp_sse(str1, str2, max_len);
+#else//GASHA_STRNCMP_FAST_USE_SSE4_2
+	return GASHA_ strncmp(str1, str2, max_len);
+#endif//GASHA_STRNCMP_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strchr
+inline const char* strchr_fast(const char* str, const char c)
+{
+#ifdef GASHA_STRCHR_FAST_USE_SSE4_2
+	return GASHA_ strchr_sse(str, c);
+#else//GASHA_STRCHR_FAST_USE_SSE4_2
+	return GASHA_ strchr(str, c);
+#endif//GASHA_STRCHR_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strrchr
+inline const char* strrchr_fast(const char* str, const char c)
+{
+#ifdef GASHA_STRRCHR_FAST_USE_SSE4_2
+	return GASHA_ strrchr_sse(str, c);
+#else//GASHA_STRRCHR_FAST_USE_SSE4_2
+	return GASHA_ strrchr(str, c);
+#endif//GASHA_STRRCHR_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strstr
+inline const char* strstr_fast(const char* str, const char* pattern)
+{
+#ifdef GASHA_STRSTR_FAST_USE_SSE4_2
+	return GASHA_ strstr_sse(str, pattern);
+#else//GASHA_STRSTR_FAST_USE_SSE4_2
+	return GASHA_ strstr(str, pattern);
+#endif//GASHA_STRSTR_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strstr(BM法)
+inline const char* strstrbm_fast(const char* str, const char* pattern, std::function<bool(const char*, const char*)> found_it)
+{
+#ifdef GASHA_STRSTRBM_FAST_USE_SSE4_2
+	return GASHA_ strstrbm_sse(str, pattern, found_it);
+#else//GASHA_STRSTRBM_FAST_USE_SSE4_2
+	return GASHA_ strstrbm(str, pattern, found_it);
+#endif//GASHA_STRSTRBM_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strstr0
+inline const char* strstr0_fast(const char* str, const char* pattern)
+{
+#ifdef GASHA_STRSTR0_FAST_USE_SSE4_2
+	return GASHA_ strstr0_sse(str, pattern);
+#else//GASHA_STRSTR0_FAST_USE_SSE4_2
+	return GASHA_ strstr0(str, pattern);
+#endif//GASHA_STRSTR0_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strcpy
+inline const char* strcpy_fast(char* dst, const char* src)
+{
+#ifdef GASHA_STRCPY_FAST_USE_SSE4_2
+	return GASHA_ strcpy_sse(dst, src);
+#else//GASHA_STRCPY_FAST_USE_SSE4_2
+	return GASHA_ strcpy(dst, src);
+#endif//GASHA_STRCPY_FAST_USE_SSE4_2
+}
+
+//----------------------------------------
+//高速版strncpy
+inline const char* strncpy_fast(char* dst, const char* src, const std::size_t max_len)
+{
+#ifdef GASHA_STRNCPY_FAST_USE_SSE4_2
+	return GASHA_ strncpy_sse(dst, src, max_len);
+#else//GASHA_STRNCPY_FAST_USE_SSE4_2
+	return GASHA_ strncpy(dst, src, max_len);
+#endif//GASHA_STRNCPY_FAST_USE_SSE4_2
+}
+
+//------------------------------------------------------------------------------
+//SSE版
+//------------------------------------------------------------------------------
 
 //----------------------------------------
 //SSE版strlen
@@ -94,44 +194,6 @@ inline std::size_t strlen_sse(const char* str)
 	return GASHA_ strlen(str);
 }
 #endif//GASHA_USE_SSE4_2
-
-//----------------------------------------
-//高速版strnlen
-inline std::size_t strnlen_fast(const char* str, const std::size_t max_len)
-{
-#ifdef GASHA_STRNLEN_FAST_USE_SSE4_2
-	return GASHA_ strnlen_sse(str, max_len);
-#else//GASHA_STRNLEN_FAST_USE_SSE4_2
-	return GASHA_ strnlen(str, max_len);
-#endif//GASHA_STRNLEN_FAST_USE_SSE4_2
-}
-
-//----------------------------------------
-//通常版strnlen
-#if !defined(GASHA_STDSTRNLENFUNC)
-inline std::size_t strnlen(const char* str, const std::size_t max_len)
-{
-	//nullチェックしない
-	//	if (!str)
-	//		return 0;
-	const char* p_end = str + max_len;
-	const char* p = str;
-	while (p <= p_end)
-	{
-		if (!*p)
-			return static_cast<std::size_t>(p - str);
-		++p;
-	}
-	return max_len;
-}
-#else//GASHA_STDSTRNLENFUNC
-#ifdef GASHA_USE_NAME_SPACE
-inline std::size_t strnlen(const char* str, const std::size_t max_len)
-{
-	return GASHA_STDSTRNLENFUNC(str, max_len);
-}
-#endif//GASHA_USE_NAME_SPACE
-#endif//GASHA_STDSTRNLENFUNC
 
 //----------------------------------------
 //SSE版strnlen
@@ -194,26 +256,6 @@ inline std::size_t strnlen_sse(const char* str, const std::size_t max_len)
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strcmp
-inline int strcmp_fast(const char* str1, const char* str2)
-{
-#ifdef GASHA_STRCMP_FAST_USE_SSE4_2
-	return GASHA_ strcmp_sse(str1, str2);
-#else//GASHA_STRCMP_FAST_USE_SSE4_2
-	return GASHA_ strcmp(str1, str2);
-#endif//GASHA_STRCMP_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strcmp
-inline int strcmp(const char* str1, const char* str2)
-{
-	return std::strcmp(str1, str2);
-}
-#endif//GASHA_USE_NAME_SPACE
-
-//----------------------------------------
 //SSE版strcmp
 #ifdef GASHA_USE_SSE4_2
 namespace _private
@@ -252,26 +294,6 @@ inline int strcmp_sse(const char* str1, const char* str2)
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strncmp
-inline int strncmp_fast(const char* str1, const char* str2, const std::size_t max_len)
-{
-#ifdef GASHA_STRNCMP_FAST_USE_SSE4_2
-	return GASHA_ strncmp_sse(str1, str2, max_len);
-#else//GASHA_STRNCMP_FAST_USE_SSE4_2
-	return GASHA_ strncmp(str1, str2, max_len);
-#endif//GASHA_STRNCMP_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strncmp
-inline int strncmp(const char* str1, const char* str2, const std::size_t max_len)
-{
-	return std::strncmp(str1, str2, max_len);
-}
-#endif//GASHA_USE_NAME_SPACE
-
-//----------------------------------------
 //SSE版strncmp
 #ifdef GASHA_USE_SSE4_2
 namespace _private
@@ -296,26 +318,6 @@ inline int strncmp_sse(const char* str1, const char* str2, const std::size_t max
 	return GASHA_ strncmp(str1, str2, max_len);
 }
 #endif//GASHA_USE_SSE4_2
-
-//----------------------------------------
-//高速版strchr
-inline const char* strchr_fast(const char* str, const char c)
-{
-#ifdef GASHA_STRCHR_FAST_USE_SSE4_2
-	return GASHA_ strchr_sse(str, c);
-#else//GASHA_STRCHR_FAST_USE_SSE4_2
-	return GASHA_ strchr(str, c);
-#endif//GASHA_STRCHR_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strchr
-inline const char* strchr(const char* str, const char c)
-{
-	return std::strchr(str, c);
-}
-#endif//GASHA_USE_NAME_SPACE
 
 //----------------------------------------
 //SSE版strchr
@@ -364,26 +366,6 @@ inline const char* strchr_sse(const char* str, const char c)
 	return GASHA_ strchr(str, c);
 }
 #endif//GASHA_USE_SSE4_2
-
-//----------------------------------------
-//高速版strrchr
-inline const char* strrchr_fast(const char* str, const char c)
-{
-#ifdef GASHA_STRRCHR_FAST_USE_SSE4_2
-	return GASHA_ strrchr_sse(str, c);
-#else//GASHA_STRRCHR_FAST_USE_SSE4_2
-	return GASHA_ strrchr(str, c);
-#endif//GASHA_STRRCHR_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strrchr
-inline const char* strrchr(const char* str, const char c)
-{
-	return std::strrchr(str, c);
-}
-#endif//GASHA_USE_NAME_SPACE
 
 //----------------------------------------
 //SSE版strrchr
@@ -435,26 +417,6 @@ inline const char* strrchr_sse(const char* str, const char c)
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strstr
-inline const char* strstr_fast(const char* str, const char* pattern)
-{
-#ifdef GASHA_STRSTR_FAST_USE_SSE4_2
-	return GASHA_ strstr_sse(str, pattern);
-#else//GASHA_STRSTR_FAST_USE_SSE4_2
-	return GASHA_ strstr(str, pattern);
-#endif//GASHA_STRSTR_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strstr
-inline const char* strstr(const char* str, const char* pattern)
-{
-	return std::strstr(str, pattern);
-}
-#endif//GASHA_USE_NAME_SPACE
-
-//----------------------------------------
 //SSE版strstr
 #ifdef GASHA_USE_SSE4_2
 namespace _private
@@ -485,17 +447,6 @@ inline const char* strstr_sse(const char* str, const char* pattern)
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strstr(BM法)
-inline const char* strstrbm_fast(const char* str, const char* pattern, std::function<bool(const char*, const char*)> found_it)
-{
-#ifdef GASHA_STRSTRBM_FAST_USE_SSE4_2
-	return GASHA_ strstrbm_sse(str, pattern, found_it);
-#else//GASHA_STRSTRBM_FAST_USE_SSE4_2
-	return GASHA_ strstrbm(str, pattern, found_it);
-#endif//GASHA_STRSTRBM_FAST_USE_SSE4_2
-}
-
-//----------------------------------------
 //SSE版strstr(BM法)
 #ifdef GASHA_USE_SSE4_2
 namespace _private
@@ -516,28 +467,6 @@ inline const char* strstrbm_sse(const char* str, const char* pattern, std::funct
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strstr0
-inline const char* strstr0_fast(const char* str, const char* pattern)
-{
-#ifdef GASHA_STRSTR0_FAST_USE_SSE4_2
-	return GASHA_ strstr0_sse(str, pattern);
-#else//GASHA_STRSTR0_FAST_USE_SSE4_2
-	return GASHA_ strstr0(str, pattern);
-#endif//GASHA_STRSTR0_FAST_USE_SSE4_2
-}
-
-//----------------------------------------
-//通常版strstr0
-inline const char* strstr0(const char* str, const char* pattern)
-{
-	const std::size_t pattern_len = GASHA_ strlen(pattern);
-	const int ret = GASHA_ strncmp(str, pattern, pattern_len);
-	if (ret == 0)
-		return str;
-	return nullptr;
-}
-
-//----------------------------------------
 //SSE版strstr0
 #ifdef GASHA_USE_SSE4_2
 inline const char* strstr0_sse(const char* str, const char* pattern)
@@ -553,26 +482,6 @@ inline const char* strstr0_sse(const char* str, const char* pattern)
 	return GASHA_ strstr0(str, pattern);
 }
 #endif//GASHA_USE_SSE4_2
-
-//----------------------------------------
-//高速版strcpy
-inline const char* strcpy_fast(char* dst, const char* src)
-{
-#ifdef GASHA_STRCPY_FAST_USE_SSE4_2
-	return GASHA_ strcpy_sse(dst, src);
-#else//GASHA_STRCPY_FAST_USE_SSE4_2
-	return GASHA_ strcpy(dst, src);
-#endif//GASHA_STRCPY_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strcpy
-inline const char* strcpy(char* dst, const char* src)
-{
-	return std::strcpy(dst, src);
-}
-#endif//GASHA_USE_NAME_SPACE
 
 //----------------------------------------
 //SSE版strcpy
@@ -599,26 +508,6 @@ inline const char* strcpy_sse(char* dst, const char* src)
 #endif//GASHA_USE_SSE4_2
 
 //----------------------------------------
-//高速版strncpy
-inline const char* strncpy_fast(char* dst, const char* src, const std::size_t max_len)
-{
-#ifdef GASHA_STRNCPY_FAST_USE_SSE4_2
-	return GASHA_ strncpy_sse(dst, src, max_len);
-#else//GASHA_STRNCPY_FAST_USE_SSE4_2
-	return GASHA_ strncpy(dst, src, max_len);
-#endif//GASHA_STRNCPY_FAST_USE_SSE4_2
-}
-
-#ifdef GASHA_USE_NAME_SPACE
-//----------------------------------------
-//通常版strcpy
-inline const char* strncpy(char* dst, const char* src, const std::size_t max_len)
-{
-	return std::strncpy(dst, src, max_len);
-}
-#endif//GASHA_USE_NAME_SPACE
-
-//----------------------------------------
 //SSE版strncpy
 #ifdef GASHA_USE_SSE4_2
 namespace _private
@@ -641,9 +530,6 @@ inline const char* strncpy_sse(char* dst, const char* src, const std::size_t max
 	return GASHA_ strncpy(dst, src, max_len);
 }
 #endif//GASHA_USE_SSE4_2
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

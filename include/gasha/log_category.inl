@@ -217,14 +217,38 @@ inline bool regLogCategory<_CATEGORY>::operator()(const char* name, GASHA_ ICons
 		console,
 		console_for_notice
 	};
+	logCategoryContainer con;//コンテナ初期化のためのインスタンス化
 	return logCategoryContainer::regist(info);
 }
 
 namespace _private
 {
 	//----------------------------------------
-	//特殊ログカテゴリ登録用テンプレートクラス
-	//※テンプレートクラスにより、有効範囲内の値かコンパイル時にチェックする。
+	//ログカテゴリ登録用テンプレートクラス（コンテナ初期化処理専用）
+	template<unsigned char _CATEGORY>
+	class regLogCategory
+	{
+	public:
+		//定数
+		static const logCategory::category_type CATEGORY = _CATEGORY;//値（カテゴリ）
+		static_assert(CATEGORY >= logCategory::NORMAL_MIN && CATEGORY <= logCategory::NORMAL_MAX, "Out of range of normal-log-category");//値の範囲チェック
+	public:
+		//関数オペレータ
+		inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice)
+		{
+			logCategory::info info =
+			{
+				name,
+				CATEGORY,
+				console,
+				console_for_notice
+			};
+			return logCategoryContainer::regist(info);
+		}
+	};
+	
+	//----------------------------------------
+	//ログカテゴリ登録用テンプレートクラス（コンテナ初期化処理＆特殊ログレベル専用）
 	template<unsigned char _CATEGORY>
 	class regSpecialLogCategory
 	{

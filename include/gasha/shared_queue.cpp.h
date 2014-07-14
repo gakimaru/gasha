@@ -23,16 +23,9 @@
 
 #include <gasha/pool_allocator.cpp.h>//プールアロケータ【関数／実体定義部】
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/string.h>//文字列処理：spprintf()
 
 #include <utility>//C++11 std::move
-#include <cstdio>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -91,21 +84,21 @@ std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	size += std::sprintf(message + size, "----- Debug Info for queue -----\n");
-	size += std::sprintf(message + size, "Queue:\n");
+	GASHA_ spprintf(message, size, "----- Debug Info for queue -----\n");
+	GASHA_ spprintf(message, size, "Queue:\n");
 	int no = 0;
 	const queue_t* node = m_head;
 	while (node)
 	{
-		size += std::sprintf(message + size, "[%d](%p) ", no++, node);
+		GASHA_ spprintf(message, size, "[%d](%p) ", no++, node);
 		size += print_node(message + size, node->m_value);
-		size += std::sprintf(message + size, "\n");
+		GASHA_ spprintf(message, size, "\n");
 		node = node->m_next;
 	}
-	size += std::sprintf(message + size, "[tail](%p)", m_tail);
+	GASHA_ spprintf(message, size, "[tail](%p)", m_tail);
 	size += print_node(message + size, m_tail->m_value);
-	size += std::sprintf(message + size, "\n");
-	size += std::sprintf(message + size, "--------------------------------\n");
+	GASHA_ spprintf(message, size, "\n");
+	GASHA_ spprintf(message, size, "--------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);
@@ -208,9 +201,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------------------------------------------------------------------
 // ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
 // 　同じ内容のものをコピーしています。
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_SHARED_QUEUE_CPP_H
 

@@ -23,16 +23,9 @@
 
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/string.h>//文字列処理：spprintf()
 
 #include <utility>//C++11 std::move
-#include <cstdio>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -115,19 +108,19 @@ template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int 
 std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node)
 {
 	std::size_t size = 0;
-	size += std::sprintf(message + size, "----- Debug Info for lfStack -----\n");
-	size += std::sprintf(message + size, "Stack:\n");
+	GASHA_ spprintf(message, size, "----- Debug Info for lfStack -----\n");
+	GASHA_ spprintf(message, size, "Stack:\n");
 	int no = 0;
 	stack_ptr_t node_tag_ptr = m_head.load();
 	while (node_tag_ptr.isNotNull())
 	{
 		const stack_t* node = node_tag_ptr;
-		size += std::sprintf(message + size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		GASHA_ spprintf(message, size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
 		size += print_node(message + size, node->m_value);
-		size += std::sprintf(message + size, "\n");
+		GASHA_ spprintf(message, size, "\n");
 		node_tag_ptr = node->m_next;
 	}
-	size += std::sprintf(message + size, "----------------------------------\n");
+	GASHA_ spprintf(message, size, "----------------------------------\n");
 	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
 	{
 		return print_node(message, info.m_value);
@@ -231,9 +224,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------------------------------------------------------------------
 // ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
 // 　同じ内容のものをコピーしています。
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_LOCKFREE_STACK_CPP_H
 

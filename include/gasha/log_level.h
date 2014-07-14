@@ -45,6 +45,8 @@ class regLogLevel;
 namespace _private
 {
 	template<unsigned char _LEVEL>
+	class regLogLevel;
+	template<unsigned char _LEVEL>
 	class regSpecialLogLevel;
 }
 
@@ -59,6 +61,8 @@ class logLevel
 	friend class logLevelContainer;
 	template<unsigned char _LEVEL>
 	friend class regLogLevel;
+	template<unsigned char _LEVEL>
+	friend class _private::regLogLevel;
 	template<unsigned char _LEVEL>
 	friend class _private::regSpecialLogLevel;
 public:
@@ -172,6 +176,8 @@ class logLevelContainer
 	friend class logLevel;
 	template<unsigned char _LEVEL>
 	friend class regLogLevel;
+	template<unsigned char _LEVEL>
+	friend class _private::regLogLevel;
 	template<unsigned char _LEVEL>
 	friend class _private::regSpecialLogLevel;
 public:

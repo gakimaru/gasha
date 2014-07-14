@@ -221,14 +221,40 @@ inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* c
 		color,
 		color_for_notice
 	};
+	logLevelContainer con;//コンテナ初期化のためのインスタンス化
 	return logLevelContainer::regist(info);
 }
 
 namespace _private
 {
 	//----------------------------------------
-	//特殊ログレベル登録用テンプレートクラス
-	//※テンプレートクラスにより、有効範囲内の値かコンパイル時にチェックする。
+	//ログレベル登録用テンプレートクラス（コンテナ初期化処理専用）
+	template<unsigned char _LEVEL>
+	class regLogLevel
+	{
+	public:
+		//定数
+		static const logLevel::level_type LEVEL = _LEVEL;//値（レベル）
+		static_assert(LEVEL >= logLevel::NORMAL_MIN && LEVEL <= logLevel::NORMAL_MAX, "Out of range of normal-log-level");//値の範囲チェック
+	public:
+		//関数オペレータ
+		inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice)
+		{
+			logLevel::info info =
+			{
+				name,
+				LEVEL,
+				console,
+				console_for_notice,
+				color,
+				color_for_notice
+			};
+			return logLevelContainer::regist(info);
+		}
+	};
+	
+	//----------------------------------------
+	//レベル登録用テンプレートクラス（コンテナ初期化処理＆特殊ログレベル専用）
 	template<unsigned char _LEVEL>
 	class regSpecialLogLevel
 	{

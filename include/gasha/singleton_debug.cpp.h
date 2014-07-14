@@ -25,13 +25,7 @@
 #include <gasha/linked_list.cpp.h>//双方向連結リスト【関数／実体定義部】
 
 #include <gasha/chrono.h>//時間系ユーティリティ：getSysElapsedTime()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_fast_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
+#include <gasha/string.h>//文字列処理：spprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -105,19 +99,19 @@ template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message)
 {
 	std::size_t size = 0;
-	size += std::sprintf(message + size, "----- Debug Info for singletonDebug -----\n");
-	size += std::sprintf(message + size, "Accessing Count: %d\n", m_accessCount.load());
-	size += std::sprintf(message + size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
-	size += std::sprintf(message + size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
+	GASHA_ spprintf(message, size, "----- Debug Info for singletonDebug -----\n");
+	GASHA_ spprintf(message, size, "Accessing Count: %d\n", m_accessCount.load());
+	GASHA_ spprintf(message, size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
+	GASHA_ spprintf(message, size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
 	{
 		auto lock = m_list.lockSharedScoped();
-		size += std::sprintf(message + size, "Access Info: (Count=%d)\n", m_list.size());
+		GASHA_ spprintf(message, size, "Access Info: (Count=%d)\n", m_list.size());
 		for (auto& info : m_list)
 		{
-			size += std::sprintf(message + size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
+			GASHA_ spprintf(message, size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
-	size += std::sprintf(message + size, "-----------------------------------------\n");
+	GASHA_ spprintf(message, size, "-----------------------------------------\n");
 	return size;
 }
 
@@ -218,9 +212,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------------------------------------------------------------------
 // ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
 // 　同じ内容のものをコピーしています。
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_SINGLETON_DEBUG_CPP_H
 

@@ -14,15 +14,9 @@
 
 #include <gasha/i_console.h>//コンソールカラー【宣言部】
 
+#include <gasha/string.h>//文字列処理：spprintf()
+
 #include <utility>//C++11 std::forward, std::move
-#include <cstdio>//sprintf()
-
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】sprintf を使用すると、error C4996 が発生する
-//  error C4996: 'sprintf': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -39,7 +33,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<typename... Tx>
 inline int IConsole::printf(char* message, const char* fmt, Tx&&... args)
 {
-	const int ret = std::sprintf(message, fmt, std::forward<Tx>(args)...);
+	const int ret = GASHA_ spprintf(message, fmt, std::forward<Tx>(args)...);
 	output(message);
 	return ret;
 }
@@ -61,9 +55,6 @@ inline void IConsole::changeColor(const GASHA_ consoleColor& color)
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_I_CONSOLE_INL
 
