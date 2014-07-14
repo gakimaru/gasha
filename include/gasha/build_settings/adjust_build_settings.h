@@ -364,6 +364,20 @@
 #endif//GASHA_LOG_WORK_BUFF_POOL_SIZE
 
 //--------------------------------------------------------------------------------
+//【ログキュー】
+//※ライブラリの再ビルド必要
+
+//ログキューメッセージ用スタックバッファサイズ
+#if !defined(GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE)
+	#define GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE 32768
+#endif//GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE
+
+//ログキュー用のノード数
+#if !defined(GASHA_LOG_QUEUE_NODE_SIZE)
+	#define GASHA_LOG_QUEUE_NODE_SIZE 256
+#endif//GASHA_LOG_QUEUE_NODE_SIZE
+
+//--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
 
 //シングルトンのデバッグ情報収集機能は、ビルド構成でデバッグ機能が有効でなければ無効化する

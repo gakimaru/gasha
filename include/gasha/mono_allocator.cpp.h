@@ -91,33 +91,33 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_monoAllocator() \
-	template class monoAllocator<>;
+	template class GASHA_ monoAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_monoAllocator_withLock(LOCK_TYPE) \
-	template class monoAllocator<LOCK_TYPE>;
+	template class GASHA_ monoAllocator<LOCK_TYPE>;
 
 #if 0//不要
 //バッファ付き単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_monoAllocator_withBuff(_MAX_SIZE) \
-	template class monoAllocator_withBuff<_MAX_SIZE>; \
-	template class monoAllocator<>;
+	template class GASHA_ monoAllocator_withBuff<_MAX_SIZE>; \
+	template class GASHA_ monoAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_monoAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class monoAllocator<LOCK_TYPE>;
+	template class GASHA_ monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
+	template class GASHA_ monoAllocator<LOCK_TYPE>;
 
 //型指定バッファ付き単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_monoAllocator_withType(T, _NUM) \
-	template class monoAllocator_withType<T, _NUM>; \
-	template class monoAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class monoAllocator<>;
+	template class GASHA_ monoAllocator_withType<T, _NUM>; \
+	template class GASHA_ monoAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class GASHA_ monoAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_monoAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class monoAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class monoAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class monoAllocator<LOCK_TYPE>;
+	template class GASHA_ monoAllocator_withType<T, _NUM, LOCK_TYPE>; \
+	template class GASHA_ monoAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
+	template class GASHA_ monoAllocator<LOCK_TYPE>;
 #endif
 
 //--------------------------------------------------------------------------------

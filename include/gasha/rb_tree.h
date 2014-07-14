@@ -1038,11 +1038,11 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/dynamic_array.inl>
+#include <gasha/rb_tree.inl>
 
 //.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
-#include <gasha/dynamic_array.cpp.h>
+#include <gasha/rb_tree.cpp.h>
 #endif//GASHA_RB_TREE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//GASHA_INCLUDED_RB_TREE_H

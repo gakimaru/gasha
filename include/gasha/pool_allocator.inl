@@ -140,7 +140,7 @@ inline void poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	m_vacantHead = 0;
-	m_recyclableHea = INVALID_INDEX;
+	m_recyclableHead = INVALID_INDEX;
 	m_usingPoolSize = 0;
 	m_using.reset();
 }

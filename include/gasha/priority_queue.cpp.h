@@ -295,15 +295,15 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
 //※二分ヒープコンテナも同時にインスタンス化
 #define GASHA_INSTANCING_pQueue_withBHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class priority_queue::container<OPE_TYPE, _TABLE_SIZE>; \
-	template class binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>;
+	template class GASHA_ priority_queue::container<OPE_TYPE, _TABLE_SIZE>; \
+	template class GASHA_ binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE>;
 
 //シンプル優先度付きキューコンテナアダプタの明示的なインスタンス化用マクロ
 //※二分ヒープコンテナも同時にインスタンス化
 #define GASHA_INSTANCING_simplePQueue(NODE_TYPE, _TABLE_SIZE) \
-	template class priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class priority_queue::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>; \
-	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>;
+	template class GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
+	template class GASHA_ priority_queue::container<typename GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>; \
+	template class GASHA_ binary_heap::container<typename GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope::container_ope_type, _TABLE_SIZE>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

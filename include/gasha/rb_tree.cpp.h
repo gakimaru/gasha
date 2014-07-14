@@ -696,20 +696,20 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //赤黒木コンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_rbTree(OPE_TYPE) \
-	template class rb_tree::stack_t<OPE_TYPE>; \
-	template class rb_tree::container<OPE_TYPE>;
+	template class GASHA_ rb_tree::stack_t<OPE_TYPE>; \
+	template class GASHA_ rb_tree::container<OPE_TYPE>;
 
 //シンプル赤黒木コンテナの明示的なインスタンス化用マクロ
 //※キー型を省略する場合
 #define GASHA_INSTANCING_simpleRBTree(VALUE_TYPE) \
-	template class rb_tree::simpleContainer<VALUE_TYPE>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE>::ope>;
+	template class GASHA_ rb_tree::simpleContainer<VALUE_TYPE>; \
+	template class GASHA_ rb_tree::container<typename GASHA_ rb_tree::simpleContainer<VALUE_TYPE>::ope>; \
+	template class GASHA_ rb_tree::stack_t<typename GASHA_ rb_tree::simpleContainer<VALUE_TYPE>::ope>;
 //※キー型を指定する場合
 #define GASHA_INSTANCING_simpleRBTree_withKey(VALUE_TYPE, KEY_TYPE) \
-	template class rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
-	template class rb_tree::container<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
-	template class rb_tree::stack_t<typename rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
+	template class GASHA_ rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>; \
+	template class GASHA_ rb_tree::container<typename GASHA_ rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>; \
+	template class GASHA_ rb_tree::stack_t<typename GASHA_ rb_tree::simpleContainer<VALUE_TYPE, KEY_TYPE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

@@ -170,13 +170,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //ロックフリースタックの明示的なインスタンス化用マクロ
 //※デフォルトのタグ付きポインタを使用
 #define GASHA_INSTANCING_lfStack(T, _POOL_SIZE) \
-	template class lfStack<T, _POOL_SIZE>;
+	template class GASHA_ lfStack<T, _POOL_SIZE>;
 //※タグ付きポインタの仕様を簡易指定
 #define GASHA_INSTANCING_lfStack_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT) \
-	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>;
+	template class GASHA_ lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>;
 //※タグ付きポインタの仕様を完全指定
 #define GASHA_INSTANCING_lfStack_withTagDetail(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
-	template class lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
+	template class GASHA_ lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
 
 //※別途、必要に応じてロックフリープールアロケータの明示的なインスタンス化も必要
 //　　GASHA_INSTANCING_lfPoolAllocator(_POOL_SIZE);

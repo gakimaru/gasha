@@ -273,13 +273,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //ロックフリーキューの明示的なインスタンス化用マクロ
 //※デフォルトのタグ付きポインタを使用
 #define GASHA_INSTANCING_lfQueue(T, _POOL_SIZE) \
-	template class lfQueue<T, _POOL_SIZE, TEST_TAGGED_PTR_TAG_SIZE, TEST_TAGGED_PTR_TAG_SHIFT>;
+	template class GASHA_ lfQueue<T, _POOL_SIZE, TEST_TAGGED_PTR_TAG_SIZE, TEST_TAGGED_PTR_TAG_SHIFT>;
 //※タグ付きポインタの仕様を簡易指定
 #define GASHA_INSTANCING_lfQueue_withTag(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT) \
-	template class lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>;
+	template class GASHA_ lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT>;
 //※タグ付きポインタの仕様を完全指定
 #define GASHA_INSTANCING_lfQueue_withTagDetail(T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE) \
-	template class lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
+	template class GASHA_ lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>;
 
 //※別途、必要に応じてロックフリープールアロケータの明示的なインスタンス化も必要
 //　　GASHA_INSTANCING_lfPoolAllocator(_POOL_SIZE);

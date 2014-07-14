@@ -237,63 +237,63 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_dualStackAllocator() \
-	template class dualStackAllocator<>;
+	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_dualStackAllocator_withLock(LOCK_TYPE) \
-	template class dualStackAllocator<LOCK_TYPE>;
+	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
 
 //スマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartDualStackAllocator() \
-	template class dualStackAllocator<GASHA_ dummyLock, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartDualStackAllocator_withLock(LOCK_TYPE) \
-	template class dualStackAllocator<LOCK_TYPE, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
 
 #if 0//不要
 //バッファ付き双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_dualStackAllocator_withBuff(_MAX_SIZE) \
-	template class dualStackAllocator_withBuff<_MAX_SIZE>; \
-	template class dualStackAllocator<>;
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE>; \
+	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_dualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class dualStackAllocator<LOCK_TYPE>;
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
+	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
 
 //バッファ付きスマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartDualStackAllocator_withBuff(_MAX_SIZE) \
-	template class dualStackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator<GASHA_ dummyLock, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator<LOCK_TYPE, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
 
 //型指定バッファ付き双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_dualStackAllocator_withType(T, _NUM) \
-	template class dualStackAllocator_withType<T, _NUM>; \
-	template class dualStackAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class dualStackAllocator<>;
+	template class GASHA_ dualStackAllocator_withType<T, _NUM>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_dualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class dualStackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class dualStackAllocator<LOCK_TYPE>;
+	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_TYPE>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
+	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
 
 //型指定バッファ付きスマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartDualStackAllocator_withType(T, _NUM) \
-	template class dualStackAllocator_withType<T, _NUM, GASHA_ dummyLock, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator<GASHA_ dummyLock, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator_withType<T, _NUM, GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartDualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class dualStackAllocator_withType<T, _NUM, LOCK_TYPE, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, dualStackAllocatorAutoClear>; \
-	template class dualStackAllocator<LOCK_TYPE, dualStackAllocatorAutoClear>;
+	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
 #endif
 
 //--------------------------------------------------------------------------------

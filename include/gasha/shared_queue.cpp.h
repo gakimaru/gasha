@@ -150,10 +150,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //マルチスレッド共有キューの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_sharedQueue(T, _POOL_SIZE) \
-	template class sharedQueue<T, _POOL_SIZE>;
+	template class GASHA_ sharedQueue<T, _POOL_SIZE>;
 //※ロック指定版
 #define GASHA_INSTANCING_sharedQueue_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class sharedQueue<T, _POOL_SIZE, LOCK_TYPE>;
+	template class GASHA_ sharedQueue<T, _POOL_SIZE, LOCK_TYPE>;
 
 //※別途、必要に応じてプールアロケータの明示的なインスタンス化も必要（ロックなし版のみ使用）
 //　　GASHA_INSTANCING_poolAllocator(_POOL_SIZE);//※ロックなし版

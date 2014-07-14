@@ -859,11 +859,11 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/dynamic_array.inl>
+#include <gasha/hash_table.inl>
 
 //.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
-#include <gasha/dynamic_array.cpp.h>
+#include <gasha/hash_table.cpp.h>
 #endif//GASHA_HASH_TABLE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//GASHA_INCLUDED_HASH_TABLE_H

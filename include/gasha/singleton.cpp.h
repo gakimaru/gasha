@@ -64,21 +64,21 @@ namespace _private
 //　    typedef dummySharedLock spilock_type;//ロック制御クラス：ダミー共有ロック（ロックしない）
 //      typedef dummySingletonDebug debug_type;//シングルトンデバッグ用ダミー処理クラス（デバッグしない）
 #define GASHA_INSTANCING_singleton(T) \
-	template class _private::singleton<T, T::lock_type, T::debug_type>;
+	template class GASHA_ _private::singleton<T, T::lock_type, T::debug_type>;
 
 //シンプルシングルトンの明示的なインスタンス化用マクロ
 //※ロックなし、デバッグなし版
 #define GASHA_INSTANCING_simpleSingleton(T) \
-	template class _private::singleton<T, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
+	template class GASHA_ _private::singleton<T, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
 //※ロック指定、デバッグなし版
 #define GASHA_INSTANCING_simpleSingleton_withLock(T, LOCK_TYPE) \
-	template class _private::singleton<T, LOCK_TYPE, GASHA_ dummySingletonDebug>;
+	template class GASHA_ _private::singleton<T, LOCK_TYPE, GASHA_ dummySingletonDebug>;
 //※ロックなし、デバッグ指定版
 #define GASHA_INSTANCING_simpleSingleton_withDebug(T, DEBUG_TYPE) \
-	template class _private::singleton<T, GASHA_ dummySharedLock, DEBUG_TYPE>;
+	template class GASHA_ _private::singleton<T, GASHA_ dummySharedLock, DEBUG_TYPE>;
 //※ロック指定、デバッグ指定版
 #define GASHA_INSTANCING_simpleSingleton_withLock_withDebug(T, LOCK_TYPE, DEBUG_TYPE) \
-	template class _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
+	template class GASHA_ _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
 
 //※別途、必要に応じてシングルトンデバッグ用処理の明示的なインスタンス化も必要
 //    GASHA_INSTANCING_singletonDebug(_MAX_RECORDS);//ロックなし版

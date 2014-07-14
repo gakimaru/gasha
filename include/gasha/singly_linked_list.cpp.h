@@ -580,12 +580,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //片方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_slList(OPE_TYPE) \
-	template class singly_linked_list::container<OPE_TYPE>;
+	template class GASHA_ singly_linked_list::container<OPE_TYPE>;
 
 //シンプル片方向連結リストコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleSLList(VALUE_TYPE) \
-	template class singly_linked_list::simpleContainer<VALUE_TYPE>; \
-	template class singly_linked_list::container<typename singly_linked_list::simpleContainer<VALUE_TYPE>::ope>;
+	template class GASHA_ singly_linked_list::simpleContainer<VALUE_TYPE>; \
+	template class GASHA_ singly_linked_list::container<typename GASHA_ singly_linked_list::simpleContainer<VALUE_TYPE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

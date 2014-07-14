@@ -79,7 +79,7 @@ namespace priority_queue
 	//		inline static void setSeqNo(node_type& node, const seq_no_type seq_no){ node.m_seqNo = seq_no; }
 	//		
 	//		//優先度を比較 ※必要に応じて定義
-	//		inline static int compareProior(const priority_type lhs, const priority_type rhs){ return ???; }
+	//		inline static int comparePriority(const priority_type lhs, const priority_type rhs){ return ???; }
 	//		
 	//		//ロック型 ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
@@ -559,11 +559,11 @@ using simplePQueue = priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>;
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/dynamic_array.inl>
+#include <gasha/priority_queue.inl>
 
 //.hファイルのインクルードに伴い、常に.cpp.hファイル（および.inlファイル）を自動インクルードする場合
 #ifdef GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
-#include <gasha/dynamic_array.cpp.h>
+#include <gasha/priority_queue.cpp.h>
 #endif//GASHA_PRIORITY_QUEUE_ALLWAYS_TOGETHER_CPP_H
 
 #endif//GASHA_INCLUDED_PRIORITY_QUEUE_H

@@ -528,12 +528,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //二分ヒープコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
+	template class GASHA_ binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル二分ヒープコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
-	template class binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class binary_heap::container<typename priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+	template class GASHA_ binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
+	template class GASHA_ binary_heap::container<typename GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

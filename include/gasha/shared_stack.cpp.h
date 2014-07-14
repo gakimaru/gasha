@@ -142,12 +142,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //マルチスレッド共有スタックの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_sharedStack(T, _POOL_SIZE) \
-	template class sharedStack<T, _POOL_SIZE>; \
-	template class poolAllocator_withType<typename sharedStack<T, _POOL_SIZE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
+	template class GASHA_ sharedStack<T, _POOL_SIZE>; \
+	template class GASHA_ poolAllocator_withType<typename GASHA_ sharedStack<T, _POOL_SIZE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
 //※ロック指定版
 #define GASHA_INSTANCING_sharedStack_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class sharedStack<T, _POOL_SIZE, LOCK_TYPE>; \
-	template class poolAllocator_withType<typename sharedStack<T, _POOL_SIZE, LOCK_TYPE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
+	template class GASHA_ sharedStack<T, _POOL_SIZE, LOCK_TYPE>; \
+	template class GASHA_ poolAllocator_withType<typename GASHA_ sharedStack<T, _POOL_SIZE, LOCK_TYPE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
 
 //※別途、必要に応じてプールアロケータの明示的なインスタンス化も必要（ロックなし版のみ使用）
 //　　GASHA_INSTANCING_poolAllocator(_POOL_SIZE);//※ロックなし版

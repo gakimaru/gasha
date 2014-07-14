@@ -21,18 +21,32 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //タグ付きポインタ型
+
+//値にポインターとタグをセット
 template<typename T, std::size_t _TAG_BITS, int _TAG_SHIFT, typename VALUE_TYPE, typename TAG_TYPE>
-inline void taggedPtr<T, _TAG_BITS, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::set(const pointer_type ptr, const tag_type tag)//値にポインターとタグをセット
+inline void taggedPtr<T, _TAG_BITS, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::set(const pointer_type ptr, const tag_type tag)
 {
 	m_value = (reinterpret_cast<value_type>(ptr) & NEGATIVE_TAG_MASK) | ((static_cast<value_type>(tag) & TAG_MASK) << TAG_SHIFT);
 }
-
 //※タグサイズが0の場合の特殊化
 template<typename T, int _TAG_SHIFT, typename VALUE_TYPE, typename TAG_TYPE>
-inline void taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::set(const pointer_type ptr, const tag_type tag)//値にポインターとタグをセット
+inline void taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::set(const pointer_type ptr, const tag_type tag)
 {
 	m_value = reinterpret_cast<value_type>(ptr);
 }
+
+//タグを更新
+template<typename T, std::size_t _TAG_BITS, int _TAG_SHIFT, typename VALUE_TYPE, typename TAG_TYPE>
+inline void taggedPtr<T, _TAG_BITS, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::updateTag(const taggedPtr tag_ptr)
+{
+	tag_type tag = tag_ptr.tag();
+	++tag;
+	m_value = (m_value & NEGATIVE_TAG_MASK) | ((static_cast<value_type>(tag) & TAG_MASK) << TAG_SHIFT);
+}
+//※タグサイズが0の場合の特殊化
+template<typename T, int _TAG_SHIFT, typename VALUE_TYPE, typename TAG_TYPE>
+inline void taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>::updateTag(const taggedPtr tag_ptr)
+{}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -49,17 +49,17 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //※アラインメントなし＋ロックなし版
 #define GASHA_INSTANCING_stdAllocator() \
-	template class stdAllocator<GASHA_ dummyLock, stdAllocatorImpl_NoAlign>;
+	template class GASHA_ stdAllocator<GASHA_ dummyLock, GASHA_ stdAllocatorImpl_NoAlign>;
 //※アラインメントなし＋ロック指定版
 #define GASHA_INSTANCING_stdAllocator_withLock(LOCK_TYPE) \
-	template class stdAllocator<LOCK_TYPE, stdAllocatorImpl_NoAlign>;
+	template class GASHA_ stdAllocator<LOCK_TYPE, GASHA_ stdAllocatorImpl_NoAlign>;
 
 //※アラインメントあり＋ロックなし版
 #define GASHA_INSTANCING_stdAlignAllocator() \
-	template class stdAllocator<GASHA_ dummyLock, stdAllocatorImpl_Align>;
+	template class GASHA_ stdAllocator<GASHA_ dummyLock, GASHA_ stdAllocatorImpl_Align>;
 //※アラインメントあり＋ロック指定版
 #define GASHA_INSTANCING_stdAlignAllocator_withLock(LOCK_TYPE) \
-	template class stdAllocator<LOCK_TYPE, stdAllocatorImpl_Align>;
+	template class GASHA_ stdAllocator<LOCK_TYPE, GASHA_ stdAllocatorImpl_Align>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

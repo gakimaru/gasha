@@ -576,12 +576,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //動的配列コンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_dArray(OPE_TYPE) \
-	template class dynamic_array::container<OPE_TYPE>;
+	template class GASHA_ dynamic_array::container<OPE_TYPE>;
 
 //シンプル動的配列コンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleDArray(VALUE_TYPE) \
-	template class dynamic_array::simpleContainer<VALUE_TYPE>; \
-	template class dynamic_array::container<typename dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
+	template class GASHA_ dynamic_array::simpleContainer<VALUE_TYPE>; \
+	template class GASHA_ dynamic_array::container<typename GASHA_ dynamic_array::simpleContainer<VALUE_TYPE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

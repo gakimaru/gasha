@@ -177,34 +177,34 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //ロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfStackAllocator() \
-	template class lfStackAllocator<>;
+	template class GASHA_ lfStackAllocator<>;
 
 //スマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfSmartStackAllocator() \
-	template class lfStackAllocator<lfStackAllocatorAutoClear>;
+	template class GASHA_ lfStackAllocator<GASHA_ lfStackAllocatorAutoClear>;
 
 #if 0//不要
 //バッファ付きロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfStackAllocator_withBuff(_MAX_SIZE) \
-	template class lfStackAllocator_withBuff<_MAX_SIZE>; \
-	template class lfStackAllocator<>;
+	template class GASHA_ lfStackAllocator_withBuff<_MAX_SIZE>; \
+	template class GASHA_ lfStackAllocator<>;
 
 //バッファ付きスマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfSmartStackAllocator_withBuff(_MAX_SIZE) \
-	template class lfStackAllocator_withBuff<_MAX_SIZE, lfStackAllocatorAutoClear>; \
-	template class lfStackAllocator<lfStackAllocatorAutoClear>;
+	template class GASHA_ lfStackAllocator_withBuff<_MAX_SIZE, GASHA_ lfStackAllocatorAutoClear>; \
+	template class GASHA_ lfStackAllocator<GASHA_ lfStackAllocatorAutoClear>;
 
 //型指定バッファ付きロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfStackAllocator_withType(T, _NUM) \
-	template class lfStackAllocator_withType<T, _NUM>; \
-	template class lfStackAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class lfStackAllocator<>;
+	template class GASHA_ lfStackAllocator_withType<T, _NUM>; \
+	template class GASHA_ lfStackAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class GASHA_ lfStackAllocator<>;
 
 //型指定バッファ付きスマートロックフリースタックアロケータの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_lfSmartStackAllocator_withType(T, _NUM) \
-	template class lfStackAllocator_withType<T, _NUM, lfStackAllocatorAutoClear>; \
-	template class lfStackAllocator_withBuff<sizeof(T)* _NUM, lfStackAllocatorAutoClear>; \
-	template class lfStackAllocator<lfStackAllocatorAutoClear>;
+	template class GASHA_ lfStackAllocator_withType<T, _NUM, GASHA_ lfStackAllocatorAutoClear>; \
+	template class GASHA_ lfStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ lfStackAllocatorAutoClear>; \
+	template class GASHA_ lfStackAllocator<lfStackAllocatorAutoClear>;
 #endif
 
 //--------------------------------------------------------------------------------

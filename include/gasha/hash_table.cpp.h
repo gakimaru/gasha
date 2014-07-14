@@ -813,17 +813,17 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_hTable(OPE_TYPE, _TABLE_SIZE) \
-	template class hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+	template class GASHA_ hash_table::container<OPE_TYPE, _TABLE_SIZE>;
 
 //シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
 //※キー型を省略する場合
 #define GASHA_INSTANCING_simpleHTable(VALUE_TYPE, _TABLE_SIZE) \
-	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
-	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+	template class GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
+	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
 //※キー型を指定する場合
 #define GASHA_INSTANCING_simpleHTable_withKey(VALUE_TYPE, _TABLE_SIZE, KEY_TYPE) \
-	template class hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
-	template class hash_table::container<typename hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
+	template class GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
+	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

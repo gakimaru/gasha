@@ -600,12 +600,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //リングバッファコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_rBuff(OPE_TYPE) \
-	template class ring_buffer::container<OPE_TYPE>;
+	template class GASHA_ ring_buffer::container<OPE_TYPE>;
 
 //シンプルリングバッファコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleRBuff(VALUE_TYPE) \
-	template class ring_buffer::simpleContainer<VALUE_TYPE>; \
-	template class ring_buffer::container<typename ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
+	template class GASHA_ ring_buffer::simpleContainer<VALUE_TYPE>; \
+	template class GASHA_ ring_buffer::container<typename GASHA_ ring_buffer::simpleContainer<VALUE_TYPE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合

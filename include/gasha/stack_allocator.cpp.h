@@ -130,63 +130,63 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_stackAllocator() \
-	template class stackAllocator<>;
+	template class GASHA_ stackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_stackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE>;
+	template class GASHA_ stackAllocator<LOCK_TYPE>;
 
 //スマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartStackAllocator() \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator<GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_TYPE) \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator<LOCK_TYPE, GASHA_ stackAllocatorAutoClear>;
 
 #if 0//不要
 //バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_stackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE>; \
-	template class stackAllocator<>;
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE>; \
+	template class GASHA_ stackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
+	template class GASHA_ stackAllocator<LOCK_TYPE>;
 
 //バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartStackAllocator_withBuff(_MAX_SIZE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<LOCK_TYPE, GASHA_ stackAllocatorAutoClear>;
 
 //型指定バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_stackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM>; \
-	template class stackAllocator_withBuff<sizeof(T) * _NUM>; \
-	template class stackAllocator<>;
+	template class GASHA_ stackAllocator_withType<T, _NUM>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T) * _NUM>; \
+	template class GASHA_ stackAllocator<>;
 //※ロック指定版
 #define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class stackAllocator<LOCK_TYPE>;
+	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
+	template class GASHA_ stackAllocator<LOCK_TYPE>;
 
 //型指定バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartStackAllocator_withType(T, _NUM) \
-	template class stackAllocator_withType<T, _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, stackAllocatorAutoClear>; \
-	template class stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator_withType<T, _NUM, GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
 //※ロック指定版
 #define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class stackAllocator_withType<T, _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, stackAllocatorAutoClear>; \
-	template class stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
 #endif
 
 //--------------------------------------------------------------------------------

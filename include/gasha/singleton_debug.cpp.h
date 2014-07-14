@@ -144,12 +144,12 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //シングルトンデバッグ用処理の明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_singletonDebug(_MAX_RECORDS) \
-	template class singletonDebug<_MAX_RECORDS>; \
-	template class linked_list::container<typename singletonDebug<_MAX_RECORDS>::listOpe>;
+	template class GASHA_ singletonDebug<_MAX_RECORDS>; \
+	template class GASHA_ linked_list::container<typename GASHA_ singletonDebug<_MAX_RECORDS>::listOpe>;
 //※ロック指定版
 #define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_TYPE) \
-	template class singletonDebug<_MAX_RECORDS, LOCK_TYPE>; \
-	template class linked_list::container<typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::listOpe>;
+	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>; \
+	template class GASHA_ linked_list::container<typename GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>::listOpe>;
 
 //※別途、必要に応じてロックフリープールアロケータの明示的なインスタンス化も必要
 //　　GASHA_INSTANCING_lfPoolAllocator(_MAX_RECORDS);//※ロックなし版
@@ -162,10 +162,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //シングルトンデバッグ用処理の明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_singletonDebug(_MAX_RECORDS) \
-	template class singletonDebug<_MAX_RECORDS>;
+	template class GASHA_ singletonDebug<_MAX_RECORDS>;
 //※ロック指定版
 #define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_TYPE) \
-	template class singletonDebug<_MAX_RECORDS, LOCK_TYPE>;
+	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>;
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED
 

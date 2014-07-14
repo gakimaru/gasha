@@ -93,6 +93,7 @@ struct taggedPtr
 	inline bool isNotNull() const { return m_value != ZERO_VALUE; }//値がゼロじゃないか？
 	inline void setNull(){ m_value = ZERO_VALUE; }//値をゼロにする
 	inline void set(const pointer_type ptr, const tag_type tag);//値にポインターとタグをセット
+	inline void updateTag(const taggedPtr tag_ptr);//タグを更新 ※元になるタグ付きポインタのタグをインクリメントしたタグを使用
 	//フィールド
 	value_type m_value;//値（タグ＋ポインタ）
 };
@@ -130,6 +131,7 @@ struct taggedPtr<T, 0, _TAG_SHIFT, VALUE_TYPE, TAG_TYPE>
 	inline bool isNotNull() const { return m_value != ZERO_VALUE; }//値がゼロじゃないか？
 	inline void setNull(){ m_value = ZERO_VALUE; }//値をゼロにする
 	inline void set(const pointer_type ptr, const tag_type tag);//値にポインターとタグをセット
+	inline void updateTag(const taggedPtr tag_ptr);//タグを更新
 	//フィールド
 	value_type m_value;//値（タグ＋ポインタ）
 };
