@@ -35,11 +35,15 @@ inline const GASHA_ IConsole* logMask::iterator::console(const GASHA_ logPurpose
 {
 	return m_logMask->console(purpose, m_logCategory, level);
 }
-
-//コンソール
 inline GASHA_ IConsole* logMask::iterator::console(const GASHA_ logPurpose purpose, const level_type level)
 {
 	return m_logMask->console(purpose, m_logCategory, level);
+}
+
+//コンソールカラー
+inline const GASHA_ consoleColor* logMask::iterator::color(const GASHA_ logPurpose purpose, const level_type level) const
+{
+	return m_logMask->color(purpose, m_logCategory, level);
 }
 
 //ムーブオペレータ
@@ -88,11 +92,15 @@ inline const GASHA_ IConsole* logMask::reverse_iterator::console(const GASHA_ lo
 {
 	return m_logMask->console(purpose, m_logCategory, level);
 }
-
-//コンソール
 inline GASHA_ IConsole* logMask::reverse_iterator::console(const GASHA_ logPurpose purpose, const level_type level)
 {
 	return m_logMask->console(purpose, m_logCategory, level);
+}
+
+//コンソールカラー
+inline const GASHA_ consoleColor* logMask::reverse_iterator::color(const GASHA_ logPurpose purpose, const level_type level) const
+{
+	return m_logMask->color(purpose, m_logCategory, level);
 }
 
 //ベースイテレータを取得
@@ -184,17 +192,28 @@ inline const GASHA_ IConsole* logMask::console(const logPurpose purpose, const c
 	GASHA_ logLevel require_level_obj(require_level);
 	return console(purpose, category, require_level_obj);
 }
-
-//コンソール取得 
 inline GASHA_ IConsole* logMask::console(const logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level)
 {
-	const GASHA_ IConsole* console_obj = reinterpret_cast<const logMask*>(this)->console(purpose, category, require_level);
-	return const_cast<GASHA_ IConsole*>(console_obj);
+	GASHA_ logLevel require_level_obj(require_level);
+	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, category, require_level_obj));
 }
 inline GASHA_ IConsole* logMask::console(const logPurpose purpose, const category_type category, const level_type require_level)
 {
 	GASHA_ logLevel require_level_obj(require_level);
 	return console(purpose, category, require_level_obj);
+}
+
+//コンソールカラー取得 
+inline const GASHA_ consoleColor* logMask::color(const logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level) const
+{
+	if (!isEnableLevel(purpose, category, require_level))
+		return nullptr;
+	return &require_level.color(purpose);
+}
+inline const GASHA_ consoleColor* logMask::color(const logPurpose purpose, const category_type category, const level_type require_level) const
+{
+	GASHA_ logLevel require_level_obj(require_level);
+	return color(purpose, category, require_level_obj);
 }
 
 //ローカルログレベルを有効にする

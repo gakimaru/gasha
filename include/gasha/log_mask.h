@@ -99,17 +99,14 @@ public:
 		inline operator bool() const { return isExist(); }
 		inline operator category_type() const { return static_cast<GASHA_ logCategory::category_type>(m_logCategory); }
 		inline operator const GASHA_ logCategory*() const { return static_cast<const GASHA_ logCategory*>(m_logCategory); }//値（カテゴリ）
-		inline operator GASHA_ logCategory*(){ return static_cast<GASHA_ logCategory*>(m_logCategory); }//値（カテゴリ）
 		inline operator const GASHA_ logCategory&() const { return m_logCategory; }//値（カテゴリ）
-		inline operator GASHA_ logCategory&(){ return m_logCategory; }//値（カテゴリ）
 	public:
 		//アクセッサ
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//値（カテゴリ）
-		inline GASHA_ logCategory& category(){ return m_logCategory; }//値（カテゴリ）
 		inline const GASHA_ logLevel levelMask(const GASHA_ logPurpose purpose) const { return logLevel(m_logMask->levelMask(purpose, m_logCategory)); }//ログレベルマスク
-		inline GASHA_ logLevel levelMask(const GASHA_ logPurpose purpose){ return logLevel(m_logMask->levelMask(purpose, m_logCategory)); }//ログレベルマスク
 		inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const level_type level) const;//コンソール取得
 		inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const level_type level);//コンソール取得
+		inline const GASHA_ consoleColor* color(const GASHA_ logPurpose purpose, const level_type level) const;//コンソールカラー取得
 	public:
 		//メソッド
 		void changeLevel(const GASHA_ logPurpose purpose, const level_type level);//ログレベルを変更
@@ -166,17 +163,14 @@ public:
 		inline operator bool() const { return isExist(); }
 		inline operator category_type() const { return static_cast<GASHA_ logCategory::category_type>(m_logCategory); }
 		inline operator const GASHA_ logCategory*() const { return static_cast<const GASHA_ logCategory*>(m_logCategory); }//値（カテゴリ）
-		inline operator GASHA_ logCategory*(){ return static_cast<GASHA_ logCategory*>(m_logCategory); }//値（カテゴリ）
 		inline operator const GASHA_ logCategory&() const { return m_logCategory; }//値（カテゴリ）
-		inline operator GASHA_ logCategory&(){ return m_logCategory; }//値（カテゴリ）
 	public:
 		//アクセッサ
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//値（カテゴリ）
-		inline GASHA_ logCategory& category(){ return m_logCategory; }//値（カテゴリ）
 		inline const GASHA_ logLevel levelMask(const GASHA_ logPurpose purpose) const { return m_logMask->levelMask(purpose, m_logCategory); }//ログレベルマスク
-		inline GASHA_ logLevel levelMask(const GASHA_ logPurpose purpose){ return m_logMask->levelMask(purpose, m_logCategory); }//ログレベルマスク
 		inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const level_type level) const;//コンソール取得
 		inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const level_type level);//コンソール取得
+		inline const GASHA_ consoleColor* color(const GASHA_ logPurpose purpose, const level_type level) const;//コンソールカラー取得
 	public:
 		//メソッド
 		void changeLevel(const GASHA_ logPurpose purpose, const level_type level);//ログレベルを変更
@@ -218,8 +212,10 @@ public:
 	//※ログカテゴリもしくはログレベルの設定から取得する（ログカテゴリ優先）
 	inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level) const;//コンソール取得
 	inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const level_type require_level) const;//コンソール取得
-	inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level);//コンソール取得 
-	inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const level_type require_level);//コンソール取得 
+	inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level);//コンソール取得
+	inline GASHA_ IConsole* console(const GASHA_ logPurpose purpose, const category_type category, const level_type require_level);//コンソール取得
+	inline const GASHA_ consoleColor* color(const GASHA_ logPurpose purpose, const category_type category, const GASHA_ logLevel& require_level) const;//コンソール取得
+	inline const GASHA_ consoleColor* color(const GASHA_ logPurpose purpose, const category_type category, const level_type require_level) const;//コンソール取得
 public:
 	//イテレータ取得
 	inline const iterator begin() const { return iterator(this, GASHA_ logCategory::BEGIN); }//開始イテレータを取得
