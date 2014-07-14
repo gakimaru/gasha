@@ -42,7 +42,7 @@ public:
 	void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
 	//※ロック取得を伴う
-	inline GASHA_ lock_guard<lwSpinLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
+	inline GASHA_ lock_guard<lwSpinLock> lockScoped();
 	//ロック取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
 	inline bool try_lock();

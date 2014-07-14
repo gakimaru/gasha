@@ -29,7 +29,7 @@ inline GASHA_ unique_lock<lwSpinLock> lwSpinLock::lockUnique(const GASHA_ adopt_
 inline GASHA_ unique_lock<lwSpinLock> lwSpinLock::lockUnique(const GASHA_ defer_lock_t&){ GASHA_ unique_lock<lwSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 //ロックガード取得
-inline GASHA_ lock_guard<lwSpinLock> lwSpinLock::lockScoped(const int spin_count)
+inline GASHA_ lock_guard<lwSpinLock> lwSpinLock::lockScoped()
 {
 	GASHA_ lock_guard<lwSpinLock> lock(*this);
 	return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

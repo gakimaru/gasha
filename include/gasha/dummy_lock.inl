@@ -34,7 +34,7 @@ inline void dummyLock::lock(const int dummy_count)
 	//何もしない
 }
 //ロックガード取得
-inline GASHA_ lock_guard<dummyLock> dummyLock::lockScoped(const int dummy_count)
+inline GASHA_ lock_guard<dummyLock> dummyLock::lockScoped()
 {
 	GASHA_ lock_guard<dummyLock> lock(*this);
 	return lock;

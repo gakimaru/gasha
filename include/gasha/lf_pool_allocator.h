@@ -118,6 +118,11 @@ public:
 	std::size_t debugInfo(char* message, const bool with_detail);
 	inline std::size_t debugInfo(char* message);
 
+	//強制クリア
+	//※【要注意】強制的に未アロケート状態にする
+	//※スレッドセーフではない
+	inline void clear();
+
 private:
 	//メモリ解放（共通処理）
 	bool free(void* p, const index_type index);

@@ -83,6 +83,12 @@ bool lfMonoAllocator::deleteArray(T* p, const std::size_t num)
 	return _free(p);
 }
 
+//強制クリア
+inline void lfMonoAllocator::clear()
+{
+	m_size.store(0);
+}
+
 //ポインタが範囲内か判定
 inline bool lfMonoAllocator::isInUsingRange(void* p)
 {

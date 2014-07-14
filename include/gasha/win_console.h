@@ -22,6 +22,13 @@
 
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 #include <Windows.h>//HANDLE, CONSOLE_SCREEN_BUFFER_INFO
+//Windows.h のインクルードによる min, max を無効化する
+#ifdef min
+#undef min
+#endif//min
+#ifdef max
+#undef max
+#endif//max
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

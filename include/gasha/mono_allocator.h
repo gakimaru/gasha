@@ -77,6 +77,10 @@ public:
 	//※作成中、ロックを取得する。
 	std::size_t debugInfo(char* message);
 
+	//強制クリア
+	//※【要注意】強制的に未アロケート状態にする
+	inline void clear();
+
 private:
 	//メモリ解放（共通処理）
 	//※ロック取得は呼び出し元で行う

@@ -37,7 +37,7 @@ inline void dummySharedLock::lock(const int spin_count)
 	//何もしない
 }
 //排他ロック（ライトロック）用のロックガード取得
-inline lock_guard<dummySharedLock> dummySharedLock::lockScoped(const int spin_count)
+inline lock_guard<dummySharedLock> dummySharedLock::lockScoped()
 {
 	GASHA_ lock_guard<dummySharedLock> lock(*this);
 	return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -60,7 +60,7 @@ inline void dummySharedLock::lock_shared(const int spin_count)
 	//何もしない
 }
 //共有ロック（リードロック）用のロックガード取得
-inline GASHA_ shared_lock_guard<dummySharedLock> dummySharedLock::lockSharedScoped(const int spin_count)
+inline GASHA_ shared_lock_guard<dummySharedLock> dummySharedLock::lockSharedScoped()
 {
 	GASHA_ shared_lock_guard<dummySharedLock> lock(*this);
 	return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。

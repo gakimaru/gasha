@@ -141,6 +141,21 @@ inline std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message)
 	return debugInfo(message, false);
 }
 
+//強制クリア
+template<std::size_t _MAX_POOL_SIZE>
+inline void lfPoolAllocator<_MAX_POOL_SIZE>::clear()
+{
+	m_vacantHead.store(0);
+	m_recyclableHead.store(INVALID_INDEX);
+	m_usingPoolSize.store(0);
+	for (std::size_t i = 0; i < m_poolSize; ++i)
+	{
+		m_using[i].store(0);
+		//m_allocCount[i].store(0);
+		//m_freeCount[i].store(0);
+	}
+}
+
 //ポインタをインデックスに変換
 template<std::size_t _MAX_POOL_SIZE>
 inline typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type lfPoolAllocator<_MAX_POOL_SIZE>::ptrToIndex(void* p)

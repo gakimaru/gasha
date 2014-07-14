@@ -37,9 +37,9 @@ public:
 	inline GASHA_ unique_lock<dummyLock> lockUnique(const GASHA_ defer_lock_t&);
 
 	//ロック取得
-	inline void lock(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT);
+	inline void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//ロックガード取得
-	inline GASHA_ lock_guard<dummyLock> lockScoped(const int dummy_count = GASHA_ DEFAULT_SPIN_COUNT);
+	inline GASHA_ lock_guard<dummyLock> lockScoped();
 	//ロック取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
 	inline bool try_lock();

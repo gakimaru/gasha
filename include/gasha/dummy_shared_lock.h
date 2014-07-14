@@ -44,7 +44,7 @@ public:
 	inline void lock(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//排他ロック（ライトロック）用のロックガード取得
 	//※排他ロック（ライトロック）取得を伴う
-	inline lock_guard<dummySharedLock> lockScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
+	inline lock_guard<dummySharedLock> lockScoped();
 	//排他ロック（ライトロック）取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
 	inline bool try_lock();
@@ -55,7 +55,7 @@ public:
 	inline void lock_shared(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
 	//共有ロック（リードロック）用のロックガード取得
 	//※共有ロック（リードロック）取得を伴う
-	inline GASHA_ shared_lock_guard<dummySharedLock> lockSharedScoped(const int spin_count = GASHA_ DEFAULT_SPIN_COUNT);
+	inline GASHA_ shared_lock_guard<dummySharedLock> lockSharedScoped();
 	//共有ロック（リードロック）取得を試行
 	//※取得に成功した場合、trueが返るので、ロックを解放する必要がある
 	inline bool try_lock_shared();

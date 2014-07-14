@@ -351,6 +351,19 @@
 #endif//GASHA_DEFAULT_LOG_MASK_OF_NOTICE
 
 //--------------------------------------------------------------------------------
+//【ログワークバッファ】
+
+//ログ出力用ワークバッファ一つ当たりのサイズ
+#if !defined(GASHA_LOG_WORK_BUFF_BLOCK_SIZE)
+	#define GASHA_LOG_WORK_BUFF_BLOCK_SIZE 2048
+#endif//GASHA_LOG_WORK_BUFF_BLOCK_SIZE
+
+//ログ出力用ワークバッファのプール数
+#if !defined(GASHA_LOG_WORK_BUFF_POOL_SIZE)
+	#define GASHA_LOG_WORK_BUFF_POOL_SIZE 4
+#endif//GASHA_LOG_WORK_BUFF_POOL_SIZE
+
+//--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
 
 //シングルトンのデバッグ情報収集機能は、ビルド構成でデバッグ機能が有効でなければ無効化する

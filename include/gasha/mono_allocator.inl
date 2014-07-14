@@ -92,6 +92,14 @@ bool monoAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 	return _free(p);
 }
 
+//強制クリア
+template<class LOCK_TYPE>
+inline void monoAllocator<LOCK_TYPE>::clear()
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	m_size = 0;
+}
+
 //ポインタが範囲内か判定
 template<class LOCK_TYPE>
 inline bool monoAllocator<LOCK_TYPE>::isInUsingRange(void* p)

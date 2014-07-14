@@ -134,6 +134,17 @@ inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* mes
 	return debugInfo(message, false);
 }
 
+//強制クリア
+template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+inline void poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::clear()
+{
+	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
+	m_vacantHead = 0;
+	m_recyclableHea = INVALID_INDEX;
+	m_usingPoolSize = 0;
+	m_using.reset();
+}
+
 //ポインタをインデックスに変換
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)

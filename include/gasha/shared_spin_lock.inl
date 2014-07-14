@@ -32,7 +32,7 @@ inline GASHA_ unique_shared_lock<sharedSpinLock> sharedSpinLock::lockUnique(cons
 inline GASHA_ unique_shared_lock<sharedSpinLock> sharedSpinLock::lockUnique(const GASHA_ defer_lock_t&){ GASHA_ unique_shared_lock<sharedSpinLock> lock(*this, GASHA_ defer_lock); return lock; }
 
 //排他ロック（ライトロック）用のロックガード取得
-inline GASHA_ lock_guard<sharedSpinLock> sharedSpinLock::lockScoped(const int spin_count)
+inline GASHA_ lock_guard<sharedSpinLock> sharedSpinLock::lockScoped()
 {
 	GASHA_ lock_guard<sharedSpinLock> lock(*this);
 	return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
@@ -45,7 +45,7 @@ inline void sharedSpinLock::unlock()
 }
 
 //共有ロック（リードロック）用のロックガード取得
-inline GASHA_ shared_lock_guard<sharedSpinLock> sharedSpinLock::lockSharedScoped(const int spin_count)
+inline GASHA_ shared_lock_guard<sharedSpinLock> sharedSpinLock::lockSharedScoped()
 {
 	GASHA_ shared_lock_guard<sharedSpinLock> lock(*this);
 	return lock;//※ムーブコンストラクタが作用するか、最適化によって呼び出し元の領域を直接初期化するので、ロックの受け渡しが成立する。
