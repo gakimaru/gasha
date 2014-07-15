@@ -18,6 +18,8 @@
 #include <gasha/log_purpose.h>//ログ用途
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
+#include <gasha/log_attr.h>//ログ属性
+#include <gasha/log_print_info.h>//ログ出力情報
 
 #include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ
 #include <gasha/binary_heap.h>//二分ヒープ ※ユニークなIDを扱うので、優先度付きキューを使う必要がない
@@ -50,7 +52,7 @@ class logQueue
 {
 public:
 	//型
-	typedef std::uint64_t id_type;//キューID型（シーケンス番号）
+	typedef GASHA_ logPrintInfo::id_type id_type;//ID型（シーケンス番号を扱う）
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
@@ -58,34 +60,11 @@ public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
 public:
-	//キューノード型
-	struct node_type
-	{
-		id_type m_id;//キューID
-		const char* m_message;//メッセージ
-		level_type m_level;//ログレベル
-		category_type m_category;//ログカテゴリ
-		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
-		const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
-		bool m_isNoCr;//自動改行なし
-
-		//比較演算子
-		inline bool operator<(const node_type& rhs) const;
-
-		//コンストラクタ
-		inline node_type(const id_type id, const char* message, const bool is_no_cr, level_type level, category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
-		
-		//デフォルトコンストラクタ
-		inline node_type();
-
-		//デストラクタ
-		inline ~node_type();
-	};
 	//バイナリヒープ操作型
-	struct queueOpe : public GASHA_ binary_heap::baseOpe<queueOpe, node_type>
+	struct queueOpe : public GASHA_ binary_heap::baseOpe<queueOpe, GASHA_ logPrintInfo>
 	{
 		//ロック型
-		typedef spinLock lock_type;//ロックオブジェクト型
+		typedef GASHA_ spinLock lock_type;//ロックオブジェクト型
 	};
 public:
 	//型
@@ -107,9 +86,9 @@ public:
 	//※通常はキューイングが成功するまでリトライを繰り返す。
 	//※GASHA_LOG_QUEUE_NOWAIT が指定されている場合、キュー用のバッファがいっぱいだとキューイングせずに失敗する。
 	//※キューイング待ち時に中断が指定されたら失敗する。
-	//※引数 mesage_size に 0 を指定すると、message の長さを計測する。message には終端を含めたサイズを指定する。
-	//※引数 reserved_id には予約したIDを指定する。通常は 0 で、0 を指定すると、キューイングの際にIDを自動発番する。
-	bool enqueue(const char* message, const bool is_no_cr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM], const std::size_t message_size = 0, const id_type reserved_id = 0);
+	//※引数 print_info.m_mesage_size に 0 を指定すると、print_info.m_message の長さを計測する。print_info.m_message には終端を含めたサイズを指定する。
+	//※引数 print_info.m_id には予約したIDを指定する。通常は 0 で、0 を指定すると、キューイングの際にIDを自動発番する。
+	bool enqueue(const logPrintInfo& print_info);
 
 	//キューイング予約
 	id_type reserve();
@@ -122,12 +101,12 @@ public:
 	//デキュー
 	//※キューのノードを渡して情報を受け取る。
 	//※キューを取得できた場合、true を返す。
-	inline bool dequeue(node_type& node);
+	inline bool dequeue(GASHA_ logPrintInfo& info);
 
 	//リリース
 	//※メッセージをバッファから解放する。
 	inline void release(const char* message);
-	inline void release(node_type& node);
+	inline void release(logPrintInfo& info);
 
 	//中断
 	//※キューイング待ちがあったら中断させる

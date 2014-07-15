@@ -27,40 +27,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
-//キューノード型
-
-//比較演算子
-inline bool logQueue::node_type::operator<(const logQueue::node_type& rhs) const
-{
-	//小さい順に並べるため、判定を逆にする
-	return m_id > rhs.m_id;
-}
-
-//コンストラクタ
-inline logQueue::node_type::node_type(const logQueue::id_type id, const char* message, const bool is_no_cr, logQueue::level_type level, logQueue::category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
-	m_id(id),
-	m_message(message),
-	m_level(level),
-	m_category(category),
-	m_isNoCr(is_no_cr)
-{
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		m_consoles[purpose] = consoles[purpose];
-		m_colors[purpose] = colors[purpose];
-	}
-}
-
-//デフォルトコンストラクタ
-inline logQueue::node_type::node_type()
-{}
-
-//デストラクタ
-inline logQueue::node_type::~node_type()
-{}
-
-//ログキュークラス
-
 //キューイング予約
 inline logQueue::id_type logQueue::reserve()
 {
@@ -71,9 +37,9 @@ inline logQueue::id_type logQueue::reserve()
 }
 
 //デキュー
-inline bool logQueue::dequeue(node_type& node)
+inline bool logQueue::dequeue(GASHA_ logPrintInfo& info)
 {
-	return m_queue.popCopying(node);
+	return m_queue.popCopying(info);
 }
 
 //リリース
@@ -81,9 +47,9 @@ inline void logQueue::release(const char* message)
 {
 	m_messageBuff.free(const_cast<char*>(message));
 }
-inline void logQueue::release(node_type& node)
+inline void logQueue::release(GASHA_ logPrintInfo& info)
 {
-	release(node.m_message);
+	release(info.m_message);
 }
 
 //中断

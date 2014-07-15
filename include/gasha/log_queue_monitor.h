@@ -20,6 +20,9 @@
 #include <gasha/log_purpose.h>//ログ用途
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
+#include <gasha/log_attr.h>//ログ属性
+#include <gasha/log_print_info.h>//ログ出力情報
+#include <gasha/std_log_print.h>//標準ログ出力
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::int32_t
@@ -50,10 +53,10 @@ class logQueueMonitor
 {
 public:
 	//型
+	typedef GASHA_ logPrintInfo::id_type id_type;//IDの型
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
-	typedef GASHA_ logQueue::id_type id_type;//キューIDの型
 public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
@@ -65,12 +68,12 @@ public:
 	struct explicitInitialize_t{};//明示的な初期化用構造体
 
 public:
-	//モニター時の出力用デフォルト関数
-	static void defaultOutput(GASHA_ logQueue::node_type& node);
-
 	//モニター
-	//※マルチスレッド専用。実行するとループ処理に入る。
-	static void monitor(std::function<void(GASHA_ logQueue::node_type&)> output = defaultOutput);
+	//※マルチスレッド専用。
+	//※実行するとループ処理に入る。
+	//※終了するには、他のスレッドから abort() を呼び出す。
+	template<class LOG_PRINT = GASHA_ stdLogPrint>
+	void monitor(LOG_PRINT log_print_functor);
 	
 	//キューイングを通知
 	//※確実にキューイングが成功した時にだけ呼ぶこと
