@@ -41,7 +41,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //カラー変更
 inline void vsConsole::changeColor(const GASHA_ consoleColor& color)
 {
-	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
+	changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 
 //コンストラクタ

@@ -16,8 +16,6 @@
 
 #include <gasha/log_level.h>//ログレベル【宣言部】
 
-#include <gasha/std_console.h>//標準コンソール
-
 #include <cstddef>//std::size_t
 #include <cstring>//memcpy()
 

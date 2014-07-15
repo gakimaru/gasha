@@ -19,6 +19,7 @@
 #else//GASHA_USE_WINDOWS_CONSOLE
 #include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/dummy_console.h>//ダミーコンソール
 
 #include <cstdio>//stdout, stderr
 
@@ -173,6 +174,28 @@ private:
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
+
+//----------------------------------------
+//標準ダミーコンソール
+class stdDummyConsole : public dummyConsole
+{
+public:
+	//静的アクセッサ
+	inline static stdDummyConsole& instance(){ return s_instance; }
+
+public:
+	//コンストラクタ
+	stdDummyConsole() :
+		dummyConsole("Dummy")
+	{}
+	//デストラクタ
+	~stdDummyConsole() override
+	{}
+
+private:
+	//静的フィールド
+	static stdDummyConsole s_instance;
+};
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 

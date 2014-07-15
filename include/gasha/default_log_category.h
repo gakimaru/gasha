@@ -27,11 +27,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 enum categoryEnum : logCategory::category_type
 {
 	forAny = MAKE_LOG_CATEGORY_VALUE(0),//なんでも（カテゴリなし）
-	forFileSystem = MAKE_LOG_CATEGORY_VALUE(1),//ファイルシステム関係
-	forResource = MAKE_LOG_CATEGORY_VALUE(2),//リソース関係
-	for3D = MAKE_LOG_CATEGORY_VALUE(3),//3Dグラフィックス関係
-	for2D = MAKE_LOG_CATEGORY_VALUE(4),//2Dグラフィックス関係
-	forSound = MAKE_LOG_CATEGORY_VALUE(5),//サウンド関係
+	forNotice = MAKE_LOG_CATEGORY_VALUE(1),//画面通知専用 ※ログ出力しない
+	forFileSystem = MAKE_LOG_CATEGORY_VALUE(2),//ファイルシステム関係
+	forResource = MAKE_LOG_CATEGORY_VALUE(3),//リソース関係
+	for3D = MAKE_LOG_CATEGORY_VALUE(4),//3Dグラフィックス関係
+	for2D = MAKE_LOG_CATEGORY_VALUE(5),//2Dグラフィックス関係
+	forSound = MAKE_LOG_CATEGORY_VALUE(6),//サウンド関係
 	//ログレベル／画面通知レベル変更用
 	forEvery = MAKE_SPECIAL_LOG_CATEGORY_VALUE(0),//全部まとめて変更
 	//特殊なカテゴリ（プリント時専用）
