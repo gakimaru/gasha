@@ -28,75 +28,100 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ属性
 
 //属性判定
-inline bool logAttr::hasAttr(const attr_type attr) const
+inline bool logAttr::has(const logAttr::attr_type target_attr, const logAttr::attr_type attr)
 {
-	return (attr & m_attr) != 0x00;
+	return (target_attr & attr) != 0x00;
+}
+inline bool logAttr::has(const attr_type attr) const
+{
+	return (*m_attrRef & attr) != 0x00;
 }
 
 //属性付与
-inline logAttr::attr_type logAttr::addAttr(const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::add(const logAttr::attr_type attr)
 {
-	m_attr |= attr;
-	return m_attr;
+	*m_attrRef |= attr;
+	return *m_attrRef;
 }
 
 //属性破棄
-inline logAttr::attr_type logAttr::removeAttr(const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::remove(const logAttr::attr_type attr)
 {
-	m_attr &= ~attr;
-	return m_attr;
+	*m_attrRef &= ~attr;
+	return *m_attrRef;
 }
 
-//クリア
-inline logAttr::attr_type logAttr::clear()
+//属性変更
+inline logAttr::attr_type logAttr::set(const logAttr::attr_type attr)
 {
-	m_attr = noLogAttr;
-	return m_attr;
+	*m_attrRef &= attr;
+	return *m_attrRef;
 }
 
-//オペレータ
-inline logAttr& logAttr::operator=(logAttr&& attr)
+//属性リセット
+inline logAttr::attr_type logAttr::reset()
 {
-	m_attr = attr.m_attr;
-	return *this;
+	*m_attrRef = DEFAULT_ATTR;
+	return *m_attrRef;
 }
-inline logAttr& logAttr::operator=(const logAttr& attr)
+
+//ムーブオペレータ
+inline logAttr& logAttr::operator=(logAttr&& rhs)
 {
-	m_attr = attr.m_attr;
-	return *this;
-}
-inline logAttr& logAttr::operator=(logAttr::attr_type&& attr)
-{
-	m_attr = attr;
-	return *this;
-}
-inline logAttr& logAttr::operator=(const logAttr::attr_type& attr)
-{
-	m_attr = attr;
+	m_refType = rhs.m_refType;
+	m_attrRef = rhs.m_attrRef;
+	m_prevTlsAttr = rhs.m_prevTlsAttr;//変更前のTLSログ属性はコピーし、
+	rhs.m_prevTlsAttr = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
+	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+		m_localAttr = rhs.m_localAttr;
 	return *this;
 }
 
-//コンストラクタ
-inline logAttr::logAttr(logAttr&& attr) :
-	m_attr(attr.m_attr)
-{}
-inline logAttr::logAttr(const logAttr& attr) :
-	m_attr(attr.m_attr)
-{}
-inline logAttr::logAttr(logAttr::attr_type&& attr) :
-	m_attr(attr)
-{}
-inline logAttr::logAttr(const logAttr::attr_type& attr) :
-	m_attr(attr)
-{}
+//コピーオペレータ
+inline logAttr& logAttr::operator=(const logAttr& rhs)
+{
+	m_refType = rhs.m_refType;
+	m_attrRef = rhs.m_attrRef;
+	m_prevTlsAttr = nullptr;//変更前のTLSログ属性はコピーしない（デストラクタで復元しない）
+	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+		m_localAttr = rhs.m_localAttr;
+	return *this;
+}
 
-//デフォルトコンストラクタ
-inline logAttr::logAttr()
-{}
+//ムーブコンストラクタ
+inline logAttr::logAttr(logAttr&& obj) :
+	m_refType(obj.m_refType),
+	m_attrRef(obj.m_attrRef),
+	m_prevTlsAttr(obj.m_prevTlsAttr)//変更前のTLSログ属性はコピーし、
+	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
+{
+	obj.m_prevTlsAttr = nullptr;//ムーブ元無効化
+	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+		m_localAttr = obj.m_localAttr;
+}
+
+//コピーコンストラクタ
+inline logAttr::logAttr(const logAttr& obj) :
+	m_refType(obj.m_refType),
+	m_attrRef(obj.m_attrRef),
+	m_prevTlsAttr(nullptr)//変更前のTLSログ属性はコピーしない（デストラクタで復元しない）
+{
+	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+		m_localAttr = obj.m_localAttr;
+}
+
+//明示的な初期化用コンストラクタ
+inline logAttr::logAttr(const explicitInitialize_t&)
+{
+	std::call_once(m_initialized, initializeOnce);//グローバルログレベルマスク初期化（一回限り）
+}
 
 //デストラクタ
 inline logAttr::~logAttr()
-{}
+{
+	if (m_refType == isLocal || m_prevTlsAttr)//TLSログ属性を復元
+		m_tlsAttrRef = m_prevTlsAttr;
+}
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 

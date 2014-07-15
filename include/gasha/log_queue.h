@@ -91,7 +91,8 @@ public:
 	bool enqueue(const logPrintInfo& print_info);
 
 	//キューイング予約
-	id_type reserve();
+	//※予約数を指定する
+	id_type reserve(const int num);
 
 	//先頭キューのIDを取得
 	//※キューの順序を確認して、次のキューを待つために使用。

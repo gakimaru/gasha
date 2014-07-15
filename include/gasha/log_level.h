@@ -118,14 +118,14 @@ public:
 public:
 	//キャストオペレータ
 	inline operator bool() const { return isExist(); }//正しいログレベルか？
-	inline operator int() const { return static_cast<int>(m_info->m_value); }//レベルの値
-	inline operator level_type() const { return m_info->m_value; }//レベルの値
+	inline operator int() const { return static_cast<int>(m_info->m_value); }//ログレベルの値
+	inline operator level_type() const { return m_info->m_value; }//ログレベルの値
 	inline operator const char*() const { return m_info->m_name; }//名前
 public:
 	//アクセッサ
 	inline bool isExist() const { return m_info != nullptr; }//正しいログレベルか？
-	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊レベルか？
-	inline level_type value() const { return m_info->m_value; }//レベルの値取得
+	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊ログレベルか？
+	inline level_type value() const { return m_info->m_value; }//ログレベルの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
 	inline level_type outputLevel() const { return toOutputLevel(m_info->m_value); }//出力レベル取得
 	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール

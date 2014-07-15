@@ -108,15 +108,15 @@ public:
 public:
 	//キャストオペレータ
 	inline operator bool() const { return isExist(); }//正しいログカテゴリか？
-	inline operator int() const { return static_cast<int>(m_info->m_value); }//カテゴリの値
-	inline operator category_type() const { return m_info->m_value; }//カテゴリの値
+	inline operator int() const { return static_cast<int>(m_info->m_value); }//ログカテゴリの値
+	inline operator category_type() const { return m_info->m_value; }//ログカテゴリの値
 	inline operator const char*() const { return m_info->m_name; }//名前
 public:
 	//アクセッサ
 	inline bool isExist() const { return m_info != nullptr; }//正しいログカテゴリか？
-	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊カテゴリか？
-	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
-	inline category_type value() const { return m_info->m_value; }//カテゴリの値取得
+	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊ログカテゴリか？
+	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なログカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
+	inline category_type value() const { return m_info->m_value; }//ログカテゴリの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
 	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
 	inline GASHA_ IConsole*& console(const purpose_type purpose){ return m_info->m_consoles[purpose]; }//コンソール

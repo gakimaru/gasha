@@ -53,7 +53,7 @@ inline void stdLogPrint:: operator()(GASHA_ logPrintInfo& info)
 			//メッセージ出力
 			console->output(info.m_message);
 
-			if (!info.m_attr.hasAttr(logWithoutCr))
+			if (!logAttr::has(info.m_attr, logWithoutCr))
 			{
 				//改行出力
 				console->outputCr();

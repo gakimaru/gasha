@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // log_mask.h
-// ログマスク【宣言部】
+// ログレベルマスク【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -31,13 +31,13 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//ログマスク
+//ログレベルマスク
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
-//ログマスク
+//ログレベルマスク
 //※カテゴリ別のログレベルマスクを扱う。
 //※グローバルログレベルマスクの他、そのコピーとして、ローカルログレベルマスクを扱うことができる。
 //※ローカルログレベルマスクは、TLSにその参照を保持し、処理ブロック（スコープ）を抜けるまで、以降の処理に適用される。
@@ -59,8 +59,8 @@ public:
 	static const category_type CATEGORY_MAX = GASHA_ logCategory::NORMAL_MAX;//ログカテゴリ最大値
 	static const category_type CATEGORY_NUM = GASHA_ logCategory::NORMAL_NUM;//ログカテゴリ数
 	static const category_type CATEGORY_FOR_EVERY = GASHA_ logCategory::FOR_EVERY;//全体変更用ログカテゴリ
-	static const level_type DEFAULT_LOG_MASK_OF_LOG = GASHA_DEFAULT_LOG_MASK_OF_LOG;//デフォルトのログマスク
-	static const level_type DEFAULT_LOG_MASK_OF_NOTICE = GASHA_DEFAULT_LOG_MASK_OF_NOTICE;//デフォルトの画面通知ログマスク
+	static const level_type DEFAULT_LOG_MASK_OF_LOG = GASHA_DEFAULT_LOG_MASK_OF_LOG;//デフォルトのログレベルマスク
+	static const level_type DEFAULT_LOG_MASK_OF_NOTICE = GASHA_DEFAULT_LOG_MASK_OF_NOTICE;//デフォルトの画面通知ログレベルマスク
 	enum ref_type//ログレベルマスク参照種別
 	{
 		isGlobal = 0,//グローバルログレベルマスク
@@ -141,7 +141,7 @@ public:
 		inline ~iterator();
 	private:
 		//フィールド
-		mutable logMask* m_logMask;//ログマスク
+		mutable logMask* m_logMask;//ログレベルマスク
 		mutable GASHA_ logCategoryContainer::iterator m_logCategory;//ログカテゴリのイテレータ
 	};
 	//--------------------
@@ -208,14 +208,14 @@ public:
 		inline ~reverse_iterator();
 	private:
 		//フィールド
-		mutable logMask* m_logMask;//ログマスク
+		mutable logMask* m_logMask;//ログレベルマスク
 		mutable GASHA_ logCategoryContainer::reverse_iterator m_logCategory;//ログカテゴリのリバースイテレータ
 	};
 public:
 	//アクセッサ
 	inline ref_type refType() const { return m_refType; }//参照しているログレベルマスクの種別
-	inline const mask_type& mask() const { return *m_refMask; }//現在参照しているログレベルマスク
-	inline mask_type& mask() { return *m_refMask; }//現在参照しているログレベルマスク
+	inline const mask_type& mask() const { return *m_maskRef; }//現在参照しているログレベルマスク
+	inline mask_type& mask() { return *m_maskRef; }//現在参照しているログレベルマスク
 	inline level_type level(const purpose_type purpose, const category_type category) const;//ログレベルマスクを取得
 	inline bool isEnableLevel(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category) const;//出力可能なログレベルか？
 	inline bool isEnableLevel(const purpose_type purpose, const level_type require_level, const category_type category) const;//出力可能なログレベルか？
@@ -251,19 +251,24 @@ public:
 	void changeEveryLevel(const purpose_type purpose, const level_type level);//全ログレベルマスクを変更 ※changeLogLevel に forEvery 指定時と同じ
 	void upLevel(const purpose_type purpose, const category_type category);//ログレベルマスクを一レベル上に変更 ※forEvery は無視する
 	void downLevel(const purpose_type purpose, const category_type category);//ログレベルマスクを一レベル下に変更 ※forEvery は無視する
-	void changeMaskType(const ref_type type);//参照するログベルマスクを変更
-	                                         //※ローカルログレベルマスクに関する操作
-	                                         //　ローカルログレベルマスクを作成すると、その時点のグローバルログレベルマスクもしくは
-	                                         //　TLSログレベルマスクをコピーして使用する。
-	                                         //※また、処理ブロック（スコープ）を抜けるまで、以降の処理にもローカルログレベルマスクが適用される。
+	
+	//参照するログレベルマスクを変更
+	//　ローカルログレベルマスクに変更すると、その時点のグローバルログレベルマスクもしくは
+	//　TLSログレベルマスクをコピーする。さらに、TLSログレベルマスクに適用する。
+	//※ローカルログレベルマスクがTLSログレベルマスクに適用されると、以降の処理にローカルログレベルマスクが反映される。
+	//※【注意】ローカルの状態で再度ローカルを指定すると、改めて元の値をコピーし直すことに注意。
+	void changeRef(const ref_type type);
+
 private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
+
 public:
 	//ムーブオペレータ
 	inline logMask& operator=(logMask&& rhs);
 	//コピーオペレータ
 	inline logMask& operator=(const logMask& rhs);
+
 public:
 	//ムーブコンストラクタ
 	inline logMask(logMask&& obj);
@@ -275,18 +280,21 @@ public:
 	logMask();
 	//デストラクタ
 	inline ~logMask();
+
 public:
 	//静的フィールド
 	static const explicitInitialize_t explicitInitialize;//明示的な初期化指定用
 private:
 	//フィールド
 	ref_type m_refType;//ログレベルマスク種別
-	mask_type* m_refMask;//現在参照しているログレベルマスク
+	mask_type* m_maskRef;//現在参照しているログレベルマスク
 	mask_type* m_prevTlsMask;//変更前のTLSログレベルマスク（ローカルログレベルマスク作成時に記録し、デストラクタで元に戻す）
 	mask_type m_localMask;//ローカルログレベルマスク
+private:
 	//静的フィールド
 	static std::once_flag m_initialized;//グローバルログレベルマスク初期化済み
 	static mask_type m_globalMask;//グローバルログレベルマスク
+private:
 	//TLS静的フィールド
 	static thread_local mask_type* m_tlsMaskRef;//TLSログレベルマスク（ローカルログレベルマスクの参照）
 };

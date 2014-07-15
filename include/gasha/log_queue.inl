@@ -28,11 +28,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //キューイング予約
-inline logQueue::id_type logQueue::reserve()
+inline logQueue::id_type logQueue::reserve(const int num)
 {
-	id_type id = m_id.fetch_add(1);
-	if (id == 0)//ID=0は許されないので、もし 0 だったら再発行する
-		id = m_id.fetch_add(1);
+	id_type id = m_id.fetch_add(num);
+	if (id == 0)//ID=0は許されないので、もし 0 だったら再発行する ※範囲オーバーで値が巡回する可能性は考慮しない
+		id = m_id.fetch_add(num);
 	return id;
 }
 

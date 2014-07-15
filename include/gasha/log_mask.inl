@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // log_mask.inl
-// ログマスク【インライン関数／テンプレート関数定義部】
+// ログレベルマスク【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
 //
@@ -14,14 +14,14 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log_mask.h>//ログマスク【宣言部】
+#include <gasha/log_mask.h>//ログレベルマスク【宣言部】
 
 #include <cstring>//memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//ログマスク
+//ログレベルマスク
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
@@ -149,14 +149,14 @@ inline logMask::reverse_iterator::~reverse_iterator()
 {}
 
 //----------------------------------------
-//ログマスク
+//ログレベルマスク
 
 //ログレベルマスクを取得
 inline logMask::level_type logMask::level(const logMask::purpose_type purpose, const logMask::category_type category) const
 {
 	if (category < CATEGORY_MIN || category > CATEGORY_MAX)
 		return LEVEL_MIN;//無効なカテゴリの場合、最も低いログレベルを返す
-	return m_refMask->m_level[purpose][category];
+	return m_maskRef->m_level[purpose][category];
 }
 
 //出力可能なログレベルか？
@@ -217,7 +217,7 @@ inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type pur
 inline logMask& logMask::operator=(logMask&& rhs)
 {
 	m_refType = rhs.m_refType;
-	m_refMask = rhs.m_refMask;
+	m_maskRef = rhs.m_maskRef;
 	m_prevTlsMask = rhs.m_prevTlsMask;//変更前のTLSログレベルマスクはコピーし、
 	rhs.m_prevTlsMask = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
@@ -229,7 +229,7 @@ inline logMask& logMask::operator=(logMask&& rhs)
 inline logMask& logMask::operator=(const logMask& rhs)
 {
 	m_refType = rhs.m_refType;
-	m_refMask = rhs.m_refMask;
+	m_maskRef = rhs.m_maskRef;
 	m_prevTlsMask = nullptr;//変更前のTLSログレベルマスクはコピーしない（デストラクタで復元しない）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
 		m_localMask = rhs.m_localMask;
@@ -239,7 +239,7 @@ inline logMask& logMask::operator=(const logMask& rhs)
 //ムーブコンストラクタ
 inline logMask::logMask(logMask&& obj) :
 	m_refType(obj.m_refType),
-	m_refMask(obj.m_refMask),
+	m_maskRef(obj.m_maskRef),
 	m_prevTlsMask(obj.m_prevTlsMask)//変更前のTLSログレベルマスクはコピーし、
 	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 {
@@ -251,7 +251,7 @@ inline logMask::logMask(logMask&& obj) :
 //コピーコンストラクタ
 inline logMask::logMask(const logMask& obj) :
 	m_refType(obj.m_refType),
-	m_refMask(obj.m_refMask),
+	m_maskRef(obj.m_maskRef),
 	m_prevTlsMask(nullptr)//変更前のTLSログレベルマスクはコピーしない（デストラクタで復元しない）
 {
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
@@ -261,13 +261,13 @@ inline logMask::logMask(const logMask& obj) :
 //明示的な初期化用コンストラクタ
 inline logMask::logMask(const explicitInitialize_t&)
 {
-	std::call_once(m_initialized, initializeOnce);//グローバルログマスク初期化（一回限り）
+	std::call_once(m_initialized, initializeOnce);//グローバルログレベルマスク初期化（一回限り）
 }
 
 //デストラクタ
 inline logMask::~logMask()
 {
-	if (m_prevTlsMask)//TLSログレベルマスクを復元
+	if (m_refType == isLocal || m_prevTlsMask)//TLSログレベルマスクを復元
 		m_tlsMaskRef = m_prevTlsMask;
 }
 

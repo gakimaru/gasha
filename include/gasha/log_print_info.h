@@ -40,6 +40,7 @@ struct logPrintInfo
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
+	typedef GASHA_ logAttr::attr_type attr_type;//ログ属性の値
 	typedef std::uint16_t message_size_type;//メッセージ長
 
 	//定数
@@ -51,7 +52,7 @@ struct logPrintInfo
 	message_size_type m_messageSize;//メッセージサイズ ※0で自動計測 ※終端を含んだ長さ
 	level_type m_level;//ログレベル
 	category_type m_category;//ログカテゴリ
-	GASHA_ logAttr m_attr;//ログ属性
+	attr_type m_attr;//ログ属性
 	GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
 	const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
 
@@ -67,7 +68,7 @@ struct logPrintInfo
 	//コピーコンストラクタ
 	inline logPrintInfo(const logPrintInfo& obj);
 	//コンストラクタ
-	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const logAttr attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
+	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
 	//デフォルトコンストラクタ
 	inline logPrintInfo();
 

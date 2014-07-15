@@ -338,17 +338,25 @@
 #endif//GASHA_LOG_CATEGORY_NUM
 
 //--------------------------------------------------------------------------------
-//【ログマスク】
+//【ログレベルマスク】
 
-//デフォルトのログマスクが未定義なら、1（asNormal：通常メッセージ）にする
+//デフォルトのログレベルマスクが未定義なら、1（asNormal：通常メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_LOG)
 	#define GASHA_DEFAULT_LOG_MASK_OF_LOG 1
 #endif//GASHA_DEFAULT_LOG_MASK_OF_LOG
 
-//デフォルトの画面通知ログマスクが未定義なら、9（asCritical：重大メッセージ）にする
+//デフォルトの画面通知ログレベルマスクが未定義なら、9（asCritical：重大メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_NOTICE)
 	#define GASHA_DEFAULT_LOG_MASK_OF_NOTICE 9
 #endif//GASHA_DEFAULT_LOG_MASK_OF_NOTICE
+
+//--------------------------------------------------------------------------------
+//【ログ属性】
+
+//デフォルトのログ属性が未定義なら、0x0000（属性なし）にする
+#if !defined(GASHA_DEFAULT_LOG_ATTR)
+	#define GASHA_DEFAULT_LOG_ATTR 0x0000
+#endif//GASHA_DEFAULT_LOG_ATTR
 
 //--------------------------------------------------------------------------------
 //【ログワークバッファ】
