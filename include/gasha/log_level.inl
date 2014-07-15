@@ -219,15 +219,18 @@ inline logLevelContainer::~logLevelContainer()
 
 //コンストラクタ
 template<unsigned char _LEVEL>
-inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* (&&console)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&&color)[logLevel::PURPOSE_NUM])
+inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&colors)[logLevel::PURPOSE_NUM])
 {
 	logLevel::info info =
 	{
 		name,
-		LEVEL,
-		console,
-		color,
+		LEVEL
 	};
+	for (logLevel::purpose_type purpose = 0; purpose < logLevel::PURPOSE_NUM; ++purpose)
+	{
+		info.m_consoles[purpose] = consoles[purpose];
+		info.m_colors[purpose] = colors[purpose];
+	}
 	logLevelContainer con;//コンテナ初期化のためのインスタンス化
 	return logLevelContainer::regist(info);
 }

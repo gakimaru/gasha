@@ -345,9 +345,9 @@
 	#define GASHA_DEFAULT_LOG_MASK_OF_LOG 1
 #endif//GASHA_DEFAULT_LOG_MASK_OF_LOG
 
-//デフォルトの画面通知ログマスクが未定義なら、4（asCritical：重大メッセージ）にする
+//デフォルトの画面通知ログマスクが未定義なら、9（asCritical：重大メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_NOTICE)
-	#define GASHA_DEFAULT_LOG_MASK_OF_NOTICE 4
+	#define GASHA_DEFAULT_LOG_MASK_OF_NOTICE 9
 #endif//GASHA_DEFAULT_LOG_MASK_OF_NOTICE
 
 //--------------------------------------------------------------------------------

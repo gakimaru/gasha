@@ -84,13 +84,13 @@ private:
 	};
 public:
 	//定数計算用マクロ／関数
-	#define TO_OUTPUT_LEVEL(value) ((value) >> 1)//値を出力レベルに変換
-	#define FROM_OUTPUT_LEVEL(value) ((value) << 1)//出力レベルを値に変換
-	inline static constexpr level_type toOutputLevel(const level_type value){ return TO_OUTPUT_LEVEL(value); }//出力レベル計算
-	inline static constexpr level_type fromOutputLevel(const level_type value){ return FROM_OUTPUT_LEVEL(value); }//出力レベルからレベル計算
+	#define GASHA_TO_OUTPUT_LEVEL(value) ((value) >> 2)//値を出力レベルに変換
+#define GASHA_FROM_OUTPUT_LEVEL(value) ((value) << 2)//出力レベルを値に変換
+	inline static constexpr level_type toOutputLevel(const level_type value){ return GASHA_TO_OUTPUT_LEVEL(value); }//出力レベル計算
+	inline static constexpr level_type fromOutputLevel(const level_type value){ return GASHA_FROM_OUTPUT_LEVEL(value); }//出力レベルからレベル計算
 public:
 	//定数
-	static const level_type NORMAL_NUM = 11;//通常ログレベル数 ※奇数である点に注意：次の値（最初の特殊ログレベル）は、「出力ログレベル」が通常ログレベルの最大と一致する
+	static const level_type NORMAL_NUM = GASHA_FROM_OUTPUT_LEVEL(12) - 1;//通常ログレベル数 ※-1 しているのは、特殊ログレベル「asSilent」を最大ログレベル「asAbsolute」と同じ出力レベルにするため
 	static const level_type SPECIAL_NUM = 2;//特殊ログレベル数
 	static const level_type NUM = NORMAL_NUM + SPECIAL_NUM;//ログレベル総数
 	static const level_type MIN = 0;//ログレベル最小値
@@ -103,12 +103,9 @@ public:
 	static const level_type END = NUM;//ログレベル終端値（イテレータ用）
 	static const level_type INVALID = NUM + 1;//無効なログレベル（イテレータ用）
 	static const level_type POOL_NUM = NUM;//ログレベル記録数
-	static const level_type OUTPUT_LEVEL_MIN = TO_OUTPUT_LEVEL(NORMAL_MIN);//出力レベル最小値
-	static const level_type OUTPUT_LEVEL_MAX = TO_OUTPUT_LEVEL(NORMAL_MAX);//出力レベル最大値
+	static const level_type OUTPUT_LEVEL_MIN = GASHA_TO_OUTPUT_LEVEL(NORMAL_MIN);//出力レベル最小値
+	static const level_type OUTPUT_LEVEL_MAX = GASHA_TO_OUTPUT_LEVEL(NORMAL_MAX);//出力レベル最大値
 	static_assert(SPECIAL_MAX == MAX, "Invalid level-constants.");//定数チェック
-	//マクロ消去
-	#undef TO_OUTPUT_LEVEL
-	#undef FROM_OUTPUT_LEVEL
 public:
 	//比較オペレータ
 	//※出力レベルで比較する
@@ -365,12 +362,12 @@ public:
 	static_assert(LEVEL >= logLevel::NORMAL_MIN && LEVEL <= logLevel::NORMAL_MAX, "Out of range of normal-log-level");//値の範囲チェック
 public:
 	//関数オペレータ
-	inline bool operator()(const char* name, IConsole* (&&console)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&&color)[logLevel::PURPOSE_NUM]);
+	inline bool operator()(const char* name, IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&colors)[logLevel::PURPOSE_NUM]);
 };
 
 //----------------------------------------
 //ログレベル登録用補助マクロ
-#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (logLevel::NORMAL_MIN + OUTPUT_LEVEL * 2 + SUB_VALIE)//ログレベル定数計算用マクロ
+#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (GASHA_FROM_OUTPUT_LEVEL(OUTPUT_LEVEL) + SUB_VALIE)//ログレベル定数計算用マクロ
 #define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
