@@ -27,6 +27,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //コンソールカラークラス
 
+//標準カラーか？
+inline bool consoleColor::isStandard() const
+{
+	return m_fore == STANDARD && m_back == STANDARD && m_attr == NOATTR;
+}
+
 //初期状態にする
 inline void consoleColor::reset()
 {

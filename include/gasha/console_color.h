@@ -83,6 +83,7 @@ public:
 
 public:
 	//アクセッサ
+	inline bool isStandard() const;//標準カラーか？
 	inline color_t fore() const { return m_fore; }//前景色
 	inline color_t& fore(){ return m_fore; }//前景色
 	inline color_t back() const { return m_back; }//背景色

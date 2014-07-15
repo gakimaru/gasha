@@ -365,7 +365,6 @@
 
 //--------------------------------------------------------------------------------
 //【ログキュー】
-//※ライブラリの再ビルド必要
 
 //ログキューメッセージ用スタックバッファサイズ
 #if !defined(GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE)
@@ -376,6 +375,14 @@
 #if !defined(GASHA_LOG_QUEUE_NODE_SIZE)
 	#define GASHA_LOG_QUEUE_NODE_SIZE 256
 #endif//GASHA_LOG_QUEUE_NODE_SIZE
+
+//--------------------------------------------------------------------------------
+//【ログキューモニター】
+
+//次のIDのキューが来ない時にリトライ（待機）する最大回数
+#if !defined(GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT)
+	#define GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT 256
+#endif//GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT
 
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】

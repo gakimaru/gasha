@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_LO_QUEUE_INL
-#define GASHA_INCLUDED_LO_QUEUE_INL
+#ifndef GASHA_INCLUDED_LOG_QUEUE_INL
+#define GASHA_INCLUDED_LOG_QUEUE_INL
 
 //--------------------------------------------------------------------------------
 // log_queue.inl
@@ -32,15 +32,17 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //比較演算子
 inline bool logQueue::node_type::operator<(const logQueue::node_type& rhs) const
 {
-	return m_id < rhs.m_id;
+	//小さい順に並べるため、判定を逆にする
+	return m_id > rhs.m_id;
 }
 
 //コンストラクタ
-inline logQueue::node_type::node_type(const logQueue::id_type id, const char* message, logQueue::level_type level, logQueue::category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
+inline logQueue::node_type::node_type(const logQueue::id_type id, const char* message, const bool is_no_cr, logQueue::level_type level, logQueue::category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
 	m_id(id),
 	m_message(message),
 	m_level(level),
-	m_category(category)
+	m_category(category),
+	m_isNoCr(is_no_cr)
 {
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
@@ -56,6 +58,17 @@ inline logQueue::node_type::node_type()
 //デストラクタ
 inline logQueue::node_type::~node_type()
 {}
+
+//ログキュークラス
+
+//キューイング予約
+inline logQueue::id_type logQueue::reserve()
+{
+	id_type id = m_id.fetch_add(1);
+	if (id == 0)//ID=0は許されないので、もし 0 だったら再発行する
+		id = m_id.fetch_add(1);
+	return id;
+}
 
 //デキュー
 inline bool logQueue::dequeue(node_type& node)
@@ -79,6 +92,18 @@ inline void logQueue::abort()
 	m_abort.store(true);//中断
 }
 
+//一時停止
+inline void logQueue::pause()
+{
+	m_pause.store(true);//一時停止
+}
+
+//一時停止から再開
+inline void logQueue::resume()
+{
+	m_pause.store(true);//一時停止解除
+}
+
 //明示的な初期化用コンストラクタ
 inline logQueue::logQueue(const explicitInitialize_t&)
 {
@@ -90,9 +115,9 @@ inline logQueue::logQueue(const explicitInitialize_t&)
 //デフォルトコンストラクタ
 inline logQueue::logQueue()
 {
-#ifdef GASHA_LO_QUEUE_SECURE_INITIALIZE
+#ifdef GASHA_LOG_QUEUE_SECURE_INITIALIZE
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
-#endif//GASHA_LO_QUEUE_SECURE_INITIALIZE
+#endif//GASHA_LOG_QUEUE_SECURE_INITIALIZE
 }
 
 //デストラクタ
@@ -103,6 +128,6 @@ inline logQueue::~logQueue()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_LO_QUEUE_INL
+#endif//GASHA_INCLUDED_LOG_QUEUE_INL
 
 // End of file

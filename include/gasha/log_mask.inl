@@ -197,7 +197,7 @@ inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, co
 inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type require_level, const logMask::category_type category)
 {
 	GASHA_ logLevel require_level_obj(require_level);
-	return console(purpose, require_level_obj, category);
+	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, require_level_obj, category));
 }
 
 //コンソールカラー取得 

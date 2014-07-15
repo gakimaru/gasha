@@ -62,6 +62,12 @@ public:
 	//　再度使用するには明示的な初期化が必要
 	inline void abort();
 
+	//一時停止
+	inline void pause();
+
+	//一時停止から再開
+	inline void resume();
+
 public:
 	//メッセージ作成補助処理
 	//※最大メッセージサイズをオーバーしないように操作する
@@ -100,6 +106,7 @@ private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
 	static std::atomic<bool> m_abort;//中断
+	static std::atomic<bool> m_pause;//一時停止
 	static GASHA_ lfPoolAllocator_withBuff<MAX_MESSAGE_SIZE, MESSAGE_POOL_SIZE> m_workBuff;//ワークバッファ
 };
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_LO_QUEUE_H
-#define GASHA_INCLUDED_LO_QUEUE_H
+#ifndef GASHA_INCLUDED_LOG_QUEUE_H
+#define GASHA_INCLUDED_LOG_QUEUE_H
 
 //--------------------------------------------------------------------------------
 // log_queue.h
@@ -14,6 +14,7 @@
 
 #include <gasha/i_console.h>//コンソールインターフェース
 #include <gasha/console_color.h>//コンソールカラー
+
 #include <gasha/log_purpose.h>//ログ用途
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
@@ -66,12 +67,13 @@ public:
 		category_type m_category;//ログカテゴリ
 		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
 		const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
+		bool m_isNoCr;//自動改行なし
 
 		//比較演算子
 		inline bool operator<(const node_type& rhs) const;
 
 		//コンストラクタ
-		inline node_type(const id_type id, const char* message, level_type level, category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
+		inline node_type(const id_type id, const char* message, const bool is_no_cr, level_type level, category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
 		
 		//デフォルトコンストラクタ
 		inline node_type();
@@ -92,6 +94,7 @@ public:
 	//定数
 	static const std::size_t MESSAGE_BUFF_SIZE = GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE;//メッセージバッファサイズ
 	static const std::size_t QUEUE_SIZE = GASHA_LOG_QUEUE_NODE_SIZE;//最大キュー数
+	static const id_type INIT_ID = 1;//IDの初期値
 #ifdef GASHA_LOG_QUEUE_NOWAIT
 	static const bool IS_NO_WAIT_MODE = true;
 #else//GASHA_LOG_QUEUE_NOWAIT
@@ -105,8 +108,16 @@ public:
 	//※GASHA_LOG_QUEUE_NOWAIT が指定されている場合、キュー用のバッファがいっぱいだとキューイングせずに失敗する。
 	//※キューイング待ち時に中断が指定されたら失敗する。
 	//※引数 mesage_size に 0 を指定すると、message の長さを計測する。message には終端を含めたサイズを指定する。
-	//※引数 id に 0 を指定すると、id を自動発番する。
-	bool enqueue(const char* message, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM], const std::size_t message_size = 0, const id_type id = 0);
+	//※引数 reserved_id には予約したIDを指定する。通常は 0 で、0 を指定すると、キューイングの際にIDを自動発番する。
+	bool enqueue(const char* message, const bool is_no_cr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM], const std::size_t message_size = 0, const id_type reserved_id = 0);
+
+	//キューイング予約
+	id_type reserve();
+
+	//先頭キューのIDを取得
+	//※キューの順序を確認して、次のキューを待つために使用。
+	//※キューがなければ 0 を返す。※ID = 0 のキューはない
+	id_type top();
 
 	//デキュー
 	//※キューのノードを渡して情報を受け取る。
@@ -123,6 +134,12 @@ public:
 	//※一度中断したら、キューイングを許可しなくなるため、
 	//　再度使用するには明示的な初期化が必要
 	inline void abort();
+
+	//一時停止
+	inline void pause();
+
+	//一時停止から再開
+	inline void resume();
 
 public:
 	//明示的な初期化用コンストラクタ
@@ -143,6 +160,7 @@ private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
 	static std::atomic<bool> m_abort;//中断
+	static std::atomic<bool> m_pause;//一時停止
 	static std::atomic<id_type> m_id;//キューID発番用
 	static GASHA_ lfSmartStackAllocator_withBuff<MESSAGE_BUFF_SIZE> m_messageBuff;//メッセージバッファ
 	static GASHA_ binary_heap::container<queueOpe, QUEUE_SIZE> m_queue;//ログキュー
@@ -158,6 +176,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_queue.inl>
 
-#endif//GASHA_INCLUDED_LO_QUEUE_H
+#endif//GASHA_INCLUDED_LOG_QUEUE_H
 
 // End of file

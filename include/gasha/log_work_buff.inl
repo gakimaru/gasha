@@ -44,6 +44,18 @@ inline void logWorkBuff::abort()
 	m_abort.store(true);//中断
 }
 
+//一時停止
+inline void logWorkBuff::pause()
+{
+	m_pause.store(true);//一時停止
+}
+
+//一時停止から再開
+inline void logWorkBuff::resume()
+{
+	m_pause.store(true);//一時停止解除
+}
+
 //spprintf
 template<typename... Tx>
 inline std::size_t logWorkBuff::spprintf(char* message, std::size_t& pos, const char* fmt, Tx&&... args)
