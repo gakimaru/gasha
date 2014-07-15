@@ -117,7 +117,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/new.inl>
 
-//依存関係はないが、利便性のためにいっしょにインクルードしておく
+//利便性のためにいっしょにインクルード
 #include <gasha/poly_allocator.h>//多態アロケータ
 #include <gasha/std_allocator.h>//標準アロケータ
 

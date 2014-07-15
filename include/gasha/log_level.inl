@@ -18,6 +18,7 @@
 
 #include <gasha/std_console.h>//標準コンソール
 
+#include <cstddef>//std::size_t
 #include <cstring>//memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -218,16 +219,14 @@ inline logLevelContainer::~logLevelContainer()
 
 //コンストラクタ
 template<unsigned char _LEVEL>
-inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice)
+inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* (&&console)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&&color)[logLevel::PURPOSE_NUM])
 {
 	logLevel::info info =
 	{
 		name,
 		LEVEL,
 		console,
-		console_for_notice,
 		color,
-		color_for_notice
 	};
 	logLevelContainer con;//コンテナ初期化のためのインスタンス化
 	return logLevelContainer::regist(info);
@@ -242,21 +241,25 @@ namespace _private
 	{
 	public:
 		//定数
-		static const logLevel::level_type LEVEL = _LEVEL;//値（レベル）
+		static const logLevel::level_type LEVEL = _LEVEL;//レベルの値
 		static_assert(LEVEL >= logLevel::NORMAL_MIN && LEVEL <= logLevel::NORMAL_MAX, "Out of range of normal-log-level");//値の範囲チェック
 	public:
 		//関数オペレータ
-		inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice)
+		inline bool operator()(const char* name, GASHA_ IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor* (&colors)[logLevel::PURPOSE_NUM])
 		{
 			logLevel::info info =
 			{
 				name,
-				LEVEL,
-				console,
-				console_for_notice,
-				color,
-				color_for_notice
+				LEVEL
 			};
+			for (logLevel::purpose_type purpose = 0; purpose < logLevel::PURPOSE_NUM; ++purpose)
+			{
+				info.m_consoles[purpose] = consoles[purpose];
+				if (colors[purpose])
+					info.m_colors[purpose] = *colors[purpose];
+				else
+					info.m_colors[purpose] = stdConsoleColor;
+			}
 			return logLevelContainer::regist(info);
 		}
 	};
@@ -268,7 +271,7 @@ namespace _private
 	{
 	public:
 		//定数
-		static const logLevel::level_type LEVEL = _LEVEL;//値（レベル）
+		static const logLevel::level_type LEVEL = _LEVEL;//レベルの値
 		static_assert(LEVEL >= logLevel::SPECIAL_MIN && LEVEL <= logLevel::SPECIAL_MAX, "Out of range of special-log-level");//値の範囲チェック
 	public:
 		//関数オペレータ
@@ -277,12 +280,13 @@ namespace _private
 			logLevel::info info =
 			{
 				name,
-				LEVEL,
-				nullptr,
-				nullptr,
-				consoleColor(stdConsoleColor),
-				consoleColor(stdConsoleColor)
+				LEVEL
 			};
+			for (logLevel::purpose_type purpose = 0; purpose < logLevel::PURPOSE_NUM; ++purpose)
+			{
+				info.m_consoles[purpose] = nullptr;
+				info.m_colors[purpose] = stdConsoleColor;
+			}
 			return logLevelContainer::regist(info);
 		}
 	};

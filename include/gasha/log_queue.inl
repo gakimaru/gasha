@@ -27,6 +27,36 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
+//キューノード型
+
+//比較演算子
+inline bool logQueue::node_type::operator<(const logQueue::node_type& rhs) const
+{
+	return m_id < rhs.m_id;
+}
+
+//コンストラクタ
+inline logQueue::node_type::node_type(const logQueue::id_type id, const char* message, logQueue::level_type level, logQueue::category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
+	m_id(id),
+	m_message(message),
+	m_level(level),
+	m_category(category)
+{
+	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
+	{
+		m_consoles[purpose] = consoles[purpose];
+		m_colors[purpose] = colors[purpose];
+	}
+}
+
+//デフォルトコンストラクタ
+inline logQueue::node_type::node_type()
+{}
+
+//デストラクタ
+inline logQueue::node_type::~node_type()
+{}
+
 //デキュー
 inline bool logQueue::dequeue(node_type& node)
 {

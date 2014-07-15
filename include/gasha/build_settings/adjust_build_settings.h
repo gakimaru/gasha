@@ -355,7 +355,7 @@
 
 //ログ出力用ワークバッファ一つ当たりのサイズ
 #if !defined(GASHA_LOG_WORK_BUFF_BLOCK_SIZE)
-	#define GASHA_LOG_WORK_BUFF_BLOCK_SIZE 2048
+	#define GASHA_LOG_WORK_BUFF_BLOCK_SIZE 4096
 #endif//GASHA_LOG_WORK_BUFF_BLOCK_SIZE
 
 //ログ出力用ワークバッファのプール数

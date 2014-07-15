@@ -12,6 +12,9 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/i_console.h>//コンソールインターフェース
+#include <gasha/console_color.h>//コンソールカラー
+#include <gasha/log_purpose.h>//ログ用途
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
 
@@ -47,37 +50,34 @@ class logQueue
 public:
 	//型
 	typedef std::uint64_t id_type;//キューID型（シーケンス番号）
-	typedef GASHA_ logCategory::category_type category_type;//カテゴリ型
-	typedef GASHA_ logLevel::level_type level_type;//レベル型
-	//ノード型
+	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
+	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
+	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
+public:
+	//定数
+	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
+public:
+	//キューノード型
 	struct node_type
 	{
 		id_type m_id;//キューID
 		const char* m_message;//メッセージ
-		category_type m_category;//ログカテゴリ
 		level_type m_level;//ログレベル
-		
+		category_type m_category;//ログカテゴリ
+		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
+		const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
+
 		//比較演算子
-		inline bool operator<(const node_type& rhs) const
-		{
-			return m_id < rhs.m_id;
-		}
+		inline bool operator<(const node_type& rhs) const;
 
 		//コンストラクタ
-		inline node_type(const id_type id, const char* message, category_type category, level_type level) :
-			m_id(id),
-			m_message(message),
-			m_category(category),
-			m_level(level)
-		{}
+		inline node_type(const id_type id, const char* message, level_type level, category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
 		
 		//デフォルトコンストラクタ
-		inline node_type()
-		{}
+		inline node_type();
 
 		//デストラクタ
-		inline ~node_type()
-		{}
+		inline ~node_type();
 	};
 	//バイナリヒープ操作型
 	struct queueOpe : public GASHA_ binary_heap::baseOpe<queueOpe, node_type>
@@ -106,7 +106,7 @@ public:
 	//※キューイング待ち時に中断が指定されたら失敗する。
 	//※引数 mesage_size に 0 を指定すると、message の長さを計測する。message には終端を含めたサイズを指定する。
 	//※引数 id に 0 を指定すると、id を自動発番する。
-	bool enqueue(const category_type category, const level_type level, const char* message, const std::size_t message_size = 0, const id_type id = 0);
+	bool enqueue(const char* message, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM], const std::size_t message_size = 0, const id_type id = 0);
 
 	//デキュー
 	//※キューのノードを渡して情報を受け取る。

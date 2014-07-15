@@ -214,17 +214,30 @@ inline logCategoryContainer::~logCategoryContainer()
 //----------------------------------------
 //ログカテゴリ登録テンプレートクラス
 
-//コンストラクタ
+//関数オペレータ
 template<unsigned char _CATEGORY>
-inline bool regLogCategory<_CATEGORY>::operator()(const char* name, GASHA_ IConsole* console, GASHA_ IConsole* console_for_notice)
+inline bool regLogCategory<_CATEGORY>::operator()(const char* name)
 {
 	logCategory::info info =
 	{
 		name,
-		CATEGORY,
-		console,
-		console_for_notice
+		CATEGORY
 	};
+	for (logCategory::purpose_type purpose = 0; purpose < logCategory::PURPOSE_NUM; ++purpose)
+		info.m_consoles[purpose] = nullptr;
+	logCategoryContainer con;//コンテナ初期化のためのインスタンス化
+	return logCategoryContainer::regist(info);
+}
+template<unsigned char _CATEGORY>
+inline bool regLogCategory<_CATEGORY>::operator()(const char* name, GASHA_ IConsole* (&consoles)[logCategory::PURPOSE_NUM])
+{
+	logCategory::info info =
+	{
+		name,
+		CATEGORY
+	};
+	for (logCategory::purpose_type purpose = 0; purpose < logCategory::PURPOSE_NUM; ++purpose)
+		info.m_consoles[purpose] = consoles[purpose];
 	logCategoryContainer con;//コンテナ初期化のためのインスタンス化
 	return logCategoryContainer::regist(info);
 }
@@ -238,19 +251,19 @@ namespace _private
 	{
 	public:
 		//定数
-		static const logCategory::category_type CATEGORY = _CATEGORY;//値（カテゴリ）
+		static const logCategory::category_type CATEGORY = _CATEGORY;//カテゴリの値
 		static_assert(CATEGORY >= logCategory::NORMAL_MIN && CATEGORY <= logCategory::NORMAL_MAX, "Out of range of normal-log-category");//値の範囲チェック
 	public:
 		//関数オペレータ
-		inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice)
+		inline bool operator()(const char* name, GASHA_ IConsole* (&consoles)[logCategory::PURPOSE_NUM])
 		{
 			logCategory::info info =
 			{
 				name,
-				CATEGORY,
-				console,
-				console_for_notice
+				CATEGORY
 			};
+			for (logCategory::purpose_type purpose = 0; purpose < logCategory::PURPOSE_NUM; ++purpose)
+				info.m_consoles[purpose] = consoles[purpose];
 			return logCategoryContainer::regist(info);
 		}
 	};
@@ -262,7 +275,7 @@ namespace _private
 	{
 	public:
 		//定数
-		static const logCategory::category_type CATEGORY = _CATEGORY;//値（カテゴリ）
+		static const logCategory::category_type CATEGORY = _CATEGORY;//カテゴリの値
 		static_assert(CATEGORY >= logCategory::SPECIAL_MIN && CATEGORY <= logCategory::SPECIAL_MAX, "Out of range of special-log-category");//値の範囲チェック
 	public:
 		//関数オペレータ
@@ -271,10 +284,10 @@ namespace _private
 			logCategory::info info =
 			{
 				name,
-				CATEGORY,
-				nullptr,
-				nullptr
+				CATEGORY
 			};
+			for (logCategory::purpose_type purpose = 0; purpose < logCategory::PURPOSE_NUM; ++purpose)
+				info.m_consoles[purpose] = nullptr;
 			return logCategoryContainer::regist(info);
 		}
 	};

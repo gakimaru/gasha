@@ -12,8 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log_common.h>//ログ共通設定
-
+#include <gasha/log_purpose.h>//ログ用途
 #include <gasha/i_console.h>//コンソールインターフェース
 #include <gasha/console_color.h>//コンソールカラー
 
@@ -69,15 +68,19 @@ class logLevel
 	friend class _private::regSpecialLogLevel;
 public:
 	//型
-	typedef unsigned char level_type;//値（レベル）
+	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
+	typedef unsigned char level_type;//ログレベルの値
+public:
+	//定数
+	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;
 private:
 	//ログレベル情報
 	struct info
 	{
 		const char* m_name;//名前
-		level_type m_value;//値（レベル）
-		GASHA_ IConsole* m_console[GASHA_ LOG_PURPOSE_NUM];//出力先コンソール
-		GASHA_ consoleColor m_color[GASHA_ LOG_PURPOSE_NUM];//カラー
+		level_type m_value;//レベルの値
+		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
+		GASHA_ consoleColor m_colors[PURPOSE_NUM];//カラー
 	};
 public:
 	//定数計算用マクロ／関数
@@ -118,20 +121,20 @@ public:
 public:
 	//キャストオペレータ
 	inline operator bool() const { return isExist(); }//正しいログレベルか？
-	inline operator int() const { return static_cast<int>(m_info->m_value); }//値（レベル）
-	inline operator level_type() const { return m_info->m_value; }//値（レベル）
+	inline operator int() const { return static_cast<int>(m_info->m_value); }//レベルの値
+	inline operator level_type() const { return m_info->m_value; }//レベルの値
 	inline operator const char*() const { return m_info->m_name; }//名前
 public:
 	//アクセッサ
 	inline bool isExist() const { return m_info != nullptr; }//正しいログレベルか？
 	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊レベルか？
-	inline level_type value() const { return m_info->m_value; }//値（レベル）取得
+	inline level_type value() const { return m_info->m_value; }//レベルの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
 	inline level_type outputLevel() const { return toOutputLevel(m_info->m_value); }//出力レベル取得
-	inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose) const { return m_info->m_console[purpose]; }//コンソール
-	inline GASHA_ IConsole*& console(const GASHA_ logPurpose purpose){ return m_info->m_console[purpose]; }//コンソール
-	inline const consoleColor& color(const GASHA_ logPurpose purpose) const { return m_info->m_color[purpose]; }//カラー取得
-	inline consoleColor& color(const GASHA_ logPurpose purpose){ return m_info->m_color[purpose]; }//カラー取得
+	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
+	inline GASHA_ IConsole*& console(const purpose_type purpose){ return m_info->m_consoles[purpose]; }//コンソール
+	inline const consoleColor& color(const purpose_type purpose) const { return m_info->m_colors[purpose]; }//カラー取得
+	inline consoleColor& color(const purpose_type purpose){ return m_info->m_colors[purpose]; }//カラー取得
 public:
 	//メソッド
 	//前後のログレベルを取得
@@ -215,10 +218,10 @@ public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
 		inline operator logLevel::level_type() const { return m_value; }
-		inline operator const logLevel*() const { return &m_logLevel; }//値（レベル）
-		inline operator logLevel*(){ return &m_logLevel; }//値（レベル）
-		inline operator const logLevel&() const { return m_logLevel; }//値（レベル）
-		inline operator logLevel&(){ return m_logLevel; }//値（レベル）
+		inline operator const logLevel*() const { return &m_logLevel; }//レベルの値
+		inline operator logLevel*(){ return &m_logLevel; }//レベルの値
+		inline operator const logLevel&() const { return m_logLevel; }//レベルの値
+		inline operator logLevel&(){ return m_logLevel; }//レベルの値
 	public:
 		//ムーブオペレータ
 		inline iterator& operator=(iterator&& rhs);
@@ -237,7 +240,7 @@ public:
 		inline ~iterator();
 	private:
 		//フィールド
-		mutable logLevel::level_type m_value;//値（レベル）
+		mutable logLevel::level_type m_value;//レベルの値
 		mutable logLevel m_logLevel;//ログレベル
 		mutable bool m_isEnd;//終端か？
 	};
@@ -271,10 +274,10 @@ public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
 		inline operator logLevel::level_type() const { return m_value == logLevel::INVALID ? logLevel::INVALID : m_logLevel.m_info ? m_logLevel.m_info->m_value : logLevel::END; }
-		inline operator const logLevel*() const { return &m_logLevel; }//値（レベル）
-		inline operator logLevel*(){ return &m_logLevel; }//値（レベル）
-		inline operator const logLevel&() const { return m_logLevel; }//値（レベル）
-		inline operator logLevel&(){ return m_logLevel; }//値（レベル）
+		inline operator const logLevel*() const { return &m_logLevel; }//レベルの値
+		inline operator logLevel*(){ return &m_logLevel; }//レベルの値
+		inline operator const logLevel&() const { return m_logLevel; }//レベルの値
+		inline operator logLevel&(){ return m_logLevel; }//レベルの値
 	public:
 		//ムーブオペレータ
 		inline reverse_iterator& operator=(reverse_iterator&& rhs);
@@ -296,7 +299,7 @@ public:
 		inline ~reverse_iterator();
 	private:
 		//フィールド
-		mutable logLevel::level_type m_value;//値（レベル）
+		mutable logLevel::level_type m_value;//レベルの値
 		mutable logLevel m_logLevel;//ログレベル
 		mutable bool m_isEnd;//終端か？
 	};
@@ -328,8 +331,8 @@ public:
 public:
 	//全てのログレベルのコンソール／画面通知用コンソールを変更
 	//※nullptrが設定されているものは変更しない
-	void replaceAllConsole(const GASHA_ logPurpose purpose, IConsole* new_console);
-	void replaceAllConsole(const GASHA_ logPurpose purpose, IConsole* src_console, IConsole* new_console);//置き換え元のコンソールを指定する場合
+	void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* new_console);
+	void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* src_console, IConsole* new_console);//置き換え元のコンソールを指定する場合
 private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
@@ -358,30 +361,17 @@ class regLogLevel
 {
 public:
 	//定数
-	static const logLevel::level_type LEVEL = _LEVEL;//値（レベル）
+	static const logLevel::level_type LEVEL = _LEVEL;//レベルの値
 	static_assert(LEVEL >= logLevel::NORMAL_MIN && LEVEL <= logLevel::NORMAL_MAX, "Out of range of normal-log-level");//値の範囲チェック
 public:
 	//関数オペレータ
-	inline bool operator()(const char* name, IConsole* console, IConsole* console_for_notice, GASHA_ consoleColor&& color, GASHA_ consoleColor&& color_for_notice);
+	inline bool operator()(const char* name, IConsole* (&&console)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&&color)[logLevel::PURPOSE_NUM]);
 };
 
 //----------------------------------------
-//既定のログレベル用定数
-#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (logLevel::NORMAL_MIN + OUTPUT_LEVEL * 2 + SUB_VALIE)
-#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (logLevel::SPECIAL_MIN + VALUE)
-enum levelEnum : logLevel::level_type
-{
-	asNormal = MAKE_LOG_LEVEL_VALUE(1, 0),//通常メッセージ
-	asVerbose = MAKE_LOG_LEVEL_VALUE(0, 0),//冗長メッセージ
-	asDetail = MAKE_LOG_LEVEL_VALUE(0, 1),//詳細メッセージ
-	asImportant = MAKE_LOG_LEVEL_VALUE(2, 0),//重要メッセージ
-	asWarning = MAKE_LOG_LEVEL_VALUE(3, 0),//警告メッセージ
-	asCritical = MAKE_LOG_LEVEL_VALUE(4, 0),//重大メッセージ
-	asAbsolute = MAKE_LOG_LEVEL_VALUE(5, 0),//絶対メッセージ（ログレベルに関係なく出力したいメッセージ）
-	//以下、ログレベル／画面通知レベル変更用
-	asSilent = MAKE_SPECIAL_LOG_LEVEL_VALUE(0),//静寂（絶対メッセージ以外出力しない）
-	asSilentAbsolutely = MAKE_SPECIAL_LOG_LEVEL_VALUE(1),//絶対静寂（全てのメッセージを出力しない）
-};
+//ログレベル登録用補助マクロ
+#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (logLevel::NORMAL_MIN + OUTPUT_LEVEL * 2 + SUB_VALIE)//ログレベル定数計算用マクロ
+#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
@@ -392,6 +382,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_level.inl>
+
+//利便性のためにいっしょにインクルード
+#include <gasha/default_log_level.h>//既定のログレベル
 
 #endif//GASHA_INCLUDED_LOG_LEVEL_H
 

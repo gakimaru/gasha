@@ -12,13 +12,12 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log_common.h>//ログ共通設定
-
+#include <gasha/log_purpose.h>//ログ用途
 #include <gasha/i_console.h>//コンソールインターフェース
 #include <gasha/console_color.h>//コンソールカラー
 
+#include <cstddef>//std::size_t
 #include <utility>//C++11 std::move
-#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)
@@ -69,14 +68,18 @@ class logCategory
 	friend class _private::regSpecialLogCategory;
 public:
 	//型
-	typedef unsigned char category_type;//値（カテゴリ）
+	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
+	typedef unsigned char category_type;//ログカテゴリの値
+public:
+	//定数
+	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;
 private:
 	//ログカテゴリ情報
 	struct info
 	{
 		const char* m_name;//名前
-		category_type m_value;//値（カテゴリ）
-		GASHA_ IConsole* m_console[GASHA_ LOG_PURPOSE_NUM];//出力先コンソール
+		category_type m_value;//カテゴリの値
+		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
 	};
 public:
 	//定数
@@ -105,18 +108,18 @@ public:
 public:
 	//キャストオペレータ
 	inline operator bool() const { return isExist(); }//正しいログカテゴリか？
-	inline operator int() const { return static_cast<int>(m_info->m_value); }//値（カテゴリ）
-	inline operator category_type() const { return m_info->m_value; }//値（カテゴリ）
+	inline operator int() const { return static_cast<int>(m_info->m_value); }//カテゴリの値
+	inline operator category_type() const { return m_info->m_value; }//カテゴリの値
 	inline operator const char*() const { return m_info->m_name; }//名前
 public:
 	//アクセッサ
 	inline bool isExist() const { return m_info != nullptr; }//正しいログカテゴリか？
 	inline bool isSpecial() const { return m_info->m_value >= SPECIAL_MIN && m_info->m_value <= SPECIAL_MAX; }//特殊カテゴリか？
 	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
-	inline category_type value() const { return m_info->m_value; }//値（カテゴリ）取得
+	inline category_type value() const { return m_info->m_value; }//カテゴリの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
-	inline const GASHA_ IConsole* console(const GASHA_ logPurpose purpose) const { return m_info->m_console[purpose]; }//コンソール
-	inline GASHA_ IConsole*& console(const GASHA_ logPurpose purpose){ return m_info->m_console[purpose]; }//コンソール
+	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
+	inline GASHA_ IConsole*& console(const purpose_type purpose){ return m_info->m_consoles[purpose]; }//コンソール
 public:
 	//ムーブオペレータ
 	inline logCategory& operator=(logCategory&& rhs);
@@ -194,10 +197,10 @@ public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
 		inline operator logCategory::category_type() const { return m_value; }
-		inline operator const logCategory*() const { return &m_logCategory; }//値（カテゴリ）
-		inline operator logCategory*(){ return &m_logCategory; }//値（カテゴリ）
-		inline operator const logCategory&() const { return m_logCategory; }//値（カテゴリ）
-		inline operator logCategory&(){ return m_logCategory; }//値（カテゴリ）
+		inline operator const logCategory*() const { return &m_logCategory; }//カテゴリの値
+		inline operator logCategory*(){ return &m_logCategory; }//カテゴリの値
+		inline operator const logCategory&() const { return m_logCategory; }//カテゴリの値
+		inline operator logCategory&(){ return m_logCategory; }//カテゴリの値
 	public:
 		//ムーブオペレータ
 		inline iterator& operator=(iterator&& rhs);
@@ -216,7 +219,7 @@ public:
 		inline ~iterator();
 	private:
 		//フィールド
-		mutable logCategory::category_type m_value;//値（カテゴリ）
+		mutable logCategory::category_type m_value;//カテゴリの値
 		mutable logCategory m_logCategory;//ログカテゴリ
 		mutable bool m_isEnd;//終端か？
 	};
@@ -250,10 +253,10 @@ public:
 		//キャストオペレータ
 		inline operator bool() const { return isExist(); }
 		inline operator logCategory::category_type() const { return m_value == logCategory::INVALID ? logCategory::INVALID : m_logCategory.m_info ? m_logCategory.m_info->m_value : logCategory::END; }
-		inline operator const logCategory*() const { return &m_logCategory; }//値（カテゴリ）
-		inline operator logCategory*(){ return &m_logCategory; }//値（カテゴリ）
-		inline operator const logCategory&() const { return m_logCategory; }//値（カテゴリ）
-		inline operator logCategory&(){ return m_logCategory; }//値（カテゴリ）
+		inline operator const logCategory*() const { return &m_logCategory; }//カテゴリの値
+		inline operator logCategory*(){ return &m_logCategory; }//カテゴリの値
+		inline operator const logCategory&() const { return m_logCategory; }//カテゴリの値
+		inline operator logCategory&(){ return m_logCategory; }//カテゴリの値
 	public:
 		//ムーブオペレータ
 		inline reverse_iterator& operator=(reverse_iterator&& rhs);
@@ -275,7 +278,7 @@ public:
 		inline ~reverse_iterator();
 	private:
 		//フィールド
-		mutable logCategory::category_type m_value;//値（カテゴリ）
+		mutable logCategory::category_type m_value;//カテゴリの値
 		mutable logCategory m_logCategory;//ログカテゴリ
 		mutable bool m_isEnd;//終端か？
 	};
@@ -332,31 +335,18 @@ class regLogCategory
 {
 public:
 	//定数
-	static const logCategory::category_type CATEGORY = _CATEGORY;//値（カテゴリ）
+	static const logCategory::category_type CATEGORY = _CATEGORY;//カテゴリの値
 	static_assert(CATEGORY >= logCategory::NORMAL_MIN && CATEGORY <= logCategory::NORMAL_MAX, "Out of range of normal-log-category");//値の範囲チェック
 public:
 	//関数オペレータ
-	inline bool operator()(const char* name, IConsole* console = nullptr, IConsole* console_for_notice = nullptr);
+	inline bool operator()(const char* name);
+	inline bool operator()(const char* name, IConsole* (&consoles)[logCategory::PURPOSE_NUM]);
 };
 
 //----------------------------------------
-//既定のログカテゴリ用定数
-#define MAKE_LOG_CATEGORY_VALUE(VALUE) (logCategory::NORMAL_MIN + VALUE)
-#define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (logCategory::SPECIAL_MIN + VALUE)
-enum categoryEnum : logCategory::category_type
-{
-	forAny = MAKE_LOG_CATEGORY_VALUE(0),//なんでも（カテゴリなし）
-	forFileSystem = MAKE_LOG_CATEGORY_VALUE(1),//ファイルシステム関係
-	forResource = MAKE_LOG_CATEGORY_VALUE(2),//リソース関係
-	for3D = MAKE_LOG_CATEGORY_VALUE(3),//3Dグラフィックス関係
-	for2D = MAKE_LOG_CATEGORY_VALUE(4),//2Dグラフィックス関係
-	forSound = MAKE_LOG_CATEGORY_VALUE(5),//サウンド関係
-	//ログレベル／画面通知レベル変更用
-	forEvery = MAKE_SPECIAL_LOG_CATEGORY_VALUE(0),//全部まとめて変更
-	//特殊なカテゴリ（プリント時専用）
-	forCallPoint = MAKE_SPECIAL_LOG_CATEGORY_VALUE(1),//直近のコールポイントのカテゴリに合わせる（なければforAny扱い）
-	forCriticalCallPoint = MAKE_SPECIAL_LOG_CATEGORY_VALUE(2),//直近の重大コールポイントのカテゴリに合わせる（なければforAny扱い）
-};
+//ログカテゴリ登録用補助マクロ
+#define MAKE_LOG_CATEGORY_VALUE(VALUE) (logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
+#define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
@@ -367,6 +357,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_category.inl>
+
+//利便性のためにいっしょにインクルード
+#include <gasha/default_log_category.h>//既定のログカテゴリ
 
 #endif//GASHA_INCLUDED_LOG_CATEGORY_H
 
