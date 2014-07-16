@@ -156,6 +156,9 @@ $(OUT_DIR)/%.h.gch : %.h
 	mkdir -p $(dir $@); \
 	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MD -MP -MF $(@:%.gch=%.d) -c $< -o $@
 
+# プリコンパイル済みヘッダーをMakefileが削除しないように設定
+.PRECIOUS: $(PC_STD_HEADER)
+
 #-------------------------------------------------------------------------------
 
 # End of file

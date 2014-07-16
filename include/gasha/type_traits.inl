@@ -147,6 +147,37 @@ inline const char* toByteStr<bool>(char* buff, const bool value)
 	buff[1] = '\0';
 	return buff;
 }
+//※nullptr_t型に特殊化
+template<>
+inline const char* toStr<std::nullptr_t>(const std::nullptr_t value)
+{
+	static char nullptr_strbuff[16];
+	static char* nullptr_str = nullptr;
+	if (!nullptr_str)
+	{
+		GASHA_ sprintf(nullptr_strbuff, "%s", nullptr);
+		nullptr_str = nullptr_strbuff;
+	}
+	return nullptr_str;
+}
+template<>
+inline const char* toNumStr<std::nullptr_t>(char* buff, const std::nullptr_t value)
+{
+	buff[0] = '\0';
+	return buff;
+}
+template<>
+inline const char* toHexStr<std::nullptr_t>(char* buff, const std::nullptr_t value)
+{
+	buff[0] = '\0';
+	return buff;
+}
+template<>
+inline const char* toByteStr<std::nullptr_t>(char* buff, const std::nullptr_t value)
+{
+	buff[0] = '\0';
+	return buff;
+}
 //※char型に特殊化
 template<>
 inline const char* toStr<char>(char* buff, const char value)

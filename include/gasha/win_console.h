@@ -49,7 +49,7 @@ class winConsole : public GASHA_ IConsole
 public:
 	//アクセッサ
 	const char* name() const override { return m_name; }
-	inline FILE* handle() const { return m_handle; }//ハンドル
+	inline std::FILE* handle() const { return m_handle; }//ハンドル
 	inline HANDLE hWin() const { return m_hWin; }//Windowsハンドル
 	inline const CONSOLE_SCREEN_BUFFER_INFO& screenBuffer() const { return m_screenBuffer; }//スクリーンバッファ
 
@@ -82,13 +82,13 @@ public:
 
 public:
 	//コンストラクタ
-	winConsole(FILE* handle, const char* name = "Win-console");
+	winConsole(std::FILE* handle, const char* name = "Win-console");
 	//デストラクタ
 	~winConsole() override;
 private:
 	//フィールド
 	const char* m_name;//名前
-	FILE* m_handle;//ハンドル
+	std::FILE* m_handle;//ハンドル
 	HANDLE m_hWin;//Windowsハンドル
 	CONSOLE_SCREEN_BUFFER_INFO m_screenBuffer;//スクリーンバッファ
 };
@@ -101,7 +101,7 @@ class winConsole : public ttyConsole
 {
 public:
 	//コンストラクタ
-	winConsole(FILE* handle, const char* name = "TTY-console") :
+	winConsole(std::FILE* handle, const char* name = "TTY-console") :
 		ttyConsole(handle, name)
 	{}
 	//デストラクタ

@@ -190,6 +190,15 @@ template<>
 inline const char* toHexStr<bool>(char* buff, const bool value);
 template<>
 inline const char* toByteStr<bool>(char* buff, const bool value);
+//※nullptr_t型に特殊化
+template<>
+inline const char* toStr<std::nullptr_t>(const std::nullptr_t value);
+template<>
+inline const char* toNumStr<std::nullptr_t>(char* buff, const std::nullptr_t value);
+template<>
+inline const char* toHexStr<std::nullptr_t>(char* buff, const std::nullptr_t value);
+template<>
+inline const char* toByteStr<std::nullptr_t>(char* buff, const std::nullptr_t value);
 //※char型に特殊化
 template<>
 inline const char* toStr<char>(char* buff, const char value);

@@ -267,13 +267,13 @@ public:
 	//ムーブオペレータ
 	inline logMask& operator=(logMask&& rhs);
 	//コピーオペレータ
-	inline logMask& operator=(const logMask& rhs);
+	inline logMask& operator=(const logMask& rhs) = delete;
 
 public:
 	//ムーブコンストラクタ
 	inline logMask(logMask&& obj);
 	//コピーコンストラクタ
-	inline logMask(const logMask& obj);
+	inline logMask(const logMask& obj) = delete;
 	//明示的な初期化用コンストラクタ
 	inline logMask(const explicitInitialize_t&);
 	//デフォルトコンストラクタ

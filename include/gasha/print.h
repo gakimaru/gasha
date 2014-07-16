@@ -1,12 +1,10 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_LOG_PURPOSE_INL
-#define GASHA_INCLUDED_LOG_PURPOSE_INL
+#ifndef GASHA_INCLUDED_PRINT_H
+#define GASHA_INCLUDED_PRINT_H
 
 //--------------------------------------------------------------------------------
-// log_purpose.inl
-// ログ用途【インライン関数／テンプレート関数定義部】
-//
-// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+// print.h
+// ログ出力操作【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -14,22 +12,26 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log_purpose.h>//ログ用途【宣言部】
+#include <cstddef>//std::size_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
-//ログ用途
+//ログ出力操作
 //--------------------------------------------------------------------------------
 
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
-//（なし）
+//----------------------------------------
+//ログ出力操作
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_LOG_PURPOSE_INL
+//.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
+#include <gasha/log_purpose.inl>
+
+#endif//GASHA_INCLUDED_PRINT_H
 
 // End of file

@@ -19,6 +19,7 @@
 #else//GASHA_USE_WINDOWS_CONSOLE
 #include <gasha/tty_console.h>//TTY端末
 #endif//GASHA_USE_WINDOWS_CONSOLE
+#include <gasha/mem_console.h>//メモリコンソール
 #include <gasha/dummy_console.h>//ダミーコンソール
 
 #include <cstdio>//stdout, stderr
@@ -36,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //標準出力コンソール
 //※Windowsコマンドプロンプトに委譲
-class stdOutConsole : public winConsole
+class stdOutConsole : public GASHA_ winConsole
 {
 public:
 	//静的アクセッサ
@@ -59,7 +60,7 @@ private:
 //----------------------------------------
 //標準エラーコンソール
 //※Windowsコマンドプロンプトに委譲
-class stdErrConsole : public winConsole
+class stdErrConsole : public GASHA_ winConsole
 {
 public:
 	//静的アクセッサ
@@ -82,7 +83,7 @@ private:
 //----------------------------------------
 //画面通知用標準コンソール
 //※Windowsコマンドプロンプトに委譲
-class stdConsoleOfNotice : public winConsole
+class stdConsoleOfNotice : public GASHA_ winConsole
 {
 public:
 	//静的アクセッサ
@@ -107,7 +108,7 @@ private:
 //----------------------------------------
 //標準出力コンソール
 //※TTY端末に委譲
-class stdOutConsole : public ttyConsole
+class stdOutConsole : public GASHA_ ttyConsole
 {
 public:
 	//静的アクセッサ
@@ -130,7 +131,7 @@ private:
 //----------------------------------------
 //標準エラーコンソール
 //※TTY端末に委譲
-class stdErrConsole : public ttyConsole
+class stdErrConsole : public GASHA_ ttyConsole
 {
 public:
 	//静的アクセッサ
@@ -153,7 +154,7 @@ private:
 //----------------------------------------
 //画面通知用標準コンソール
 //※TTY端末に委譲
-class stdConsoleOfNotice : public ttyConsole
+class stdConsoleOfNotice : public GASHA_ ttyConsole
 {
 public:
 	//静的アクセッサ
@@ -176,8 +177,31 @@ private:
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 //----------------------------------------
+//標準メモリコンソール
+//※ビルド設定で設定されたバッファサイズ、かつ、ロック制御なしで設定する
+class stdMemConsole : public GASHA_ memConsole<GASHA_STD_MEM_CONSOLE_BUFF_SIZE>
+{
+public:
+	//静的アクセッサ
+	inline static stdMemConsole& instance(){ return s_instance; }
+
+public:
+	//コンストラクタ
+	stdMemConsole() :
+		memConsole("Memory")
+	{}
+	//デストラクタ
+	~stdMemConsole() override
+	{}
+
+private:
+	//静的フィールド
+	static stdMemConsole s_instance;
+};
+
+//----------------------------------------
 //標準ダミーコンソール
-class stdDummyConsole : public dummyConsole
+class stdDummyConsole : public GASHA_ dummyConsole
 {
 public:
 	//静的アクセッサ

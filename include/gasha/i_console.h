@@ -14,6 +14,8 @@
 
 #include <gasha/console_color.h>//コンソールカラー
 
+#include <cstddef>//std::size_t
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -51,9 +53,11 @@ public:
 	virtual void output(const char* str) = 0;
 
 	//書式付き出力
-	//※バッファも受け渡す必要あり
+	//※十分なサイズのワークバッファを受け渡す必要あり
 	template<typename... Tx>
-	inline int printf(char* message, const char* fmt, Tx&&... args);
+	inline int printf(char* work_buff, const char* fmt, Tx&&... args);
+	template<typename... Tx>
+	inline int printf(char* work_buff, const std::size_t work_buff_size, const char* fmt, Tx&&... args);
 
 	//改行出力
 	//※改行前にカラーリセットも行う

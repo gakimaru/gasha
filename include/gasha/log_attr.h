@@ -109,13 +109,13 @@ public:
 	//ムーブオペレータ
 	inline logAttr& operator=(logAttr&& attr);
 	//コピーオペレータ
-	inline logAttr& operator=(const logAttr& attr);
+	inline logAttr& operator=(const logAttr& attr) = delete;
 
 public:
 	//ムーブコンストラクタ
 	inline logAttr(logAttr&& attr);
 	//コピーコンストラクタ
-	inline logAttr(const logAttr& attr);
+	inline logAttr(const logAttr& attr) = delete;
 	//明示的な初期化用コンストラクタ
 	inline logAttr(const explicitInitialize_t&);
 	//デフォルトコンストラクタ

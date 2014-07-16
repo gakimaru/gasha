@@ -31,10 +31,18 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //書式付き出力
 template<typename... Tx>
-inline int IConsole::printf(char* message, const char* fmt, Tx&&... args)
+inline int IConsole::printf(char* work_buff, const char* fmt, Tx&&... args)
 {
-	const int ret = GASHA_ spprintf(message, fmt, std::forward<Tx>(args)...);
-	output(message);
+	const int ret = GASHA_ spprintf(work_buff, fmt, std::forward<Tx>(args)...);
+	output(work_buff);
+	return ret;
+}
+template<typename... Tx>
+inline int IConsole::printf(char* work_buff, const std::size_t work_buff_size, const char* fmt, Tx&&... args)
+{
+	std::size_t pos = 0;
+	const int ret = GASHA_ spprintf(work_buff, work_buff_size, pos, fmt, std::forward<Tx>(args)...);
+	output(work_buff);
 	return ret;
 }
 

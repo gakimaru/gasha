@@ -72,17 +72,7 @@ inline logAttr& logAttr::operator=(logAttr&& rhs)
 	m_attrRef = rhs.m_attrRef;
 	m_prevTlsAttr = rhs.m_prevTlsAttr;//変更前のTLSログ属性はコピーし、
 	rhs.m_prevTlsAttr = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
-	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
-		m_localAttr = rhs.m_localAttr;
-	return *this;
-}
-
-//コピーオペレータ
-inline logAttr& logAttr::operator=(const logAttr& rhs)
-{
-	m_refType = rhs.m_refType;
-	m_attrRef = rhs.m_attrRef;
-	m_prevTlsAttr = nullptr;//変更前のTLSログ属性はコピーしない（デストラクタで復元しない）
+	rhs.m_refType = isGlobal;         //（同上）
 	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
 		m_localAttr = rhs.m_localAttr;
 	return *this;
@@ -96,19 +86,11 @@ inline logAttr::logAttr(logAttr&& obj) :
 	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 {
 	obj.m_prevTlsAttr = nullptr;//ムーブ元無効化
+	obj.m_refType = isGlobal;   //（同上）
 	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
 		m_localAttr = obj.m_localAttr;
 }
 
-//コピーコンストラクタ
-inline logAttr::logAttr(const logAttr& obj) :
-	m_refType(obj.m_refType),
-	m_attrRef(obj.m_attrRef),
-	m_prevTlsAttr(nullptr)//変更前のTLSログ属性はコピーしない（デストラクタで復元しない）
-{
-	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
-		m_localAttr = obj.m_localAttr;
-}
 
 //明示的な初期化用コンストラクタ
 inline logAttr::logAttr(const explicitInitialize_t&)

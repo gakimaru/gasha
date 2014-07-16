@@ -31,7 +31,7 @@ class ttyConsole : public GASHA_ IConsole
 public:
 	//アクセッサ
 	const char* name() const override { return m_name; }
-	inline FILE* handle() const { return m_handle; }//ハンドル
+	inline std::FILE* handle() const { return m_handle; }//ハンドル
 
 public:
 	//メソッド
@@ -62,14 +62,14 @@ public:
 
 public:
 	//コンストラクタ
-	inline ttyConsole(FILE* handle, const char* name = "TTY-console");
+	inline ttyConsole(std::FILE* handle, const char* name = "TTY-console");
 	//デストラクタ
 	~ttyConsole() override;
 
 private:
 	//フィールド
 	const char* m_name;//名前
-	FILE* m_handle;//ハンドル
+	std::FILE* m_handle;//ハンドル
 };
 
 #endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化

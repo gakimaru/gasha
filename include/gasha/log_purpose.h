@@ -3,7 +3,7 @@
 #define GASHA_INCLUDED_LOG_PURPOSE_H
 
 //--------------------------------------------------------------------------------
-// log_reporter.h
+// log_purpose.h
 // ログ用途【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA

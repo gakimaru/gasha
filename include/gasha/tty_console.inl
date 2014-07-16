@@ -43,7 +43,7 @@ inline void ttyConsole::changeColor(const GASHA_ consoleColor& color)
 	changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 //コンストラクタ
-inline ttyConsole::ttyConsole(FILE* handle, const char* name) :
+inline ttyConsole::ttyConsole(std::FILE* handle, const char* name) :
 	m_name(name),
 	m_handle(handle)
 {}

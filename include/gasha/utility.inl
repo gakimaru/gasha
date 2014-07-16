@@ -37,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //値が二つの max()
 template<typename T1, typename T2>
-inline constexpr T1 max(const T1& n1, const T2& n2){ return static_cast<T1>(n2) < n1 ? n1 : static_cast<T1>(n2); }
+inline constexpr T1 max(const T1 n1, const T2 n2){ return static_cast<T1>(n2) < n1 ? n1 : static_cast<T1>(n2); }
 template<typename T>
 inline constexpr const T& maxObj(const T& obj1, const T& obj2){ return obj2 < obj1 ? obj1 : obj2; }
 template<typename T>
@@ -45,7 +45,7 @@ inline constexpr T& maxObj(T&& obj1, T&& obj2){ return obj2 < obj1 ? obj1 : obj2
 
 //値が三つ以上の max() : 再帰処理
 template<typename T1, typename T2, typename T3, typename... Tx>
-inline constexpr T1 max(const T1& n1, const T2& n2, const T3& n3, const Tx&... nx){ return GASHA_ max(GASHA_ max(n1, n2), n3, nx...); }
+inline constexpr T1 max(const T1 n1, const T2 n2, const T3 n3, const Tx... nx){ return GASHA_ max(GASHA_ max(n1, n2), n3, nx...); }
 template<typename T1, typename T2, typename T3, typename... Tx>
 inline constexpr const T1& maxObj(const T1& obj1, const T2& obj2, const T3& obj3, const Tx&... nx){ return GASHA_ maxObj(GASHA_ maxObj(obj1, obj2), obj3, nx...); }
 template<typename T1, typename T2, typename T3, typename... Tx>
@@ -57,7 +57,7 @@ inline constexpr T1& maxObj(T1&& obj1, T2&& obj2, T3&& obj3, Tx&&... nx){ return
 
 //値が二つの min()
 template<typename T1, typename T2>
-inline constexpr T1 min(const T1& n1, const T2& n2){ return n1 < static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
+inline constexpr T1 min(const T1 n1, const T2 n2){ return n1 < static_cast<T1>(n2) ? n1 : static_cast<T1>(n2); }
 template<typename T>
 inline constexpr const T& minObj(const T& obj1, const T& obj2){ return obj1 < obj2 ? obj1 : obj2; }
 template<typename T>
@@ -65,7 +65,7 @@ inline constexpr T& minObj(T&& obj1, T&& obj2){ return obj1 < obj2 ? obj1 : obj2
 
 //値が三つ以上の min() : 再帰処理
 template<typename T1, typename T2, typename T3, typename... Tx>
-inline constexpr T1 min(const T1& n1, const T2& n2, const T3& n3, const Tx&... nx){ return GASHA_ min(GASHA_ min(n1, n2), n3, nx...); }
+inline constexpr T1 min(const T1 n1, const T2 n2, const T3 n3, const Tx... nx){ return GASHA_ min(GASHA_ min(n1, n2), n3, nx...); }
 template<typename T1, typename T2, typename T3, typename... Tx>
 inline constexpr const T1& minObj(const T1& obj1, const T2& obj2, const T3& obj3, const Tx&... nx){ return GASHA_ minObj(GASHA_ minObj(obj1, obj2), obj3, nx...); }
 template<typename T1, typename T2, typename T3, typename... Tx>

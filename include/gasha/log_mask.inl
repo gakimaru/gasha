@@ -220,17 +220,7 @@ inline logMask& logMask::operator=(logMask&& rhs)
 	m_maskRef = rhs.m_maskRef;
 	m_prevTlsMask = rhs.m_prevTlsMask;//変更前のTLSログレベルマスクはコピーし、
 	rhs.m_prevTlsMask = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
-	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
-		m_localMask = rhs.m_localMask;
-	return *this;
-}
-
-//コピーオペレータ
-inline logMask& logMask::operator=(const logMask& rhs)
-{
-	m_refType = rhs.m_refType;
-	m_maskRef = rhs.m_maskRef;
-	m_prevTlsMask = nullptr;//変更前のTLSログレベルマスクはコピーしない（デストラクタで復元しない）
+	rhs.m_refType = isGlobal;         //（同上）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
 		m_localMask = rhs.m_localMask;
 	return *this;
@@ -244,16 +234,7 @@ inline logMask::logMask(logMask&& obj) :
 	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 {
 	obj.m_prevTlsMask = nullptr;//ムーブ元無効化
-	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
-		m_localMask = obj.m_localMask;
-}
-
-//コピーコンストラクタ
-inline logMask::logMask(const logMask& obj) :
-	m_refType(obj.m_refType),
-	m_maskRef(obj.m_maskRef),
-	m_prevTlsMask(nullptr)//変更前のTLSログレベルマスクはコピーしない（デストラクタで復元しない）
-{
+	obj.m_refType = isGlobal;   //（同上）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
 		m_localMask = obj.m_localMask;
 }

@@ -324,17 +324,25 @@
 #endif//GASHA_USE_WINDOWS_CONSOLE_COLOR
 
 //--------------------------------------------------------------------------------
+//【メモリコンソール】
+
+//標準メモリコンソールのバッファサイズが未定義なら、デフォルト値にする
+#if !defined(GASHA_STD_MEM_CONSOLE_BUFF_SIZE)
+	#define GASHA_STD_MEM_CONSOLE_BUFF_SIZE 4096
+#endif//GASHA_STD_MEM_CONSOLE_BUFF_SIZE
+
+//--------------------------------------------------------------------------------
 //【ログカテゴリ】
 
-//ログカテゴリの数が未定義なら、64にする
+//ログカテゴリの数が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_CATEGORY_NUM)
 	#define GASHA_LOG_CATEGORY_NUM 64
 #endif//GASHA_LOG_CATEGORY_NUM
 
-//ログカテゴリの数が8以下なら、8に再定義する
-#if GASHA_LOG_CATEGORY_NUM < 8
+//ログカテゴリの数が10未満なら、10に再定義する
+#if GASHA_LOG_CATEGORY_NUM < 10
 	#unde GASHA_LOG_CATEGORY_NUM
-	#define GASHA_LOG_CATEGORY_NUM 8
+	#define GASHA_LOG_CATEGORY_NUM 10
 #endif//GASHA_LOG_CATEGORY_NUM
 
 //--------------------------------------------------------------------------------
@@ -361,12 +369,12 @@
 //--------------------------------------------------------------------------------
 //【ログワークバッファ】
 
-//ログ出力用ワークバッファ一つ当たりのサイズ
+//ログ出力用ワークバッファ一つ当たりのサイズが未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_WORK_BUFF_BLOCK_SIZE)
 	#define GASHA_LOG_WORK_BUFF_BLOCK_SIZE 4096
 #endif//GASHA_LOG_WORK_BUFF_BLOCK_SIZE
 
-//ログ出力用ワークバッファのプール数
+//ログ出力用ワークバッファのプール数が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_WORK_BUFF_POOL_SIZE)
 	#define GASHA_LOG_WORK_BUFF_POOL_SIZE 4
 #endif//GASHA_LOG_WORK_BUFF_POOL_SIZE
@@ -374,12 +382,12 @@
 //--------------------------------------------------------------------------------
 //【ログキュー】
 
-//ログキューメッセージ用スタックバッファサイズ
+//ログキューメッセージ用スタックバッファサイズが未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE)
 	#define GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE 32768
 #endif//GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE
 
-//ログキュー用のノード数
+//ログキュー用のノード数が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_NODE_SIZE)
 	#define GASHA_LOG_QUEUE_NODE_SIZE 256
 #endif//GASHA_LOG_QUEUE_NODE_SIZE
@@ -387,7 +395,7 @@
 //--------------------------------------------------------------------------------
 //【ログキューモニター】
 
-//次のIDのキューが来ない時にリトライ（待機）する最大回数
+//次のIDのキューが来ない時にリトライ（待機）する最大回数が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT)
 	#define GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT 256
 #endif//GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT
