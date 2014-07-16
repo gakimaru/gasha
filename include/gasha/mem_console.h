@@ -38,21 +38,14 @@ class memConsole : public GASHA_ IConsole
 public:
 	//型
 	typedef LOCK_TYPE lock_type;//ロック型
+	typedef int block_type;//ブロック型
 public:
 	//定数
 	static const std::size_t BUFF_SIZE = _BUFF_SIZE;//バッファサイズ
-	static const std::size_t BLOCK_SIZE = 8;//ブロックサイズ
+	static const std::size_t BLOCK_SIZE = sizeof(block_type);//ブロックサイズ
 	static const std::size_t POOL_SIZE = BUFF_SIZE / BLOCK_SIZE;//プールサイズ
-public:
-	//型
-	struct block_type
-	{
-		char m_buff[BLOCK_SIZE];
-
-		//ダミーの比較オペレータ
-		inline bool operator<(const block_type& rhs) const { return true; }
-		inline bool operator==(const block_type& rhs) const { return true; }
-	};
+	static_assert(BUFF_SIZE >= BLOCK_SIZE, "BUFF_SIZE is too small.");
+	static_assert(BUFF_SIZE % BLOCK_SIZE == 0, "BUFF_SIZE is not a multiple of BLOCK_SIZE(sizeof(int)).");
 public:
 	//リングバッファ操作型
 	struct buffOpe : public GASHA_ ring_buffer::baseOpe<buffOpe, block_type>

@@ -151,13 +151,19 @@ inline const char* toByteStr<bool>(char* buff, const bool value)
 template<>
 inline const char* toStr<std::nullptr_t>(const std::nullptr_t value)
 {
+#if 0
+	//コンパイラ固有の nullptr 文字列を調べる
+	//※コンパイラやコンパイル時のデバッグオプションによってはハングするので使わない
 	static char nullptr_strbuff[16];
-	static char* nullptr_str = nullptr;
+	static const char* nullptr_str = nullptr;
 	if (!nullptr_str)
 	{
 		GASHA_ sprintf(nullptr_strbuff, "%s", nullptr);
 		nullptr_str = nullptr_strbuff;
 	}
+#else
+	static const char* nullptr_str = "(null)";
+#endif
 	return nullptr_str;
 }
 template<>
