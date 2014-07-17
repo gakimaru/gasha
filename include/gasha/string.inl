@@ -3,7 +3,6 @@
 #define GASHA_INCLUDED_STRING_INL
 
 //--------------------------------------------------------------------------------
-//【テンプレートライブラリ含む】
 // string.inl
 // 文字列処理【インライン関数／テンプレート関数定義部】
 //
@@ -17,9 +16,9 @@
 
 #include <gasha/string.h>//文字列処理【宣言部】
 
-#include <cstring>//strlen(), strcmp(), strncmp(), strchr(), strrchr(), strstr(), strcpy(), strncpy()
-                  //strnlen() ※VC++
-#include <cstdio>//snprintf() ※GCC
+#include <cstring>//std::strlen(), std::strcmp(), std::strncmp(), std::strchr(), std::strrchr(), std::strstr(), std::strcpy(), std::strncpy()
+                  //::strnlen() ※VC++
+#include <cstdio>//::snprintf() ※GCC, ::_snprintf_s() ※VC++
 #include <utility>//C++11 std::forward
 
 //【VC++】ワーニング設定を退避
@@ -167,7 +166,7 @@ int spprintf(char* dst, const std::size_t max_len, std::size_t& pos, const char*
 	const std::size_t remain = max_len - pos;
 	int ret = 0;
 #ifdef GASHA_IS_VC
-	ret = _snprintf_s(dst_now, remain, remain - 1, fmt, std::forward<Tx>(args)...);
+	ret = ::_snprintf_s(dst_now, remain, remain - 1, fmt, std::forward<Tx>(args)...);
 	if (ret < 0)
 	{
 		pos += (remain - 1);
@@ -177,7 +176,7 @@ int spprintf(char* dst, const std::size_t max_len, std::size_t& pos, const char*
 		pos += ret;
 #endif
 #ifdef GASHA_IS_GCC
-	ret = snprintf(dst_now, remain, fmt, std::forward<Tx>(args)...);
+	ret = ::snprintf(dst_now, remain, fmt, std::forward<Tx>(args)...);
 	if (ret >= remain)
 	{
 		pos += (remain - 1);
@@ -195,10 +194,10 @@ inline int spprintf(char* dst, const char* fmt, Tx&&... args)
 	return ret;
 }
 
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)
-
-GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//GASHA_INCLUDED_STRING_INL
 

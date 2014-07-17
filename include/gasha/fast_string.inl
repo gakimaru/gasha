@@ -18,6 +18,8 @@
 
 #include <gasha/string.h>//文字列処理
 
+#include <cstdint>//std::intptr_t
+
 #ifdef GASHA_USE_SSE4_2
 #include <nmmintrin.h>//SSE4.2
 #endif//GASHA_USE_SSE4_2
@@ -164,7 +166,7 @@ inline std::size_t strlen_sse(const char* str)
 	static const int flags = _SIDD_SBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_POSITIVE_POLARITY | _SIDD_LEAST_SIGNIFICANT;
 	const __m128i null = _mm_setzero_si128();
 	const char* p = str;
-	const std::size_t str_over = reinterpret_cast<intptr_t>(str)& 0xf;
+	const std::size_t str_over = reinterpret_cast<std::intptr_t>(str)& 0xf;
 	if (str_over != 0)
 	{
 		//非16バイトアランイメント時
@@ -208,7 +210,7 @@ inline std::size_t strnlen_sse(const char* str, const std::size_t max_len)
 	const char* p_end = str + max_len;
 	const char* p_end_16 = p_end - 16;
 	const char* p = str;
-	const std::size_t str_over = reinterpret_cast<intptr_t>(str)& 0xf;
+	const std::size_t str_over = reinterpret_cast<std::intptr_t>(str)& 0xf;
 	if (str_over != 0)
 	{
 		//非16バイトアランイメント時
@@ -269,8 +271,8 @@ namespace _private
 	//  3 ... 非16バイトアラインメント＋非16バイトアラインメント
 	inline static int sse_str_pattern(const char* str1, const char* str2)
 	{
-		return (((reinterpret_cast<intptr_t>(str1)& 0xf) != 0) << 0) |
-			(((reinterpret_cast<intptr_t>(str2)& 0xf) != 0) << 1);
+		return (((reinterpret_cast<std::intptr_t>(str1)& 0xf) != 0) << 0) |
+			(((reinterpret_cast<std::intptr_t>(str2)& 0xf) != 0) << 1);
 	}
 	//SSE版strcmp:関数テーブル
 	typedef int(*strcmp_sse_t)(const char* str1, const char* str2);
@@ -330,7 +332,7 @@ inline const char* strchr_sse(const char* str, const char c)
 	static const int flags = _SIDD_SBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_POSITIVE_POLARITY | _SIDD_LEAST_SIGNIFICANT;
 	const __m128i c16 = _mm_set1_epi8(c);
 	const char* p = str;
-	const std::size_t str_over = reinterpret_cast<intptr_t>(str)& 0xf;
+	const std::size_t str_over = reinterpret_cast<std::intptr_t>(str)& 0xf;
 	if (str_over != 0)
 	{
 		//非16バイトアランイメント時
@@ -379,7 +381,7 @@ inline const char* strrchr_sse(const char* str, const char c)
 	static const int flags = _SIDD_SBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_POSITIVE_POLARITY | _SIDD_MOST_SIGNIFICANT;
 	const __m128i c16 = _mm_set1_epi8(c);
 	const char* p = str;
-	const std::size_t str_over = reinterpret_cast<intptr_t>(str)& 0xf;
+	const std::size_t str_over = reinterpret_cast<std::intptr_t>(str)& 0xf;
 	if (str_over != 0)
 	{
 		//非16バイトアランイメント時

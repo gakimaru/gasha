@@ -114,7 +114,7 @@
 #endif//GASHA_IS_X86
 
 //--------------------------------------------------------------------------------
-//【算術設定：高速算術】
+//【算術：高速算術】
 
 //SSE命令による高速化は、SSE命令が使えなければ無効化する
 #if defined(GASHA_FAST_ARITH_USE_SSE) && !defined(GASHA_USE_SSE)
@@ -153,7 +153,7 @@
 #endif//GASHA_MATRIX_OPERATION_ALWAYS_USE_SSE4_1
 
 //--------------------------------------------------------------------------------
-//【算術設定：CRC32】
+//【算術：CRC32】
 
 //SSE4.2命令によるCRC計算の高速化は、SSE4.2命令が使えなければ無効化する
 #if defined(GASHA_CRC32_USE_SSE) && (!defined(GASHA_CRC32_IS_CRC32C) || !defined(GASHA_USE_SSE4_2))
@@ -161,7 +161,7 @@
 #endif//GASHA_CRC32_USE_SSE
 
 //--------------------------------------------------------------------------------
-//【文字列設定：高速文字列】
+//【文字列：高速文字列】
 
 //SSE4.2命令による文字列処理の高速化は、SSE4.2命令が使えなければ無効化する
 #if defined(GASHA_FASE_STRING_USE_SSE4_2) && !defined(GASHA_USE_SSE4_2)
@@ -222,6 +222,14 @@
 #if defined(GASHA_STRNCPY_FAST_USE_SSE4_2) && !defined(GASHA_FASE_STRING_USE_SSE4_2)
 	#undef GASHA_STRNCPY_FAST_USE_SSE4_2
 #endif//GASHA_STRNCPY_FAST_USE_SSE4_2
+
+//--------------------------------------------------------------------------------
+//【時間処理ユーティリティ】
+
+//経過時間計算用の「秒数」型が未定義なら、double にする
+#if !defined(GASHA_TIME_TYPE)
+	#define GASHA_TIME_TYPE double
+#endif//GASHA_TIME_TYPE
 
 //--------------------------------------------------------------------------------
 //【スタックアロケータ】

@@ -70,7 +70,7 @@ public:
 	struct stack_t;
 	typedef TAGGED_PTR_VALUE_TYPE tagged_ptr_value_type;//タグ付きポインタの値の型
 	typedef TAGGED_PTR_TAG_TYPE tagged_ptr_tag_type;//タグ付きポインタのタグの型
-	typedef GASHA_ taggedPtr<stack_t, TAGGED_PTR_TAG_BITS, TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE> stack_ptr_t;
+	typedef GASHA_ taggedPtr<stack_t, TAGGED_PTR_TAG_BITS, TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE> stack_ptr_type;
 	
 	//アロケータ型
 	typedef GASHA_ lfPoolAllocator_withType<stack_t, POOL_SIZE> allocator_type;//ロックフリープールアロケータ
@@ -79,7 +79,7 @@ public:
 	struct stack_t
 	{
 		value_type m_value;//値
-		std::atomic<stack_ptr_t> m_next;//次のノード
+		std::atomic<stack_ptr_type> m_next;//次のノード
 		//コンストラクタ
 		inline stack_t(value_type&& value) :
 			m_value(std::move(value))
@@ -122,8 +122,8 @@ public:
 private:
 	//フィールド
 	allocator_type m_allocator;//アロケータ
-	std::atomic<stack_ptr_t> m_head;//スタックの先頭　※タグ付きポインタ
-	std::atomic<typename stack_ptr_t::tag_type> m_tag;//ABA問題対策用のタグ
+	std::atomic<stack_ptr_type> m_head;//スタックの先頭　※タグ付きポインタ
+	std::atomic<typename stack_ptr_type::tag_type> m_tag;//ABA問題対策用のタグ
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

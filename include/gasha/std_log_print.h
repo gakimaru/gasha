@@ -29,7 +29,7 @@ struct stdLogPrint
 {
 public:
 	//標準ログ出力
-	//※ログキューモニターのテンプレート関数内でインライン展開する事を意図して inline 宣言を付加
+	//※長い処理だが、ログキューモニターのテンプレート関数内でインライン展開する事を意図して inline 宣言を付加
 	inline void operator()(GASHA_ logPrintInfo& info);
 };
 

@@ -17,7 +17,7 @@
 #include <gasha/log_level.h>//ログレベル【宣言部】
 
 #include <cstddef>//std::size_t
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

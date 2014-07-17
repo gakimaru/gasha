@@ -28,7 +28,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	public:
 		//型
 		typedef CStackAllocatorWithBuff<BUFF_SIZE> buffer_t;//バッファ型
-		typedef uintptr_t key_t;//キー型
+		typedef std::uintptr_t key_t;//キー型
 		//簡易文字列型
 		struct PROFILE;
 		struct THREAD_INFO;

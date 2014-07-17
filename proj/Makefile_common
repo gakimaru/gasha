@@ -110,6 +110,15 @@ endif
 CXXFLAGS_DEF := \
 
 # C++コンパイルオプション（定数：ビルド設定別）
+# -DGASHA_BUILD_CONFIG_IS_DEBUG           ... フルデバッグ設定
+# -DGASHA_BUILD_CONFIG_IS_DEBUG_MODERATE  ... プログラム開発向け設定
+# -DGASHA_BUILD_CONFIG_IS_DEBUG_OPT       ... コンテンツ制作・QA向け設定
+# -DGASHA_BUILD_CONFIG_IS_REGRESSION_TEST ... 自動回帰テスト向け設定
+# -DGASHA_BUILD_CONFIG_IS_LOCAL_RELEASE   ... 製品テスト向け設定
+# -DGASHA_BUILD_CONFIG_IS_RELEASE         ... 製品向け設定
+# -DNDEBUG ... DGASHA_BUILD_CONFIG_IS_RELEASE と同じ
+# -D_DEBUG ... DGASHA_BUILD_CONFIG_IS_DEBUG   と同じ
+
 ifeq ($(BUILD_TYPE),Release)
 	# リリースビルド用
 	CXXFLAGS_DEF += \

@@ -12,6 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <cstdint>//std::uintptr_t
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -31,7 +33,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	{
 	public:
 		//型
-		typedef uintptr_t key_t;//キー型
+		typedef std::uintptr_t key_t;//キー型
 		typedef std::chrono::high_resolution_clock::time_point clock_t;//クロック型
 		typedef double duration_t;//処理時間型
 		typedef unsigned char control_t;//操作設定型

@@ -60,18 +60,18 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
 inline bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::_enqueue(typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::queue_t* new_node)
 {
-	queue_ptr_t new_node_tag_ptr;
+	queue_ptr_type new_node_tag_ptr;
 	new_node_tag_ptr.set(new_node, m_tag.fetch_add(1));//タグ付きポインタ生成
-	queue_ptr_t null_tag_ptr;
+	queue_ptr_type null_tag_ptr;
 	null_tag_ptr.set(nullptr, 0);//タグ付きヌルポインタ
 	new_node->m_next.store(null_tag_ptr);//新規ノードの次ノードを初期化
-	queue_ptr_t tail_tag_ptr = null_tag_ptr;
+	queue_ptr_type tail_tag_ptr = null_tag_ptr;
 	while (true)
 	{
 		tail_tag_ptr = m_tail.load();//末尾ノードを取得
 		queue_t* tail = tail_tag_ptr;
-		std::atomic<queue_ptr_t>& next = tail->m_next;
-		queue_ptr_t next_tag_ptr = next.load();//末尾ノードの次ノードを取得
+		std::atomic<queue_ptr_type>& next = tail->m_next;
+		queue_ptr_type next_tag_ptr = next.load();//末尾ノードの次ノードを取得
 		//if (tail_tag_ptr == m_tail.load())//このタイミングで他のスレッドが末尾を書き換えていないか？　←削除（E7,E15）
 		{
 			if (next_tag_ptr.isNull())//末尾ノードの次ノードが末端（nullptr）か？
@@ -149,17 +149,17 @@ bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
 bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::dequeue(typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)
 {
-	queue_ptr_t null_tag_ptr;
+	queue_ptr_type null_tag_ptr;
 	null_tag_ptr.set(nullptr, 0);//タグ付きヌルポインタ
-	queue_ptr_t head_tag_ptr = null_tag_ptr;
-	queue_ptr_t tail_tag_ptr = null_tag_ptr;
-	queue_ptr_t top_tag_ptr = null_tag_ptr;
+	queue_ptr_type head_tag_ptr = null_tag_ptr;
+	queue_ptr_type tail_tag_ptr = null_tag_ptr;
+	queue_ptr_type top_tag_ptr = null_tag_ptr;
 	while (true)
 	{
 		head_tag_ptr = m_head.load();//先頭ノードを取得
 		tail_tag_ptr = m_tail.load();//末尾ノードを取得
 		queue_t* head = head_tag_ptr;
-		queue_ptr_t next_tag_ptr = head->m_next.load();//先頭ノードの次ノード（有効なキューの先頭）を取得
+		queue_ptr_type next_tag_ptr = head->m_next.load();//先頭ノードの次ノード（有効なキューの先頭）を取得
 		//if (head_tag_ptr == m_head.load())//このタイミングで他のスレッドが先頭を書き換えていないか？　←削除（D5,D17）
 		{
 			if (head_tag_ptr == tail_tag_ptr)//先頭ノードと末尾ノードが同じか？（一つもキューイングされていない状態か？）
@@ -199,7 +199,7 @@ std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 	GASHA_ spprintf(message, size, "----- Debug Info for lfQueue -----\n");
 	GASHA_ spprintf(message, size, "Queue:\n");
 	int no = 0;
-	queue_ptr_t node_tag_ptr = m_head;
+	queue_ptr_type node_tag_ptr = m_head;
 	while (node_tag_ptr.isNotNull())
 	{
 		queue_t* node = node_tag_ptr;
@@ -208,7 +208,7 @@ std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 		GASHA_ spprintf(message, size, "\n");
 		node_tag_ptr = node->m_next.load();
 	}
-	queue_ptr_t tail_tag_ptr = m_tail.load();
+	queue_ptr_type tail_tag_ptr = m_tail.load();
 	queue_t* tail = tail_tag_ptr;
 	GASHA_ spprintf(message, size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
 	size += print_node(message + size, tail->m_value);
@@ -227,10 +227,10 @@ template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int 
 void lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::initialize()
 {
 	queue_t* dummy_node = m_allocator.newDefault();//ダミーノードを生成
-	queue_ptr_t null_tag_ptr;
+	queue_ptr_type null_tag_ptr;
 	null_tag_ptr.set(nullptr, 0);//タグ付きヌルポインタ
 	dummy_node->m_next.store(null_tag_ptr);//ダミーノードの次ノードを初期化
-	queue_ptr_t dummy_node_tag_ptr;
+	queue_ptr_type dummy_node_tag_ptr;
 	dummy_node_tag_ptr.set(dummy_node, 0);
 	m_head.store(dummy_node_tag_ptr);//先頭ノードにダミーノードをセット
 	m_tail.store(dummy_node_tag_ptr);//末尾ノードにダミーノードをセット
@@ -246,7 +246,7 @@ void lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 	value_type value;
 	while (dequeue(value));
 	//ダミーノードを削除
-	queue_ptr_t head_tag_ptr = m_head.load();
+	queue_ptr_type head_tag_ptr = m_head.load();
 	queue_t* head = head_tag_ptr;
 	m_allocator.deleteObj(head);
 }

@@ -16,6 +16,8 @@
 
 #include <gasha/log_queue_monitor.h>//ログキューモニター【宣言部】
 
+#include <gasha/std_log_print.h>//標準ログ出力
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -25,8 +27,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 //モニター
-template<class LOG_PRINT>
-void logQueueMonitor::monitor(LOG_PRINT log_print_functor)
+template<class PRINT_FUNC>
+void logQueueMonitor::monitor(PRINT_FUNC print_func)
 {
 	m_nextId.store(INIT_ID);//次のID初期化
 	int retry_count = MAX_RETRY_COUNT;//次のIDが来るまでの最大リトライカウント
@@ -67,7 +69,7 @@ void logQueueMonitor::monitor(LOG_PRINT log_print_functor)
 				queue.dequeue(print_info);
 
 				//出力
-				log_print_functor(print_info);
+				print_func(print_info);
 
 				//キューを解放
 				queue.release(print_info);
@@ -88,6 +90,10 @@ void logQueueMonitor::monitor(LOG_PRINT log_print_functor)
 			}
 		}
 	}
+}
+inline void logQueueMonitor::monitor()
+{
+	monitor(GASHA_ stdLogPrint());
 }
 
 //中断

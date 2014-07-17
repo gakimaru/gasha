@@ -24,7 +24,7 @@
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
 #include <gasha/linked_list.cpp.h>//双方向連結リスト【関数／実体定義部】
 
-#include <gasha/chrono.h>//時間系ユーティリティ：getSysElapsedTime()
+#include <gasha/chrono.h>//時間処理系ユーティリティ：nowElapsedTime()
 #include <gasha/string.h>//文字列処理：spprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

@@ -67,11 +67,26 @@ public:
 		isTls,//TLSログレベルマスク（他のローカルログレベルの参照）
 		isLocal,//ローカルログレベルマスク
 	};
+	enum consolesCondition_type//コンソール状態
+	{
+		hasNotAvailableConsole = 0,//利用可能なコンソールがない
+		everyConsoleIsDummy = -1,//ダミーコンソールのみ（利用可能なコンソールがない）
+		hasAvailableConsoles = 1,//利用可能なコンソールがある
+	};
 public:
 	//ログレベルマスク型
 	struct mask_type
 	{
 		level_type m_level[PURPOSE_NUM][CATEGORY_NUM];//カテゴリごとのログレベルマスク値
+	};
+	//コンソール情報取得用構造体
+	struct consolesInfo_type
+	{
+		GASHA_ logLevel m_level;//ログレベル
+		GASHA_ logCategory m_category;//ログカテゴリ
+		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//コンソール
+		const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//コンソールカラー
+		consolesCondition_type m_cond;//コンソール状態
 	};
 public:
 	//--------------------
@@ -219,14 +234,19 @@ public:
 	inline level_type level(const purpose_type purpose, const category_type category) const;//ログレベルマスクを取得
 	inline bool isEnableLevel(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category) const;//出力可能なログレベルか？
 	inline bool isEnableLevel(const purpose_type purpose, const level_type require_level, const category_type category) const;//出力可能なログレベルか？
-	//※以下のコンソール取得は、出力可能なログレベルでなければ nullptr を返す
+	//コンソール／コンソールカラー取得
 	//※ログカテゴリもしくはログレベルの設定から取得する（ログカテゴリ優先）
-	inline const GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category) const;//コンソール取得
-	inline const GASHA_ IConsole* console(const purpose_type purpose, const level_type require_level, const category_type category) const;//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category);//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type require_level, const category_type category);//コンソール取得
-	inline const GASHA_ consoleColor* color(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category) const;//コンソール取得
-	inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type require_level, const category_type category) const;//コンソール取得
+	//※【注意】ログレベルマスクの判定は行っていないので注意
+	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const;//コンソール取得
+	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category) const;//コンソール取得
+	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category);//コンソール取得
+	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category);//コンソール取得
+	inline const GASHA_ consoleColor* color(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const;//コンソールカラー取得
+	inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level, const category_type category) const;//コンソールカラー取得
+	//コンソールとコンソールカラー、ログレベルオブジェクト、ログカテゴリオブジェクトをまとめて取得
+	//※ログレベルマスクの判定も行う
+	//※出力可能なコンソールがない場合（全てログレベルマスクされたかダミーコンソールであった場合）、戻り値に false を返す
+	const consolesCondition_type consolesInfo(consolesInfo_type& info, const level_type require_level, const category_type category) const;
 public:
 	//イテレータ取得
 	inline const iterator begin() const { return iterator(this, GASHA_ logCategory::BEGIN); }//開始イテレータを取得
@@ -258,6 +278,12 @@ public:
 	//※ローカルログレベルマスクがTLSログレベルマスクに適用されると、以降の処理にローカルログレベルマスクが反映される。
 	//※【注意】ローカルの状態で再度ローカルを指定すると、改めて元の値をコピーし直すことに注意。
 	void changeRef(const ref_type type);
+
+	//ログレベルマスクのセーブ／ロード
+	//※【注意】現在参照しているログレベルマスクに対して操作する点に注意
+	inline std::size_t serializeSize() const;//シリアライズに必要なサイズを取得
+	inline bool serialize(void* dst, const std::size_t dst_size) const;//シリアライズ（セーブ用）※dst に出力
+	inline bool deserialize(const void* src, const std::size_t dst_size);//デシリアライズ（ロード用）※src から復元
 
 private:
 	//初期化メソッド（一回限り）

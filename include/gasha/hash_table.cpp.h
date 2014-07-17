@@ -22,7 +22,7 @@
 #include <gasha/hash_table.inl>//ハッシュテーブルコンテナ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

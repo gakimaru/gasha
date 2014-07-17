@@ -16,7 +16,9 @@
 
 #include <gasha/log_print_info.h>//ログ出力情報【宣言部】
 
-#include <cstring>//memcpy(), memset()
+#include <gasha/chrono.h>//時間処理系ユーティリティ：nowElapsedTime()
+
+#include <cstring>//std::memcpy(), std::memset()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -65,6 +67,7 @@ inline logPrintInfo::logPrintInfo(const logPrintInfo& obj)
 //コンストラクタ
 inline logPrintInfo::logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
 	m_id(id),
+	m_time(nowElapsedTime()),
 	m_message(message),
 	m_messageSize(static_cast<message_size_type>(message_size)),
 	m_level(level),
@@ -81,7 +84,7 @@ inline logPrintInfo::logPrintInfo(const id_type id, const char* message, const s
 //デフォルトコンストラクタ
 inline logPrintInfo::logPrintInfo()
 {
-	memset(this, 0, sizeof(*this));
+	std::memset(this, 0, sizeof(*this));
 }
 
 //デストラクタ

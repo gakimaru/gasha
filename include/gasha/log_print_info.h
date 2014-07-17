@@ -19,6 +19,7 @@
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
 #include <gasha/log_attr.h>//ログ属性
+#include <gasha/chrono.h>//時間処理ユーティリティ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint64_t
@@ -48,6 +49,7 @@ struct logPrintInfo
 
 	//フィールド
 	id_type m_id;//ID ※0 で自動発番 ※ログキュー使用時に、キューを一意に識別し、キューどうしの順序性を判定するためのIDとして扱う
+	GASHA_ time_type m_time;//時間 ※出力時もしくはキューイング時の時間（予約時の時間ではないので注意）
 	const char* m_message;//メッセージ
 	message_size_type m_messageSize;//メッセージサイズ ※0で自動計測 ※終端を含んだ長さ
 	level_type m_level;//ログレベル

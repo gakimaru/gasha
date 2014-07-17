@@ -23,12 +23,15 @@
 
 //----------------------------------------
 //ビルド構成識別マクロ一覧
+//※コンパイラオプションで下記のいずれかのマクロを指定すること
+//※いずれの指定も内場合は、（可能な限り）自動的に該当する構成を選択する
+//※複数指定された場合、デバッグレベルの高いものが優先される（下記の並び順に優先度が高い）
 //#define GASHA_BUILD_CONFIG_IS_DEBUG//フルデバッグ設定
 //#define GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE//プログラム開発向け設定
 //#define GASHA_BUILD_CONFIG_IS_DEBUG_OPT//コンテンツ制作・QA向け設定
 //#define GASHA_BUILD_CONFIG_IS_REGRESSION_TEST//自動回帰テスト向け設定
 //#define GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE//製品テスト向け設定
-//#define GASHA_BUILD_CONFIG_ISRELEASE//製品向け設定
+//#define GASHA_BUILD_CONFIG_IS_RELEASE//製品向け設定
 
 //----------------------------------------
 //ビルド構成個別マクロ一覧
@@ -48,31 +51,156 @@
 //#define GASHA_IS_STRIPPED_SYMBOLS//シンボル情報なし
 
 //----------------------------------------
-#ifdef GASHA_IS_VC
-//Visual C++ の場合
+//ビルド構成識別マクロ判定
 
-	#ifdef _DEBUG
-		#define GASHA_BUILD_CONFIG_FULL_DEBUG//DEBUG：フルデバッグ設定
-	#else//_DEBUG
-		#define GASHA_BUILD_CONFIG_IS_RELEASE//RELEASE：製品向け設定
-	#endif//_DEBUG
+#ifdef GASHA_BUILD_CONFIG_EXIST
+	#undef GASHA_BUILD_CONFIG_EXIST//一旦このマクロは削除
+#endif//GASHA_BUILD_CONFIG_EXIST
 
-#endif//GASHA_IS_VC
+//フルデバッグ設定
+#ifdef GASHA_BUILD_CONFIG_IS_DEBUG
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
+		#undef GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
+	#endif//GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
+
+	#ifdef GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+		#undef GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+	#endif//GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+
+	#ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+		#undef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+	#endif//GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_DEBUG
+
+//プログラム開発向け設定
+#ifdef GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+		#undef GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+	#endif//GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+
+	#ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+		#undef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+	#endif//GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
+
+//コンテンツ制作・QA向け設定
+#ifdef GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+		#undef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+	#endif//GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_DEBUG_OPT
+
+//自動回帰テスト向け設定
+#ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
+
+//製品テスト向け設定
+#ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE
+
+//製品向け設定
+#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+
+	#define GASHA_BUILD_CONFIG_EXIST
+
+	#ifdef GASHA_BUILD_CONFIG_IS_RELEASE
+		#undef GASHA_BUILD_CONFIG_IS_RELEASE
+	#endif//GASHA_BUILD_CONFIG_IS_RELEASE
+
+#endif//GASHA_BUILD_CONFIG_IS_RELEASE
 
 //----------------------------------------
-#ifdef GASHA_IS_GCC
-//GCC の場合
+//ビルド構成識別マクロがなかった時の自動判定
 
-	#ifdef _DEBUG
-		#define GASHA_BUILD_CONFIG_FULL_DEBUG//DEBUG：フルデバッグ設定
-	#else//_DEBUG
-		#define GASHA_BUILD_CONFIG_IS_RELEASE//RELEASE：製品向け設定
-	#endif//_DEBUG
+#ifndef GASHA_BUILD_CONFIG_EXIST
 
-#endif//GASHA_IS_GCC
+	//--------------------
+	#ifdef GASHA_IS_VC
+	//Visual C++ の場合
+
+		#ifdef _DEBUG
+			#define GASHA_BUILD_CONFIG_FULL_DEBUG//DEBUG：フルデバッグ設定
+			#define GASHA_BUILD_CONFIG_EXIST
+		#else//_DEBUG
+			#define GASHA_BUILD_CONFIG_IS_RELEASE//RELEASE：製品向け設定
+			#define GASHA_BUILD_CONFIG_EXIST
+		#endif//_DEBUG
+
+	#endif//GASHA_IS_VC
+
+	//----------------------------------------
+	#ifdef GASHA_IS_GCC
+	//GCC の場合
+
+		#ifdef _DEBUG
+			#define GASHA_BUILD_CONFIG_FULL_DEBUG//DEBUG：フルデバッグ設定
+			#define GASHA_BUILD_CONFIG_EXIST
+		#else//_DEBUG
+			#define GASHA_BUILD_CONFIG_IS_RELEASE//RELEASE：製品向け設定
+			#define GASHA_BUILD_CONFIG_EXIST
+		#endif//_DEBUG
+
+	#endif//GASHA_IS_GCC
+
+#endif//GASHA_BUILD_CONFIG_TYPE
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_FULL_DEBUG//フルデバッグ設定
+	#define GASHA_BUILD_CONFIG_LEVEL 1
 	#define GASHA_BUILD_CONFIG_NAME "FULL_DEBUG"
 	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
 	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
@@ -87,6 +215,7 @@
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE//プログラム開発向け設定
+	#define GASHA_BUILD_CONFIG_LEVEL 2
 	#define GASHA_BUILD_CONFIG_NAME "DEBUG_MODERATE"
 	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
 	#define GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
@@ -101,6 +230,7 @@
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_IS_DEBUG_OPT//コンテンツ制作・QA向け設定
+	#define GASHA_BUILD_CONFIG_LEVEL 3
 	#define GASHA_BUILD_CONFIG_NAME "DEBUG_OPT"
 	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
 	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
@@ -113,6 +243,7 @@
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST//自動回帰テスト向け設定
+	#define GASHA_BUILD_CONFIG_LEVEL 4
 	#define GASHA_BUILD_CONFIG_NAME "REGRESSON_TEST"
 	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
 	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
@@ -126,6 +257,7 @@
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE//製品テスト向け設定
+	#define GASHA_BUILD_CONFIG_LEVEL 5
 	#define GASHA_BUILD_CONFIG_NAME "LOCAL_RELEASE"
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
@@ -134,6 +266,7 @@
 
 //----------------------------------------
 #ifdef GASHA_BUILD_CONFIG_IS_RELEASE//製品向け設定
+	#define GASHA_BUILD_CONFIG_LEVEL 6
 	#define GASHA_BUILD_CONFIG_NAME "RELEASE"
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_ROM//ROM専用ファイルシステム

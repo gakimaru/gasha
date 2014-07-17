@@ -34,8 +34,10 @@ public:
 
 public:
 	//判定オペレータ
+	inline bool operator==(IConsole&& rhs) const { return isSame(&rhs); }
 	inline bool operator==(const IConsole& rhs) const { return isSame(&rhs); }
 	inline bool operator==(const IConsole* rhs) const { return isSame(rhs); }
+	inline bool operator!=(IConsole&& rhs) const { return !isSame(&rhs); }
 	inline bool operator!=(const IConsole& rhs) const { return !isSame(&rhs); }
 	inline bool operator!=(const IConsole* rhs) const { return !isSame(rhs); }
 
@@ -61,7 +63,7 @@ public:
 
 	//改行出力
 	//※改行前にカラーリセットも行う
-	inline void outputCr();
+	inline void outputCr(const bool with_reset_color = true);
 
 	//カラー変更
 	virtual void changeColor(GASHA_ consoleColor&& color) = 0;

@@ -45,6 +45,7 @@ public:
 public:
 	//定数
 	static const std::size_t MAX_MESSAGE_SIZE = GASHA_LOG_WORK_BUFF_BLOCK_SIZE;//メッセージ一つ当たりの最大サイズ
+	static const std::size_t HALF_MESSAGE_SIZE = MAX_MESSAGE_SIZE / 2;//メッセージ一つ当たりの最大サイズの半分
 	static const std::size_t MESSAGE_POOL_SIZE = GASHA_LOG_WORK_BUFF_POOL_SIZE;//メッセージのプール数
 
 public:
@@ -86,6 +87,8 @@ public:
 	//※コピーしたサイズを返す（オーバーしたら 0）
 	template<typename... Tx>
 	std::size_t spprintf(char* message, std::size_t& pos, const char* fmt, Tx&&... args);
+	template<typename... Tx>
+	std::size_t spprintf_halfSized(char* message, std::size_t& pos, const char* fmt, Tx&&... args);//バッファサイズ半分版
 
 public:
 	//明示的な初期化用コンストラクタ

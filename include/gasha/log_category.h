@@ -17,6 +17,7 @@
 #include <gasha/console_color.h>//コンソールカラー
 
 #include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint8_t
 #include <utility>//C++11 std::move
 
 //【VC++】ワーニング設定を退避
@@ -69,7 +70,7 @@ class logCategory
 public:
 	//型
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
-	typedef unsigned char category_type;//ログカテゴリの値
+	typedef std::uint8_t category_type;//ログカテゴリの値
 public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;
@@ -118,7 +119,7 @@ public:
 	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なログカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
 	inline category_type value() const { return m_info->m_value; }//ログカテゴリの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
-	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
+	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
 	inline GASHA_ IConsole*& console(const purpose_type purpose){ return m_info->m_consoles[purpose]; }//コンソール
 public:
 	//ムーブオペレータ

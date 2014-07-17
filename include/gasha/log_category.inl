@@ -16,7 +16,7 @@
 
 #include <gasha/log_category.h>//ログカテゴリ【宣言部】
 
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

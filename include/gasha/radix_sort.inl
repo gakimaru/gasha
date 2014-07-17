@@ -22,7 +22,7 @@
 
 #include <type_traits>//C++11 std:is_same, std::is_signed, std::make_unsigned, std::conditional, std::integral_constant
 #include <utility>//C++11 std::move
-#include <cstring>//memset()
+#include <cstring>//std::memset()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

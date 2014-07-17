@@ -12,6 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/log_purpose.h>//ログ用途
+
 #include <cstdint>//std::uint32_t
 
 //【VC++】ワーニング設定を退避
@@ -37,24 +39,56 @@ enum logAttrEnum : std::uint32_t
 {
 	noLogAttr = 0x0000,//属性なし
 
+	//基本属性
+	//reserved1 = 0x0001,//（予約１）
+	//reserved2 = 0x0001,//（予約２）
+	//reserved3 = 0x0001,//（予約３）
+	//reserved4 = 0x0001,//（予約４）
+	//reserved5 = 0x0001,//（予約５）
+	//reserved6 = 0x0001,//（予約６）
+	//reserved7 = 0x0001,//（予約７）
+	//reserved8 = 0x0001,//（予約８）
+
+	//共通属性（全12bit）
+	//※ビットシフトしてログ系と画面通知系の両方で使用する
+	withID = 0x0002,//メッセージヘッダー：IDを付加
+	withTime = 0x0004,//メッセージヘッダー：時間を付加
+	withLevel = 0x0008,//メッセージヘッダー：ログレベル名を付加
+	withCategory = 0x0010,//メッセージヘッダ：ログカテゴリ名を付加
+	withCPName = 0x0020,//メッセージヘッダ：直近のコールポイント名を付加
+	withCriticalCPName = 0x0040,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	withAnyHeader = withID | withTime | withLevel | withCategory | withCPName | withCriticalCPName,//メッセージヘッダー：全ビット
+	headerOnlyColored = 0x0080,//カラーの反映をヘッダーのみにする
+	withoutColor = 0x0100,//カラー表示なし ※headerOnlyColored より優先
+	//reserved1 = 0x0200,//（予約１）
+	//reserved2 = 0x0400,//（予約２）
+	//reserved3 = 0x0800,//（予約３）
+
 	//ログ系属性
-	logWithoutCr = 0x0001,//改行なし属性 ※デフォルトは改行する
-	logWithID = 0x0002,//メッセージヘッダー：IDを付加
-	logWithLevel = 0x0004,//メッセージヘッダー：ログレベル名を付加
-	logWithCategory = 0x0008,//メッセージヘッダ：ログカテゴリ名を付加
-	logWithCPName = 0x0010,//メッセージヘッダ：直近のコールポイント名を付加
-	logWithCriticalCPName = 0x0020,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
-	logHeaderOnlyColored = 0x0040,//カラーの反映をヘッダーのみにする
+	bitShiftOfLog = 8,//ログ系属性のためのビットシフト数
+	logWithoutCr = 0x0001 << bitShiftOfLog,//改行なし属性 ※デフォルトは改行する
+	logWithID = withID << bitShiftOfLog,//メッセージヘッダー：IDを付加
+	logWithTime = withTime << bitShiftOfLog,//メッセージヘッダー：時間を付加
+	logWithLevel = withLevel << bitShiftOfLog,//メッセージヘッダー：ログレベル名を付加
+	logWithCategory = withCategory << bitShiftOfLog,//メッセージヘッダ：ログカテゴリ名を付加
+	logWithCPName = withCPName << bitShiftOfLog,//メッセージヘッダ：直近のコールポイント名を付加
+	logWithCriticalCPName = withCriticalCPName << bitShiftOfLog,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	logWithAnyHeader = withAnyHeader << bitShiftOfLog,//メッセージヘッダー：全ビット
+	logHeaderOnlyColored = headerOnlyColored << bitShiftOfLog,//カラーの反映をヘッダーのみにする
+	logWithoutColor = withoutColor << bitShiftOfLog,//カラー表示なし ※headerOnlyColored より優先
 
 	//画面通知系属性
-	bitShiftOfNotice = 16,//画面通知系属性のためのビットシフト数
+	bitShiftOfNotice = 8 + 12,//画面通知系属性のためのビットシフト数
 	noticeWithCr = 0x0001 << bitShiftOfNotice,//改行付き属性 ※デフォルトは改行しない（デフォルトの挙動がログ系と異なる点に注意）
-	noticeWithID = logWithID << bitShiftOfNotice,//メッセージヘッダー：IDを付加
-	noticeWithLevel = logWithLevel << bitShiftOfNotice,//メッセージヘッダー：ログレベル名を付加
-	noticeWithCategory = logWithCategory << bitShiftOfNotice,//メッセージヘッダ：ログカテゴリ名を付加
-	noticeWithCPName = logWithCPName << bitShiftOfNotice,//メッセージヘッダ：直近のコールポイント名を付加
-	noticeWithCriticalCPName = logWithCriticalCPName << bitShiftOfNotice,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
-	noticeHeaderOnlyColored = logHeaderOnlyColored << bitShiftOfNotice,//カラーの反映をヘッダーのみにする
+	noticeWithID = withID << bitShiftOfNotice,//メッセージヘッダー：IDを付加
+	noticeWithTime = withTime << bitShiftOfNotice,//メッセージヘッダー：時間を付加
+	noticeWithLevel = withLevel << bitShiftOfNotice,//メッセージヘッダー：ログレベル名を付加
+	noticeWithCategory = withCategory << bitShiftOfNotice,//メッセージヘッダ：ログカテゴリ名を付加
+	noticeWithCPName = withCPName << bitShiftOfNotice,//メッセージヘッダ：直近のコールポイント名を付加
+	noticeWithCriticalCPName = withCriticalCPName << bitShiftOfNotice,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	noticeWithAnyHeader = withAnyHeader << bitShiftOfNotice,//メッセージヘッダー：全ビット
+	noticeHeaderOnlyColored = headerOnlyColored << bitShiftOfNotice,//カラーの反映をヘッダーのみにする
+	noticeWithoutColor = withoutColor << bitShiftOfNotice,//カラー表示なし ※headerOnlyColored より優先
 };
 
 //----------------------------------------
@@ -64,6 +98,7 @@ class logAttr
 public:
 	//型
 	typedef std::uint32_t attr_type;//ログ属性の値
+	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	struct explicitInitialize_t{};//明示的な初期化用構造体
 public:
 	//定数
@@ -79,17 +114,25 @@ public:
 	//キャストオペレータ
 	inline operator int() const { return static_cast<int>(*m_attrRef); }//ログ属性の値
 	inline operator attr_type() const { return *m_attrRef; }//ログ属性の値
-
+	inline const attr_type* operator->() const { return m_attrRef; }//ログ属性の値の参照
+	inline attr_type* operator->(){ return m_attrRef; }//ログ属性の値の参照
+	inline attr_type operator*() const { return *m_attrRef; }//ログ属性の値
 public:
 	//アクセッサ
 	inline ref_type refType() const { return m_refType; }//参照しているログ属性の種別
 	inline const attr_type& attr() const { return *m_attrRef; }//現在参照しているログ属性
+	inline static int shiftBits(const purpose_type purpose);//ログ用途に応じたビットシフト数
 public:
 	//メソッド
 	inline static bool has(const attr_type target_attr, const attr_type attr);//属性判定（静的メソッド）
+	inline static bool has(const attr_type target_attr, const purpose_type purpose, const attr_type attr);//属性判定（静的メソッド）※用途別の判定
 	inline bool has(const attr_type attr) const;//属性判定
+	inline bool has(const purpose_type purpose, const attr_type attr) const;//属性判定
 	inline attr_type add(const attr_type attr);//属性付与
+	inline attr_type add(const purpose_type purpose, const attr_type attr);//属性付与
 	inline attr_type remove(const attr_type attr);//属性破棄
+	inline attr_type remove(const purpose_type purpose, const attr_type attr);//属性破棄
+	inline attr_type get() const;//属性取得 ※attr() と同じ
 	inline attr_type set(const attr_type attr);//属性変更
 	inline attr_type reset();//属性リセット
 	
@@ -100,6 +143,12 @@ public:
 	//※ローカルログ属性がTLSログ属性に適用されると、以降の処理にローカルログ属性が反映される。
 	//※【注意】ローカルの状態で再度ローカルを指定すると、改めて元の値をコピーし直すことに注意。
 	void changeRef(const ref_type type);
+
+	//ログ属性のセーブ／ロード
+	//※【注意】現在参照しているログ属性に対して操作する点に注意
+	inline std::size_t serializeSize() const;//シリアライズに必要なサイズを取得
+	inline bool serialize(void* dst, const std::size_t dst_size) const;//シリアライズ（セーブ用）※dst に出力
+	inline bool deserialize(const void* src, const std::size_t dst_size);//デシリアライズ（ロード用）※src から復元
 
 private:
 	//初期化メソッド（一回限り）

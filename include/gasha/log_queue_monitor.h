@@ -22,7 +22,6 @@
 #include <gasha/log_category.h>//ログカテゴリ
 #include <gasha/log_attr.h>//ログ属性
 #include <gasha/log_print_info.h>//ログ出力情報
-#include <gasha/std_log_print.h>//標準ログ出力
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::int32_t
@@ -72,8 +71,11 @@ public:
 	//※マルチスレッド専用。
 	//※実行するとループ処理に入る。
 	//※終了するには、他のスレッドから abort() を呼び出す。
-	template<class LOG_PRINT = GASHA_ stdLogPrint>
-	void monitor(LOG_PRINT log_print_functor);
+	//※ログ表示用関数を指定する。
+	//　PRINT_FUNC のプロトタイプ：void print_func(GASHA_ logPrintInfo& info)
+	template<class PRINT_FUNC>
+	void monitor(PRINT_FUNC print_func);
+	inline void monitor();
 	
 	//キューイングを通知
 	//※確実にキューイングが成功した時にだけ呼ぶこと

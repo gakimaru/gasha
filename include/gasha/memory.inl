@@ -16,7 +16,9 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/memory.h>//メモリ操作【宣言部】
+
 //#include <memory>//C++11 std::align
+#include <cstdint>//std::uintptr_t
 
 #ifdef GASHA_IS_GCC
 #include <stdlib.h>//posix_memalign(), free()
@@ -44,7 +46,7 @@ inline std::size_t adjustAlign(const std::size_t value)
 template<typename T, std::size_t ALIGN>
 inline T* adjustAlign(const T* p)
 {
-	return reinterpret_cast<T*>(adjustAlign<ALIGN>(reinterpret_cast<uintptr_t>(p)));
+	return reinterpret_cast<T*>(adjustAlign<ALIGN>(reinterpret_cast<std::uintptr_t>(p)));
 }
 
 //※アライメントの引数指定版
@@ -60,7 +62,7 @@ inline std::size_t adjustAlign(const std::size_t value, const std::size_t align)
 template <typename T>
 inline T* adjustAlign(const T* p, const std::size_t align)
 {
-	return reinterpret_cast<T*>(adjustAlign(reinterpret_cast<uintptr_t>(p), align));
+	return reinterpret_cast<T*>(adjustAlign(reinterpret_cast<std::uintptr_t>(p), align));
 }
 
 //----------------------------------------

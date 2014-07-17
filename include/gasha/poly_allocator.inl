@@ -26,7 +26,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //コンストラクタ
 #ifdef GASHA_HAS_DEBUG_FEATURE
-inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
 	m_fileName(file_name),
 	m_funcName(func_name),
 	m_callPointName(call_point_name),
@@ -36,7 +36,7 @@ inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const cha
 	m_arrayNum(array_num)
 {}
 #else//GASHA_HAS_DEBUG_FEATURE
-inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
 {}
 #endif//GASHA_HAS_DEBUG_FEATURE
 

@@ -22,7 +22,7 @@
 #include <gasha/rb_tree.inl>//赤黒木コンテナ【インライン関数／テンプレート関数定義部】
 
 #include <utility>//C++11 std::move
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 #include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始

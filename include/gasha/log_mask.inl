@@ -16,7 +16,7 @@
 
 #include <gasha/log_mask.h>//ログレベルマスク【宣言部】
 
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -165,52 +165,75 @@ inline bool logMask::isEnableLevel(const logMask::purpose_type purpose, const GA
 	GASHA_ logLevel mask_level(level(purpose, category));
 	return mask_level.isExist() && require_level >= mask_level;
 }
-
-//出力可能なログレベルか？
 inline bool logMask::isEnableLevel(const logMask::purpose_type purpose, const logMask::level_type require_level, const logMask::category_type category) const
 {
 	GASHA_ logLevel require_level_obj(require_level);
 	return isEnableLevel(purpose, require_level_obj, category);
 }
 
+
 //コンソール取得
-inline const GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& require_level, const logMask::category_type category) const
+inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
 {
-	if (!isEnableLevel(purpose, require_level, category))
-		return nullptr;
+	GASHA_ IConsole* console_obj = category.console(purpose);
+	if (console_obj)
+		return console_obj;
+	return level.console(purpose);
+}
+inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category) const
+{
+	GASHA_ logLevel level_obj(level);
 	GASHA_ logCategory category_obj(category);
-	const GASHA_ IConsole* console_obj = category_obj.console(purpose);
-	if (!console_obj)
-		console_obj = require_level.console(purpose);
-	return console_obj;
+	return console(purpose, level_obj, category_obj);
 }
-inline const GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type require_level, const logMask::category_type category) const
+inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category)
 {
-	GASHA_ logLevel require_level_obj(require_level);
-	return console(purpose, require_level_obj, category);
+	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
 }
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& require_level, const logMask::category_type category)
+inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category)
 {
-	GASHA_ logLevel require_level_obj(require_level);
-	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, require_level_obj, category));
-}
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type require_level, const logMask::category_type category)
-{
-	GASHA_ logLevel require_level_obj(require_level);
-	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, require_level_obj, category));
+	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
 }
 
 //コンソールカラー取得 
-inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type purpose, const GASHA_ logLevel& require_level, const logMask::category_type category) const
+inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
 {
-	if (!isEnableLevel(purpose, require_level, category))
+	const GASHA_ IConsole* console_obj = console(purpose, level, category);
+	if (!console_obj)
 		return nullptr;
-	return &require_level.color(purpose);
+	return &level.color(purpose);
 }
-inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type purpose, const logMask::level_type require_level, const logMask::category_type category) const
+inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category) const
 {
-	GASHA_ logLevel require_level_obj(require_level);
-	return color(purpose, require_level_obj, category);
+	GASHA_ logLevel level_obj(level);
+	GASHA_ logCategory category_obj(category);
+	return color(purpose, level_obj, category_obj);
+}
+
+//ログレベルマスクのセーブ／ロード
+
+//シリアライズに必要なサイズを取得
+inline std::size_t logMask::serializeSize() const
+{
+	return sizeof(mask_type);
+}
+
+//シリアライズ（セーブ用）
+inline bool logMask::serialize(void* dst, const std::size_t dst_size) const
+{
+	if (dst_size < serializeSize())
+		return false;
+	std::memcpy(dst, m_maskRef, serializeSize());
+	return true;
+}
+
+//デシリアライズ（ロード用）
+inline bool logMask::deserialize(const void* src, const std::size_t src_size)
+{
+	if (src_size != serializeSize())
+		return false;
+	std::memcpy(m_maskRef, src, serializeSize());
+	return true;
 }
 
 //ムーブオペレータ
@@ -240,7 +263,10 @@ inline logMask::logMask(logMask&& obj) :
 }
 
 //明示的な初期化用コンストラクタ
-inline logMask::logMask(const explicitInitialize_t&)
+inline logMask::logMask(const explicitInitialize_t&) :
+	m_refType(isGlobal),
+	m_maskRef(&m_globalMask),
+	m_prevTlsMask(nullptr)
 {
 	std::call_once(m_initialized, initializeOnce);//グローバルログレベルマスク初期化（一回限り）
 }

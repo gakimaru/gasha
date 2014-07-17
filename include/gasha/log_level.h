@@ -16,6 +16,8 @@
 #include <gasha/i_console.h>//コンソールインターフェース
 #include <gasha/console_color.h>//コンソールカラー
 
+#include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint8_t
 #include <utility>//C++11 std::move
 #include <cassert>//assert()
 
@@ -69,7 +71,7 @@ class logLevel
 public:
 	//型
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
-	typedef unsigned char level_type;//ログレベルの値
+	typedef std::uint8_t level_type;//ログレベルの値
 public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;
@@ -128,7 +130,7 @@ public:
 	inline level_type value() const { return m_info->m_value; }//ログレベルの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
 	inline level_type outputLevel() const { return toOutputLevel(m_info->m_value); }//出力レベル取得
-	inline const GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
+	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール
 	inline GASHA_ IConsole*& console(const purpose_type purpose){ return m_info->m_consoles[purpose]; }//コンソール
 	inline const consoleColor& color(const purpose_type purpose) const { return m_info->m_colors[purpose]; }//カラー取得
 	inline consoleColor& color(const purpose_type purpose){ return m_info->m_colors[purpose]; }//カラー取得

@@ -14,6 +14,7 @@
 
 #include <gasha/i_allocator_adapter.h>//アロケータアダプターインターフェース
 #include <gasha/std_allocator.h>//標準アロケータ
+#include <gasha/chrono.h>//時間処理ユーティリティ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -51,24 +52,24 @@ struct debugAllocationInfo
 	const char* m_fileName;//ファイル名
 	const char* m_funcName;//関数名
 	const char* m_callPointName;//コールポイント名
-	double m_time;//プログラム経過時間
+	GASHA_ time_type m_time;//プログラム経過時間
 	const char* m_typeName;//型名
 	std::size_t m_typeSize;//型のサイズ
 	std::size_t m_arrayNum;//配列サイズ
 #endif//GASHA_HAS_DEBUG_FEATURE
 
 	//コンストラクタ
-	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const double time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
+	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
 };
 
 //--------------------
 //デバッグ用メモリアロケート観察者
-enum newMethod_t//new時の状況
+enum newMethod_type//new時の状況
 {
 	methodOfNew,//new時
 	methodOfNewArrays,//new[]時
 };
-enum deleteMethod_t//delete時の状況
+enum deleteMethod_type//delete時の状況
 {
 	methodOfDelete,//delete時
 	methodOfDeleteArrays,//delete[]時
@@ -76,10 +77,10 @@ enum deleteMethod_t//delete時の状況
 struct debugAllocationObserver
 {
 	//new時のコールバック関数
-	std::function<void(const IAllocatorAdapter& adapter, const void* p, std::size_t size, std::size_t align, const newMethod_t method, const debugAllocationInfo* info)> m_atNew;
+	std::function<void(const IAllocatorAdapter& adapter, const void* p, std::size_t size, std::size_t align, const newMethod_type method, const debugAllocationInfo* info)> m_atNew;
 	
 	//delete時のコールバック関数
-	std::function<void(const IAllocatorAdapter& adapter, const void* p, const deleteMethod_t method, const debugAllocationInfo* info)> m_atDelete;
+	std::function<void(const IAllocatorAdapter& adapter, const void* p, const deleteMethod_type method, const debugAllocationInfo* info)> m_atDelete;
 	
 	//アロケータアダプター変更時のコールバック関数 
 	std::function<void(const IAllocatorAdapter& adapter, const IAllocatorAdapter& next_adapter)> m_atChangeAllocator;
@@ -156,8 +157,8 @@ private:
 
 private:
 	//コールバック
-	void callbackAtNew(void *p, std::size_t size, const GASHA_ newMethod_t method);
-	void callbackAtDelete(void *p, const GASHA_ deleteMethod_t method);
+	void callbackAtNew(void *p, std::size_t size, const GASHA_ newMethod_type method);
+	void callbackAtDelete(void *p, const GASHA_ deleteMethod_type method);
 	void callbackAtChangeAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& next_adapter);//アロケータアダプター変更時のコールバック
 	void callbackAtReturnAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
 

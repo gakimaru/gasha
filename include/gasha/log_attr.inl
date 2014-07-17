@@ -16,6 +16,8 @@
 
 #include <gasha/log_attr.h>//ログ属性【宣言部】
 
+#include <cstring>//std::memcpy()
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -27,6 +29,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //ログ属性
 
+//ログ用途に応じたビットシフト数
+inline int logAttr::shiftBits(const logAttr::purpose_type purpose)
+{
+	return static_cast<int>(purpose == ofLog ? bitShiftOfLog : purpose == ofNotice ? bitShiftOfNotice : 0);
+}
+
 //属性判定
 inline bool logAttr::has(const logAttr::attr_type target_attr, const logAttr::attr_type attr)
 {
@@ -36,6 +44,15 @@ inline bool logAttr::has(const attr_type attr) const
 {
 	return (*m_attrRef & attr) != 0x00;
 }
+//※用途別の判定
+inline bool logAttr::has(const logAttr::attr_type target_attr, const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+{
+	return ((target_attr >> shiftBits(purpose)) & attr) != 0x00;
+}
+inline bool logAttr::has(const logAttr::purpose_type purpose, const attr_type attr) const
+{
+	return ((*m_attrRef >> shiftBits(purpose)) & attr) != 0x00;
+}
 
 //属性付与
 inline logAttr::attr_type logAttr::add(const logAttr::attr_type attr)
@@ -43,11 +60,25 @@ inline logAttr::attr_type logAttr::add(const logAttr::attr_type attr)
 	*m_attrRef |= attr;
 	return *m_attrRef;
 }
+inline logAttr::attr_type logAttr::add(const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+{
+	return add(attr << shiftBits(purpose));
+}
 
 //属性破棄
 inline logAttr::attr_type logAttr::remove(const logAttr::attr_type attr)
 {
 	*m_attrRef &= ~attr;
+	return *m_attrRef;
+}
+inline logAttr::attr_type logAttr::remove(const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+{
+	return remove(attr << shiftBits(purpose));
+}
+
+//属性取得
+inline logAttr::attr_type logAttr::get() const
+{
 	return *m_attrRef;
 }
 
@@ -63,6 +94,32 @@ inline logAttr::attr_type logAttr::reset()
 {
 	*m_attrRef = DEFAULT_ATTR;
 	return *m_attrRef;
+}
+
+//ログレベルマスクのセーブ／ロード
+
+//シリアライズに必要なサイズを取得
+inline std::size_t logAttr::serializeSize() const
+{
+	return sizeof(attr_type);
+}
+
+//シリアライズ（セーブ用）
+inline bool logAttr::serialize(void* dst, const std::size_t dst_size) const
+{
+	if (dst_size < serializeSize())
+		return false;
+	std::memcpy(dst, m_attrRef, serializeSize());
+	return true;
+}
+
+//デシリアライズ（ロード用）
+inline bool logAttr::deserialize(const void* src, const std::size_t src_size)
+{
+	if (src_size != serializeSize())
+		return false;
+	std::memcpy(m_attrRef, src, serializeSize());
+	return true;
 }
 
 //ムーブオペレータ
@@ -93,7 +150,10 @@ inline logAttr::logAttr(logAttr&& obj) :
 
 
 //明示的な初期化用コンストラクタ
-inline logAttr::logAttr(const explicitInitialize_t&)
+inline logAttr::logAttr(const explicitInitialize_t&) :
+	m_refType(isGlobal),
+	m_attrRef(&m_globalAttr),
+	m_prevTlsAttr(nullptr)
 {
 	std::call_once(m_initialized, initializeOnce);//グローバルログレベルマスク初期化（一回限り）
 }

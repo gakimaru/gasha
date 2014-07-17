@@ -17,7 +17,7 @@
 #include <gasha/new.h>//多態アロケータ対応標準new/delete【宣言部】
 
 #include <gasha/poly_allocator.h>//多態アロケータ
-#include <gasha/chrono.h>//時間系ユーティリティ
+#include <gasha/chrono.h>//時間処理系ユーティリティ
 
 #include <utility>//C++11 std::forward
 
@@ -50,7 +50,7 @@ namespace _private
 	T* newFunctor<T>::operator()(Tx&& ...nx) const
 	{
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
-		const double time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
@@ -70,7 +70,7 @@ namespace _private
 	T* newFunctor<T[N]>::operator()() const
 	{
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
-		const double time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), N);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
@@ -92,7 +92,7 @@ namespace _private
 	void deleteFunctor::operator()(T* p) const
 	{
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
-		const double time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete p;//メモリ破棄
@@ -107,7 +107,7 @@ namespace _private
 	void deleteArrayFunctor::operator()(T* p) const
 	{
 		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
-		const double time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete[] p;//メモリ破棄

@@ -37,11 +37,11 @@ template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int 
 inline bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::_push(typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::stack_t* new_node)
 {
 	new_node->m_next.store(m_head.load());//新規ノードの次ノードに現在の先頭ノードをセット
-	stack_ptr_t new_node_tag_ptr;
+	stack_ptr_type new_node_tag_ptr;
 	new_node_tag_ptr.set(new_node, m_tag.fetch_add(1));//タグ付きポインタ生成
 	while (true)
 	{
-		stack_ptr_t next_tag_ptr = new_node->m_next.load();//新規ノードの次ノードを取得
+		stack_ptr_type next_tag_ptr = new_node->m_next.load();//新規ノードの次ノードを取得
 
 		//CAS操作①
 		if (m_head.compare_exchange_weak(next_tag_ptr, new_node_tag_ptr))//CAS操作
@@ -81,11 +81,11 @@ bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
 bool lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::pop(typename lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)
 {
-	stack_ptr_t head_tag_ptr = m_head.load();//先頭ノードを取得
+	stack_ptr_type head_tag_ptr = m_head.load();//先頭ノードを取得
 	while (head_tag_ptr.isNotNull())
 	{
 		stack_t* head = head_tag_ptr;//タグ付きポインタからポインタを取得
-		stack_ptr_t next_tag_ptr = head->m_next;//次のノードを取得
+		stack_ptr_type next_tag_ptr = head->m_next;//次のノードを取得
 
 		//CAS操作②
 		if (m_head.compare_exchange_weak(head_tag_ptr, next_tag_ptr))//CAS操作
@@ -111,7 +111,7 @@ std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 	GASHA_ spprintf(message, size, "----- Debug Info for lfStack -----\n");
 	GASHA_ spprintf(message, size, "Stack:\n");
 	int no = 0;
-	stack_ptr_t node_tag_ptr = m_head.load();
+	stack_ptr_type node_tag_ptr = m_head.load();
 	while (node_tag_ptr.isNotNull())
 	{
 		const stack_t* node = node_tag_ptr;
@@ -133,7 +133,7 @@ std::size_t lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, 
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
 void lfStack<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::initialize()
 {
-	stack_ptr_t null_tag_ptr;
+	stack_ptr_type null_tag_ptr;
 	null_tag_ptr.set(nullptr, 0);//タグ付きヌルポインタ
 	m_head.store(null_tag_ptr);//先頭ノードの初期値はnull
 	m_tag.store(0);//タグを初期化

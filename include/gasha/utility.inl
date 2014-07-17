@@ -20,7 +20,7 @@
 #include <type_traits>//c++11 std::conditional
 
 #ifdef GASHA_SWAP_VALUES_USE_MEMCPY
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 #endif//GASHA_SWAP_VALUES_USE_MEMCPY
 
 #include <utility>//C++11 std::move, std::forward

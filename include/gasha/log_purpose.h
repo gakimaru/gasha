@@ -13,6 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint8_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -24,7 +25,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //ログ用途の定数
-enum logPurposeEnum : unsigned char
+enum logPurposeEnum : std::uint8_t
 {
 	ofLog = 0,//用途：ログ出力
 	ofNotice = 1,//用途：画面通知
@@ -36,7 +37,7 @@ class logPurpose
 {
 public:
 	//型
-	typedef unsigned char purpose_type;//ログ用途の値
+	typedef std::uint8_t purpose_type;//ログ用途の値
 public:
 	//定数
 	static const std::size_t NUM = 2;//ログ用途の数

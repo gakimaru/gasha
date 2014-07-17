@@ -48,9 +48,10 @@ inline int IConsole::printf(char* work_buff, const std::size_t work_buff_size, c
 
 //改行出力
 //※改行前にカラーリセットも行う
-inline void IConsole::outputCr()
+inline void IConsole::outputCr(const bool with_reset_color)
 {
-	resetColor();
+	if (with_reset_color)
+		resetColor();
 	output("\n");
 }
 

@@ -21,7 +21,7 @@
 #include <gasha/lock_common.h>//ロック共通設定
 #include <gasha/fast_string.h>//高速文字列処理
 
-#include <cstring>//memcpy()
+#include <cstring>//std::memcpy()
 #include <utility>//C++11 std::forward
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -61,6 +61,13 @@ template<typename... Tx>
 inline std::size_t logWorkBuff::spprintf(char* message, std::size_t& pos, const char* fmt, Tx&&... args)
 {
 	return GASHA_ spprintf(message, MAX_MESSAGE_SIZE, pos, fmt, std::forward<Tx>(args)...);
+}
+
+//spprintf ※バッファサイズ半分版
+template<typename... Tx>
+inline std::size_t logWorkBuff::spprintf_halfSized(char* message, std::size_t& pos, const char* fmt, Tx&&... args)
+{
+	return GASHA_ spprintf(message, HALF_MESSAGE_SIZE, pos, fmt, std::forward<Tx>(args)...);
 }
 
 //明示的な初期化用コンストラクタ
