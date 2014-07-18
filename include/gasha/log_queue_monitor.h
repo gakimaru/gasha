@@ -44,7 +44,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログキューモニター
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログキューモニター
@@ -64,7 +64,7 @@ public:
 
 public:
 	//型
-	struct explicitInitialize_t{};//明示的な初期化用構造体
+	struct explicitInit_type{};//明示的な初期化用構造体
 
 public:
 	//モニター
@@ -105,7 +105,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logQueueMonitor(const explicitInitialize_t&);
+	inline logQueueMonitor(const explicitInit_type&);
 	//デフォルトコンストラクタ
 	inline logQueueMonitor();
 	//デストラクタ
@@ -115,9 +115,6 @@ private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
 
-public:
-	//静的フィールド
-	static const explicitInitialize_t explicitInitialize;//明示的な初期化指定用
 private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
@@ -127,9 +124,12 @@ private:
 	static std::atomic<id_type> m_nextId;//次のID（先に大きなIDが来たら、次のIDが来るまで待つ）
 	static std::mutex m_mutex;//ミューテックス
 	static std::condition_variable m_cond;//条件変数
+public:
+	//静的フィールド
+	static const explicitInit_type explicitInit;//明示的な初期化指定用
 };
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

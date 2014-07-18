@@ -33,6 +33,28 @@ inline time_type calcElapsedTime(const std::chrono::system_clock::time_point beg
 inline time_type calcElapsedTime(const std::chrono::system_clock::time_point begin, const std::chrono::system_clock::time_point end);
 
 //----------------------------------------
+//経過時間を文字列化
+//※文字列の長さ（終端を含まない）を返す。
+enum timeStrFormat_type
+{
+	timeStr_S,//"秒"（例："0"）
+	timeStr_S_MILLI,//"秒.ミリ秒"（例："0.000"）
+	timeStr_S_MICRO,//"秒.マイクロ秒"（例："0.000000"）
+	timeStr_S_NANO,//"秒.ナノ秒"（例："0.000000000"）
+	
+	timeStr_MMSS,//"分:秒"（例："00:00"）
+	timeStr_MMSS_MILLI,//"分:秒.ミリ秒"（例："00:00.000"）
+	timeStr_MMSS_MICRO,//"分:秒.マイクロ秒"（例："00:00.000000"）
+	timeStr_MMSS_NANO,//"分:秒.ナノ秒"（例："00:00.000000000"）
+
+	timeStr_HHMMSS,//"時:分:秒"（例："00:00:00"）
+	timeStr_HHMMSS_MILLI,//"時:分:秒.ミリ秒"（例："00:00:00.000"）
+	timeStr_HHMMSS_MICRO,//"時:分:秒.マイクロ秒"（例："00:00:00.000000"）
+	timeStr_HHMMSS_NANO,//"時:分:秒.ナノ秒"（例："00:00:00.000000000"）
+};
+std::size_t timeToStr(char* buff, const time_type time, const timeStrFormat_type format_type);
+
+//----------------------------------------
 //経過時間クラス
 class elapsedTime
 {
@@ -43,6 +65,15 @@ public:
 	//※開始時間を現在時間にリセット
 	inline void reset();
 public:
+	//ムーブオペレータ
+	inline elapsedTime& operator=(elapsedTime&& rhs);
+	//コピーオペレータ
+	inline elapsedTime& operator=(const elapsedTime& rhs);
+public:
+	//ムーブコンストラクタ
+	inline elapsedTime(elapsedTime&& obj);
+	//コピーコンストラクタ
+	inline elapsedTime(const elapsedTime& obj);
 	//コンストラクタ
 	inline elapsedTime();
 private:

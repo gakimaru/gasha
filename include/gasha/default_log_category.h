@@ -20,8 +20,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //既定のログカテゴリ
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //既定のログカテゴリ用定数
 enum categoryEnum : logCategory::category_type
@@ -40,8 +38,6 @@ enum categoryEnum : logCategory::category_type
 	forCallPoint = MAKE_SPECIAL_LOG_CATEGORY_VALUE(1),//直近のコールポイントのカテゴリに合わせる（なければforAny扱い）
 	forCriticalCallPoint = MAKE_SPECIAL_LOG_CATEGORY_VALUE(2),//直近の重大コールポイントのカテゴリに合わせる（なければforAny扱い）
 };
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

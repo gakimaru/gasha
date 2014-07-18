@@ -22,7 +22,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ダミーコンソール
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ダミーコンソールクラス
@@ -38,7 +38,7 @@ inline dummyConsole::dummyConsole(const char* name) :
 	m_name(name)
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

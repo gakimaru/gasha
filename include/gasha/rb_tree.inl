@@ -23,7 +23,7 @@
 #include <cassert>//assert()
 
 #if defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD) || defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE)
-#include <cstdio>//printf()
+#include <cstdio>//std::printf()
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD, GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -36,14 +36,14 @@ namespace rb_tree
 	template<typename... Tx>
 	inline int printf_dbg_add(const char* fmt, Tx&&... args)
 	{
-		return printf(fmt, std::forward<Tx>(args)...);
+		return std::printf(fmt, std::forward<Tx>(args)...);
 	}
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD
 #ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 	template<typename... Tx>
 	inline int printf_dbg_remove(const char* fmt, Tx&&... args)
 	{
-		return printf(fmt, std::forward<Tx>(args)...);
+		return std::printf(fmt, std::forward<Tx>(args)...);
 	}
 #endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 

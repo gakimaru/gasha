@@ -30,7 +30,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログワークバッファ
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //ワークバッファの解放
 inline void logWorkBuff::free(char* p)
@@ -71,7 +71,7 @@ inline std::size_t logWorkBuff::spprintf_halfSized(char* message, std::size_t& p
 }
 
 //明示的な初期化用コンストラクタ
-inline logWorkBuff::logWorkBuff(const explicitInitialize_t&)
+inline logWorkBuff::logWorkBuff(const explicitInit_type&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};
@@ -90,7 +90,7 @@ inline logWorkBuff::logWorkBuff()
 inline logWorkBuff::~logWorkBuff()
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

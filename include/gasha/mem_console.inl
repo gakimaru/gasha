@@ -25,10 +25,17 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリコンソール
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //メモリコンソールクラス
+
+//改行出力
+template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
+inline void memConsole<_BUFF_SIZE, LOCK_TYPE>::putCr()
+{
+	put("\n");
+}
 
 //カラー変更
 template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
@@ -55,7 +62,7 @@ inline memConsole<_BUFF_SIZE, LOCK_TYPE>::memConsole(const char* name) :
 	m_posInBlock(0)
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

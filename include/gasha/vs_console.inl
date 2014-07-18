@@ -30,7 +30,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //Visual Studio出力ウインドウ
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //Visual Studio出力ウインドウクラス
@@ -51,7 +51,7 @@ inline vsConsole::vsConsole(const char* name) :
 
 #endif//GASHA_USE_VS_CONSOLE
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

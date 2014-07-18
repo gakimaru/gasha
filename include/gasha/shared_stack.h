@@ -76,7 +76,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const value_type& value)> print_node);
+	std::size_t debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const value_type& value)> print_node) const;
 
 private:
 	//初期化
@@ -93,7 +93,7 @@ private:
 	//フィールド
 	poolAllocator_withType<stack_t, _POOL_SIZE, GASHA_ dummyLock> m_allocator;//プールアロケータ（プールアロケータ自体はロック制御しない）
 	stack_t* m_head;//スタックの先頭
-	lock_type m_lock;//ロックオブジェクト
+	mutable lock_type m_lock;//ロックオブジェクト
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

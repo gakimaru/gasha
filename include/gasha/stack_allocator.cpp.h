@@ -77,11 +77,11 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 
 //デバッグ情報作成
 template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message)
+std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug Info for stackAllocator -----\n");
+	GASHA_ spprintf(message, size, "----- Debug-info for stackAllocator -----\n");
 	GASHA_ spprintf(message, size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
 	GASHA_ spprintf(message, size, "-----------------------------------------\n");
 	return size;

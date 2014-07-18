@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //コンソールインターフェース
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //コンソールインターフェースクラス
@@ -34,7 +34,7 @@ template<typename... Tx>
 inline int IConsole::printf(char* work_buff, const char* fmt, Tx&&... args)
 {
 	const int ret = GASHA_ spprintf(work_buff, fmt, std::forward<Tx>(args)...);
-	output(work_buff);
+	put(work_buff);
 	return ret;
 }
 template<typename... Tx>
@@ -42,17 +42,8 @@ inline int IConsole::printf(char* work_buff, const std::size_t work_buff_size, c
 {
 	std::size_t pos = 0;
 	const int ret = GASHA_ spprintf(work_buff, work_buff_size, pos, fmt, std::forward<Tx>(args)...);
-	output(work_buff);
+	put(work_buff);
 	return ret;
-}
-
-//改行出力
-//※改行前にカラーリセットも行う
-inline void IConsole::outputCr(const bool with_reset_color)
-{
-	if (with_reset_color)
-		resetColor();
-	output("\n");
 }
 
 //カラー変更
@@ -61,7 +52,7 @@ inline void IConsole::changeColor(const GASHA_ consoleColor& color)
 	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

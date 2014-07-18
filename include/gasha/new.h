@@ -49,8 +49,8 @@ namespace _private
 		template<typename... Tx>
 		T* operator()(Tx&& ...nx) const;
 		inline newFunctor(const char* file_name, const char* func_name);
-		const char* m_fileName;
-		const char* m_funcName;
+		const char* m_fileName;//呼び出し元ソースファイル名
+		const char* m_funcName;//呼び出し元関数名
 	};
 	//※配列版
 	//※【問題点】VC++の場合、32バイトアラインメント以上でデストラクタ付きのクラス／構造体の確保は正常に動作しないので注意
@@ -60,8 +60,8 @@ namespace _private
 	{
 		T* operator()() const;
 		inline newFunctor(const char* file_name, const char* func_name);
-		const char* m_fileName;
-		const char* m_funcName;
+		const char* m_fileName;//呼び出し元ソースファイル名
+		const char* m_funcName;//呼び出し元関数名
 	};
 
 	//--------------------
@@ -71,8 +71,8 @@ namespace _private
 		template<typename T>
 		void operator()(T* p) const;
 		inline deleteFunctor(const char* file_name, const char* func_name);
-		const char* m_fileName;
-		const char* m_funcName;
+		const char* m_fileName;//呼び出し元ソースファイル名
+		const char* m_funcName;//呼び出し元関数名
 	};
 	//※配列版
 	struct deleteArrayFunctor
@@ -80,8 +80,8 @@ namespace _private
 		template<typename T>
 		void operator()(T* p) const;
 		inline deleteArrayFunctor(const char* file_name, const char* func_name);
-		const char* m_fileName;
-		const char* m_funcName;
+		const char* m_fileName;//呼び出し元ソースファイル名
+		const char* m_funcName;//呼び出し元関数名
 	};
 }
 

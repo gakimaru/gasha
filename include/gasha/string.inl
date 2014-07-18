@@ -160,10 +160,10 @@ inline int spprintf(char* dst, std::size_t& pos, const char* fmt, Tx&&... args)
 	return ret;
 }
 template<typename... Tx>
-int spprintf(char* dst, const std::size_t max_len, std::size_t& pos, const char* fmt, Tx&&... args)
+int spprintf(char* dst, const std::size_t max_size, std::size_t& pos, const char* fmt, Tx&&... args)
 {
 	char* dst_now = dst + pos;
-	const std::size_t remain = max_len - pos;
+	const std::size_t remain = max_size - pos;
 	int ret = 0;
 #ifdef GASHA_IS_VC
 	ret = ::_snprintf_s(dst_now, remain, remain - 1, fmt, std::forward<Tx>(args)...);

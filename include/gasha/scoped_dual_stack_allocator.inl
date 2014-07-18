@@ -233,10 +233,10 @@ inline void scopedDualStackAllocator<ALLOCATOR>::clearOrd(const allocationOrder_
 
 //デバッグ情報作成
 template<class ALLOCATOR>
-std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message)
+std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug Info for scopedDualStackAllocator -----\n");
+	GASHA_ spprintf(message, size, "----- Debug-info for scopedDualStackAllocator -----\n");
 	GASHA_ spprintf(message, size, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
 	GASHA_ spprintf(message, size, "---------------------------------------------------\n");
 	return size;

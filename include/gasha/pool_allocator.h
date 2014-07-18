@@ -107,9 +107,9 @@ public:
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
 	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
-	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node);
-	std::size_t debugInfo(char* message, const bool with_detail);
-	inline std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node) const;
+	std::size_t debugInfo(char* message, const bool with_detail) const;
+	inline std::size_t debugInfo(char* message) const;
 
 	//強制クリア
 	//※【要注意】強制的に未アロケート状態にする
@@ -149,7 +149,7 @@ private:
 	index_type m_recyclableHead;//再利用プールの先頭インデックス
 	std::bitset<MAX_POOL_SIZE> m_using;//使用中インデックス（二重解放判定用）
 	size_type m_usingPoolSize;//使用中の数（デバッグ用）※制御に必要な情報ではない
-	lock_type m_lock;//ロックオブジェクト
+	mutable lock_type m_lock;//ロックオブジェクト
 };
 
 //--------------------------------------------------------------------------------

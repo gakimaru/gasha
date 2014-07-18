@@ -30,8 +30,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //標準コンソール
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 
 //----------------------------------------
@@ -45,11 +43,8 @@ public:
 
 public:
 	//コンストラクタ
-	stdOutConsole() :
+	inline stdOutConsole() :
 		winConsole(stdout, "Win(stdout)")
-	{}
-	//デストラクタ
-	~stdOutConsole() override
 	{}
 
 private:
@@ -68,11 +63,8 @@ public:
 
 public:
 	//コンストラクタ
-	stdErrConsole() :
+	inline stdErrConsole() :
 		winConsole(stderr, "Win(stderr)")
-	{}
-	//デストラクタ
-	~stdErrConsole() override
 	{}
 
 private:
@@ -85,17 +77,21 @@ private:
 //※Windowsコマンドプロンプトに委譲
 class stdConsoleOfNotice : public GASHA_ winConsole
 {
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+public:
+	//出力終了
+	//※フラッシュ可能な状態
+	void end() override;
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
 public:
 	//静的アクセッサ
 	inline static stdConsoleOfNotice& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsoleOfNotice():
+	inline stdConsoleOfNotice() :
 		winConsole(stderr, "Win(stderr)")
-	{}
-	//デストラクタ
-	~stdConsoleOfNotice() override
 	{}
 
 private:
@@ -116,11 +112,8 @@ public:
 
 public:
 	//コンストラクタ
-	stdOutConsole():
+	inline stdOutConsole():
 		ttyConsole(stdout, "TTY(stdout)")
-	{}
-	//デストラクタ
-	~stdOutConsole() override
 	{}
 
 private:
@@ -139,11 +132,8 @@ public:
 
 public:
 	//コンストラクタ
-	stdErrConsole():
+	inline stdErrConsole():
 		ttyConsole(stderr, "TTY(stderr)")
-	{}
-	//デストラクタ
-	~stdErrConsole() override
 	{}
 
 private:
@@ -156,17 +146,21 @@ private:
 //※TTY端末に委譲
 class stdConsoleOfNotice : public GASHA_ ttyConsole
 {
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+public:
+	//出力終了
+	//※フラッシュ可能な状態
+	void end() override;
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
 public:
 	//静的アクセッサ
 	inline static stdConsoleOfNotice& instance(){ return s_instance; }
 
 public:
 	//コンストラクタ
-	stdConsoleOfNotice():
+	inline stdConsoleOfNotice():
 		ttyConsole(stderr, "TTY(stderr)")
-	{}
-	//デストラクタ
-	~stdConsoleOfNotice() override
 	{}
 
 private:
@@ -187,11 +181,8 @@ public:
 
 public:
 	//コンストラクタ
-	stdMemConsole() :
+	inline stdMemConsole() :
 		memConsole("Memory")
-	{}
-	//デストラクタ
-	~stdMemConsole() override
 	{}
 
 private:
@@ -209,19 +200,14 @@ public:
 
 public:
 	//コンストラクタ
-	stdDummyConsole() :
+	inline stdDummyConsole() :
 		dummyConsole("Dummy")
-	{}
-	//デストラクタ
-	~stdDummyConsole() override
 	{}
 
 private:
 	//静的フィールド
 	static stdDummyConsole s_instance;
 };
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

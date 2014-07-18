@@ -15,7 +15,7 @@
 
 #include <gasha/basic_math.h>//基本算術
 
-#include <cstdint>//std::int*_t
+#include <cstdint>//C++11 std::int*_t
 #include <utility>//C++11 std::move
 
 #ifdef GASHA_USE_SSE

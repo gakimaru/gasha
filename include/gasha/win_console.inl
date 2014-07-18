@@ -21,7 +21,7 @@
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 #include <utility>//std:forward
-#include <cstdio>//fprintf()
+#include <cstdio>//std::fprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -29,7 +29,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //Windowsコマンドプロントプト
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //Windowsコマンドプロントプトクラス
@@ -50,9 +50,17 @@ inline void winConsole::changeColor(const GASHA_ consoleColor& color)
 	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
 
+//----------------------------------------
+//カラー出力なしWindowsコマンドプロンプトクラス
+
+//コンストラクタ
+inline monoWinConsole::monoWinConsole(std::FILE* handle, const char* name) :
+	winConsole(handle, name)
+{}
+
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -110,8 +110,8 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
-	std::size_t debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const value_type& value)> print_node);
-
+	std::size_t debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const value_type& value)> print_node) const;
+	
 private:
 	//初期化
 	void initialize();

@@ -25,7 +25,7 @@
 #include <gasha/log_queue.h>//ログキュー
 #include <gasha/log_queue_monitor.h>//ログキューモニター
 #include <gasha/std_log_print.h>//標準ログ出力
-#include <gasha/chrono.h>//時間処理系ユーティリティ：nowElapsedTime()
+#include <gasha/chrono.h>//時間処理ユーティリティ：nowElapsedTime()
 
 #include <cstddef>//std::size_t
 #include <utility>//C++11 std::forward
@@ -36,7 +36,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ操作
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログ操作
@@ -66,17 +66,17 @@ bool log::print(const bool is_reserved, const log::level_type level, const log::
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = is_reserved ? m_reservedId : 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = message;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(message_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(is_reserved ? m_reservedId : 0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(message);
+	print_info.setMessageSize(message_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//キューイング
@@ -169,17 +169,17 @@ bool log::convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = is_reserved ? m_reservedId : 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = converted_message;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(converted_message_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId (is_reserved ? m_reservedId : 0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(converted_message);
+	print_info.setMessageSize(converted_message_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//キューイング
@@ -250,17 +250,17 @@ bool log::convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const l
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = is_reserved ? m_reservedId : 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = converted_str;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(converted_str_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(is_reserved ? m_reservedId : 0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(converted_str);
+	print_info.setMessageSize(converted_str_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//キューイング
@@ -331,17 +331,17 @@ bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const 
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = message;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(message_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(message);
+	print_info.setMessageSize(message_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//直接出力
@@ -374,17 +374,17 @@ bool log::putDirect(PRINT_FUNC print_func, const log::level_type level, const lo
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = str;
-	print_info.m_messageSize = 0;
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(str);
+	print_info.setMessageSize(0);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//直接出力
@@ -429,17 +429,17 @@ bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, 
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = converted_message;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(converted_message_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(converted_message);
+	print_info.setMessageSize(converted_message_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//直接出力
@@ -482,17 +482,17 @@ bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, co
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.m_id = 0;
-	print_info.m_time = nowElapsedTime();
-	print_info.m_message = converted_str;
-	print_info.m_messageSize = static_cast<logPrintInfo::message_size_type>(converted_str_len + 1);
-	print_info.m_level = level;
-	print_info.m_category = category;
-	print_info.m_attr = *GASHA_ logAttr();
+	print_info.setId(0);
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(converted_str);
+	print_info.setMessageSize(converted_str_len + 1);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{
-		print_info.m_consoles[purpose] = masked.m_consoles[purpose];
-		print_info.m_colors[purpose] = masked.m_colors[purpose];
+		print_info.setConsole(purpose, masked.m_consoles[purpose]);
+		print_info.setColor(purpose, masked.m_colors[purpose]);
 	}
 
 	//直接出力
@@ -558,177 +558,7 @@ inline log::~log()
 	cancelToReserve();//予約があったらキャンセル
 }
 
-#else//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
-//ログ出力：書式付き出力
-template<typename... Tx>
-inline bool log::print(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-//※予約出力版
-template<typename... Tx>
-inline bool log::reservedPrint(const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ出力：書式なし出力
-inline bool log::put(const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-//※予約出力版
-inline bool log::reservedPut(const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ出力：書式付き出力
-//※文字コード変換処理指定版
-template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::convPrint(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-//※予約出力版
-template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::reservedConvPrint(CONVERTER_FUNC converter_func, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ出力：書式なし出力
-//※文字コード変換処理指定版
-template<class CONVERTER_FUNC>
-inline bool log::convPut(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-//※予約出力版
-template<class CONVERTER_FUNC>
-inline bool log::reservedConvPut(CONVERTER_FUNC converter_func, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ直接出力：書式付き出力
-template<class PRINT_FUNC, typename... Tx>
-inline bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-template<typename... Tx>
-inline bool log::printDirect(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ直接出力：書式なし出力
-template<class PRINT_FUNC>
-inline bool log::putDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-inline bool log::putDirect(const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ直接出力：書式付き出力
-//※文字コード変換処理指定版
-template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
-inline bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::convPrintDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ直接出力：書式なし出力
-//※文字コード変換処理指定版
-template<class PRINT_FUNC, class CONVERTER_FUNC>
-inline bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-template<class CONVERTER_FUNC>
-inline bool log::convPutDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ出力予約
-inline bool log::reserve(const log::level_type level, const log::category_type category, const int num)
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//ログ出力予約を取り消す
-inline bool log::cancelToReserve()
-{
-	//なにもしない
-	return true;//常に成功扱い
-}
-
-//【使用注意】ログ関係の処理を一括して初期化する
-inline void log::initialize()
-{
-	//なにもしない
-}
-
-//【使用注意】ログ関係の処理を一括して中断する
-//※中断後は初期化しないと再利用できないので注意。
-inline void log::abort()
-{
-	//なにもしない
-}
-
-//【使用注意】ログ関係の処理を一括して一時停止する
-inline void log::pause()
-{
-	//なにもしない
-}
-
-//【使用注意】ログ関係の処理を一括して一時停止解除する
-inline void log::resume()
-{
-	//なにもしない
-}
-
-//コンストラクタ
-inline log::log()
-{
-	//なにもしない
-}
-
-//デストラクタ
-inline log::~log()
-{
-	//なにもしない
-}
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -79,7 +79,7 @@ public:
 	inline void clear();
 	
 	//デバッグ情報作成
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message) const;
 
 public:
 	//コンストラクタ

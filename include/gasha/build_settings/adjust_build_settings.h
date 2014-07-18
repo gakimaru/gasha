@@ -24,9 +24,23 @@
 //【ビルド構成】
 
 //アサーションが有効なら、必ずデバッグログも有効になる
-#if !defined(GASHA_HAS_DEBUG_LOG) && defined(GASHA_ASSERTION_IS_ENABLED)
-	#define GASHA_HAS_DEBUG_LOG
-#endif//GASHA_HAS_DEBUG_LOG
+#if !defined(GASHA_LOG_IS_ENABLED) && defined(GASHA_ASSERTION_IS_ENABLED)
+	#define GASHA_LOG_IS_ENABLED
+#endif//GASHA_LOG_IS_ENABLED
+
+//コールポイントが有効なら、必ずデバッグログも有効になる
+#if !defined(GASHA_LOG_IS_ENABLED) && defined(GASHA_CALLPOINT_IS_ENABLED)
+	#define GASHA_LOG_IS_ENABLED
+#endif//GASHA_LOG_IS_ENABLED
+
+//--------------------------------------------------------------------------------
+//【全体設定：TLS設定】
+
+//MAC OS Xなど、TLSの初期化ができない環境では、TLSの初期化が不完全であることを明示する
+//【予約処理】現時点で、GASHAは MAX OS X に対応していないが、対応に備えた処理として記述しておく
+#if !defined(GASHA_INCOMPLETE_TLS_INITIALIZER) && defined(GASHA_IS_MAXOSX)
+	#define GASHA_INCOMPLETE_TLS_INITIALIZER
+#endif//GASHA_INCOMPLETE_TLS_INITIALIZER
 
 //--------------------------------------------------------------------------------
 //【全体設定：SSE命令設定】
@@ -412,7 +426,7 @@
 //【シングルトンデバッグ用処理】
 
 //シングルトンのデバッグ情報収集機能は、ビルド構成でデバッグ機能が有効でなければ無効化する
-#if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_HAS_DEBUG_FEATURE)
+#if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_DEBUG_FEATURE_IS_ENABLED)
 	#undef GASHA_SINGLETON_DEBUG_ENABLED
 #endif//GASHA_SINGLETON_DEBUG_ENABLED
 

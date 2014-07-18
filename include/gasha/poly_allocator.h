@@ -44,19 +44,26 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※new / delete オペレータを直接使用してもよいが、GASHA_NEW / GASHA_DELETE マクロを使用すると、
 //　アラインメントを保証し、かつ、デバッグ情報／デバッグコールバックを使用できるようになる。
 
+//--------------------------------------------------------------------------------
+//【注意】対策済みだが、TLSが初期化できない環境（0初期化しかできない環境）には注意。
+//        ⇒懸念点：m_align の初期値が 0 ではない。
+//        ⇒対策：ビルド設定で、プラットフォームに応じて GASHA_INCOMPLETE_TLS_INITIALIZER が設定され、
+//                それに基づいて m_align の明示的な初期化を行う。
+//--------------------------------------------------------------------------------
+
 //--------------------
 //アロケート用デバッグ情報
 struct debugAllocationInfo
 {
-#ifdef GASHA_HAS_DEBUG_FEATURE
-	const char* m_fileName;//ファイル名
-	const char* m_funcName;//関数名
+#ifdef GASHA_DEBUG_FEATURE_IS_ENABLED
+	const char* m_fileName;//呼び出し元ソースファイル名
+	const char* m_funcName;//呼び出し元関数名
 	const char* m_callPointName;//コールポイント名
 	GASHA_ time_type m_time;//プログラム経過時間
 	const char* m_typeName;//型名
 	std::size_t m_typeSize;//型のサイズ
 	std::size_t m_arrayNum;//配列サイズ
-#endif//GASHA_HAS_DEBUG_FEATURE
+#endif//GASHA_DEBUG_FEATURE_IS_ENABLED
 
 	//コンストラクタ
 	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
@@ -149,7 +156,7 @@ private:
 	//アライメントサイズを変更
 	inline static void setAlign(const std::size_t align);
 	inline static void resetAlign();
-	//デバッグ情報を変更
+	//デバッグ情報を取得
 	inline static const GASHA_ debugAllocationInfo* debugInfo();
 	//デバッグ情報を更新
 	inline static void setDebugInfo(const GASHA_ debugAllocationInfo* info);
@@ -163,13 +170,16 @@ private:
 	void callbackAtReturnAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
 
 public:
+	//標準アロケータアダプターの強制初期化
+	//※二重に呼び出されても問題ないので public
+	void initlaizeStdAllocatorAdapter();
+
+public:
 	//コンストラクタ
 	inline polyAllocator(GASHA_ IAllocatorAdapter& adapter);
 	//デフォルトコンストラクタ
-	//現在のアダプター、および、観察者を操作可能。
-	//※標準アロケータアダプターの強制初期化（二重に呼び出されても問題ない）
+	//※現在設定されているアダプター、および、観察者を扱う。
 	inline polyAllocator();
-	void initlaizeStdAllocatorAdapter();
 	//デストラクタ
 	inline ~polyAllocator();
 

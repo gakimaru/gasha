@@ -28,7 +28,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
-#include <cstdint>//std::uint32_t
+#include <cstdint>//C++11 std::uint32_t
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

@@ -20,8 +20,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //既定のログレベル
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //既定のログレベル用定数
 enum levelEnum : logLevel::level_type
@@ -37,8 +35,6 @@ enum levelEnum : logLevel::level_type
 	asSilent = MAKE_SPECIAL_LOG_LEVEL_VALUE(0),//静寂（絶対メッセージ以外出力しない）
 	asSilentAbsolutely = MAKE_SPECIAL_LOG_LEVEL_VALUE(1),//絶対静寂（全てのメッセージを出力しない）
 };
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

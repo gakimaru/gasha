@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログキューモニター
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //モニター
 template<class PRINT_FUNC>
@@ -78,7 +78,7 @@ void logQueueMonitor::monitor(PRINT_FUNC print_func)
 				m_request.fetch_sub(1);
 
 				//次のIDを更新
-				m_nextId.store(print_info.m_id);
+				m_nextId.store(print_info.id());
 				m_nextId.fetch_add(1);
 				retry_count = MAX_RETRY_COUNT;//リトライカウントをリセット
 			}
@@ -118,7 +118,7 @@ inline void logQueueMonitor::reset()
 }
 
 //明示的な初期化用コンストラクタ
-inline logQueueMonitor::logQueueMonitor(const explicitInitialize_t&)
+inline logQueueMonitor::logQueueMonitor(const explicitInit_type&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};
@@ -137,7 +137,7 @@ inline logQueueMonitor::logQueueMonitor()
 inline logQueueMonitor::~logQueueMonitor()
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

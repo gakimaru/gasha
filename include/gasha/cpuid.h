@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <cstdint>//std::uint64_t, std::uint32_t
+#include <cstdint>//C++11 std::uint64_t, std::uint32_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

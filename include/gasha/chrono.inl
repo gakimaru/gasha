@@ -15,7 +15,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/chrono.h>//時間処理系ユーティリティ【宣言部】
+#include <gasha/chrono.h>//時間処理ユーティリティ【宣言部】
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -56,6 +56,30 @@ inline void elapsedTime::reset()
 {
 	m_beginTime = nowTime();
 }
+
+//ムーブオペレータ
+inline elapsedTime& elapsedTime::operator=(elapsedTime&& rhs)
+{
+	m_beginTime = rhs.m_beginTime;
+	return *this;
+}
+
+//コピーオペレータ
+inline elapsedTime& elapsedTime::operator=(const elapsedTime& rhs)
+{
+	m_beginTime = rhs.m_beginTime;
+	return *this;
+}
+
+//ムーブコンストラクタ
+inline elapsedTime::elapsedTime(elapsedTime&& obj) :
+	m_beginTime(obj.m_beginTime)
+{}
+
+//コピーコンストラクタ
+inline elapsedTime::elapsedTime(const elapsedTime& obj) :
+	m_beginTime(obj.m_beginTime)
+{}
 
 //コンストラクタ
 inline elapsedTime::elapsedTime() :

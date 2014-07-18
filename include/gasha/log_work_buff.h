@@ -32,7 +32,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログワークバッファ
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログワークバッファ
@@ -40,7 +40,7 @@ class logWorkBuff
 {
 public:
 	//型
-	struct explicitInitialize_t{};//明示的な初期化用構造体
+	struct explicitInit_type{};//明示的な初期化用構造体
 
 public:
 	//定数
@@ -92,7 +92,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logWorkBuff(const explicitInitialize_t&);
+	inline logWorkBuff(const explicitInit_type&);
 	//デフォルトコンストラクタ
 	inline logWorkBuff();
 	//デストラクタ
@@ -102,18 +102,18 @@ private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
 
-public:
-	//静的フィールド
-	static const explicitInitialize_t explicitInitialize;//明示的な初期化指定用
 private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
 	static std::atomic<bool> m_abort;//中断
 	static std::atomic<bool> m_pause;//一時停止
 	static GASHA_ lfPoolAllocator_withBuff<MAX_MESSAGE_SIZE, MESSAGE_POOL_SIZE> m_workBuff;//ワークバッファ
+public:
+	//静的フィールド
+	static const explicitInit_type explicitInit;//明示的な初期化指定用
 };
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

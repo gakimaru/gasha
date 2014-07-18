@@ -26,7 +26,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ出力操作
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログ出力操作
@@ -80,7 +80,7 @@ inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type 
 #endif//GASHA_LOG_PRINT_USE_QUEUE
 }
 
-#else//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログ出力操作
@@ -118,7 +118,7 @@ inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type 
 	return true;//常に成功扱い
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログレベルマスク
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //--------------------
 //イテレータ
@@ -244,8 +244,14 @@ inline logMask& logMask::operator=(logMask&& rhs)
 	m_prevTlsMask = rhs.m_prevTlsMask;//変更前のTLSログレベルマスクはコピーし、
 	rhs.m_prevTlsMask = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 	rhs.m_refType = isGlobal;         //（同上）
+	rhs.m_maskRef = &m_globalMask;    //（同上）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
+	{
 		m_localMask = rhs.m_localMask;
+		m_maskRef = &m_localMask;
+		if (m_tlsMaskRef == &rhs.m_localMask)//末端以外のオブジェクトをムーブすると、ここで不整合を起こすので注意
+			m_tlsMaskRef = &m_localMask;
+	}
 	return *this;
 }
 
@@ -256,14 +262,20 @@ inline logMask::logMask(logMask&& obj) :
 	m_prevTlsMask(obj.m_prevTlsMask)//変更前のTLSログレベルマスクはコピーし、
 	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 {
-	obj.m_prevTlsMask = nullptr;//ムーブ元無効化
-	obj.m_refType = isGlobal;   //（同上）
+	obj.m_prevTlsMask = nullptr;  //ムーブ元を無効化
+	obj.m_refType = isGlobal;     //（同上）
+	obj.m_maskRef = &m_globalMask;//（同上）
 	if (m_refType == isLocal)//ローカルログレベルマスクは、現在の種別がローカルの時だけコピー
+	{
 		m_localMask = obj.m_localMask;
+		m_maskRef = &m_localMask;
+		if (m_tlsMaskRef == &obj.m_localMask)//末端以外のオブジェクトをムーブすると、ここで不整合を起こすので注意
+			m_tlsMaskRef = &m_localMask;
+	}
 }
 
 //明示的な初期化用コンストラクタ
-inline logMask::logMask(const explicitInitialize_t&) :
+inline logMask::logMask(const explicitInit_type&) :
 	m_refType(isGlobal),
 	m_maskRef(&m_globalMask),
 	m_prevTlsMask(nullptr)
@@ -278,7 +290,7 @@ inline logMask::~logMask()
 		m_tlsMaskRef = m_prevTlsMask;
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

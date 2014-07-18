@@ -29,13 +29,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //【注意】文字コード変換処理を指定した場合、かつ、書式付き出力時は、ワークバッファ（logWorkBuff）の半分のサイズの文字列しか扱えない
 //--------------------------------------------------------------------------------
 
-//デバッグログ無効時は非inline関数として処理するものを指定
-#ifdef GASHA_HAS_DEBUG_LOG
-#define GASHA_INLINE
-#else//GASHA_HAS_DEBUG_LOG
-#define GASHA_INLINE inline
-#endif//GASHA_HAS_DEBUG_LOG
-
 //----------------------------------------
 //ログ操作
 //※指定のログレベルとログカテゴリに応じて、マスクされていない時だけ実際にコンソールに出力される。
@@ -45,7 +38,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 class log
 {
 public:
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 	//型
 	typedef GASHA_ logPrintInfo::id_type id_type;//ログID
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
@@ -53,72 +45,69 @@ public:
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
 	//定数
 	static const std::size_t PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
-#else//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-	typedef std::uint8_t purpose_type;//ログ用途の値
-	typedef std::uint8_t level_type;//ログレベルの値
-	typedef std::uint8_t category_type;//ログカテゴリの値
-	//定数
-	static const std::size_t PURPOSE_NUM = 2;//ログ用途の数
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
 public:
+	//メソッド
+	
 	//--------------------
 	//ログ出力
 	//※キューを使用して出力するため、マルチスレッドで出力が干渉することがない。
 	//※キューからコンソールに出力するために、logQueueMonitor を専用スレッドで動作させておく必要がある。
 	//※書式付き出力時は専用のワークバッファを使用するため、スタックサイズの小さなスレッドからでも問題なく出力可能。
 	
-public:
+private:
 	//ログ出力：書式付き出力
+	template<typename... Tx>
+	bool print(const bool is_reserved, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+public:
+	//※通常版
 	template<typename... Tx>
 	inline bool print(const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※予約出力版
 	template<typename... Tx>
 	inline bool reservedPrint(const char* fmt, Tx&&... args);
-private:
-	//※共通処理（プライベート）
-	template<typename... Tx>
-	bool print(const bool is_reserved, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 
-public:
+private:
 	//ログ出力：書式なし出力
+	bool put(const bool is_reserved, const level_type level, const category_type category, const char* str);
+public:
+	//※通常版
 	inline bool put(const level_type level, const category_type category, const char* str);
 	//※予約出力版
 	inline bool reservedPut(const char* str);
-private:
-	//※共通処理（プライベート）
-	bool put(const bool is_reserved, const level_type level, const category_type category, const char* str);
 
 	//----------
 	//※文字コード変換処理指定版：max_dst_sizeは終端を含めた出力バッファサイズ、src_len は終端を含まない入力文字列長、戻り値は終端を含まない出力文字列長
 	//　CONVERTER_FUNC のプロトタイプ：std::size_t converter_func(char* dst, const std::size_t max_dst_size, const char* src, const std::size_t src_len)
 	
-public:
+private:
 	//ログ出力：書式付き出力
 	//※文字コード変換処理指定版
+	template<class CONVERTER_FUNC, typename... Tx>
+	inline bool convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+public:
+	//※通常版
 	template<class CONVERTER_FUNC, typename... Tx>
 	inline bool convPrint(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※予約出力版
 	template<class CONVERTER_FUNC, typename... Tx>
 	inline bool reservedConvPrint(CONVERTER_FUNC converter_func, const char* fmt, Tx&&... args);
-private:
-	//※共通処理（プライベート）
-	template<class CONVERTER_FUNC, typename... Tx>
-	inline bool convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 
-public:
+private:
 	//ログ出力：書式なし出力
 	//※文字コード変換処理指定版
+	template<class CONVERTER_FUNC>
+	bool convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
+public:
+	//※通常版
 	template<class CONVERTER_FUNC>
 	inline bool convPut(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
 	//※予約出力版
 	template<class CONVERTER_FUNC>
 	inline bool reservedConvPut(CONVERTER_FUNC converter_func, const char* str);
-private:
-	//※共通処理（プライベート）
-	template<class CONVERTER_FUNC>
-	bool convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
 
-public:
 	//--------------------
 	//ログ直接出力
 	//※キューを使用せずに直接出力する。
@@ -128,14 +117,14 @@ public:
 
 	//ログ直接出力：書式付き出力
 	template<class PRINT_FUNC, typename... Tx>
-	GASHA_INLINE bool printDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+	bool printDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	template<typename... Tx>
 	inline bool printDirect(const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	
 	//ログ直接出力：書式なし出力
 	template<class PRINT_FUNC>
-	GASHA_INLINE bool putDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* str);
+	bool putDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* str);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	inline bool putDirect(const level_type level, const category_type category, const char* str);
 	
@@ -146,7 +135,7 @@ public:
 	//ログ直接出力：書式付き出力
 	//※文字コード変換処理指定版
 	template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
-	GASHA_INLINE bool convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+	bool convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	template<class CONVERTER_FUNC, typename... Tx>
 	inline bool convPrintDirect(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
@@ -154,7 +143,7 @@ public:
 	//ログ直接出力：書式なし出力
 	//※文字コード変換処理指定版
 	template<class PRINT_FUNC, class CONVERTER_FUNC>
-	GASHA_INLINE bool convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
+	bool convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	template<class CONVERTER_FUNC>
 	inline bool convPutDirect(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
@@ -198,22 +187,83 @@ public:
 public:
 	//コンストラクタ
 	inline log();
-
 	//デストラクタ
 	inline ~log();
 
 private:
 	//フィールド
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 	id_type m_reservedId;//予約ID（現在値）
 	id_type m_reservedNum;//予約IDの数（出力するごとに減算する）
 	level_type m_reservedLevel;//予約レベル
 	category_type m_reservedCategory;//予約カテゴリ
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-};
 
-//マクロ削除
-#undef GASHA_INLINE
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+public:
+	//メソッド
+
+	//ログ出力：書式付き出力
+	template<typename... Tx>
+	inline bool print(const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//※予約出力版
+	template<typename... Tx>
+	inline bool reservedPrint(const char* fmt, Tx&&... args){ return true; }
+	//ログ出力：書式なし出力
+	inline bool put(const level_type level, const category_type category, const char* str){ return true; }
+	//※予約出力版
+	inline bool reservedPut(const char* str){ return true; }
+	//ログ出力：書式付き出力
+	//※文字コード変換処理指定版
+	template<class CONVERTER_FUNC, typename... Tx>
+	inline bool convPrint(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//※予約出力版
+	template<class CONVERTER_FUNC, typename... Tx>
+	inline bool reservedConvPrint(CONVERTER_FUNC converter_func, const char* fmt, Tx&&... args){ return true; }
+	//ログ出力：書式なし出力
+	template<class CONVERTER_FUNC>
+	inline bool convPut(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str){ return true; }
+	//※予約出力版
+	template<class CONVERTER_FUNC>
+	inline bool reservedConvPut(CONVERTER_FUNC converter_func, const char* str){ return true; }
+	//ログ直接出力：書式付き出力
+	template<class PRINT_FUNC, typename... Tx>
+	inline bool printDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
+	template<typename... Tx>
+	inline bool printDirect(const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//ログ直接出力：書式なし出力
+	template<class PRINT_FUNC>
+	inline bool putDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* str){ return true; }
+	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
+	inline bool putDirect(const level_type level, const category_type category, const char* str){ return true; }
+	//ログ直接出力：書式付き出力
+	template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
+	inline bool convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
+	template<class CONVERTER_FUNC, typename... Tx>
+	inline bool convPrintDirect(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args){ return true; }
+	//ログ直接出力：書式なし出力
+	template<class PRINT_FUNC, class CONVERTER_FUNC>
+	inline bool convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str){ return true; }
+	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
+	template<class CONVERTER_FUNC>
+	inline bool convPutDirect(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str){ return true; }
+	
+	inline bool reserve(const level_type level, const category_type category, const int num){ return true; }//ログ出力予約
+	inline bool cancelToReserve(){ return true; }//ログ出力予約を取り消す
+	inline void initialize(){}//ログ関係の処理を一括して初期化する
+	inline void flush(){}//ログキューモニターに溜まっているキューを全て出力する
+	inline void abort(){}//ログ関係の処理を一括して中断する
+	inline void pause(){}//ログ関係の処理を一括して一時停止する
+	inline void resume(){}//ログ関係の処理を一括して一時停止解除する
+
+public:
+	inline log(){}//コンストラクタ
+	inline ~log(){}//デストラクタ
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+};
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

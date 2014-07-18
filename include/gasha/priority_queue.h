@@ -23,7 +23,7 @@
 #include <gasha/unique_lock.h>//単一ロック
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
-#include <cstdint>//std::int32_t, std::uint32_t
+#include <cstdint>//C++11 std::int32_t, std::uint32_t
 
 #include <gasha/binary_heap.h>//二分ヒープコンテナ【宣言部】
 

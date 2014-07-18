@@ -103,7 +103,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message) const;
 
 private:
 	//メモリ解放（共通処理）
@@ -121,7 +121,7 @@ public:
 
 private:
 	//フィールド
-	lock_type m_lock;//ロックオブジェクト
+	mutable lock_type m_lock;//ロックオブジェクト
 };
 
 //----------------------------------------

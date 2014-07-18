@@ -121,15 +121,15 @@ inline int sprintf(char* dst, const char* fmt, Tx&&... args);
 //----------------------------------------
 //spprintf
 //※変則sprintf/snprintf。2文字目の p は progressive の意。漸進的な書き込みを行うため。または「pos」指定版。
-//・max_len には dst の最大サイズを指定
+//・max_size には dst の最大サイズを指定（終端を必ず書き込むため、最大長 + 1 のサイズとする）
 //・dst + pos の位置から出力
 //・pos は終端位置に更新される
-//・戻り値は、全文字書き込みできたら書き込んだ文字数を返す
+//・戻り値は、全文字書き込みできたら書き込んだ文字数を返す（終端を含まない長さ）
 //・指定サイズを超える場合、書き込めるところまで書き込み、終端も必ず付けた上で、0 を返す（書き込んだ文字数は pos から判断できる）
 template<typename... Tx>
 int spprintf(char* dst, std::size_t& pos, const char* fmt, Tx&&... args);//最大バッファサイズ指定なし版
 template<typename... Tx>
-int spprintf(char* dst, const std::size_t max_len, std::size_t& pos, const char* fmt, Tx&&... args);//最大バッファサイズ指定あり版
+int spprintf(char* dst, const std::size_t max_size, std::size_t& pos, const char* fmt, Tx&&... args);//最大バッファサイズ指定あり版
 template<typename... Tx>
 int spprintf(char* dst, const char* fmt, Tx&&... args);//最大バッファサイズ／出力位置指定なし版
 

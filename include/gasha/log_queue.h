@@ -44,7 +44,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログキュー
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログキュー
@@ -68,7 +68,7 @@ public:
 	};
 public:
 	//型
-	struct explicitInitialize_t{};//明示的な初期化用構造体
+	struct explicitInit_type{};//明示的な初期化用構造体
 public:
 	//定数
 	static const std::size_t MESSAGE_BUFF_SIZE = GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE;//メッセージバッファサイズ
@@ -123,7 +123,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logQueue(const explicitInitialize_t&);
+	inline logQueue(const explicitInit_type&);
 	//デフォルトコンストラクタ
 	inline logQueue();
 	//デストラクタ
@@ -133,9 +133,6 @@ private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
 
-public:
-	//静的フィールド
-	static const explicitInitialize_t explicitInitialize;//明示的な初期化指定用
 private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
@@ -144,9 +141,12 @@ private:
 	static std::atomic<id_type> m_id;//キューID発番用
 	static GASHA_ lfSmartStackAllocator_withBuff<MESSAGE_BUFF_SIZE> m_messageBuff;//メッセージバッファ
 	static GASHA_ binary_heap::container<queueOpe, QUEUE_SIZE> m_queue;//ログキュー
+public:
+	//静的フィールド
+	static const explicitInit_type explicitInit;//明示的な初期化指定用
 };
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

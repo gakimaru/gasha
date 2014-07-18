@@ -21,11 +21,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ用途
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //ログ用途の定数
-enum logPurposeEnum : std::uint8_t
+enum logPurposeConst : std::uint8_t
 {
 	ofLog = 0,//用途：ログ出力
 	ofNotice = 1,//用途：画面通知
@@ -42,8 +40,6 @@ public:
 	//定数
 	static const std::size_t NUM = 2;//ログ用途の数
 };
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

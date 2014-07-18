@@ -105,7 +105,7 @@ namespace _private
 		//※十分なサイズのバッファを渡す必要あり。
 		//※使用したバッファのサイズを返す。
 		//※作成中、ロックを取得する。
-		inline std::size_t debugInfo(char* message);
+		inline std::size_t debugInfo(char* message) const;
 	private:
 		//デフォルトコンストラクタでインスタンスを生成
 		inline bool createDefault(const char* procedure_name);

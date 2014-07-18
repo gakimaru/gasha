@@ -16,7 +16,7 @@
 
 #include <gasha/log_print_info.h>//ログ出力情報【宣言部】
 
-#include <gasha/chrono.h>//時間処理系ユーティリティ：nowElapsedTime()
+#include <gasha/chrono.h>//時間処理ユーティリティ：nowElapsedTime()
 
 #include <cstring>//std::memcpy(), std::memset()
 
@@ -26,7 +26,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ出力情報
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログ出力情報
@@ -91,7 +91,7 @@ inline logPrintInfo::logPrintInfo()
 inline logPrintInfo::~logPrintInfo()
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

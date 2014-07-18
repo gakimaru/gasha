@@ -17,7 +17,7 @@
 #include <gasha/tty_console.h>//TTY端末【宣言部】
 
 #include <utility>//std:forward
-#include <cstdio>//fprintf()
+#include <cstdio>//std::fprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -25,7 +25,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //TTY端末
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //TTY端末クラス
@@ -34,7 +34,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<typename... Tx>
 inline int ttyConsole::printf(const char* fmt, Tx&&... args) const
 {
-	return ::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
+	return std::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
 }
 
 //カラー変更
@@ -42,13 +42,23 @@ inline void ttyConsole::changeColor(const GASHA_ consoleColor& color)
 {
 	changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }
+
 //コンストラクタ
 inline ttyConsole::ttyConsole(std::FILE* handle, const char* name) :
 	m_name(name),
-	m_handle(handle)
+	m_handle(handle),
+	m_currColor(consoleColor::stdColor)
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+//----------------------------------------
+//カラー出力なしTTY端末クラス
+
+//コンストラクタ
+inline monoTtyConsole::monoTtyConsole(std::FILE* handle, const char* name) :
+	ttyConsole(handle, name)
+{}
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

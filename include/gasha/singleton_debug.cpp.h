@@ -24,7 +24,7 @@
 #include <gasha/lf_pool_allocator.cpp.h>//ロックフリープールアロケータ【関数／実体定義部】
 #include <gasha/linked_list.cpp.h>//双方向連結リスト【関数／実体定義部】
 
-#include <gasha/chrono.h>//時間処理系ユーティリティ：nowElapsedTime()
+#include <gasha/chrono.h>//時間処理ユーティリティ：nowElapsedTime()
 #include <gasha/string.h>//文字列処理：spprintf()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -96,10 +96,10 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebu
 
 //デバッグ情報作成
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message)
+std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug Info for singletonDebug -----\n");
+	GASHA_ spprintf(message, size, "----- Debug-info for singletonDebug -----\n");
 	GASHA_ spprintf(message, size, "Accessing Count: %d\n", m_accessCount.load());
 	GASHA_ spprintf(message, size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
 	GASHA_ spprintf(message, size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);

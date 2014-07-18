@@ -35,10 +35,14 @@
 
 //----------------------------------------
 //ビルド構成個別マクロ一覧
-//#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
-//#define GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
-//#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
-//#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化
+//#define GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
+//#define GASHA_VERBOSE_DEBUG_IS_ENABLED//冗長デバッグ機能有効化
+//#define GASHA_LOG_IS_ENABLED//デバッグログ有効化
+//#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化       ※【注】アサーション有効化時は、デバッグログを自動的に有効化する
+//#define GASHA_BREAKPOINT_IS_ENABLED//ブレークポイント有効化  ※【注】ブレークポイント有効化時は、デバッグログを自動的に有効化する
+//#define GASHA_WATCHPOINT_IS_ENABLED//ウォッチポイント有効化  ※【注】ウォッチポイント有効化時は、デバッグログを自動的に有効化する
+//#define GASHA_CALLPOINT_IS_ENABLED//コールポイント機能有効化 ※【注】コールポイント有効化時は、デバッグログを自動的に有効化する
+//#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 //#define GASHA_DEV_TOOLS_IS_AVAILABLE//開発ツール利用可能
 //#define GASHA_NO_OPTIMIZED//最適化なし
 //#define GASHA_OPTIMIZED_MODERATELY//適度に最適化
@@ -202,10 +206,14 @@
 #ifdef GASHA_BUILD_CONFIG_FULL_DEBUG//フルデバッグ設定
 	#define GASHA_BUILD_CONFIG_LEVEL 1
 	#define GASHA_BUILD_CONFIG_NAME "FULL_DEBUG"
-	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
-	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
-	#define GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
+	#define GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
+	#define GASHA_LOG_IS_ENABLED//デバッグログ有効化
+	#define GASHA_VERBOSE_DEBUG_IS_ENABLED//冗長デバッグ機能有効化
 	#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化
+	#define GASHA_BREAKPOINT_IS_ENABLED//ブレークポイント有効化
+	#define GASHA_WATCHPOINT_IS_ENABLED//ウォッチポイント有効化
+	#define GASHA_CALLPOINT_IS_ENABLED//コールポイント機能有効化
+	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_DEV_TOOLS_IS_AVAILABLE//開発ツール利用可能
 	#define GASHA_NO_OPTIMIZED//最適化なし
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
@@ -217,10 +225,14 @@
 #ifdef GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE//プログラム開発向け設定
 	#define GASHA_BUILD_CONFIG_LEVEL 2
 	#define GASHA_BUILD_CONFIG_NAME "DEBUG_MODERATE"
-	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
-	#define GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
-	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
+	#define GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
+	#define GASHA_VERBOSE_DEBUG_IS_ENABLED//冗長デバッグ機能有効化
+	#define GASHA_LOG_IS_ENABLED//デバッグログ有効化
 	#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化
+	#define GASHA_BREAKPOINT_IS_ENABLED//ブレークポイント有効化
+	#define GASHA_WATCHPOINT_IS_ENABLED//ウォッチポイント有効化
+	#define GASHA_CALLPOINT_IS_ENABLED//コールポイント機能有効化
+	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_DEV_TOOLS_IS_AVAILABLE//開発ツール利用可能
 	#define GASHA_OPTIMIZED_MODERATELY//適度に最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
@@ -232,9 +244,13 @@
 #ifdef GASHA_BUILD_CONFIG_IS_DEBUG_OPT//コンテンツ制作・QA向け設定
 	#define GASHA_BUILD_CONFIG_LEVEL 3
 	#define GASHA_BUILD_CONFIG_NAME "DEBUG_OPT"
-	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
-	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
+	#define GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
+	#define GASHA_LOG_IS_ENABLED//デバッグログ有効化
 	#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化
+	#define GASHA_BREAKPOINT_IS_ENABLED//ブレークポイント有効化
+	#define GASHA_WATCHPOINT_IS_ENABLED//ウォッチポイント有効化
+	#define GASHA_CALLPOINT_IS_ENABLED//コールポイント機能有効化
+	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
 	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
@@ -245,9 +261,13 @@
 #ifdef GASHA_BUILD_CONFIG_IS_REGRESSION_TEST//自動回帰テスト向け設定
 	#define GASHA_BUILD_CONFIG_LEVEL 4
 	#define GASHA_BUILD_CONFIG_NAME "REGRESSON_TEST"
-	#define GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
-	#define GASHA_HAS_DEBUG_LOG//デバッグログ有効化
+	#define GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
+	#define GASHA_LOG_IS_ENABLED//デバッグログ有効化
 	#define GASHA_ASSERTION_IS_ENABLED//アサーション有効化
+	#define GASHA_BREAKPOINT_IS_ENABLED//ブレークポイント有効化
+	#define GASHA_WATCHPOINT_IS_ENABLED//ウォッチポイント有効化
+	#define GASHA_CALLPOINT_IS_ENABLED//コールポイント機能有効化
+	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
 	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効

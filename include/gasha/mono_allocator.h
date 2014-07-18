@@ -75,7 +75,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message) const;
 
 	//強制クリア
 	//※【要注意】強制的に未アロケート状態にする
@@ -104,7 +104,7 @@ private:
 	char* m_buffRef;//バッファの参照
 	const size_type m_maxSize;//バッファの全体サイズ
 	size_type m_size;//バッファの使用中サイズ
-	lock_type m_lock;//ロックオブジェクト
+	mutable lock_type m_lock;//ロックオブジェクト
 };
 
 //--------------------------------------------------------------------------------

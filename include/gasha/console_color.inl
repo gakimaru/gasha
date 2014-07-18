@@ -22,15 +22,45 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //コンソールカラー
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //コンソールカラークラス
+
+//比較オペレータ
+inline bool consoleColor::operator==(consoleColor&& rhs) const
+{
+	return m_fore == rhs.m_fore && m_back == rhs.m_back && m_attr == rhs.m_attr;
+}
+inline bool consoleColor::operator==(const consoleColor& rhs) const
+{
+	return m_fore == rhs.m_fore && m_back == rhs.m_back && m_attr == rhs.m_attr;
+}
+inline bool consoleColor::operator!=(consoleColor&& rhs) const
+{
+	return m_fore != rhs.m_fore || m_back != rhs.m_back || m_attr == rhs.m_attr;
+}
+inline bool consoleColor::operator!=(const consoleColor& rhs) const
+{
+	return m_fore != rhs.m_fore || m_back != rhs.m_back || m_attr == rhs.m_attr;
+}
 
 //標準カラーか？
 inline bool consoleColor::isStandard() const
 {
 	return m_fore == STANDARD && m_back == STANDARD && m_attr == NOATTR;
+}
+
+//属性付与
+inline void consoleColor::addAttr(const attr_t attr)
+{
+	m_attr = static_cast<attr_t>(static_cast<unsigned char>(m_attr) | static_cast<unsigned char>(attr));
+}
+
+//属性削除
+inline void consoleColor::removeAttr(const attr_t attr)
+{
+	m_attr = static_cast<attr_t>(static_cast<unsigned char>(m_attr)& ~static_cast<unsigned char>(attr));
 }
 
 //初期状態にする
@@ -81,7 +111,7 @@ inline consoleColor::consoleColor(const consoleColor::color_t fore, const consol
 {}
 
 //リセット用コンストラクタ
-inline consoleColor::consoleColor(const stdConsoleColor_t&) :
+inline consoleColor::consoleColor(const stdColor_type&) :
 	m_fore(STANDARD),
 	m_back(STANDARD),
 	m_attr(NOATTR)
@@ -96,7 +126,7 @@ inline consoleColor::consoleColor()
 inline consoleColor::~consoleColor()
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

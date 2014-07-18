@@ -98,9 +98,9 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
 
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail)
+std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail) const
 {
-	auto print_node = [](char* message, std::uint32_t& data) -> std::size_t
+	auto print_node = [](char* message, const std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
 		return GASHA_ spprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);

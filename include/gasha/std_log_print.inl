@@ -29,38 +29,39 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //標準ログ出力
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //標準ログ出力
-inline void stdLogPrint:: operator()(GASHA_ logPrintInfo& info)
+inline void stdLogPrint::operator()(GASHA_ logPrintInfo& info)
 {
 	for (logPrintInfo::purpose_type purpose = 0; purpose < logPrintInfo::PURPOSE_NUM; ++purpose)
 	{
 		//コンソールが指定されていれば出力
-		IConsole* console = info.m_consoles[purpose];
+		IConsole* console = info.console(purpose);
 		if (console)
 		{
 			//属性取得
-			const GASHA_ logAttr::attr_type attr = info.m_attr;
+			const GASHA_ logAttr::attr_type attr = info.attr();
 
 			//出力開始
-			console->beginOutput();
+			console->begin();
 
 			//カラー変更
-			bool color_is_changed = false;
-			if (!GASHA_ logAttr::has(attr, purpose, GASHA_ withoutColor))
+			bool color_changed = false;
+			if (!GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithoutColor))
 			{
-				const consoleColor* color = info.m_colors[purpose];
+				const consoleColor* color = info.color(purpose);
 				if (color && !color->isStandard())
 				{
 					console->changeColor(*color);
-					color_is_changed = true;
+					color_changed = true;
 				}
+
 			}
 
 			//ヘッダー出力
-			if (GASHA_ logAttr::has(attr, purpose, GASHA_ withAnyHeader))
+			if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithAnyHeader))
 			{
 				char header[128];
 				static const std::size_t max_header_size = sizeof(header) - 2;//※ヘッダーの終端分の文字数を引いておく
@@ -70,85 +71,79 @@ inline void stdLogPrint:: operator()(GASHA_ logPrintInfo& info)
 				auto with_sep = [&is_first, &header, &header_size]()
 				{
 					if (!is_first)
-						GASHA_ spprintf(header, max_header_size, header_size, "/");
+						GASHA_ spprintf(header, max_header_size, header_size, "|");
 					else
 						is_first = false;
 				};
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withID))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithID))
 				{
 					with_sep();
-					GASHA_ spprintf(header, max_header_size,  header_size, "%d", info.m_id);
+					GASHA_ spprintf(header, max_header_size,  header_size, "%d", info.id());
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withTime))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithTime))
 				{
-					const double time = static_cast<double> (info.m_time);
-					const std::uint32_t total_sec = static_cast<std::uint32_t>(time);
-					const double dec = time - static_cast<double>(total_sec);
-					const std::uint32_t total_minute = total_sec / 60;
-					const std::uint32_t total_hour = total_minute / 60;
-					const std::uint32_t sec = total_sec % 60;
-					const std::uint32_t minute = total_minute % 60;
-					//const std::uint32_t hour = total_hour % 24;
-					//const std::uint32_t day = total_hour / 24;
-					const std::uint32_t dec_i = static_cast<std::uint32_t>(dec * 1000000.);
+					char time_str[32];
+					GASHA_ timeToStr(time_str, info.time(), timeStr_HHMMSS_MICRO);
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_size, "%02d:%02d:%02d.%06d", total_hour, minute, sec, dec_i);
+					GASHA_ spprintf(header, max_header_size, header_size, time_str);
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withLevel))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithLevel))
 				{
-					GASHA_ logLevel level(info.m_level);
+					GASHA_ logLevel level(info.level());
 					with_sep();
 					GASHA_ spprintf(header, max_header_size, header_size, level.name());
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withCategory))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCategory))
 				{
-					GASHA_ logCategory category(info.m_category);
+					GASHA_ logCategory category(info.category());
 					with_sep();
 					GASHA_ spprintf(header, max_header_size, header_size, category.name());
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withCPName))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCPName))
 				{
 					with_sep();
 					//GASHA_ spprintf(header, max_header_size, header_size, ???);
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ withCriticalCPName))
+				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCriticalCPName))
 				{
 					with_sep();
 					//GASHA_ spprintf(header, max_header_size, header_size, ???);
 				}
 				GASHA_ spprintf(header, header_size, "]");
-				console->output(header);
+				console->put(header);
 			}
 			
 			//カラーを戻す
-			if (color_is_changed && GASHA_ logAttr::has(attr, purpose, GASHA_ headerOnlyColored))
+			if (color_changed && GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeHeaderOnlyColored))
 			{
 				console->resetColor();
-				color_is_changed = false;
+				color_changed = false;
 			}
 
 			//メッセージ出力
-			console->output(info.m_message);
+			console->put(info.message());
+
+			//カラーを戻す
+			if (color_changed)
+			{
+				console->resetColor();
+				color_changed = false;
+			}
 
 			//改行
 			bool with_cr =
-				(purpose == ofLog && !logAttr::has(info.m_attr, logWithoutCr)) ||
-				(purpose == ofNotice && logAttr::has(info.m_attr, noticeWithCr));
+				(purpose == ofLog && !logAttr::has(info.attr(), logWithoutCr)) ||
+				(purpose == ofNotice && logAttr::has(info.attr(), noticeWithCr));
 			if (with_cr)
-				console->outputCr(color_is_changed);
-			else
-			{
-				//カラーを戻す
-				if (color_is_changed)
-					console->resetColor();
-			}
+				console->putCr();
+			
 			//出力終了
-			console->endOutput();
+			console->end();
 		}
 	}
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

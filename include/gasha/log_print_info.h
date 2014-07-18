@@ -30,12 +30,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ出力情報
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //ログ出力情報
-struct logPrintInfo
+class logPrintInfo
 {
+public:
 	//型
 	typedef std::uint64_t id_type;//ID型
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
@@ -43,10 +42,76 @@ struct logPrintInfo
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
 	typedef GASHA_ logAttr::attr_type attr_type;//ログ属性の値
 	typedef std::uint16_t message_size_type;//メッセージ長
-
+public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
 
+public:
+	//比較オペレータ
+	inline bool operator<(const logPrintInfo& rhs) const;
+
+public:
+	//アクセッサ
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+	inline id_type id() const { return m_id;}//ID
+	inline void setId(const id_type id){ m_id = id; }//ID
+	inline GASHA_ time_type time() const { return m_time; }//時間
+	inline void setTime(GASHA_ time_type time){ m_time = time; }//時間
+	inline const char* message() const { return m_message; }//メッセージ
+	inline void setMessage(const char* message){ m_message = message; }//メッセージ
+	inline message_size_type messageSize() const { return m_messageSize; }//メッセージサイズ
+	inline void setMessageSize(const std::size_t message_size){ m_messageSize = static_cast<message_size_type>(message_size); }//メッセージサイズ
+	inline level_type level() const { return m_level; }//ログレベル
+	inline void setLevel(const level_type level) { m_level = level; }//ログレベル
+	inline category_type category() const { return m_category; }//ログカテゴリ
+	inline void setCategory(const category_type category){ m_category = category; }//ログカテゴリ
+	inline attr_type attr() const { return m_attr; }//ログ属性
+	inline void setAttr(const attr_type attr){ m_attr = attr; }//ログ属性
+	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_consoles[purpose]; }//ログ出力先
+	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){ m_consoles[purpose] = console; }//ログ出力先
+	inline const GASHA_ consoleColor* color(const purpose_type purpose) const { return m_colors[purpose]; }//ログ出力カラー
+	inline void setColor(const purpose_type purpose, const GASHA_ consoleColor* color){ m_colors[purpose] = color; }//ログ出力カラー
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+	inline id_type id() const { return 0; }//ID
+	inline void setId(const id_type id){}//ID
+	inline GASHA_ time_type time() const { return static_cast<GASHA_ time_type>(0); }//時間
+	inline void setTime(GASHA_ time_type time){}//時間
+	inline const char* message() const { return nullptr; }//メッセージ
+	inline void setMessage(const char* message){}//メッセージ
+	inline message_size_type messageSize() const { return 0; }//メッセージサイズ
+	inline void setMessageSize(const std::size_t message_size){}//メッセージサイズ
+	inline level_type level() const { return 0; }//ログレベル
+	inline void setLevel(const level_type level) {}//ログレベル
+	inline category_type category() const { return 0; }//ログカテゴリ
+	inline void setCategory(const category_type category){}//ログカテゴリ
+	inline attr_type attr() const { return 0; }//ログ属性
+	inline void setAttr(const attr_type attr){}//ログ属性
+	inline GASHA_ IConsole* console(const purpose_type purpose) const { return nullptr; }//ログ出力先
+	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){}//ログ出力先
+	inline const GASHA_ consoleColor* color(const purpose_type purpose) const { return nullptr; }//ログ出力カラー
+	inline void setColor(const purpose_type purpose, const GASHA_ consoleColor* color){}//ログ出力カラー
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
+public:
+	//ムーブオペレータ
+	inline logPrintInfo& operator=(logPrintInfo&& rhs);
+	//コピーオペレータ
+	inline logPrintInfo& operator=(const logPrintInfo& rhs);
+
+public:
+	//ムーブコンストラクタ
+	inline logPrintInfo(logPrintInfo&& obj);
+	//コピーコンストラクタ
+	inline logPrintInfo(const logPrintInfo& obj);
+	//コンストラクタ
+	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
+	//デフォルトコンストラクタ
+	inline logPrintInfo();
+	//デストラクタ
+	inline ~logPrintInfo();
+
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+private:
 	//フィールド
 	id_type m_id;//ID ※0 で自動発番 ※ログキュー使用時に、キューを一意に識別し、キューどうしの順序性を判定するためのIDとして扱う
 	GASHA_ time_type m_time;//時間 ※出力時もしくはキューイング時の時間（予約時の時間ではないので注意）
@@ -57,28 +122,8 @@ struct logPrintInfo
 	attr_type m_attr;//ログ属性
 	GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
 	const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
-
-	//比較オペレータ
-	inline bool operator<(const logPrintInfo& rhs) const;
-
-	//ムーブオペレータ
-	inline logPrintInfo& operator=(logPrintInfo&& rhs);
-	//コピーオペレータ
-	inline logPrintInfo& operator=(const logPrintInfo& rhs);
-	//ムーブコンストラクタ
-	inline logPrintInfo(logPrintInfo&& obj);
-	//コピーコンストラクタ
-	inline logPrintInfo(const logPrintInfo& obj);
-	//コンストラクタ
-	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
-	//デフォルトコンストラクタ
-	inline logPrintInfo();
-
-	//デストラクタ
-	inline ~logPrintInfo();
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 };
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

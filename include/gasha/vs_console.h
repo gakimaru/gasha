@@ -32,8 +32,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //【注意】文字列中の改行コード変換は行わない（'\r', '\n' はそのまま出力する）
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //Visual Studio出力ウインドウクラス
 
@@ -41,6 +39,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //Visual Studio出力ウインドウクラス有効時
 class vsConsole : public GASHA_ IConsole
 {
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
 public:
 	//アクセッサ
 	const char* name() const override { return m_name; }
@@ -49,14 +49,17 @@ public:
 	//メソッド
 
 	//出力開始
-	void beginOutput() override;
+	void begin() override;
 
 	//出力終了
 	//※フラッシュ可能な状態
-	void endOutput() override;
+	void end() override;
 
 	//出力
-	void output(const char* str) override;
+	void put(const char* str) override;
+
+	//改行出力
+	void putCr() override;
 
 	//カラー変更
 	void changeColor(GASHA_ consoleColor&& color) override;
@@ -77,6 +80,27 @@ public:
 private:
 	//フィールド
 	const char* m_name;//名前
+
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+public:
+	//アクセッサ
+	inline const char* name() const { return ""; }
+public:
+	//メソッド
+	inline void begin(){}//出力開始
+	inline void end(){}//出力終了
+	inline void put(const char* str){}//出力
+	inline void putCr(){}//改行出力
+	inline void changeColor(GASHA_ consoleColor&& color){}//カラー変更
+	inline void changeColor(const GASHA_ consoleColor& color){}//カラー変更
+	inline void resetColor(){}//カラーリセット
+	inline bool isSame(const IConsole* rhs) const{ return true; }//出力先が同じか判定
+public:
+	inline vsConsole(const char* name = nullptr){}//コンストラクタ
+	inline ~vsConsole(){}//デストラクタ
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 
 #else//GASHA_USE_VS_CONSOLE
@@ -91,9 +115,6 @@ public:
 	vsConsole(const char* name = "Win-console"):
 		winConsole(stdout, name)
 	{}
-	//デストラクタ
-	~vsConsole() override
-	{}
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
@@ -102,19 +123,14 @@ class vsConsole : public ttyConsole
 {
 public:
 	//コンストラクタ
-	vsConsole(const char* name = "TTY-console") :
+	inline vsConsole(const char* name = "TTY-console") :
 		ttyConsole(stdout, name)
-	{}
-	//デストラクタ
-	~vsConsole() override
 	{}
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
 
 #endif//GASHA_USE_VS_CONSOLE
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

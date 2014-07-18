@@ -19,6 +19,7 @@
 
 //#include <memory>//C++11 std::align
 #include <cstdint>//std::uintptr_t
+#include <cassert>//assert()
 
 #ifdef GASHA_IS_GCC
 #include <stdlib.h>//posix_memalign(), free()

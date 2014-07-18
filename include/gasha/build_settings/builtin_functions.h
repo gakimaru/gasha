@@ -49,6 +49,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_SRC_FILE()           GASHA_ getStaticFileName(__FILE__)
 #define GASHA_SRC_FILE_LINE()      GASHA_ getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")")
 #define GASHA_SRC_FILE_LINE_TIME() GASHA_ getStaticFileName(__FILE__ "(" GASHA_TO_STR_EX(__LINE__) ")[" __TIMESTAMP__ "]")
+#define GASHA_FILE_AND_FUNC        GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/build_settings/builtin_functions.inl>

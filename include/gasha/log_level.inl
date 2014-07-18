@@ -25,7 +25,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログレベル
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログレベル
@@ -195,7 +195,7 @@ inline logLevel::info* logLevelContainer::getInfo(const logLevel::level_type val
 }
 
 //明示的な初期化用コンストラクタ
-inline logLevelContainer::logLevelContainer(const explicitInitialize_t&)
+inline logLevelContainer::logLevelContainer(const explicitInit_type&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
 }
@@ -259,7 +259,7 @@ namespace _private
 				if (colors[purpose])
 					info.m_colors[purpose] = *colors[purpose];
 				else
-					info.m_colors[purpose] = stdConsoleColor;
+					info.m_colors[purpose] = consoleColor(consoleColor::stdColor);
 			}
 			return logLevelContainer::regist(info);
 		}
@@ -286,14 +286,14 @@ namespace _private
 			for (logLevel::purpose_type purpose = 0; purpose < logLevel::PURPOSE_NUM; ++purpose)
 			{
 				info.m_consoles[purpose] = nullptr;
-				info.m_colors[purpose] = stdConsoleColor;
+				info.m_colors[purpose] = GASHA_ consoleColor(GASHA_ consoleColor::stdColor);
 			}
 			return logLevelContainer::regist(info);
 		}
 	};
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

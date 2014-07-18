@@ -61,7 +61,7 @@ public:
 #endif//DELETE
 
 	//デバッグ情報作成
-	virtual std::size_t debugInfo(char* message) = 0;
+	virtual std::size_t debugInfo(char* message) const = 0;
 
 public:
 	//デストラクタ

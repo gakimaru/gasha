@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ属性
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログ属性
@@ -32,46 +32,46 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ用途に応じたビットシフト数
 inline int logAttr::shiftBits(const logAttr::purpose_type purpose)
 {
-	return static_cast<int>(purpose == ofLog ? bitShiftOfLog : purpose == ofNotice ? bitShiftOfNotice : 0);
+	return static_cast<int>(purpose == ofLog ? logShiftBits : purpose == ofNotice ? noticeShiftBits : 0);
 }
 
 //属性判定
-inline bool logAttr::has(const logAttr::attr_type target_attr, const logAttr::attr_type attr)
+inline bool logAttr::has(const logAttr::attr_value_type target_attr, const logAttr::attr_value_type attr)
 {
 	return (target_attr & attr) != 0x00;
 }
-inline bool logAttr::has(const attr_type attr) const
+inline bool logAttr::has(const logAttr::attr_value_type attr) const
 {
-	return (*m_attrRef & attr) != 0x00;
+	return (m_attrRef->m_attr & attr) != 0x00;
 }
 //※用途別の判定
-inline bool logAttr::has(const logAttr::attr_type target_attr, const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+inline bool logAttr::has(const logAttr::attr_value_type target_attr, const logAttr::purpose_type purpose, const logAttr::attr_value_type attr)
 {
 	return ((target_attr >> shiftBits(purpose)) & attr) != 0x00;
 }
-inline bool logAttr::has(const logAttr::purpose_type purpose, const attr_type attr) const
+inline bool logAttr::has(const logAttr::purpose_type purpose, const logAttr::attr_value_type attr) const
 {
-	return ((*m_attrRef >> shiftBits(purpose)) & attr) != 0x00;
+	return ((m_attrRef->m_attr >> shiftBits(purpose)) & attr) != 0x00;
 }
 
 //属性付与
-inline logAttr::attr_type logAttr::add(const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::add(const logAttr::attr_value_type attr)
 {
-	*m_attrRef |= attr;
+	m_attrRef->m_attr |= attr;
 	return *m_attrRef;
 }
-inline logAttr::attr_type logAttr::add(const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::add(const logAttr::purpose_type purpose, const logAttr::attr_value_type attr)
 {
 	return add(attr << shiftBits(purpose));
 }
 
 //属性破棄
-inline logAttr::attr_type logAttr::remove(const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::remove(const logAttr::attr_value_type attr)
 {
-	*m_attrRef &= ~attr;
+	m_attrRef->m_attr &= ~attr;
 	return *m_attrRef;
 }
-inline logAttr::attr_type logAttr::remove(const logAttr::purpose_type purpose, const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::remove(const logAttr::purpose_type purpose, const logAttr::attr_value_type attr)
 {
 	return remove(attr << shiftBits(purpose));
 }
@@ -83,16 +83,16 @@ inline logAttr::attr_type logAttr::get() const
 }
 
 //属性変更
-inline logAttr::attr_type logAttr::set(const logAttr::attr_type attr)
+inline logAttr::attr_type logAttr::set(const logAttr::attr_value_type attr)
 {
-	*m_attrRef &= attr;
+	m_attrRef->m_attr &= attr;
 	return *m_attrRef;
 }
 
 //属性リセット
 inline logAttr::attr_type logAttr::reset()
 {
-	*m_attrRef = DEFAULT_ATTR;
+	m_attrRef->m_attr = DEFAULT_ATTR;
 	return *m_attrRef;
 }
 
@@ -130,8 +130,14 @@ inline logAttr& logAttr::operator=(logAttr&& rhs)
 	m_prevTlsAttr = rhs.m_prevTlsAttr;//変更前のTLSログ属性はコピーし、
 	rhs.m_prevTlsAttr = nullptr;      //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 	rhs.m_refType = isGlobal;         //（同上）
+	rhs.m_attrRef = &m_globalAttr;    //（同上）
 	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+	{
 		m_localAttr = rhs.m_localAttr;
+		m_attrRef = &m_localAttr;
+		if (m_tlsAttrRef == &rhs.m_localAttr)//末端以外のオブジェクトをムーブすると、ここで不整合を起こすので注意
+			m_tlsAttrRef = &m_localAttr;
+	}
 	return *this;
 }
 
@@ -142,15 +148,21 @@ inline logAttr::logAttr(logAttr&& obj) :
 	m_prevTlsAttr(obj.m_prevTlsAttr)//変更前のTLSログ属性はコピーし、
 	                                //ムーブ元からは削除（ムーブ元はデストラクタで復元しなくなる）
 {
-	obj.m_prevTlsAttr = nullptr;//ムーブ元無効化
-	obj.m_refType = isGlobal;   //（同上）
+	obj.m_prevTlsAttr = nullptr;  //ムーブ元を無効化
+	obj.m_refType = isGlobal;     //（同上）
+	obj.m_attrRef = &m_globalAttr;//（同上）
 	if (m_refType == isLocal)//ローカルログ属性は、現在の種別がローカルの時だけコピー
+	{
 		m_localAttr = obj.m_localAttr;
+		m_attrRef = &m_localAttr;
+		if (m_tlsAttrRef == &obj.m_localAttr)//末端以外のオブジェクトをムーブすると、ここで不整合を起こすので注意
+			m_tlsAttrRef = &m_localAttr;
+	}
 }
 
 
 //明示的な初期化用コンストラクタ
-inline logAttr::logAttr(const explicitInitialize_t&) :
+inline logAttr::logAttr(const explicitInit_type&) :
 	m_refType(isGlobal),
 	m_attrRef(&m_globalAttr),
 	m_prevTlsAttr(nullptr)
@@ -165,7 +177,7 @@ inline logAttr::~logAttr()
 		m_tlsAttrRef = m_prevTlsAttr;
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

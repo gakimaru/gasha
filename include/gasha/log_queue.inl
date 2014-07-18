@@ -25,7 +25,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログキュー
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //キューイング予約
 inline logQueue::id_type logQueue::reserve(const int num)
@@ -49,7 +49,7 @@ inline void logQueue::release(const char* message)
 }
 inline void logQueue::release(GASHA_ logPrintInfo& info)
 {
-	release(info.m_message);
+	release(info.message());
 }
 
 //中断
@@ -71,7 +71,7 @@ inline void logQueue::resume()
 }
 
 //明示的な初期化用コンストラクタ
-inline logQueue::logQueue(const explicitInitialize_t&)
+inline logQueue::logQueue(const explicitInit_type&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};
@@ -90,7 +90,7 @@ inline logQueue::logQueue()
 inline logQueue::~logQueue()
 {}
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

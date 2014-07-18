@@ -13,6 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/i_console.h>//コンソールインターフェース
+#include <gasha/console_color.h>//コンソールカラー
 
 #ifndef GASHA_USE_WINDOWS_CONSOLE
 #include <gasha/tty_console.h>//TTY端末
@@ -20,6 +21,7 @@
 
 #include <cstdio>//FILE, stdout, stderr
 
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 #ifdef GASHA_USE_WINDOWS_CONSOLE
 #include <Windows.h>//HANDLE, CONSOLE_SCREEN_BUFFER_INFO
 //Windows.h のインクルードによる min, max を無効化する
@@ -30,6 +32,7 @@
 #undef max
 #endif//max
 #endif//GASHA_USE_WINDOWS_CONSOLE
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -40,8 +43,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //【注意】文字列中の改行コード変換は行わない（'\r', '\n' はそのまま出力する）
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
-
 //----------------------------------------
 //Windowsコマンドプロントプトクラス
 
@@ -49,6 +50,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //Windowsコマンドプロンプトクラス有効時
 class winConsole : public GASHA_ IConsole
 {
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
 public:
 	//アクセッサ
 	const char* name() const override { return m_name; }
@@ -60,19 +63,23 @@ public:
 	//メソッド
 
 	//出力開始
-	void beginOutput() override;
+	void begin() override;
 
 	//出力終了
 	//※フラッシュ可能な状態
-	void endOutput() override;
+	void end() override;
 
 	//出力
-	void output(const char* str) override;
+	void put(const char* str) override;
 
 	//書式付き出力
 	template<typename... Tx>
 	inline int printf(const char* fmt, Tx&&... args) const;
-	
+
+	//改行出力
+	//※改行前にカラーのリセットも行う
+	void putCr() override;
+
 	//カラー変更
 	void changeColor(GASHA_ consoleColor&& color) override;
 	inline void changeColor(const GASHA_ consoleColor& color);
@@ -88,12 +95,72 @@ public:
 	winConsole(std::FILE* handle, const char* name = "Win-console");
 	//デストラクタ
 	~winConsole() override;
+
 private:
 	//フィールド
 	const char* m_name;//名前
 	std::FILE* m_handle;//ハンドル
 	HANDLE m_hWin;//Windowsハンドル
 	CONSOLE_SCREEN_BUFFER_INFO m_screenBuffer;//スクリーンバッファ
+	consoleColor m_currColor;//現在のカラー
+
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+public:
+	//アクセッサ
+	inline const char* name() const { return ""; }
+	inline std::FILE* handle() const { return nullptr; }//ハンドル
+	inline int hWin() const { return 0; }//Windowsハンドル
+	//inline const CONSOLE_SCREEN_BUFFER_INFO& screenBuffer() const { return m_screenBuffer; }//スクリーンバッファ
+public:
+	//メソッド
+	inline void begin(){}//出力開始
+	inline void end(){}//出力終了
+	inline void put(const char* str){}//出力
+	template<typename... Tx>
+	inline int printf(const char* fmt, Tx&&... args) const{ return 0; }//書式付き出力
+	inline void putCr(){}//改行出力
+	inline void changeColor(GASHA_ consoleColor&& color){}//カラー変更
+	inline void changeColor(const GASHA_ consoleColor& color){}//カラー変更
+	inline void resetColor(){}//カラーリセット
+	inline bool isSame(const IConsole* rhs) const{ return true; }//出力先が同じか判定
+public:
+	inline winConsole(std::FILE* handle, const char* name = nullptr){}//コンストラクタ
+	inline ~winConsole(){}//デストラクタ
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+};
+
+//----------------------------------------
+//カラー出力なしWindowsコマンドプロンプトクラス
+class monoWinConsole : public winConsole
+{
+
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+public:
+	//カラー変更
+	void changeColor(GASHA_ consoleColor&& color) override;
+	inline void changeColor(const GASHA_ consoleColor& color){}//なにもしない
+public:
+	//コンストラクタ
+	inline monoWinConsole(std::FILE* handle, const char* name = "Mono-Win-console");
+	//デストラクタ
+	~monoWinConsole() override;
+
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
+
+public:
+	//カラー変更
+	inline void changeColor(GASHA_ consoleColor&& color){}
+	inline void changeColor(const GASHA_ consoleColor& color){}
+public:
+	inline monoWinConsole(std::FILE* handle, const char* name = nullptr) ://コンストラクタ
+		winConsole(handle, name)
+	{}
+	inline ~monoWinConsole(){}//デストラクタ
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
@@ -104,17 +171,22 @@ class winConsole : public ttyConsole
 {
 public:
 	//コンストラクタ
-	winConsole(std::FILE* handle, const char* name = "TTY-console") :
+	inline winConsole(std::FILE* handle, const char* name = "TTY-console") :
 		ttyConsole(handle, name)
 	{}
-	//デストラクタ
-	~winConsole() override
+};
+
+//TTY端末に委譲
+class monoWinConsole : public monoTtyConsole
+{
+public:
+	//コンストラクタ
+	inline monoWinConsole(std::FILE* handle, const char* name = "Mono-TTY-console") :
+		monoTtyConsole(handle, name)
 	{}
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
-
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

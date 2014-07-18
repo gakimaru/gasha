@@ -61,7 +61,7 @@ public:
 #endif//DELETE
 
 	//デバッグ情報作成
-	inline std::size_t debugInfo(char* message) override;
+	inline std::size_t debugInfo(char* message) const override;
 
 public:
 	//コンストラクタ

@@ -766,7 +766,7 @@ namespace hash_table
 			#if 1
 				*value_new = std::move(*value);//ムーブ演算子で移動
 			#else
-				std::memcpy(value_new, value, sizeof(value_type));//memcpyで移動
+				std::memcpy(value_new, value, sizeof(value_type));//std::memcpyで移動
 			#endif
 			}
 		}

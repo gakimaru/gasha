@@ -67,6 +67,13 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 	GASHA_ spprintf(message, size, "cpu_string=\"%s\"\n", cpu_info_str);
 	__cpuid(cpu_info, 1);//CPU情報取得：Type1
 
+	//TLS対応
+#ifdef GASHA_INCOMPLETE_TLS_INITIALIZER
+	GASHA_ spprintf(message, size, "[NG] TLS initializer is INCOMPLETE!\n");
+#else//GASHA_INCOMPLETE_TLS_INITIALIZER
+	GASHA_ spprintf(message, size, "[OK] TLS initializer is COMPLETE.\n");
+#endif//GASHA_INCOMPLETE_TLS_INITIALIZER
+
 #ifdef GASHA_USE_SSE
 	const bool sse_is_supported = (cpu_info[3] & (1 << 25)) || false;//SSE対応
 	if (!sse_is_supported)
@@ -708,14 +715,14 @@ bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mo
 	//#define GASHA_BUILD_CONFIG_IS_LOCAL_RELEASE//製品テスト向け設定
 	//#define GASHA_BUILD_CONFIG_IS_RELEASE//製品向け設定
 
-#ifdef GASHA_HAS_DEBUG_FEATURE//デバッグ機能有効化
+#ifdef GASHA_DEBUG_FEATURE_IS_ENABLED//デバッグ機能有効化
 	GASHA_ spprintf(message, size, "[Yes] 'Debug-feature' is AVAILABLE.");
-#ifdef GASHA_HAS_VERBOSE_DEBUG//冗長デバッグ機能有効化
+#ifdef GASHA_VERBOSE_DEBUG_IS_ENABLED//冗長デバッグ機能有効化
 	GASHA_ spprintf(message, size, " (with VERBOSE mode)");
-#endif//GASHA_HAS_VERBOSE_DEBUG
-#else//GASHA_HAS_DEBUG_FEATURE
+#endif//GASHA_VERBOSE_DEBUG_IS_ENABLED
+#else//GASHA_DEBUG_FEATURE_IS_ENABLED
 	GASHA_ spprintf(message, size, "[No]  'Debug-feature' is NOT available.");
-#endif//GASHA_HAS_DEBUG_FEATURE
+#endif//GASHA_DEBUG_FEATURE_IS_ENABLED
 	GASHA_ spprintf(message, size, "\n");
 
 #ifdef GASHA_ASSERTION_IS_ENABLED//アサーション有効化

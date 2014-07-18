@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログカテゴリ
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //----------------------------------------
 //ログカテゴリ
@@ -194,7 +194,7 @@ inline logCategory::info* logCategoryContainer::getInfo(const logCategory::categ
 }
 
 //明示的な初期化用コンストラクタ
-inline logCategoryContainer::logCategoryContainer(const explicitInitialize_t&)
+inline logCategoryContainer::logCategoryContainer(const explicitInit_type&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
 }
@@ -293,7 +293,7 @@ namespace _private
 	};
 }
 
-#endif//GASHA_HAS_DEBUG_LOG//デバッグログ無効時はまるごと無効化
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -80,11 +80,11 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE
 
 //デバッグ情報作成
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node)
+std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug Info for stack -----\n");
+	GASHA_ spprintf(message, size, "----- Debug-info for stack -----\n");
 	GASHA_ spprintf(message, size, "Stack:\n");
 	int no = 0;
 	stack_t* node = m_head;

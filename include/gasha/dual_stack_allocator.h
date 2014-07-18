@@ -162,7 +162,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message);
+	std::size_t debugInfo(char* message) const;
 
 	//使用中のサイズと数を取得
 	//※スコープスタックアロケータで使用されるメソッド
@@ -222,7 +222,7 @@ private:
 	size_type m_countAsc;//アロケート中の数(正順)
 	size_type m_countDesc;//アロケート中の数(逆順)
 	allocationOrder_t m_allocateOrder;//現在のアロケート方向
-	lock_type m_lock;//ロックオブジェクト
+	mutable lock_type m_lock;//ロックオブジェクト
 };
 
 //--------------------------------------------------------------------------------
