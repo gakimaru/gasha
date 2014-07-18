@@ -36,11 +36,11 @@ extern const diagForProject_t diagForProject;
 //※診断結果メッセージとそのサイズを受け取るための変数を引数に渡す（バッファは4KBもあれば十分）。
 //※ライブラリビルド時の状態か、現在の状態かを選んで指定可能。
 template<class MODE>
-bool buildSettingsDiagnosticTest(char* message, std::size_t& size, const MODE mode);
+bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std::size_t& size, const MODE mode);
 
 //※ライブラリビルド時の診断モードを特殊化
 template<>
-bool buildSettingsDiagnosticTest<diagForLibrary_t>(char* message, std::size_t& size, const diagForLibrary_t mode);
+bool buildSettingsDiagnosticTest<diagForLibrary_t>(char* message, const std::size_t max_size, std::size_t& size, const diagForLibrary_t mode);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

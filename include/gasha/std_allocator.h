@@ -103,7 +103,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
 private:
 	//メモリ解放（共通処理）

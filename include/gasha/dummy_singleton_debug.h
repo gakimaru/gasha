@@ -39,7 +39,7 @@ public:
 	//シングルトンアクセス終了時呼び出し
 	inline bool leave(const id_type id);
 	//デバッグ情報作成
-	std::size_t debugInfo(char* message) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

@@ -80,30 +80,30 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::dequeue(typename sharedQueue<T, POOL_
 
 //デバッグ情報作成
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
+std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for queue -----\n");
-	GASHA_ spprintf(message, size, "Queue:\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for queue -----\n");
+	GASHA_ spprintf(message, max_size, size, "Queue:\n");
 	int no = 0;
 	const queue_t* node = m_head;
 	while (node)
 	{
-		GASHA_ spprintf(message, size, "[%d](%p) ", no++, node);
-		size += print_node(message + size, node->m_value);
-		GASHA_ spprintf(message, size, "\n");
+		GASHA_ spprintf(message, max_size, size, "[%d](%p) ", no++, node);
+		print_node(message, max_size, size, node->m_value);
+		GASHA_ spprintf(message, max_size, size, "\n");
 		node = node->m_next;
 	}
-	GASHA_ spprintf(message, size, "[tail](%p)", m_tail);
-	size += print_node(message + size, m_tail->m_value);
-	GASHA_ spprintf(message, size, "\n");
-	GASHA_ spprintf(message, size, "--------------------------------\n");
-	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
+	GASHA_ spprintf(message, max_size, size, "[tail](%p)", m_tail);
+	print_node(message, max_size, size, m_tail->m_value);
+	GASHA_ spprintf(message, max_size, size, "\n");
+	GASHA_ spprintf(message, max_size, size, "--------------------------------\n");
+	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& size, const queue_t& info) -> std::size_t
 	{
-		return print_node(message, info.m_value);
+		return print_node(message, max_size, size, info.m_value);
 	};
-	size += m_allocator.template debugInfo<queue_t>(message + size, with_detail, print_allocator_node);
+	size += m_allocator.template debugInfo<queue_t>(message + size, max_size - size, with_detail, print_allocator_node);
 	return size;
 }
 

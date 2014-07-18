@@ -72,7 +72,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
-	std::size_t debugInfo(char* message) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
 	//強制クリア
 	//※【要注意】強制的に未アロケート状態にする

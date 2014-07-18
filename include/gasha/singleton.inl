@@ -130,9 +130,9 @@ namespace _private
 	//※作成中、ロックを取得する。
 	//インスタンス生成用クラス：インスタンス生成
 	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline std::size_t singleton<T, LOCK_TYPE, DEBUG_TYPE>::debugInfo(char* message) const
+	inline std::size_t singleton<T, LOCK_TYPE, DEBUG_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 	{
-		return m_staticDebug.debugInfo(message);
+		return m_staticDebug.debugInfo(message, max_size);
 	}
 
 	//デフォルトコンストラクタでインスタンスを生成

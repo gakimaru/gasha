@@ -138,14 +138,14 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p)
 
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE>
-std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail) const
+std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail) const
 {
-	auto print_node = [](char* message, const std::uint32_t& data) -> std::size_t
+	auto print_node = [](char* message, const std::size_t max_size, std::size_t& size, const std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
-		return GASHA_ spprintf(message, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
+		return GASHA_ spprintf(message, max_size, size, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
 	};
-	return this->template debugInfo<std::uint32_t>(message, with_detail, print_node);
+	return this->template debugInfo<std::uint32_t>(message, max_size, with_detail, print_node);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

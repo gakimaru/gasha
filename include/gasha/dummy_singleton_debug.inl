@@ -54,7 +54,7 @@ inline bool dummySingletonDebug::leave(const dummySingletonDebug::id_type)
 }
 
 //デバッグ情報作成
-inline std::size_t  dummySingletonDebug::debugInfo(char* message) const
+inline std::size_t  dummySingletonDebug::debugInfo(char* message, const std::size_t max_size) const
 {
 	//何もしない
 	message[0] = '\0';

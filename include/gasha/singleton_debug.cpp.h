@@ -96,22 +96,22 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebu
 
 //デバッグ情報作成
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message) const
+std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for singletonDebug -----\n");
-	GASHA_ spprintf(message, size, "Accessing Count: %d\n", m_accessCount.load());
-	GASHA_ spprintf(message, size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
-	GASHA_ spprintf(message, size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for singletonDebug -----\n");
+	GASHA_ spprintf(message, max_size, size, "Accessing Count: %d\n", m_accessCount.load());
+	GASHA_ spprintf(message, max_size, size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
+	GASHA_ spprintf(message, max_size, size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
 	{
 		auto lock = m_list.lockSharedScoped();
-		GASHA_ spprintf(message, size, "Access Info: (Count=%d)\n", m_list.size());
+		GASHA_ spprintf(message, max_size, size, "Access Info: (Count=%d)\n", m_list.size());
 		for (auto& info : m_list)
 		{
-			GASHA_ spprintf(message, size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
+			GASHA_ spprintf(message, max_size, size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
-	GASHA_ spprintf(message, size, "-----------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "-----------------------------------------\n");
 	return size;
 }
 

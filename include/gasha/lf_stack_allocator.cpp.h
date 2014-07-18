@@ -123,12 +123,12 @@ void lfStackAllocator<AUTO_CLEAR>::clear()
 
 //デバッグ情報作成
 template<class AUTO_CLEAR>
-std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message) const
+std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for lfStackAllocator -----\n");
-	GASHA_ spprintf(message, size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
-	GASHA_ spprintf(message, size, "-------------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for lfStackAllocator -----\n");
+	GASHA_ spprintf(message, max_size, size, "buff=%p, maxSize=%d, size=%d, remain=%d, count=%d\n", m_buffRef, maxSize(), this->size(), remain(), count());
+	GASHA_ spprintf(message, max_size, size, "-------------------------------------------\n");
 	return size;
 }
 

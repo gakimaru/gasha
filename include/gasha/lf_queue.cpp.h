@@ -193,32 +193,32 @@ bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 
 //デバッグ情報作成
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
-std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node) const
+std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for lfQueue -----\n");
-	GASHA_ spprintf(message, size, "Queue:\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for lfQueue -----\n");
+	GASHA_ spprintf(message, max_size, size, "Queue:\n");
 	int no = 0;
 	queue_ptr_type node_tag_ptr = m_head;
 	while (node_tag_ptr.isNotNull())
 	{
 		queue_t* node = node_tag_ptr;
-		GASHA_ spprintf(message, size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
-		size += print_node(message + size, node->m_value);
-		GASHA_ spprintf(message, size, "\n");
+		GASHA_ spprintf(message, max_size, size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		print_node(message, max_size, size, node->m_value);
+		GASHA_ spprintf(message, max_size, size, "\n");
 		node_tag_ptr = node->m_next.load();
 	}
 	queue_ptr_type tail_tag_ptr = m_tail.load();
 	queue_t* tail = tail_tag_ptr;
-	GASHA_ spprintf(message, size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
-	size += print_node(message + size, tail->m_value);
-	GASHA_ spprintf(message, size, "\n");
-	GASHA_ spprintf(message, size, "----------------------------------\n");
-	auto print_allocator_node = [&print_node](char* message, const queue_t& info) -> std::size_t
+	GASHA_ spprintf(message, max_size, size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
+	print_node(message, max_size, size, tail->m_value);
+	GASHA_ spprintf(message, max_size, size, "\n");
+	GASHA_ spprintf(message, max_size, size, "----------------------------------\n");
+	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& size, const queue_t& info) -> std::size_t
 	{
-		return print_node(message, info.m_value);
+		return print_node(message, max_size, size, info.m_value);
 	};
-	size += m_allocator.template debugInfo<queue_t>(message + size, with_detail, print_allocator_node);
+	size += m_allocator.template debugInfo<queue_t>(message + size, max_size - size, with_detail, print_allocator_node);
 	return size;
 }
 

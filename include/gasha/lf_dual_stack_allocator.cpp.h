@@ -32,12 +32,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //デバッグ情報作成
 template<class AUTO_CLEAR>
-std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message) const
+std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for lfDualStackAllocator -----\n");
-	GASHA_ spprintf(message, size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
-	GASHA_ spprintf(message, size, "-----------------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for lfDualStackAllocator -----\n");
+	GASHA_ spprintf(message, max_size, size, "buff=%p, maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count%d(ASC=%d,DESC=%d), order=%s\n", m_buffRef, maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC");
+	GASHA_ spprintf(message, max_size, size, "-----------------------------------------------\n");
 	return size;
 }
 

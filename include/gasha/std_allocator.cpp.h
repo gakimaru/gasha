@@ -30,13 +30,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //デバッグ情報作成
 template<class LOCK_TYPE, class IMPL>
-std::size_t stdAllocator<LOCK_TYPE, IMPL>::debugInfo(char* message) const
+std::size_t stdAllocator<LOCK_TYPE, IMPL>::debugInfo(char* message, const std::size_t max_size) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for stdAllocator -----\n");
-	GASHA_ spprintf(message, size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
-	GASHA_ spprintf(message, size, "---------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for stdAllocator -----\n");
+	GASHA_ spprintf(message, max_size, size, "maxSize=%d, size=%d, remain=%d\n", maxSize(), this->size(), remain());
+	GASHA_ spprintf(message, max_size, size, "---------------------------------------\n");
 	return size;
 }
 

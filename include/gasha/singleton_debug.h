@@ -89,7 +89,7 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	std::size_t debugInfo(char* message) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 public:
 	//コンストラクタ
 	singletonDebug();
@@ -127,7 +127,7 @@ public:
 	//シングルトンアクセス終了時呼び出し
 	inline bool leave(const id_type id);
 	//デバッグ情報作成
-	inline std::size_t debugInfo(char* message) const;
+	inline std::size_t debugInfo(char* message, const std::size_t max_size) const;
 };
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED

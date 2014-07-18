@@ -101,7 +101,7 @@ public:
 	inline void clearOrd(const allocationOrder_t order);
 	
 	//デバッグ情報作成
-	std::size_t debugInfo(char* message) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
 public:
 	//コンストラクタ

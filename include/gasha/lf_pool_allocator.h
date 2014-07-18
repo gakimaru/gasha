@@ -113,10 +113,10 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、他のスレッドで操作が発生すると、不整合が生じる可能性がある点に注意
-	template<typename T, class FUNC = std::function<std::size_t(char* message, const T& value)>>
-	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node) const;
-	std::size_t debugInfo(char* message, const bool with_detail) const;
-	inline std::size_t debugInfo(char* message) const;
+	template<typename T, class FUNC = std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const T& value)>>
+	std::size_t debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size, const bool with_detail) const;
+	inline std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
 	//強制クリア
 	//※【要注意】強制的に未アロケート状態にする

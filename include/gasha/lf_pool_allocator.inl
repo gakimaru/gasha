@@ -87,37 +87,37 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::deleteArray(T* p, const std::size_t num)
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE>
 template<typename T, class FUNC>
-std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool with_detail, FUNC print_node) const
+std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const
 {
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for lfPoolAllocator -----\n");
-	GASHA_ spprintf(message, size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead.load());
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for lfPoolAllocator -----\n");
+	GASHA_ spprintf(message, max_size, size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead.load());
 
 	if (with_detail)
 	{
-		GASHA_ spprintf(message, size, "Using:\n");
+		GASHA_ spprintf(message, max_size, size, "Using:\n");
 		std::size_t num = 0;
 		for (index_type index = 0; index < m_poolSize; ++index)
 		{
 			if (m_using[index].load() != 0)
 			{
 				++num;
-				GASHA_ spprintf(message, size, "[%d] ", index);
+				GASHA_ spprintf(message, max_size, size, "[%d] ", index);
 				if (m_using[index].load() != 1)
-					GASHA_ spprintf(message, size, "(using=%d)", m_using[index].load());
-				//GASHA_ spprintf(message, size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+					GASHA_ spprintf(message, max_size, size, "(using=%d)", m_using[index].load());
+				//GASHA_ spprintf(message, max_size, size, "(leak=%d)", static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 				const T* value = reinterpret_cast<const T*>(refBuff(index));
-				size += print_node(message + size, *value);
-				GASHA_ spprintf(message, size, "\n");
+				print_node(message, max_size, size, *value);
+				GASHA_ spprintf(message, max_size, size, "\n");
 			}
 			//else
 			//{
 			//	if (m_allocCount[index].load() != m_freeCount[index].load())
-			//		GASHA_ spprintf(message, size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
+			//		GASHA_ spprintf(message, max_size, size, "[%d](leak=%d)\n", index, static_cast<int>(m_allocCount[index].load() - m_freeCount[index].load()));
 			//}
 		}
-		GASHA_ spprintf(message, size, "(num=%d)\n", num);
-		GASHA_ spprintf(message, size, "Recycable pool:\n");
+		GASHA_ spprintf(message, max_size, size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, max_size, size, "Recycable pool:\n");
 		num = 0;
 		index_type recycable_index_and_tag = m_recyclableHead;
 		while (recycable_index_and_tag != INVALID_INDEX)
@@ -125,20 +125,20 @@ std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const bool
 			++num;
 			index_type recycable_index = recycable_index_and_tag & 0x00ffffff;
 			index_type tag = recycable_index_and_tag >> 24;
-			GASHA_ spprintf(message, size, " [%d(tag=%d)]", recycable_index, tag);
+			GASHA_ spprintf(message, max_size, size, " [%d(tag=%d)]", recycable_index, tag);
 			const recycable_t* recycable_pool = reinterpret_cast<const recycable_t*>(refBuff(recycable_index));
 			recycable_index_and_tag = recycable_pool->m_next_index.load();
 		}
-		GASHA_ spprintf(message, size, "\n");
-		GASHA_ spprintf(message, size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, max_size, size, "\n");
+		GASHA_ spprintf(message, max_size, size, "(num=%d)\n", num);
 	}
-	GASHA_ spprintf(message, size, "------------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "------------------------------------------\n");
 	return size;
 }
 template<std::size_t _MAX_POOL_SIZE>
-inline std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message) const
+inline std::size_t lfPoolAllocator<_MAX_POOL_SIZE>::debugInfo(char* message, const std::size_t max_size) const
 {
-	return debugInfo(message, false);
+	return debugInfo(message, max_size, false);
 }
 
 //強制クリア

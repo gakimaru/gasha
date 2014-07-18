@@ -88,50 +88,50 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T, class FUNC>
-std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, FUNC print_node) const
+std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for poolAllocator -----\n");
-	GASHA_ spprintf(message, size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for poolAllocator -----\n");
+	GASHA_ spprintf(message, max_size, size, "buff=%p, offset=%d, maxSize=%d, blockSize=%d, blockAlign=%d, poolSize=%d, usingPoolSize=%d, poolRemain=%d, size=%d, remain=%d, vacantHead=%d\n", m_buffRef, offset(), maxSize(), blockSize(), blockAlign(), poolSize(), usingPoolSize(), poolRemain(), this->size(), remain(), m_vacantHead);
 
 	if (with_detail)
 	{
-		GASHA_ spprintf(message, size, "Using:\n");
+		GASHA_ spprintf(message, max_size, size, "Using:\n");
 		std::size_t num = 0;
 		for (index_type index = 0; index < m_poolSize; ++index)
 		{
 			if (m_using[index])
 			{
 				++num;
-				GASHA_ spprintf(message, size, "[%d] ", index);
+				GASHA_ spprintf(message, max_size, size, "[%d] ", index);
 				const T* value = reinterpret_cast<const T*>(refBuff(index));
-				size += print_node(message + size, *value);
-				GASHA_ spprintf(message, size, "\n");
+				print_node(message, max_size, size, *value);
+				GASHA_ spprintf(message, max_size, size, "\n");
 			}
 		}
-		GASHA_ spprintf(message, size, "(num=%d)\n", num);
-		GASHA_ spprintf(message, size, "Recycable pool:\n");
+		GASHA_ spprintf(message, max_size, size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, max_size, size, "Recycable pool:\n");
 		num = 0;
 		index_type recycable_index = m_recyclableHead;
 		while (recycable_index != INVALID_INDEX)
 		{
 			++num;
-			GASHA_ spprintf(message, size, " [%d]", recycable_index);
+			GASHA_ spprintf(message, max_size, size, " [%d]", recycable_index);
 			const recycable_t* recycable_pool = reinterpret_cast<const recycable_t*>(refBuff(recycable_index));
 			recycable_index = recycable_pool->m_next_index;
 		}
-		GASHA_ spprintf(message, size, "\n");
-		GASHA_ spprintf(message, size, "(num=%d)\n", num);
+		GASHA_ spprintf(message, max_size, size, "\n");
+		GASHA_ spprintf(message, max_size, size, "(num=%d)\n", num);
 	}
-	GASHA_ spprintf(message, size, "----------------------------------------\n");
+	GASHA_ spprintf(message, max_size, size, "----------------------------------------\n");
 	return size;
 }
 //デバッグ情報作成
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message) const
+inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 {
-	return debugInfo(message, false);
+	return debugInfo(message, max_size, false);
 }
 
 //強制クリア

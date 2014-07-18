@@ -106,10 +106,10 @@ public:
 	//※十分なサイズのバッファを渡す必要あり。
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
-	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const T& value)>>
-	std::size_t debugInfo(char* message, const bool with_detail, FUNC print_node) const;
-	std::size_t debugInfo(char* message, const bool with_detail) const;
-	inline std::size_t debugInfo(char* message) const;
+	template<typename T, class FUNC = std::function<std::size_t(char* messdage, const std::size_t max_size, std::size_t& size, const T& value)>>
+	std::size_t debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const;
+	std::size_t debugInfo(char* message, const std::size_t max_size, const bool with_detail) const;
+	inline std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
 	//強制クリア
 	//※【要注意】強制的に未アロケート状態にする

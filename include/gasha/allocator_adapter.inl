@@ -107,9 +107,9 @@ bool allocatorAdapter<ALLOCATOR>::deleteArray(T* p, const std::size_t num)
 
 //デバッグ情報作成
 template<class ALLOCATOR>
-inline std::size_t allocatorAdapter<ALLOCATOR>::debugInfo(char* message) const
+inline std::size_t allocatorAdapter<ALLOCATOR>::debugInfo(char* message, const std::size_t max_size) const
 {
-	return m_allocator.debugInfo(message);
+	return m_allocator.debugInfo(message, max_size);
 }
 
 //コンストラクタ

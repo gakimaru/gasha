@@ -69,7 +69,7 @@ inline bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename single
 
 //デバッグ情報作成
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline std::size_t  singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message) const
+inline std::size_t  singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 {
 	//何もしない
 	message[0] = '\0';

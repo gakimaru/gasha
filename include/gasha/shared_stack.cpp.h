@@ -80,27 +80,27 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE
 
 //デバッグ情報作成
 template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const bool with_detail, std::function<std::size_t(char* message, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
+std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t size = 0;
-	GASHA_ spprintf(message, size, "----- Debug-info for stack -----\n");
-	GASHA_ spprintf(message, size, "Stack:\n");
+	GASHA_ spprintf(message, max_size, size, "----- Debug-info for stack -----\n");
+	GASHA_ spprintf(message, max_size, size, "Stack:\n");
 	int no = 0;
 	stack_t* node = m_head;
 	while (node)
 	{
-		GASHA_ spprintf(message, size, "[%d](%p) ", no++, node);
-		size += print_node(message + size, node->m_value);
-		GASHA_ spprintf(message, size, "\n");
+		GASHA_ spprintf(message, max_size, size, "[%d](%p) ", no++, node);
+		print_node(message, max_size, size, node->m_value);
+		GASHA_ spprintf(message, max_size, size, "\n");
 		node = node->m_next;
 	}
-	GASHA_ spprintf(message, size, "--------------------------------\n");
-	auto print_allocator_node = [&print_node](char* message, const stack_t& info) -> std::size_t
+	GASHA_ spprintf(message, max_size, size, "--------------------------------\n");
+	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& size, const stack_t& info) -> std::size_t
 	{
-		return print_node(message, info.m_value);
+		return print_node(message, max_size, size, info.m_value);
 	};
-	size += m_allocator.template debugInfo<stack_t>(message + size, with_detail, print_allocator_node);
+	size += m_allocator.template debugInfo<stack_t>(message + size, max_size - size, with_detail, print_allocator_node);
 	return size;
 }
 
