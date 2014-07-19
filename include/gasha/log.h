@@ -16,8 +16,10 @@
 #include <gasha/log_purpose.h>//ログ用途
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
+#include <gasha/log_mask.h>//ログレベルマスク
 
 #include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint32_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -37,17 +39,35 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※ログ出力属性を変更したい場合は、別途 logAttr を使用する。
 class log
 {
+	friend class breakPoint;
 public:
 	//型
 	typedef GASHA_ logPrintInfo::id_type id_type;//ログID
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
+public:
 	//定数
 	static const std::size_t PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
 
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
+private:
+	enum ope_type : std::uint32_t//ログ操作種別
+	{
+		normalOpe = 0x0000,//属性なし
+
+		useReservedId = 0x0001,//予約IDを使用
+		addCPStack = 0x0002,//コールポイントスタックを付加
+
+		addMessageMask = (addCPStack),//メッセージ付加あり判定マスク（メッセージ付加がある場合、必ずワークバッファを使用してメッセ―ジ出力する）
+	};
+
+private:
+	//ダミーメッセージ追加用関数オブジェクト
+	struct dummyAddMessageFunctor{
+		std::size_t operator()(char* message, const std::size_t max_size, std::size_t& pos){ return 0; }
+	};
 public:
 	//メソッド
 	
@@ -59,8 +79,8 @@ public:
 	
 private:
 	//ログ出力：書式付き出力
-	template<typename... Tx>
-	bool print(const bool is_reserved, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+	template<class ADD_MESSAGE_FUNC, typename... Tx>
+	bool print(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 public:
 	//※通常版
 	template<typename... Tx>
@@ -71,7 +91,8 @@ public:
 
 private:
 	//ログ出力：書式なし出力
-	bool put(const bool is_reserved, const level_type level, const category_type category, const char* str);
+	template<class ADD_MESSAGE_FUNC>
+	bool put(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* str);
 public:
 	//※通常版
 	inline bool put(const level_type level, const category_type category, const char* str);
@@ -85,8 +106,8 @@ public:
 private:
 	//ログ出力：書式付き出力
 	//※文字コード変換処理指定版
-	template<class CONVERTER_FUNC, typename... Tx>
-	inline bool convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+	template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+	inline bool convPrint(const ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 public:
 	//※通常版
 	template<class CONVERTER_FUNC, typename... Tx>
@@ -98,8 +119,8 @@ public:
 private:
 	//ログ出力：書式なし出力
 	//※文字コード変換処理指定版
-	template<class CONVERTER_FUNC>
-	bool convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
+	template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
+	bool convPut(const ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* str);
 public:
 	//※通常版
 	template<class CONVERTER_FUNC>
@@ -115,14 +136,24 @@ public:
 	//※ログ出力処理数を指定する。（省略時は stdLogPrint を使用）
 	//　PRINT_FUNC のプロトタイプ：void print_func(GASHA_ logPrintInfo& info)
 
+private:
 	//ログ直接出力：書式付き出力
+	template<class PRINT_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+	bool printDirect(const ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+public:
+	//※通常版
 	template<class PRINT_FUNC, typename... Tx>
 	bool printDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	template<typename... Tx>
 	inline bool printDirect(const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	
+private:
 	//ログ直接出力：書式なし出力
+	template<class PRINT_FUNC, class ADD_MESSAGE_FUNC>
+	bool putDirect(const ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* str);
+public:
+	//※通常版
 	template<class PRINT_FUNC>
 	bool putDirect(PRINT_FUNC print_func, const level_type level, const category_type category, const char* str);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
@@ -132,16 +163,26 @@ public:
 	//※文字コード変換処理指定版：max_dst_sizeは終端を含めた出力バッファサイズ、src_len は終端を含まない入力文字列長、戻り値は終端を含まない出力文字列長
 	//　CONVERTER_FUNC のプロトタイプ：std::size_t converter_func(char* dst, const std::size_t max_dst_size, const char* src, const std::size_t src_len)
 	
+private:
 	//ログ直接出力：書式付き出力
 	//※文字コード変換処理指定版
+	template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+	bool convPrintDirect(const ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
+public:
+	//※通常版
 	template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
 	bool convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 	template<class CONVERTER_FUNC, typename... Tx>
 	inline bool convPrintDirect(CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* fmt, Tx&&... args);
 	
+private:
 	//ログ直接出力：書式なし出力
 	//※文字コード変換処理指定版
+	template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
+	bool convPutDirect(const ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const level_type level, const category_type category, const char* str);
+public:
+	//※通常版
 	template<class PRINT_FUNC, class CONVERTER_FUNC>
 	bool convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const level_type level, const category_type category, const char* str);
 	//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
@@ -150,6 +191,27 @@ public:
 
 	//--------------------
 
+private:
+	//メッセージ付加
+	inline bool addMessage(const ope_type ope, char* message, const std::size_t max_size, std::size_t& message_len);
+
+	//--------------------
+
+private:
+	//操作種別判定
+	inline bool hasOpe(const ope_type target_ope, const ope_type ope);
+	//メッセージ付加操作判定
+	template<class ADD_MESSAGE_FUNC >
+	inline bool isAddMessage(const ope_type ope, ADD_MESSAGE_FUNC add_message_func);
+	//ログレベルマスク判定とコンソール取得
+	//※戻り値が false を返したら続行不要と判定し、result を返して終了する
+	inline bool consolesInfo(bool& result, GASHA_ logMask::consolesInfo_type& consoles_info, const level_type level, const category_type category);
+	//ログ出力情報を作成
+	inline void makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const ope_type ope, const level_type level, const category_type category, const char* message, const std::size_t message_size, GASHA_ logMask::consolesInfo_type& consoles_info);
+	
+	//--------------------
+
+public:
 	//ログ出力予約
 	//※キューイングを予約し、実際の出力が遅延しても予約順にコンソールに出力されることを保証する。
 	//※予約後は reservedPrint(), reservedPut() を実行すると、予約分として出力される。
@@ -160,6 +222,19 @@ public:
 	//ログ出力予約を取り消す
 	inline bool cancelToReserve();
 
+private:
+	//予約IDの取得と更新
+	inline id_type reservedId();
+	//適切なIDの取得
+	inline id_type properId(const ope_type ope);
+
+private:
+	//ログキューをエンキュー
+	inline bool enqueue(GASHA_ logPrintInfo& print_info);
+	//ログキューモニターに通知
+	inline bool notifyMonitor();
+
+public:
 	//【使用注意】ログ関係の処理を一括して初期化する
 	void initialize();
 

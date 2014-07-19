@@ -53,9 +53,11 @@ enum logAttrConst : std::uint32_t
 	logPurposeWithTime = 0x0004,//メッセージヘッダー：時間を付加
 	logPurposeWithLevel = 0x0008,//メッセージヘッダー：ログレベル名を付加
 	logPurposeWithCategory = 0x0010,//メッセージヘッダ：ログカテゴリ名を付加
-	logPurposeWithCPName = 0x0020,//メッセージヘッダ：直近のコールポイント名を付加
-	logPurposeWithCriticalCPName = 0x0040,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
-	logPurposeWithAnyHeader = logPurposeWithID | logPurposeWithTime | logPurposeWithLevel | logPurposeWithCategory | logPurposeWithCPName | logPurposeWithCriticalCPName,//メッセージヘッダー：全ビット
+	//※ログキューを通すと正しいコールポイントを得られない
+	//logPurposeWithCPName = 0x0020,//メッセージヘッダ：直近のコールポイント名を付加
+	//logPurposeWithCriticalCPName = 0x0040,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	//logPurposeWithAnyHeader = logPurposeWithID | logPurposeWithTime | logPurposeWithLevel | logPurposeWithCategory | logPurposeWithCPName | logPurposeWithCriticalCPName,//メッセージヘッダー：全ビット
+	logPurposeWithAnyHeader = logPurposeWithID | logPurposeWithTime | logPurposeWithLevel | logPurposeWithCategory,//メッセージヘッダー：全ビット
 	logPurposeHeaderOnlyColored = 0x0080,//カラーの反映をヘッダーのみにする
 	logPurposeWithoutColor = 0x0100,//カラー表示なし ※logPurposeHeaderOnlyColored より優先
 	//reserved1 = 0x0200,//（予約１）
@@ -69,8 +71,8 @@ enum logAttrConst : std::uint32_t
 	logWithTime = logPurposeWithTime << logShiftBits,//メッセージヘッダー：時間を付加
 	logWithLevel = logPurposeWithLevel << logShiftBits,//メッセージヘッダー：ログレベル名を付加
 	logWithCategory = logPurposeWithCategory << logShiftBits,//メッセージヘッダ：ログカテゴリ名を付加
-	logWithCPName = logPurposeWithCPName << logShiftBits,//メッセージヘッダ：直近のコールポイント名を付加
-	logWithCriticalCPName = logPurposeWithCriticalCPName << logShiftBits,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	//logWithCPName = logPurposeWithCPName << logShiftBits,//メッセージヘッダ：直近のコールポイント名を付加
+	//logWithCriticalCPName = logPurposeWithCriticalCPName << logShiftBits,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
 	logWithAnyHeader = logPurposeWithAnyHeader << logShiftBits,//メッセージヘッダー：全ビット
 	logHeaderOnlyColored = logPurposeHeaderOnlyColored << logShiftBits,//カラーの反映をヘッダーのみにする
 	logWithoutColor = logPurposeWithoutColor << logShiftBits,//カラー表示なし ※logPurposeHeaderOnlyColored より優先
@@ -82,8 +84,8 @@ enum logAttrConst : std::uint32_t
 	noticeWithTime = logPurposeWithTime << noticeShiftBits,//メッセージヘッダー：時間を付加
 	noticeWithLevel = logPurposeWithLevel << noticeShiftBits,//メッセージヘッダー：ログレベル名を付加
 	noticeWithCategory = logPurposeWithCategory << noticeShiftBits,//メッセージヘッダ：ログカテゴリ名を付加
-	noticeWithCPName = logPurposeWithCPName << noticeShiftBits,//メッセージヘッダ：直近のコールポイント名を付加
-	noticeWithCriticalCPName = logPurposeWithCriticalCPName << noticeShiftBits,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
+	//noticeWithCPName = logPurposeWithCPName << noticeShiftBits,//メッセージヘッダ：直近のコールポイント名を付加
+	//noticeWithCriticalCPName = logPurposeWithCriticalCPName << noticeShiftBits,//メッセージヘッダ：直近のクリティカルコールポイント名を付加
 	noticeWithAnyHeader = logPurposeWithAnyHeader << noticeShiftBits,//メッセージヘッダー：全ビット
 	noticeHeaderOnlyColored = logPurposeHeaderOnlyColored << noticeShiftBits,//カラーの反映をヘッダーのみにする
 	noticeWithoutColor = logPurposeWithoutColor << noticeShiftBits,//カラー表示なし ※logPurposeHeaderOnlyColored より優先

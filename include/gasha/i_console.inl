@@ -31,14 +31,14 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //書式付き出力
 template<typename... Tx>
-inline int IConsole::printf(char* work_buff, const char* fmt, Tx&&... args)
+inline int iConsole::printf(char* work_buff, const char* fmt, Tx&&... args)
 {
 	const int ret = GASHA_ spprintf(work_buff, fmt, std::forward<Tx>(args)...);
 	put(work_buff);
 	return ret;
 }
 template<typename... Tx>
-inline int IConsole::printf(char* work_buff, const std::size_t work_buff_size, const char* fmt, Tx&&... args)
+inline int iConsole::printf(char* work_buff, const std::size_t work_buff_size, const char* fmt, Tx&&... args)
 {
 	std::size_t pos = 0;
 	const int ret = GASHA_ spprintf(work_buff, work_buff_size, pos, fmt, std::forward<Tx>(args)...);
@@ -47,7 +47,7 @@ inline int IConsole::printf(char* work_buff, const std::size_t work_buff_size, c
 }
 
 //カラー変更
-inline void IConsole::changeColor(const GASHA_ consoleColor& color)
+inline void iConsole::changeColor(const GASHA_ consoleColor& color)
 {
 	return changeColor(std::move(*const_cast<GASHA_ consoleColor*>(&color)));
 }

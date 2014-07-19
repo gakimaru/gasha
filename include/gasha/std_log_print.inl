@@ -19,6 +19,7 @@
 #include <gasha/log_level.h>//ログレベル
 #include <gasha/log_category.h>//ログカテゴリ
 #include <gasha/log_attr.h>//ログ属性
+#include <gasha/call_point.h>//コールポイント
 #include <gasha/string.h>//文字列処理：spprintf()
 
 #include <cstdint>//C++11 std::uint32_t
@@ -38,7 +39,7 @@ inline void stdLogPrint::operator()(GASHA_ logPrintInfo& info)
 	for (logPrintInfo::purpose_type purpose = 0; purpose < logPrintInfo::PURPOSE_NUM; ++purpose)
 	{
 		//コンソールが指定されていれば出力
-		IConsole* console = info.console(purpose);
+		iConsole* console = info.console(purpose);
 		if (console)
 		{
 			//属性取得
@@ -65,51 +66,71 @@ inline void stdLogPrint::operator()(GASHA_ logPrintInfo& info)
 			{
 				char header[128];
 				static const std::size_t max_header_size = sizeof(header) - 2;//※ヘッダーの終端分の文字数を引いておく
-				std::size_t header_size = 0;
-				GASHA_ spprintf(header, max_header_size, header_size, "[");
+				std::size_t header_len = 0;
 				bool is_first = true;
-				auto with_sep = [&is_first, &header, &header_size]()
+				//ヘッダー始端
+				GASHA_ spprintf(header, max_header_size, header_len, "[");
+				//項目のセパレータ表示用共通関数
+				auto with_sep = [&is_first, &header, &header_len]()
 				{
 					if (!is_first)
-						GASHA_ spprintf(header, max_header_size, header_size, "|");
+						GASHA_ spprintf(header, max_header_size, header_len, "|");
 					else
 						is_first = false;
 				};
+				//ID
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithID))
 				{
 					with_sep();
-					GASHA_ spprintf(header, max_header_size,  header_size, "%d", info.id());
+					GASHA_ spprintf(header, max_header_size,  header_len, "%d", info.id());
 				}
+				//時間
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithTime))
 				{
 					char time_str[32];
 					GASHA_ timeToStr(time_str, info.time(), timeStr_HHMMSS_MICRO);
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_size, time_str);
+					GASHA_ spprintf(header, max_header_size, header_len, time_str);
 				}
+				//ログレベル名
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithLevel))
 				{
 					GASHA_ logLevel level(info.level());
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_size, level.name());
+					GASHA_ spprintf(header, max_header_size, header_len, level.name());
 				}
+				//ログカテゴリ名
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCategory))
 				{
 					GASHA_ logCategory category(info.category());
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_size, category.name());
+					GASHA_ spprintf(header, max_header_size, header_len, category.name());
 				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCPName))
-				{
-					with_sep();
-					//GASHA_ spprintf(header, max_header_size, header_size, ???);
-				}
-				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCriticalCPName))
-				{
-					with_sep();
-					//GASHA_ spprintf(header, max_header_size, header_size, ???);
-				}
-				GASHA_ spprintf(header, header_size, "]");
+				//※ログキューを通すと正しいコールポイントが得られない
+				////コールポイント名
+				//if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCPName))
+				//{
+				//	GASHA_ callPoint cp;
+				//	const GASHA_ callPoint* recent_cp = cp.find();
+				//	if (recent_cp)
+				//	{
+				//		with_sep();
+				//		GASHA_ spprintf(header, max_header_size, header_len, recent_cp->name());
+				//	}
+				//}
+				////クリティカルコールポイント名
+				//if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCriticalCPName))
+				//{
+				//	GASHA_ callPoint cp;
+				//	const GASHA_ callPoint* recent_cp = cp.findCritical();
+				//	if (recent_cp)
+				//	{
+				//		with_sep();
+				//		GASHA_ spprintf(header, max_header_size, header_len, recent_cp->name());
+				//	}
+				//}
+				//ヘッダー終端
+				GASHA_ spprintf(header, header_len, "]");
 				console->put(header);
 			}
 			

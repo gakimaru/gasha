@@ -97,7 +97,7 @@ public:
 	//※モニターを中断する。
 	//※一度中断したら、モニターを開始できなくなるため、
 	//　再度使用するには明示的な初期化が必要
-	inline void abort();
+	void abort();
 
 	//リセット
 	//※キューが中断／再初期化された際などに呼び出し、「次のID」をリセットする
@@ -119,6 +119,7 @@ private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
 	static std::atomic<bool> m_abort;//中断
+	static std::atomic<bool> m_isEnd;//終了済み
 	static std::atomic<std::int32_t> m_request;//要求数
 	static std::atomic<std::int32_t> m_flush;//フラッシュ要求数
 	static std::atomic<id_type> m_nextId;//次のID（先に大きなIDが来たら、次のIDが来るまで待つ）

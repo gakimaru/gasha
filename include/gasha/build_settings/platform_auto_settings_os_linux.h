@@ -31,12 +31,6 @@
 		#define GASHA_PLATFORM_ARCHITECTURE_BITS 32//プラットフォームアーキテクチャ（ビット長）
 	#endif//__x86_64__
 #endif//__linux__
-#ifdef __CYGWIN__
-	#define GASHA_IS_CYGWIN//プラットフォーム：Cygwin
-	#define GASHA_PLATFORM_VER 0//プラットフォームバージョン
-	#define GASHA_PLATFORM_MINOR 0//プラットフォームマイナーバージョン
-	#define GASHA_PLATFORM_NAME "Cygin"
-#endif//__CYGWIN__
 
 #endif//GASHA_INCLUDED_PLATFORM_AUTO_SETTINGS_OS_LINUX_H
 

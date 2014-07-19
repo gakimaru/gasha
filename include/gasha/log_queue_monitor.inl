@@ -30,16 +30,17 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<class PRINT_FUNC>
 void logQueueMonitor::monitor(PRINT_FUNC print_func)
 {
+	m_isEnd.store(false);//終了状態を初期化
 	m_nextId.store(INIT_ID);//次のID初期化
 	int retry_count = MAX_RETRY_COUNT;//次のIDが来るまでの最大リトライカウント
 	while (true)
 	{
 		//キューイング待ち受け
 		{
-			//キューイングを状態を判定するプリディケート関数
+			//キューイング状態を判定するプリディケート関数
 			auto pred = []() -> bool
 			{
-				return m_request.load() > 0 || m_flush.load() > 0 || m_abort.load();
+				return m_request.load() > 0 || m_flush.load() > 0 || m_abort.load() || m_isEnd.load();
 			};
 
 			//条件変数による待ち受け
@@ -90,24 +91,11 @@ void logQueueMonitor::monitor(PRINT_FUNC print_func)
 			}
 		}
 	}
+	m_isEnd.store(true);//終了状態にする
 }
 inline void logQueueMonitor::monitor()
 {
 	monitor(GASHA_ stdLogPrint());
-}
-
-//中断
-inline void logQueueMonitor::abort()
-{
-	//すでに中断時は即終了
-	if (m_abort.load())
-		return;
-
-	//中断
-	m_abort.store(true);
-
-	//通知
-	m_cond.notify_one();
 }
 
 //リセット

@@ -100,10 +100,10 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail) const
 {
-	auto print_node = [](char* message, const std::size_t max_size, std::size_t& size, const std::uint32_t& data) -> std::size_t
+	auto print_node = [](char* message, const std::size_t max_size, std::size_t& message_len, const std::uint32_t& data) -> std::size_t
 	{
 		unionTypes uni(data);
-		return GASHA_ spprintf(message, max_size, size, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
+		return GASHA_ spprintf(message, max_size, message_len, "image=[0x%02x,0x%02x,0x%02x,0x%02x]", uni.m_uchar[0], uni.m_uchar[1], uni.m_uchar[2], uni.m_uchar[3]);
 	};
 	return this->template debugInfo<std::uint32_t>(message, max_size, with_detail, print_node);
 }
@@ -172,7 +172,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　通常、テンプレートクラス／関数の同じ型のインスタンスが複数作られても、リンク時に一つにまとめられるため問題がない。
 // 　しかし、一つのソースファイルの中で複数のインスタンスが生成されると、コンパイラによってはエラーになる。
 //   GCCの場合のエラーメッセージ例：（VC++ではエラーにならない）
-// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class gasha::templateClass<>’ [-fpermissive]
+// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class templateClass<>’ [-fpermissive]
 //
 //【対策１】
 // 　別のファイルに分けてインスタンス化する。

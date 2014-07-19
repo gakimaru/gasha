@@ -79,7 +79,7 @@ private:
 	{
 		const char* m_name;//名前
 		level_type m_value;//レベルの値
-		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
+		GASHA_ iConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
 		GASHA_ consoleColor m_colors[PURPOSE_NUM];//カラー
 	};
 public:
@@ -131,9 +131,9 @@ public:
 	inline level_type value() const { return m_info->m_value; }//ログレベルの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
 	inline level_type outputLevel() const { return toOutputLevel(m_info->m_value); }//出力レベル取得
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール取得
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){ m_info->m_consoles[purpose] = console; }//コンソール変更
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole& console){ m_info->m_consoles[purpose] = &console; }//コンソール変更
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール取得
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){ m_info->m_consoles[purpose] = console; }//コンソール変更
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole& console){ m_info->m_consoles[purpose] = &console; }//コンソール変更
 	inline const consoleColor& color(const purpose_type purpose) const { return m_info->m_colors[purpose]; }//カラー取得
 	inline consoleColor& color(const purpose_type purpose){ return m_info->m_colors[purpose]; }//カラー取得
 	inline void setColor(const purpose_type purpose, consoleColor&& color){ m_info->m_colors[purpose] = color; }//カラー変更
@@ -192,9 +192,9 @@ public:
 	inline level_type value() const { return 0; }//ログレベルの値取得
 	inline const char* name() const { return ""; }//名前取得
 	inline level_type outputLevel() const { return 0; }//出力レベル取得
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return const_cast<GASHA_ IConsole*>(&m_console); }//コンソール取得
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){}//コンソール変更
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole& console){}//コンソール変更
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return const_cast<GASHA_ iConsole*>(&m_console); }//コンソール取得
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){}//コンソール変更
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole& console){}//コンソール変更
 	inline const consoleColor& color(const purpose_type purpose) const { return m_color; }//カラー取得
 	inline consoleColor& color(const purpose_type purpose){ return m_color; }//カラー取得
 	inline void setColor(const purpose_type purpose, consoleColor&& color){}//カラー変更
@@ -214,7 +214,7 @@ public:
 	inline ~logLevel(){}//デストラクタ
 private:
 	//フィールド
-	GASHA_ IConsole m_console;//ダミーコンソール
+	GASHA_ iConsole m_console;//ダミーコンソール
 	GASHA_ consoleColor m_color;//ダミーカラー
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
@@ -512,8 +512,8 @@ public:
 public:
 	//全てのログレベルのコンソール／画面通知用コンソールを変更
 	//※nullptrが設定されているものは変更しない
-	void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* new_console);
-	void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* src_console, IConsole* new_console);//置き換え元のコンソールを指定する場合
+	void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* new_console);
+	void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* src_console, iConsole* new_console);//置き換え元のコンソールを指定する場合
 private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
@@ -559,8 +559,8 @@ public:
 	inline const_reverse_iterator crend() const { return reverse_iterator(); }//終端constイテレータを取得
 public:
 	//全てのログレベルのコンソール／画面通知用コンソールを変更
-	inline void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* new_console){}
-	inline void replaceEachConsole(const logLevel::purpose_type purpose, IConsole* src_console, IConsole* new_console){}//置き換え元のコンソールを指定する場合
+	inline void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* new_console){}
+	inline void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* src_console, iConsole* new_console){}//置き換え元のコンソールを指定する場合
 public:
 	inline logLevelContainer(const explicitInit_type&){}//明示的な初期化用コンストラクタ
 	inline logLevelContainer(){}//デフォルトコンストラクタ
@@ -586,9 +586,9 @@ public:
 public:
 	//関数オペレータ
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
-	inline bool operator()(const char* name, IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor(&colors)[logLevel::PURPOSE_NUM]);
+	inline bool operator()(const char* name, iConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor(&colors)[logLevel::PURPOSE_NUM]);
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
-	inline bool operator()(const char* name, IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor(&colors)[logLevel::PURPOSE_NUM]){ return true; }
+	inline bool operator()(const char* name, iConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor(&colors)[logLevel::PURPOSE_NUM]){ return true; }
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 

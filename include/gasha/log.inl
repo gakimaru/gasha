@@ -17,18 +17,18 @@
 #include <gasha/log.h>//ログ操作【宣言部】
 
 #include <gasha/log_attr.h>//ログ属性
-#include <gasha/log_level.h>//ログレベル
-#include <gasha/log_category.h>//ログカテゴリ
-#include <gasha/log_mask.h>//ログレベルマスク
 #include <gasha/log_print_info.h>//ログ出力情報
 #include <gasha/log_work_buff.h>//ログワークバッファ
 #include <gasha/log_queue.h>//ログキュー
 #include <gasha/log_queue_monitor.h>//ログキューモニター
 #include <gasha/std_log_print.h>//標準ログ出力
+#include <gasha/call_point.h>//コールポイント
 #include <gasha/chrono.h>//時間処理ユーティリティ：nowElapsedTime()
+#include <gasha/string.h>//文字列処理：spprintf()
 
 #include <cstddef>//std::size_t
 #include <utility>//C++11 std::forward
+#include <type_traits>//C++11 std::is_same
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -42,17 +42,15 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ログ操作
 
 //ログ出力：書式付き出力
-template<typename... Tx>
-bool log::print(const bool is_reserved, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+template<class ADD_MESSAGE_FUNC, typename... Tx>
+bool log::print(const log::ope_type ope, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -64,44 +62,25 @@ bool log::print(const bool is_reserved, const log::level_type level, const log::
 	std::size_t message_len = 0;
 	work_buff.spprintf(message, message_len, fmt, std::forward<Tx>(args)...);
 
+	//メッセージ付加
+	add_message_func(message, logWorkBuff::MAX_MESSAGE_SIZE, message_len);
+
+	//メッセージ付加
+	addMessage(ope, message, logWorkBuff::MAX_MESSAGE_SIZE, message_len);
+
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(is_reserved ? m_reservedId : 0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(message);
-	print_info.setMessageSize(message_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, ope, level, category, message, message_len + 1, consoles_info);
 
-	//キューイング
-	logQueue queue;
-	const bool result = queue.enqueue(print_info);//キューイング
+	//ログキューをエンキュー
+	result = enqueue(print_info);
 
 	//ワークバッファを解放
 	work_buff.free(message);
 
-	//予約IDを更新
-	if (is_reserved && m_reservedNum > 0)
-	{
-		--m_reservedNum;
-		if (m_reservedNum == 0)
-			m_reservedId = 0;
-		else
-			++m_reservedId;
-	}
-
 	//ログキューモニターに通知
 	if (result)
-	{
-		logQueueMonitor mon;
-		mon.notify();
-	}
+		notifyMonitor();
 	
 	//終了
 	return result;
@@ -110,7 +89,7 @@ bool log::print(const bool is_reserved, const log::level_type level, const log::
 template<typename... Tx>
 inline bool log::print(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
-	return print(false, level, category, fmt, std::forward<Tx>(args)...);
+	return print(normalOpe, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※予約出力版
 template<typename... Tx>
@@ -119,14 +98,42 @@ inline bool log::reservedPrint(const char* fmt, Tx&&... args)
 	//予約IDを確認
 	if (m_reservedNum == 0)
 		return false;
-	return print(true, m_reservedLevel, m_reservedCategory, fmt, std::forward<Tx>(args)...);
+	return print(useReservedId, dummyAddMessageFunctor(), m_reservedLevel, m_reservedCategory, fmt, std::forward<Tx>(args)...);
 }
 
 //ログ出力：書式なし出力
+template<class ADD_MESSAGE_FUNC>
+bool log::put(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
+{
+	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
+	if (isAddMessage(ope, add_message_func))
+		return print(ope, add_message_func, level, category, str);
+
+	bool result = false;
+
+	//ログレベルマスク判定とコンソール取得
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
+
+	//ログ出力情報作成
+	GASHA_ logPrintInfo print_info;
+	makeLogPrintInfo(print_info, ope, level, category, str, 0, consoles_info);
+
+	//ログキューをエンキュー
+	result = enqueue(print_info);
+
+	//ログキューモニターに通知
+	if (result)
+		notifyMonitor();
+
+	//終了
+	return result;
+}
 //※通常版
 inline bool log::put(const log::level_type level, const log::category_type category, const char* str)
 {
-	return put(false, level, category, str);
+	return put(normalOpe, dummyAddMessageFunctor(), level, category, str);
 }
 //※予約出力版
 inline bool log::reservedPut(const char* str)
@@ -134,22 +141,20 @@ inline bool log::reservedPut(const char* str)
 	//予約IDを確認
 	if (m_reservedNum == 0)
 		return false;
-	return put(true, m_reservedLevel, m_reservedCategory, str);
+	return put(useReservedId, dummyAddMessageFunctor(), m_reservedLevel, m_reservedCategory, str);
 }
 
 //ログ出力：書式付き出力
 //※文字コード変換処理指定版
-template<class CONVERTER_FUNC, typename... Tx>
-bool log::convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+bool log::convPrint(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -165,46 +170,27 @@ bool log::convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const
 	//文字コード変換
 	//※半分のバッファサイズで処理する
 	char* converted_message = message + logWorkBuff::HALF_MESSAGE_SIZE;
-	const std::size_t converted_message_len = converter_func(converted_message, logWorkBuff::HALF_MESSAGE_SIZE, message, message_len);
+	std::size_t converted_message_len = converter_func(converted_message, logWorkBuff::HALF_MESSAGE_SIZE, message, message_len);
+
+	//メッセージ付加
+	add_message_func(message, logWorkBuff::HALF_MESSAGE_SIZE, message_len);
+
+	//メッセージ付加
+	addMessage(ope, converted_message, logWorkBuff::HALF_MESSAGE_SIZE, converted_message_len);
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId (is_reserved ? m_reservedId : 0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(converted_message);
-	print_info.setMessageSize(converted_message_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, ope, level, category, converted_message, converted_message_len + 1, consoles_info);
 
-	//キューイング
-	logQueue queue;
-	const bool result = queue.enqueue(print_info);//キューイング
+	//ログキューをエンキュー
+	result = enqueue(print_info);
 
 	//ワークバッファを解放
 	work_buff.free(message);
 
-	//予約IDを更新
-	if (is_reserved && m_reservedNum > 0)
-	{
-		--m_reservedNum;
-		if (m_reservedNum == 0)
-			m_reservedId = 0;
-		else
-			++m_reservedId;
-	}
-
 	//ログキューモニターに通知
 	if (result)
-	{
-		logQueueMonitor mon;
-		mon.notify();
-	}
+		notifyMonitor();
 
 	//終了
 	return result;
@@ -213,7 +199,7 @@ bool log::convPrint(const bool is_reserved, CONVERTER_FUNC converter_func, const
 template<class CONVERTER_FUNC, typename... Tx>
 inline bool log::convPrint(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
-	return convPrint(false, converter_func, level, category, fmt, std::forward<Tx>(args)...);
+	return convPrint(normalOpe, converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※予約出力版
 template<class CONVERTER_FUNC, typename... Tx>
@@ -222,22 +208,24 @@ inline bool log::reservedConvPrint(CONVERTER_FUNC converter_func, const char* fm
 	//予約IDを確認
 	if (m_reservedNum == 0)
 		return false;
-	return convPrint(true, converter_func, m_reservedLevel, m_reservedCategory, fmt, std::forward<Tx>(args)...);
+	return convPrint(useReservedId, converter_func, dummyAddMessageFunctor(), m_reservedLevel, m_reservedCategory, fmt, std::forward<Tx>(args)...);
 }
 
 //ログ出力：書式なし出力
 //※文字コード変換処理指定版
-template<class CONVERTER_FUNC>
-bool log::convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
+bool log::convPut(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
 {
+	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
+	if (isAddMessage(ope, add_message_func))
+		return convPrint(ope, converter_func, add_message_func, level, category, str);
+
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -250,42 +238,17 @@ bool log::convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const l
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(is_reserved ? m_reservedId : 0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(converted_str);
-	print_info.setMessageSize(converted_str_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, ope, level, category, converted_str, converted_str_len + 1, consoles_info);
 
-	//キューイング
-	logQueue queue;
-	const bool result = queue.enqueue(print_info);//キューイング
+	//ログキューをエンキュー
+	result = enqueue(print_info);
 
 	//ワークバッファを解放
 	work_buff.free(converted_str);
 
-	//予約IDを更新
-	if (is_reserved && m_reservedNum > 0)
-	{
-		--m_reservedNum;
-		if (m_reservedNum == 0)
-			m_reservedId = 0;
-		else
-			++m_reservedId;
-	}
-
 	//ログキューモニターに通知
 	if (result)
-	{
-		logQueueMonitor mon;
-		mon.notify();
-	}
+		notifyMonitor();
 
 	//終了
 	return result;
@@ -294,7 +257,7 @@ bool log::convPut(const bool is_reserved, CONVERTER_FUNC converter_func, const l
 template<class CONVERTER_FUNC>
 inline bool log::convPut(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
 {
-	return convPut(false, converter_func, level, category, str);
+	return convPut(normalOpe, converter_func, dummyAddMessageFunctor(), level, category, str);
 }
 //※予約出力版
 template<class CONVERTER_FUNC>
@@ -303,21 +266,19 @@ inline bool log::reservedConvPut(CONVERTER_FUNC converter_func, const char* str)
 	//予約IDを確認
 	if (m_reservedNum == 0)
 		return false;
-	return convPut(true, converter_func, m_reservedLevel, m_reservedCategory, str);
+	return convPut(useReservedId, converter_func, dummyAddMessageFunctor(), m_reservedLevel, m_reservedCategory, str);
 }
 
 //ログ直接出力：書式付き出力
-template<class PRINT_FUNC, typename... Tx>
-bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+template<class PRINT_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+bool log::printDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -329,20 +290,15 @@ bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const 
 	std::size_t message_len = 0;
 	work_buff.spprintf(message, message_len, fmt, std::forward<Tx>(args)...);
 
+	//メッセージ付加
+	add_message_func(message, logWorkBuff::MAX_MESSAGE_SIZE, message_len);
+
+	//メッセージ付加
+	addMessage(ope, message, logWorkBuff::MAX_MESSAGE_SIZE, message_len);
+
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(message);
-	print_info.setMessageSize(message_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, normalOpe, level, category, message, message_len + 1, consoles_info);
 
 	//直接出力
 	print_func(print_info);//出力
@@ -353,39 +309,37 @@ bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const 
 	//終了
 	return true;
 }
+//※通常版
+template<class PRINT_FUNC, typename... Tx>
+bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+{
+	return printDirect(normalOpe, print_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
+}
+//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<typename... Tx>
 inline bool log::printDirect(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
-	return printDirect(GASHA_ stdLogPrint(), level, category, fmt, std::forward<Tx>(args)...);
+	return printDirect(normalOpe, GASHA_ stdLogPrint(), dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 
 //ログ直接出力：書式なし出力
-template<class PRINT_FUNC>
-bool log::putDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* str)
+template<class PRINT_FUNC, class ADD_MESSAGE_FUNC>
+bool log::putDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
 {
+	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
+	if (isAddMessage(ope, add_message_func))
+		return printDirect(ope, print_func, add_message_func, level, category, str);
+
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(str);
-	print_info.setMessageSize(0);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, normalOpe, level, category, str, 0, consoles_info);
 
 	//直接出力
 	print_func(print_info);//出力
@@ -393,24 +347,29 @@ bool log::putDirect(PRINT_FUNC print_func, const log::level_type level, const lo
 	//終了
 	return true;
 }
+//※通常版
+template<class PRINT_FUNC>
+bool log::putDirect( PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* str)
+{
+	return putDirect(normalOpe, print_func, dummyAddMessageFunctor(), level, category, str);
+}
+//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 inline bool log::putDirect(const log::level_type level, const log::category_type category, const char* str)
 {
-	return putDirect(GASHA_ stdLogPrint(), level, category, str);
+	return putDirect(normalOpe, GASHA_ stdLogPrint(), dummyAddMessageFunctor(), level, category, str);
 }
 
 //ログ直接出力：書式付き出力
 //※文字コード変換処理指定版
-template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
-bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
+bool log::convPrintDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -425,22 +384,17 @@ bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, 
 
 	//文字コード変換
 	char* converted_message = message + logWorkBuff::HALF_MESSAGE_SIZE;
-	const std::size_t converted_message_len = converter_func(converted_message, logWorkBuff::HALF_MESSAGE_SIZE, message, message_len);
+	std::size_t converted_message_len = converter_func(converted_message, logWorkBuff::HALF_MESSAGE_SIZE, message, message_len);
+
+	//メッセージ付加
+	add_message_func(message, logWorkBuff::MAX_MESSAGE_SIZE, message_len);
+
+	//メッセージ付加
+	addMessage(ope, converted_message, logWorkBuff::MAX_MESSAGE_SIZE, converted_message_len);
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(converted_message);
-	print_info.setMessageSize(converted_message_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, normalOpe, level, category, converted_message, converted_message_len + 1, consoles_info);
 
 	//直接出力
 	print_func(print_info);//出力
@@ -451,25 +405,34 @@ bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, 
 	//終了
 	return true;
 }
+//※通常版
+template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
+bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+{
+	return convPrintDirect(normalOpe, print_func, converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
+}
+//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<class CONVERTER_FUNC, typename... Tx>
 inline bool log::convPrintDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
 {
-	return convPrintDirect(GASHA_ stdLogPrint(), converter_func, level, category, fmt, std::forward<Tx>(args)...);
+	return convPrintDirect(normalOpe, GASHA_ stdLogPrint(), converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 
 //ログ直接出力：書式なし出力
 //※文字コード変換処理指定版
-template<class PRINT_FUNC, class CONVERTER_FUNC>
-bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
+bool log::convPutDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
 {
+	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
+	if (isAddMessage(ope, add_message_func))
+		return convPrintDirect(ope, print_func, converter_func, add_message_func, level, category, str);
+
+	bool result = false;
+
 	//ログレベルマスク判定とコンソール取得
-	GASHA_ logMask mask;
-	GASHA_ logMask::consolesInfo_type masked;
-	mask.consolesInfo(masked, level, category);
-	if (masked.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
-		return false;
-	else if (masked.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
-		return true;//成功扱い
+	GASHA_ logMask::consolesInfo_type consoles_info;
+	if (!consolesInfo(result, consoles_info, level, category))
+		return result;
 
 	//ワークバッファ取得
 	logWorkBuff work_buff;
@@ -482,18 +445,7 @@ bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, co
 
 	//ログ出力情報作成
 	GASHA_ logPrintInfo print_info;
-	print_info.setId(0);
-	print_info.setTime(nowElapsedTime());
-	print_info.setMessage(converted_str);
-	print_info.setMessageSize(converted_str_len + 1);
-	print_info.setLevel(level);
-	print_info.setCategory(category);
-	print_info.setAttr(*GASHA_ logAttr());
-	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
-	{
-		print_info.setConsole(purpose, masked.m_consoles[purpose]);
-		print_info.setColor(purpose, masked.m_colors[purpose]);
-	}
+	makeLogPrintInfo(print_info, normalOpe, level, category, converted_str, converted_str_len + 1, consoles_info);
 
 	//直接出力
 	print_func(print_info);//出力
@@ -504,10 +456,80 @@ bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, co
 	//終了
 	return true;
 }
+//※通常版
+template<class PRINT_FUNC, class CONVERTER_FUNC>
+bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+{
+	return convPutDirect(normalOpe, print_func, converter_func, dummyAddMessageFunctor(), level, category, str);
+}
+//※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<class CONVERTER_FUNC>
 inline bool log::convPutDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
 {
-	return convPutDirect(GASHA_ stdLogPrint(), converter_func, level, category, str);
+	return convPutDirect(normalOpe, GASHA_ stdLogPrint(), converter_func, dummyAddMessageFunctor(), level, category, str);
+}
+
+//メッセージ付加
+inline bool log::addMessage(const log::ope_type ope, char* message, const std::size_t max_size, std::size_t& message_len)
+{
+	bool result = false;
+	if (hasOpe(ope, addCPStack))
+	{
+		//コールポイントスタックを追加
+		GASHA_ callPoint cp;
+		message_len += cp.debugInfo(message + message_len, max_size);
+		result = true;
+	}
+	return result;
+}
+
+//操作種別判定
+inline bool log::hasOpe(const log::ope_type target_ope, const log::ope_type ope)
+{
+	return (static_cast<std::uint32_t>(target_ope)& static_cast<std::uint32_t>(ope)) != 0;
+}
+
+//メッセージ付加操作判定
+template<class ADD_MESSAGE_FUNC>
+inline bool log::isAddMessage(const log::ope_type ope, ADD_MESSAGE_FUNC add_message_func)
+{
+	return std::is_same<ADD_MESSAGE_FUNC, dummyAddMessageFunctor>::value || hasOpe(ope, addMessageMask);
+}
+
+//ログレベルマスク判定とコンソール取得
+inline bool log::consolesInfo(bool& result, GASHA_ logMask::consolesInfo_type& consoles_info, const log::level_type level, const log::category_type category)
+{
+	GASHA_ logMask mask;
+	mask.consolesInfo(consoles_info, level, category);
+	if (consoles_info.m_cond == logMask::hasNotAvailableConsole)//利用可能なコンソールがない
+	{
+		result = false;
+		return false;//処理続行不要
+	}
+	else if (consoles_info.m_cond == logMask::everyConsoleIsDummy)//ダミーコンソールしかない
+	{
+		result = true;//成功扱い
+		return false;//処理続行不要
+	}
+	return true;//処理続行可能
+}
+
+//ログ出力情報を作成
+inline void log::makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const log::ope_type ope, const log::level_type level, const log::category_type category, const char* message, const std::size_t message_size, GASHA_ logMask::consolesInfo_type& consoles_info)
+{
+	//ログ出力情報作成
+	print_info.setId(properId(ope));
+	print_info.setTime(nowElapsedTime());
+	print_info.setMessage(message);
+	print_info.setMessageSize(message_size);
+	print_info.setLevel(level);
+	print_info.setCategory(category);
+	print_info.setAttr(*GASHA_ logAttr());
+	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
+	{
+		print_info.setConsole(purpose, consoles_info.m_consoles[purpose]);
+		print_info.setColor(purpose, consoles_info.m_colors[purpose]);
+	}
 }
 
 //ログ出力予約
@@ -528,6 +550,42 @@ inline bool log::reserve(const log::level_type level, const log::category_type c
 	m_reservedLevel = level;
 	m_reservedCategory = category;
 	return true;
+}
+
+//予約IDの取得と更新
+inline log::id_type log::reservedId()
+{
+	id_type id = 0;
+	if (m_reservedNum > 0)
+	{
+		id = m_reservedId;
+		--m_reservedNum;
+		if (m_reservedNum == 0)
+			m_reservedId = 0;
+		else
+			++m_reservedId;
+	}
+	return id;
+}
+
+//適切なIDの取得
+inline log::id_type log::properId(const log::ope_type ope)
+{
+	return (ope & useReservedId) ? reservedId() : 0;
+}
+
+//ログキューをエンキュー
+inline bool log::enqueue(GASHA_ logPrintInfo& print_info)
+{
+	GASHA_ logQueue queue;
+	return queue.enqueue(print_info);
+}
+
+//ログキューモニターに通知
+inline bool log::notifyMonitor()
+{
+	GASHA_ logQueueMonitor mon;
+	return mon.notify();
 }
 
 //ログ出力予約を取り消す

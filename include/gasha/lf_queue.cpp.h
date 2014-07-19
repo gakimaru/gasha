@@ -195,31 +195,31 @@ bool lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_
 template<class T, std::size_t _POOL_SIZE, std::size_t _TAGGED_PTR_TAG_BITS, int _TAGGED_PTR_TAG_SHIFT, typename TAGGED_PTR_VALUE_TYPE, typename TAGGED_PTR_TAG_TYPE>
 std::size_t lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename lfQueue<T, _POOL_SIZE, _TAGGED_PTR_TAG_BITS, _TAGGED_PTR_TAG_SHIFT, TAGGED_PTR_VALUE_TYPE, TAGGED_PTR_TAG_TYPE>::value_type& value)> print_node) const
 {
-	std::size_t size = 0;
-	GASHA_ spprintf(message, max_size, size, "----- Debug-info for lfQueue -----\n");
-	GASHA_ spprintf(message, max_size, size, "Queue:\n");
+	std::size_t message_len = 0;
+	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for lfQueue -----\n");
+	GASHA_ spprintf(message, max_size, message_len, "Queue:\n");
 	int no = 0;
 	queue_ptr_type node_tag_ptr = m_head;
 	while (node_tag_ptr.isNotNull())
 	{
 		queue_t* node = node_tag_ptr;
-		GASHA_ spprintf(message, max_size, size, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
-		print_node(message, max_size, size, node->m_value);
-		GASHA_ spprintf(message, max_size, size, "\n");
+		GASHA_ spprintf(message, max_size, message_len, "[%d(tag=%d)](%p) ", no++, node_tag_ptr.tag(), node);
+		print_node(message, max_size, message_len, node->m_value);
+		GASHA_ spprintf(message, max_size, message_len, "\n");
 		node_tag_ptr = node->m_next.load();
 	}
 	queue_ptr_type tail_tag_ptr = m_tail.load();
 	queue_t* tail = tail_tag_ptr;
-	GASHA_ spprintf(message, max_size, size, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
-	print_node(message, max_size, size, tail->m_value);
-	GASHA_ spprintf(message, max_size, size, "\n");
-	GASHA_ spprintf(message, max_size, size, "----------------------------------\n");
-	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& size, const queue_t& info) -> std::size_t
+	GASHA_ spprintf(message, max_size, message_len, "[tail(tag=%d)](%p)", tail_tag_ptr.tag(), tail);
+	print_node(message, max_size, message_len, tail->m_value);
+	GASHA_ spprintf(message, max_size, message_len, "\n");
+	GASHA_ spprintf(message, max_size, message_len, "----------------------------------\n");
+	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& message_len, const queue_t& info) -> std::size_t
 	{
-		return print_node(message, max_size, size, info.m_value);
+		return print_node(message, max_size, message_len, info.m_value);
 	};
-	size += m_allocator.template debugInfo<queue_t>(message + size, max_size - size, with_detail, print_allocator_node);
-	return size;
+	message_len += m_allocator.template debugInfo<queue_t>(message + message_len, max_size - message_len, with_detail, print_allocator_node);
+	return message_len;
 }
 
 //初期化
@@ -311,7 +311,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　通常、テンプレートクラス／関数の同じ型のインスタンスが複数作られても、リンク時に一つにまとめられるため問題がない。
 // 　しかし、一つのソースファイルの中で複数のインスタンスが生成されると、コンパイラによってはエラーになる。
 //   GCCの場合のエラーメッセージ例：（VC++ではエラーにならない）
-// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class gasha::templateClass<>’ [-fpermissive]
+// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class templateClass<>’ [-fpermissive]
 //
 //【対策１】
 // 　別のファイルに分けてインスタンス化する。

@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //コンソールインターフェースクラス
-class IConsole
+class iConsole
 {
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
@@ -34,12 +34,12 @@ public:
 
 public:
 	//判定オペレータ
-	inline bool operator==(IConsole&& rhs) const { return isSame(&rhs); }
-	inline bool operator==(const IConsole& rhs) const { return isSame(&rhs); }
-	inline bool operator==(const IConsole* rhs) const { return isSame(rhs); }
-	inline bool operator!=(IConsole&& rhs) const { return !isSame(&rhs); }
-	inline bool operator!=(const IConsole& rhs) const { return !isSame(&rhs); }
-	inline bool operator!=(const IConsole* rhs) const { return !isSame(rhs); }
+	inline bool operator==(iConsole&& rhs) const { return isSame(&rhs); }
+	inline bool operator==(const iConsole& rhs) const { return isSame(&rhs); }
+	inline bool operator==(const iConsole* rhs) const { return isSame(rhs); }
+	inline bool operator!=(iConsole&& rhs) const { return !isSame(&rhs); }
+	inline bool operator!=(const iConsole& rhs) const { return !isSame(&rhs); }
+	inline bool operator!=(const iConsole* rhs) const { return !isSame(rhs); }
 
 public:
 	//メソッド
@@ -73,11 +73,11 @@ public:
 	virtual void resetColor() = 0;
 
 	//出力先が同じか判定
-	virtual bool isSame(const IConsole* rhs) const = 0;
+	virtual bool isSame(const iConsole* rhs) const = 0;
 
 public:
 	//デストラクタ
-	virtual ~IConsole()
+	virtual ~iConsole()
 	{}
 
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
@@ -87,12 +87,12 @@ public:
 	inline const char* name() const { return ""; }
 public:
 	//判定オペレータ
-	inline bool operator==(IConsole&& rhs) const { return true; }
-	inline bool operator==(const IConsole& rhs) const { return true; }
-	inline bool operator==(const IConsole* rhs) const { return true; }
-	inline bool operator!=(IConsole&& rhs) const { return false; }
-	inline bool operator!=(const IConsole& rhs) const { return false; }
-	inline bool operator!=(const IConsole* rhs) const { return false; }
+	inline bool operator==(iConsole&& rhs) const { return true; }
+	inline bool operator==(const iConsole& rhs) const { return true; }
+	inline bool operator==(const iConsole* rhs) const { return true; }
+	inline bool operator!=(iConsole&& rhs) const { return false; }
+	inline bool operator!=(const iConsole& rhs) const { return false; }
+	inline bool operator!=(const iConsole* rhs) const { return false; }
 public:
 	//メソッド
 	inline void begin(){}//出力開始
@@ -106,9 +106,9 @@ public:
 	inline void changeColor(GASHA_ consoleColor&& color){}//カラー変更
 	inline void changeColor(const GASHA_ consoleColor& color){}//カラー変更
 	inline void resetColor(){}//カラーリセット
-	inline bool isSame(const IConsole* rhs) const{ return true; }//出力先が同じか判定
+	inline bool isSame(const iConsole* rhs) const{ return true; }//出力先が同じか判定
 public:
-	inline ~IConsole(){}//デストラクタ
+	inline ~iConsole(){}//デストラクタ
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };

@@ -217,7 +217,7 @@ inline logLevelContainer::~logLevelContainer()
 
 //コンストラクタ
 template<unsigned char _LEVEL>
-inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&colors)[logLevel::PURPOSE_NUM])
+inline bool regLogLevel<_LEVEL>::operator()(const char* name, GASHA_ iConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor (&colors)[logLevel::PURPOSE_NUM])
 {
 	logLevel::info info =
 	{
@@ -246,7 +246,7 @@ namespace _private
 		static_assert(LEVEL >= logLevel::NORMAL_MIN && LEVEL <= logLevel::NORMAL_MAX, "Out of range of normal-log-level");//値の範囲チェック
 	public:
 		//関数オペレータ
-		inline bool operator()(const char* name, GASHA_ IConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor* (&colors)[logLevel::PURPOSE_NUM])
+		inline bool operator()(const char* name, GASHA_ iConsole* (&consoles)[logLevel::PURPOSE_NUM], GASHA_ consoleColor* (&colors)[logLevel::PURPOSE_NUM])
 		{
 			logLevel::info info =
 			{

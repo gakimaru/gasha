@@ -137,11 +137,11 @@ inline void scopedStackAllocator<ALLOCATOR>::clear()
 template<class ALLOCATOR>
 std::size_t scopedStackAllocator<ALLOCATOR>::debugInfo(char* message, const std::size_t max_size) const
 {
-	std::size_t size = 0;
-	GASHA_ spprintf(message, max_size, size, "----- Debug-info for scopedStackAllocator -----\n");
-	GASHA_ spprintf(message, max_size, size, "maxSize=%d, size=%d, remain=%d, count=%d (INIT: buff=%p, size=%d, count=%d)\n", maxSize(), this->size(), remain(), count(), m_allocator.buff(), m_initSize, m_initCount);
-	GASHA_ spprintf(message, max_size, size, "-----------------------------------------------\n");
-	return size;
+	std::size_t message_len = 0;
+	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for scopedStackAllocator -----\n");
+	GASHA_ spprintf(message, max_size, message_len, "maxSize=%d, size=%d, remain=%d, count=%d (INIT: buff=%p, size=%d, count=%d)\n", maxSize(), this->size(), remain(), count(), m_allocator.buff(), m_initSize, m_initCount);
+	GASHA_ spprintf(message, max_size, message_len, "-----------------------------------------------");//最終行改行なし
+	return message_len;
 }
 
 //コンストラクタ

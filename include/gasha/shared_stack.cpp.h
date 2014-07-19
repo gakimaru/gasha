@@ -83,25 +83,25 @@ template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
 std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
-	std::size_t size = 0;
-	GASHA_ spprintf(message, max_size, size, "----- Debug-info for stack -----\n");
-	GASHA_ spprintf(message, max_size, size, "Stack:\n");
+	std::size_t message_len = 0;
+	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for stack -----\n");
+	GASHA_ spprintf(message, max_size, message_len, "Stack:\n");
 	int no = 0;
 	stack_t* node = m_head;
 	while (node)
 	{
-		GASHA_ spprintf(message, max_size, size, "[%d](%p) ", no++, node);
-		print_node(message, max_size, size, node->m_value);
-		GASHA_ spprintf(message, max_size, size, "\n");
+		GASHA_ spprintf(message, max_size, message_len, "[%d](%p) ", no++, node);
+		print_node(message, max_size, message_len, node->m_value);
+		GASHA_ spprintf(message, max_size, message_len, "\n");
 		node = node->m_next;
 	}
-	GASHA_ spprintf(message, max_size, size, "--------------------------------\n");
-	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& size, const stack_t& info) -> std::size_t
+	GASHA_ spprintf(message, max_size, message_len, "--------------------------------\n");
+	auto print_allocator_node = [&print_node](char* message, const std::size_t max_size, std::size_t& message_len, const stack_t& info) -> std::size_t
 	{
-		return print_node(message, max_size, size, info.m_value);
+		return print_node(message, max_size, message_len, info.m_value);
 	};
-	size += m_allocator.template debugInfo<stack_t>(message + size, max_size - size, with_detail, print_allocator_node);
-	return size;
+	message_len += m_allocator.template debugInfo<stack_t>(message + message_len, max_size - message_len, with_detail, print_allocator_node);
+	return message_len;
 }
 
 //初期化
@@ -179,7 +179,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　通常、テンプレートクラス／関数の同じ型のインスタンスが複数作られても、リンク時に一つにまとめられるため問題がない。
 // 　しかし、一つのソースファイルの中で複数のインスタンスが生成されると、コンパイラによってはエラーになる。
 //   GCCの場合のエラーメッセージ例：（VC++ではエラーにならない）
-// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class gasha::templateClass<>’ [-fpermissive]
+// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class templateClass<>’ [-fpermissive]
 //
 //【対策１】
 // 　別のファイルに分けてインスタンス化する。

@@ -78,7 +78,7 @@ private:
 	{
 		const char* m_name;//名前
 		category_type m_value;//カテゴリの値
-		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
+		GASHA_ iConsole* m_consoles[PURPOSE_NUM];//出力先コンソール
 	};
 public:
 	//定数
@@ -117,9 +117,9 @@ public:
 	inline bool isAllowMask() const { return !isSpecial() || m_info->m_value == FOR_EVERY; }//マスク操作可能なログカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
 	inline category_type value() const { return m_info->m_value; }//ログカテゴリの値取得
 	inline const char* name() const { return m_info->m_name; }//名前取得
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール取得
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){ m_info->m_consoles[purpose] = console; }//コンソール変更
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole& console){ m_info->m_consoles[purpose] = &console; }//コンソール変更
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return m_info->m_consoles[purpose]; }//コンソール取得
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){ m_info->m_consoles[purpose] = console; }//コンソール変更
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole& console){ m_info->m_consoles[purpose] = &console; }//コンソール変更
 public:
 	//ムーブオペレータ
 	inline logCategory& operator=(logCategory&& rhs);
@@ -164,9 +164,9 @@ public:
 	inline bool isAllowMask() const { return false; }//マスク操作可能なログカテゴリか？（通常カテゴリ＋全体マスク操作用カテゴリ）
 	inline category_type value() const { return 0; }//ログカテゴリの値取得
 	inline const char* name() const { return ""; }//名前取得
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return const_cast<GASHA_ IConsole*>(&m_console); }//コンソール取得
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){}//コンソール変更
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole& console){}//コンソール変更
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return const_cast<GASHA_ iConsole*>(&m_console); }//コンソール取得
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){}//コンソール変更
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole& console){}//コンソール変更
 public:
 	inline logCategory& operator=(logCategory&& rhs){ return *this; }//ムーブオペレータ
 	inline logCategory& operator=(const logCategory& rhs){ return *this; }//コピーオペレータ
@@ -177,7 +177,7 @@ public:
 	inline logCategory(){}//デフォルトコンストラクタ
 	inline ~logCategory(){}//デストラクタ
 private:
-	IConsole m_console;//ダミーコンソール
+	iConsole m_console;//ダミーコンソール
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
@@ -545,10 +545,10 @@ public:
 	//関数オペレータ
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 	inline bool operator()(const char* name);
-	inline bool operator()(const char* name, IConsole* (&consoles)[logCategory::PURPOSE_NUM]);
+	inline bool operator()(const char* name, iConsole* (&consoles)[logCategory::PURPOSE_NUM]);
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 	inline bool operator()(const char* name){ return true; }
-	inline bool operator()(const char* name, IConsole* (&consoles)[logCategory::PURPOSE_NUM]){ return true; }
+	inline bool operator()(const char* name, iConsole* (&consoles)[logCategory::PURPOSE_NUM]){ return true; }
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 

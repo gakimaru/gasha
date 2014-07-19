@@ -53,7 +53,7 @@ inline void logWorkBuff::pause()
 //一時停止から再開
 inline void logWorkBuff::resume()
 {
-	m_pause.store(true);//一時停止解除
+	m_pause.store(false);//一時停止解除
 }
 
 //spprintf

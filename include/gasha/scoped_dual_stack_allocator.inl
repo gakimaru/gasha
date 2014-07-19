@@ -235,11 +235,11 @@ inline void scopedDualStackAllocator<ALLOCATOR>::clearOrd(const allocationOrder_
 template<class ALLOCATOR>
 std::size_t scopedDualStackAllocator<ALLOCATOR>::debugInfo(char* message, const std::size_t max_size) const
 {
-	std::size_t size = 0;
-	GASHA_ spprintf(message, max_size, size, "----- Debug-info for scopedDualStackAllocator -----\n");
-	GASHA_ spprintf(message, max_size, size, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
-	GASHA_ spprintf(message, max_size, size, "---------------------------------------------------\n");
-	return size;
+	std::size_t message_len = 0;
+	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for scopedDualStackAllocator -----\n");
+	GASHA_ spprintf(message, max_size, message_len, "maxSize=%d, size=%d(ASC=%d,DESC=%d), remain=%d, count=%d(ASC=%d,DESC=%d), order=%s (INIT: buff=%p, order=%s, size=%d(ASC=%d,DESC=%d), count=%d(ASC=%d,DESC=%d))\n", maxSize(), this->size(), sizeAsc(), sizeDesc(), remain(), count(), countAsc(), countDesc(), allocationOrder() == ALLOC_ASC ? "ASC" : "DESC", m_allocator.buff(), m_initAllocateOrder == ALLOC_ASC ? "ASC" : "DESC", m_initSizeAsc + m_initSizeDesc, m_initSizeAsc, m_initSizeDesc, m_initCountAsc + m_initCountDesc, m_initCountAsc, m_initCountDesc);
+	GASHA_ spprintf(message, max_size, message_len, "---------------------------------------------------");//最終行改行なし
+	return message_len;
 }
 
 //コンストラクタ

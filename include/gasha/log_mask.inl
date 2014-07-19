@@ -16,6 +16,8 @@
 
 #include <gasha/log_mask.h>//ログレベルマスク【宣言部】
 
+#include <gasha/call_point.h>//コールポイント
+
 #include <cstring>//std::memcpy()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -30,11 +32,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //イテレータ
 
 //コンソール
-inline const GASHA_ IConsole* logMask::iterator::console(const logMask::purpose_type purpose, const logMask::level_type level) const
+inline const GASHA_ iConsole* logMask::iterator::console(const logMask::purpose_type purpose, const logMask::level_type level) const
 {
 	return m_logMask->console(purpose, level, m_logCategory);
 }
-inline GASHA_ IConsole* logMask::iterator::console(const logMask::purpose_type purpose, const logMask::level_type level)
+inline GASHA_ iConsole* logMask::iterator::console(const logMask::purpose_type purpose, const logMask::level_type level)
 {
 	return m_logMask->console(purpose, level, m_logCategory);
 }
@@ -87,11 +89,11 @@ inline logMask::iterator::~iterator()
 //リバースイテレータ
 
 //コンソール
-inline const GASHA_ IConsole* logMask::reverse_iterator::console(const logMask::purpose_type purpose, const logMask::level_type level) const
+inline const GASHA_ iConsole* logMask::reverse_iterator::console(const logMask::purpose_type purpose, const logMask::level_type level) const
 {
 	return m_logMask->console(purpose, level, m_logCategory);
 }
-inline GASHA_ IConsole* logMask::reverse_iterator::console(const logMask::purpose_type purpose, const logMask::level_type level)
+inline GASHA_ iConsole* logMask::reverse_iterator::console(const logMask::purpose_type purpose, const logMask::level_type level)
 {
 	return m_logMask->console(purpose, level, m_logCategory);
 }
@@ -156,6 +158,16 @@ inline logMask::level_type logMask::level(const logMask::purpose_type purpose, c
 {
 	if (category < CATEGORY_MIN || category > CATEGORY_MAX)
 		return LEVEL_MIN;//無効なカテゴリの場合、最も低いログレベルを返す
+	logMask::category_type _category = category;
+	if (_category == GASHA_ forCallPoint || _category == GASHA_ forCriticalCallPoint)
+	{
+		GASHA_ callPoint cp;
+		const GASHA_ callPoint* recent_cp = ((_category == GASHA_ forCriticalCallPoint) ? cp.findCritical() : cp.find());
+		if (!recent_cp)
+			_category = GASHA_ forAny;
+		else
+			_category = recent_cp->category();
+	}
 	return m_maskRef->m_level[purpose][category];
 }
 
@@ -173,32 +185,32 @@ inline bool logMask::isEnableLevel(const logMask::purpose_type purpose, const lo
 
 
 //コンソール取得
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
+inline GASHA_ iConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
 {
-	GASHA_ IConsole* console_obj = category.console(purpose);
+	GASHA_ iConsole* console_obj = category.console(purpose);
 	if (console_obj)
 		return console_obj;
 	return level.console(purpose);
 }
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category) const
+inline GASHA_ iConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category) const
 {
 	GASHA_ logLevel level_obj(level);
 	GASHA_ logCategory category_obj(category);
 	return console(purpose, level_obj, category_obj);
 }
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category)
+inline GASHA_ iConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category)
 {
-	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
+	return const_cast<GASHA_ iConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
 }
-inline GASHA_ IConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category)
+inline GASHA_ iConsole* logMask::console(const logMask::purpose_type purpose, const logMask::level_type level, const logMask::category_type category)
 {
-	return const_cast<GASHA_ IConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
+	return const_cast<GASHA_ iConsole*>(const_cast<const logMask*>(this)->console(purpose, level, category));
 }
 
 //コンソールカラー取得 
 inline const GASHA_ consoleColor* logMask::color(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
 {
-	const GASHA_ IConsole* console_obj = console(purpose, level, category);
+	const GASHA_ iConsole* console_obj = console(purpose, level, category);
 	if (!console_obj)
 		return nullptr;
 	return &level.color(purpose);

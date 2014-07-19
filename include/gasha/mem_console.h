@@ -34,7 +34,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリコンソールクラス
 
 template<std::size_t _BUFF_SIZE, class LOCK_TYPE = GASHA_ dummySharedLock>
-class memConsole : public GASHA_ IConsole
+class memConsole : public GASHA_ iConsole
 {
 public:
 	//型
@@ -87,7 +87,7 @@ public:
 	void resetColor() override;
 
 	//出力先が同じか判定
-	bool isSame(const IConsole* rhs) const override;
+	bool isSame(const iConsole* rhs) const override;
 
 	//バッファをクリア
 	void clear();
@@ -134,7 +134,7 @@ public:
 	inline void changeColor(GASHA_ consoleColor&& color){}//カラー変更
 	inline void changeColor(const GASHA_ consoleColor& color){}//カラー変更
 	inline void resetColor(){}//カラーリセット
-	inline bool isSame(const IConsole* rhs) const{ return true; }//出力先が同じか判定
+	inline bool isSame(const iConsole* rhs) const{ return true; }//出力先が同じか判定
 	inline void clear(){}//バッファをクリア
 	inline std::size_t size(){ return 0; }//現在バッファリングされているサイズを取得
 	inline std::size_t copy(char* dst, const std::size_t max_size){ return 0; }//バッファをコピー

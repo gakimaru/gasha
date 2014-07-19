@@ -58,7 +58,8 @@ struct debugAllocationInfo
 #ifdef GASHA_DEBUG_FEATURE_IS_ENABLED
 	const char* m_fileName;//呼び出し元ソースファイル名
 	const char* m_funcName;//呼び出し元関数名
-	const char* m_callPointName;//コールポイント名
+	const char* m_cpName;//コールポイント名
+	const char* m_criticalCpName;//重大コールポイント名
 	GASHA_ time_type m_time;//プログラム経過時間
 	const char* m_typeName;//型名
 	std::size_t m_typeSize;//型のサイズ
@@ -66,7 +67,7 @@ struct debugAllocationInfo
 #endif//GASHA_DEBUG_FEATURE_IS_ENABLED
 
 	//コンストラクタ
-	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
+	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* cp_name, const char* critical_cp_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
 };
 
 //--------------------
@@ -84,16 +85,16 @@ enum deleteMethod_type//delete時の状況
 struct debugAllocationObserver
 {
 	//new時のコールバック関数
-	std::function<void(const IAllocatorAdapter& adapter, const void* p, std::size_t size, std::size_t align, const newMethod_type method, const debugAllocationInfo* info)> m_atNew;
+	std::function<void(const iAllocatorAdapter& adapter, const void* p, std::size_t size, std::size_t align, const newMethod_type method, const debugAllocationInfo* info)> m_atNew;
 	
 	//delete時のコールバック関数
-	std::function<void(const IAllocatorAdapter& adapter, const void* p, const deleteMethod_type method, const debugAllocationInfo* info)> m_atDelete;
+	std::function<void(const iAllocatorAdapter& adapter, const void* p, const deleteMethod_type method, const debugAllocationInfo* info)> m_atDelete;
 	
 	//アロケータアダプター変更時のコールバック関数 
-	std::function<void(const IAllocatorAdapter& adapter, const IAllocatorAdapter& next_adapter)> m_atChangeAllocator;
+	std::function<void(const iAllocatorAdapter& adapter, const iAllocatorAdapter& next_adapter)> m_atChangeAllocator;
 
 	//アロケータアダプター復帰時のコールバック関数 
-	std::function<void(const IAllocatorAdapter& adapter, const IAllocatorAdapter& prev_adapter)> m_atReturnAllocator;
+	std::function<void(const iAllocatorAdapter& adapter, const iAllocatorAdapter& prev_adapter)> m_atReturnAllocator;
 
 	//コンストラクタ
 	inline debugAllocationObserver();
@@ -128,20 +129,20 @@ public:
 	//アクセッサ
 	inline const char* name() const;//アロケータ名
 	inline const char* mode() const;//アロケータの実装モード名
-	inline const GASHA_ IAllocatorAdapter* adapter() const;//アダプター
-	inline GASHA_ IAllocatorAdapter* adapter();//アダプター
+	inline const GASHA_ iAllocatorAdapter* adapter() const;//アダプター
+	inline GASHA_ iAllocatorAdapter* adapter();//アダプター
 
 public:
 	//オペレータ
-	inline const GASHA_ IAllocatorAdapter& operator*() const;
-	inline GASHA_ IAllocatorAdapter& operator*();
-	inline const GASHA_ IAllocatorAdapter* operator->() const;
-	inline GASHA_ IAllocatorAdapter* operator->();
+	inline const GASHA_ iAllocatorAdapter& operator*() const;
+	inline GASHA_ iAllocatorAdapter& operator*();
+	inline const GASHA_ iAllocatorAdapter* operator->() const;
+	inline GASHA_ iAllocatorAdapter* operator->();
 
 public:
 	//キャストオペレータ
-	inline operator const GASHA_ IAllocatorAdapter&() const;
-	inline operator GASHA_ IAllocatorAdapter&();
+	inline operator const GASHA_ iAllocatorAdapter&() const;
+	inline operator GASHA_ iAllocatorAdapter&();
 
 public:
 	//デバッグ観察者を変更
@@ -166,8 +167,8 @@ private:
 	//コールバック
 	void callbackAtNew(void *p, std::size_t size, const GASHA_ newMethod_type method);
 	void callbackAtDelete(void *p, const GASHA_ deleteMethod_type method);
-	void callbackAtChangeAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& next_adapter);//アロケータアダプター変更時のコールバック
-	void callbackAtReturnAllocator(const GASHA_ IAllocatorAdapter& adapter, const GASHA_ IAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
+	void callbackAtChangeAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& next_adapter);//アロケータアダプター変更時のコールバック
+	void callbackAtReturnAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
 
 public:
 	//標準アロケータアダプターの強制初期化
@@ -176,7 +177,7 @@ public:
 
 public:
 	//コンストラクタ
-	inline polyAllocator(GASHA_ IAllocatorAdapter& adapter);
+	inline polyAllocator(GASHA_ iAllocatorAdapter& adapter);
 	//デフォルトコンストラクタ
 	//※現在設定されているアダプター、および、観察者を扱う。
 	inline polyAllocator();
@@ -186,18 +187,18 @@ public:
 private:
 	//フィールド
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
-	GASHA_ IAllocatorAdapter* m_prevAdapter;//変更前のアロケータ
+	GASHA_ iAllocatorAdapter* m_prevAdapter;//変更前のアロケータ
 	const GASHA_ debugAllocationObserver* m_prevObserver;//変更前の観察者
 	bool m_isChanged;//アロケータ変更時
 	//静的フィールド
 	static GASHA_ stdAllocator<> m_stdAllocator;//標準アロケータ
 	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプター
-	thread_local static GASHA_ IAllocatorAdapter* m_adapter;//現在のアロケータアダプター
+	thread_local static GASHA_ iAllocatorAdapter* m_adapter;//現在のアロケータアダプター
 	thread_local static const GASHA_ debugAllocationObserver* m_observer;//現在の観察者
 	thread_local static std::size_t m_align;//現在のアラインメントサイズ（一時利用のみ）
 	thread_local static const GASHA_ debugAllocationInfo* m_debugInfo;//現在のデバッグ情報（一時利用のみ）
 #else//GASHA_ENABLE_POLY_ALLOCATOR
-	static GASHA_ IAllocatorAdapter* m_dummyAdapter;//アロケータアダプターダミー
+	static GASHA_ iAllocatorAdapter* m_dummyAdapter;//アロケータアダプターダミー
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 };
 

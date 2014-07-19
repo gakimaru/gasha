@@ -22,7 +22,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //アロケータアダプターインターフェースクラス
 //※アロケータの実装を隠ぺいして、アロケータを共通利用できるようにするためのインターフェース。
-class IAllocatorAdapter
+class iAllocatorAdapter
 {
 public:
 	//型
@@ -65,7 +65,7 @@ public:
 
 public:
 	//デストラクタ
-	virtual ~IAllocatorAdapter()
+	virtual ~iAllocatorAdapter()
 	{}
 };
 

@@ -37,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_USE_VS_CONSOLE
 //Visual Studio出力ウインドウクラス有効時
-class vsConsole : public GASHA_ IConsole
+class vsConsole : public GASHA_ iConsole
 {
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
@@ -69,7 +69,7 @@ public:
 	void resetColor() override;
 
 	//出力先が同じか判定
-	bool isSame(const IConsole* rhs) const override;
+	bool isSame(const iConsole* rhs) const override;
 
 public:
 	//コンストラクタ
@@ -95,7 +95,7 @@ public:
 	inline void changeColor(GASHA_ consoleColor&& color){}//カラー変更
 	inline void changeColor(const GASHA_ consoleColor& color){}//カラー変更
 	inline void resetColor(){}//カラーリセット
-	inline bool isSame(const IConsole* rhs) const{ return true; }//出力先が同じか判定
+	inline bool isSame(const iConsole* rhs) const{ return true; }//出力先が同じか判定
 public:
 	inline vsConsole(const char* name = nullptr){}//コンストラクタ
 	inline ~vsConsole(){}//デストラクタ

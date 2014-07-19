@@ -17,7 +17,8 @@
 #include <gasha/new.h>//多態アロケータ対応標準new/delete【宣言部】
 
 #include <gasha/poly_allocator.h>//多態アロケータ
-#include <gasha/chrono.h>//時間処理系ユーティリティ
+#include <gasha/call_point.h>//コールポイント
+#include <gasha/chrono.h>//時間処理ユーティリティ
 
 #include <utility>//C++11 std::forward
 
@@ -44,14 +45,36 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	//--------------------
+	//コールポイント名取得
+	inline void getCallpointName(const char*& cp_name, const char*& critical_cp_name)
+	{
+		GASHA_ callPoint cp;
+		const GASHA_ callPoint* recent_cp = cp.find();
+		if (recent_cp)
+		{
+			cp_name = recent_cp->name();
+			if (recent_cp->type() == GASHA_ callPoint::isCritical)
+				critical_cp_name = cp_name;
+			else
+			{
+				recent_cp = cp.findCritical();
+				if (recent_cp)
+					critical_cp_name = recent_cp->name();
+			}
+		}
+	}
+
+	//--------------------
 	//アライメント＋デバッグ情報付き new
 	template<class T>
 	template<typename... Tx>
 	T* newFunctor<T>::operator()(Tx&& ...nx) const
 	{
-		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
+		const char* cp_name = nullptr;//コールポイント名
+		const char* critical_cp_name = nullptr;//重大コールポイント名
+		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
 		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
-		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
+		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
 		allocator.setDebugInfo(&info);//デバッグ情報
@@ -69,9 +92,11 @@ namespace _private
 	template<class T, std::size_t N>
 	T* newFunctor<T[N]>::operator()() const
 	{
-		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
+		const char* cp_name = nullptr;//コールポイント名
+		const char* critical_cp_name = nullptr;//重大コールポイント名
+		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
 		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
-		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), N);//デバッグ情報生成
+		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), N);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
 		allocator.setDebugInfo(&info);//デバッグ情報
@@ -91,9 +116,11 @@ namespace _private
 	template<typename T>
 	void deleteFunctor::operator()(T* p) const
 	{
-		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
+		const char* cp_name = nullptr;//コールポイント名
+		const char* critical_cp_name = nullptr;//重大コールポイント名
+		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
 		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
-		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
+		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete p;//メモリ破棄
 		GASHA_ polyAllocator::resetDebugInfo();//デバッグ情報リセット
@@ -106,9 +133,11 @@ namespace _private
 	template<typename T>
 	void deleteArrayFunctor::operator()(T* p) const
 	{
-		const char* call_point_name = nullptr;// getCurrentCallPointNameDummy();//コールポイント名取得
+		const char* cp_name = nullptr;//コールポイント名
+		const char* critical_cp_name = nullptr;//重大コールポイント名
+		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
 		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
-		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, call_point_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
+		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete[] p;//メモリ破棄
 		GASHA_ polyAllocator::resetDebugInfo();//デバッグ情報リセット

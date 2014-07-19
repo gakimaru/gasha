@@ -27,7 +27,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
-//キューイング予約
+//エンキュー予約
 inline logQueue::id_type logQueue::reserve(const int num)
 {
 	id_type id = m_id.fetch_add(num);
@@ -67,7 +67,7 @@ inline void logQueue::pause()
 //一時停止から再開
 inline void logQueue::resume()
 {
-	m_pause.store(true);//一時停止解除
+	m_pause.store(false);//一時停止解除
 }
 
 //明示的な初期化用コンストラクタ

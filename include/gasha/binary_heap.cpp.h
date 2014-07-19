@@ -562,7 +562,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　通常、テンプレートクラス／関数の同じ型のインスタンスが複数作られても、リンク時に一つにまとめられるため問題がない。
 // 　しかし、一つのソースファイルの中で複数のインスタンスが生成されると、コンパイラによってはエラーになる。
 //   GCCの場合のエラーメッセージ例：（VC++ではエラーにならない）
-// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class gasha::templateClass<>’ [-fpermissive]
+// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class templateClass<>’ [-fpermissive]
 //
 //【対策１】
 // 　別のファイルに分けてインスタンス化する。

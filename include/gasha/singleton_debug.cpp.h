@@ -98,21 +98,21 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebu
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 {
-	std::size_t size = 0;
-	GASHA_ spprintf(message, max_size, size, "----- Debug-info for singletonDebug -----\n");
-	GASHA_ spprintf(message, max_size, size, "Accessing Count: %d\n", m_accessCount.load());
-	GASHA_ spprintf(message, max_size, size, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
-	GASHA_ spprintf(message, max_size, size, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
+	std::size_t message_len = 0;
+	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for singletonDebug -----\n");
+	GASHA_ spprintf(message, max_size, message_len, "Accessing Count: %d\n", m_accessCount.load());
+	GASHA_ spprintf(message, max_size, message_len, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
+	GASHA_ spprintf(message, max_size, message_len, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
 	{
 		auto lock = m_list.lockSharedScoped();
-		GASHA_ spprintf(message, max_size, size, "Access Info: (Count=%d)\n", m_list.size());
+		GASHA_ spprintf(message, max_size, message_len, "Access Info: (Count=%d)\n", m_list.size());
 		for (auto& info : m_list)
 		{
-			GASHA_ spprintf(message, max_size, size, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
+			GASHA_ spprintf(message, max_size, message_len, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
-	GASHA_ spprintf(message, max_size, size, "-----------------------------------------\n");
-	return size;
+	GASHA_ spprintf(message, max_size, message_len, "-----------------------------------------");//最終行改行なし
+	return message_len;
 }
 
 //コンストラクタ
@@ -196,7 +196,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　通常、テンプレートクラス／関数の同じ型のインスタンスが複数作られても、リンク時に一つにまとめられるため問題がない。
 // 　しかし、一つのソースファイルの中で複数のインスタンスが生成されると、コンパイラによってはエラーになる。
 //   GCCの場合のエラーメッセージ例：（VC++ではエラーにならない）
-// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class gasha::templateClass<>’ [-fpermissive]
+// 　  source_file.cpp.h:114:17: エラー: duplicate explicit instantiation of ‘class templateClass<>’ [-fpermissive]
 //
 //【対策１】
 // 　別のファイルに分けてインスタンス化する。

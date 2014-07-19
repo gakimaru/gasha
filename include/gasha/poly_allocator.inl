@@ -26,17 +26,18 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //コンストラクタ
 #ifdef GASHA_DEBUG_FEATURE_IS_ENABLED
-inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* cp_name, const char* critical_cp_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num) :
 	m_fileName(file_name),
 	m_funcName(func_name),
-	m_callPointName(call_point_name),
+	m_cpName(cp_name),
+	m_criticalCpName(critical_cp_name),
 	m_time(time),
 	m_typeName(type_name),
 	m_typeSize(type_size),
 	m_arrayNum(array_num)
 {}
 #else//GASHA_DEBUG_FEATURE_IS_ENABLED
-inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* call_point_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
+inline debugAllocationInfo::debugAllocationInfo(const char* file_name, const char* func_name, const char* cp_name, const char* critical_cp_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num)
 {}
 #endif//GASHA_DEBUG_FEATURE_IS_ENABLED
 
@@ -59,36 +60,36 @@ debugAllocationObserver::debugAllocationObserver():
 //アクセッサ
 inline const char* polyAllocator::name() const{ return m_adapter->name(); };//アロケータ名
 inline const char* polyAllocator::mode() const{ return m_adapter->mode(); };//アロケータの実装モード名
-inline const GASHA_ IAllocatorAdapter* polyAllocator::adapter() const{ return m_adapter; };//アダプター
-inline GASHA_ IAllocatorAdapter* polyAllocator::adapter(){ return m_adapter; };//アダプター
+inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return m_adapter; };//アダプター
+inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return m_adapter; };//アダプター
 
 //オペレータ
-inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_adapter; }
-inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_adapter; }
-inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return m_adapter; }
-inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return m_adapter; }
+inline const GASHA_ iAllocatorAdapter& polyAllocator::operator*() const { return *m_adapter; }
+inline GASHA_ iAllocatorAdapter& polyAllocator::operator*(){ return *m_adapter; }
+inline const GASHA_ iAllocatorAdapter* polyAllocator::operator->() const { return m_adapter; }
+inline GASHA_ iAllocatorAdapter* polyAllocator::operator->(){ return m_adapter; }
 
 //キャストオペレータ
-inline polyAllocator::operator const GASHA_ IAllocatorAdapter&() const { return *m_adapter; }
-inline polyAllocator::operator GASHA_ IAllocatorAdapter&() { return *m_adapter; }
+inline polyAllocator::operator const GASHA_ iAllocatorAdapter&() const { return *m_adapter; }
+inline polyAllocator::operator GASHA_ iAllocatorAdapter&() { return *m_adapter; }
 
 #else//GASHA_ENABLE_POLY_ALLOCATOR
 
 //アクセッサ
 inline const char* polyAllocator::name() const{ return ""; };//アロケータ名
 inline const char* polyAllocator::mode() const{ return ""; };//アロケータの実装モード名
-inline const GASHA_ IAllocatorAdapter* polyAllocator::adapter() const{ return nullptr; };//アダプター
-inline GASHA_ IAllocatorAdapter* polyAllocator::adapter(){ return nullptr; };//アダプター
+inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return nullptr; };//アダプター
+inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return nullptr; };//アダプター
 
 //オペレータ
-inline const GASHA_ IAllocatorAdapter& polyAllocator::operator*() const { return *m_dummyAdapter; }
-inline GASHA_ IAllocatorAdapter& polyAllocator::operator*(){ return *m_dummyAdapter; }
-inline const GASHA_ IAllocatorAdapter* polyAllocator::operator->() const { return nullptr; }
-inline GASHA_ IAllocatorAdapter* polyAllocator::operator->(){ return nullptr; }
+inline const GASHA_ iAllocatorAdapter& polyAllocator::operator*() const { return *m_dummyAdapter; }
+inline GASHA_ iAllocatorAdapter& polyAllocator::operator*(){ return *m_dummyAdapter; }
+inline const GASHA_ iAllocatorAdapter* polyAllocator::operator->() const { return nullptr; }
+inline GASHA_ iAllocatorAdapter* polyAllocator::operator->(){ return nullptr; }
 
 //キャストオペレータ
-inline polyAllocator::operator const GASHA_ IAllocatorAdapter&() const { return *m_dummyAdapter; }
-inline polyAllocator::operator GASHA_ IAllocatorAdapter&() { return *m_dummyAdapter; }
+inline polyAllocator::operator const GASHA_ iAllocatorAdapter&() const { return *m_dummyAdapter; }
+inline polyAllocator::operator GASHA_ iAllocatorAdapter&() { return *m_dummyAdapter; }
 
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 
@@ -168,7 +169,7 @@ inline void polyAllocator::resetDebugInfo()
 
 //コンストラクタ
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
-inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter) :
+inline polyAllocator::polyAllocator(GASHA_ iAllocatorAdapter& adapter) :
 	m_prevAdapter(m_adapter),
 	m_prevObserver(m_observer),
 	m_isChanged(true)
@@ -182,7 +183,7 @@ inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter) :
 	m_observer = nullptr;
 }
 #else//GASHA_ENABLE_POLY_ALLOCATOR
-inline polyAllocator::polyAllocator(GASHA_ IAllocatorAdapter& adapter)
+inline polyAllocator::polyAllocator(GASHA_ iAllocatorAdapter& adapter)
 {}
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 

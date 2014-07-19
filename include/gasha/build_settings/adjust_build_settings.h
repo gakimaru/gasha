@@ -34,16 +34,32 @@
 #endif//GASHA_LOG_IS_ENABLED
 
 //--------------------------------------------------------------------------------
-//【全体設定：TLS設定】
+//【全体設定：TLS】
 
 //MAC OS Xなど、TLSの初期化ができない環境では、TLSの初期化が不完全であることを明示する
-//【予約処理】現時点で、GASHAは MAX OS X に対応していないが、対応に備えた処理として記述しておく
+//【注】現時点で、GASHAは MAX OS X に対応していないが、対応に備えた処理として記述しておく
 #if !defined(GASHA_INCOMPLETE_TLS_INITIALIZER) && defined(GASHA_IS_MAXOSX)
 	#define GASHA_INCOMPLETE_TLS_INITIALIZER
 #endif//GASHA_INCOMPLETE_TLS_INITIALIZER
 
 //--------------------------------------------------------------------------------
-//【全体設定：SSE命令設定】
+//【全体設定：標準入出力】
+
+//標準入力が使用できない環境では、標準入力を無効化する
+//#if defined(GASHA_STDIN_IS_AVAILABLE) && defined(***IS_GAME_PLATFORM***)
+//	#undef GASHA_STDIN_IS_AVAILABLE
+//#endif//GASHA_STDIN_IS_AVAILABLE
+
+//--------------------------------------------------------------------------------
+//【全体設定：デバッガ用ブレークポイント】
+
+//デバッガ用ブレークポイントは、ビルド構成でアサーションが有効でなければ、もしくは、開発ツールが有効でなければ無効化する
+#if defined(GASHA_DEBUGGER_BREAK_IS_AVAILABLE) && (!defined(GASHA_ASSERTION_IS_ENABLED) || !defined(GASHA_DEV_TOOLS_IS_AVAILABLE))
+	#undef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+
+//--------------------------------------------------------------------------------
+//【全体設定：SSE命令】
 
 #ifdef GASHA_IS_X86//x86,x64系CPUの場合のみ設定可
 

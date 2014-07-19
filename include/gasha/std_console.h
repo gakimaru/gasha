@@ -39,7 +39,7 @@ class stdOutConsole : public GASHA_ winConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdOutConsole& instance(){ return s_instance; }
+	inline static stdOutConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -49,7 +49,7 @@ public:
 
 private:
 	//静的フィールド
-	static stdOutConsole s_instance;
+	static stdOutConsole m_instance;
 };
 
 //----------------------------------------
@@ -59,7 +59,7 @@ class stdErrConsole : public GASHA_ winConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdErrConsole& instance(){ return s_instance; }
+	inline static stdErrConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -69,34 +69,54 @@ public:
 
 private:
 	//静的フィールド
-	static stdErrConsole s_instance;
+	static stdErrConsole m_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
-//※Windowsコマンドプロンプトに委譲
-class stdConsoleOfNotice : public GASHA_ winConsole
+//※内部でWindowsコマンドプロンプトを使用（そのため、標準エラーのWindowsコマンドプロンプトと比較判定すると一致することに注意）
+//※改行までしか出力しない。
+class stdNoticeConsole : public GASHA_ winConsole
 {
-#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
-public:
-	//出力終了
-	//※フラッシュ可能な状態
-	void end() override;
-#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
-
 public:
 	//静的アクセッサ
-	inline static stdConsoleOfNotice& instance(){ return s_instance; }
+	inline static stdNoticeConsole& instance(){ return m_instance; }
+
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
+public:
+	//出力開始
+	void begin() override;
+	//出力終了
+	void end() override;
+	//出力
+	void put(const char* str) override;
+	//改行出力
+	void putCr() override;
+	//カラー変更
+	void changeColor(GASHA_ consoleColor&& color) override;
+public:
+	//コンストラクタ
+	inline stdNoticeConsole() :
+		winConsole(stderr, "Win(stderr)"),
+		m_idAlreadyCr(false)
+	{}
+private:
+	bool m_idAlreadyCr;//改行出力済み
+
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 
 public:
 	//コンストラクタ
-	inline stdConsoleOfNotice() :
+	inline stdNoticeConsole() :
 		winConsole(stderr, "Win(stderr)")
 	{}
 
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
 private:
 	//静的フィールド
-	static stdConsoleOfNotice s_instance;
+	static stdNoticeConsole m_instance;
 };
 
 #else//GASHA_USE_WINDOWS_CONSOLE
@@ -108,7 +128,7 @@ class stdOutConsole : public GASHA_ ttyConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdOutConsole& instance(){ return s_instance; }
+	inline static stdOutConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -118,7 +138,7 @@ public:
 
 private:
 	//静的フィールド
-	static stdOutConsole s_instance;
+	static stdOutConsole m_instance;
 };
 
 //----------------------------------------
@@ -128,7 +148,7 @@ class stdErrConsole : public GASHA_ ttyConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdErrConsole& instance(){ return s_instance; }
+	inline static stdErrConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -138,34 +158,55 @@ public:
 
 private:
 	//静的フィールド
-	static stdErrConsole s_instance;
+	static stdErrConsole m_instance;
 };
 
 //----------------------------------------
 //画面通知用標準コンソール
-//※TTY端末に委譲
-class stdConsoleOfNotice : public GASHA_ ttyConsole
+//※内部でTTY端末を使用（そのため、標準エラーのTTY端末と比較判定すると一致することに注意）
+//※改行までしか出力しない。
+class stdNoticeConsole : public GASHA_ ttyConsole
 {
-#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
-public:
-	//出力終了
-	//※フラッシュ可能な状態
-	void end() override;
-#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
-
 public:
 	//静的アクセッサ
-	inline static stdConsoleOfNotice& instance(){ return s_instance; }
+	inline static stdNoticeConsole& instance(){ return m_instance; }
+
+#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 
 public:
+	//出力開始
+	void begin() override;
+	//出力終了
+	void end() override;
+	//出力
+	void put(const char* str) override;
+	//改行出力
+	void putCr() override;
+	//カラー変更
+	void changeColor(GASHA_ consoleColor&& color) override;
+public:
 	//コンストラクタ
-	inline stdConsoleOfNotice():
-		ttyConsole(stderr, "TTY(stderr)")
+	inline stdNoticeConsole():
+		ttyConsole(stderr, "TTY(stderr)"),
+		m_idAlreadyCr(false)
 	{}
 
 private:
+	bool m_idAlreadyCr;//改行出力済み
+
+#else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
+public:
+	//コンストラクタ
+	inline stdNoticeConsole():
+		ttyConsole(stderr, "TTY(stderr)")
+	{}
+
+#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
+
+private:
 	//静的フィールド
-	static stdConsoleOfNotice s_instance;
+	static stdNoticeConsole m_instance;
 };
 
 #endif//GASHA_USE_WINDOWS_CONSOLE
@@ -177,7 +218,7 @@ class stdMemConsole : public GASHA_ memConsole<GASHA_STD_MEM_CONSOLE_BUFF_SIZE>
 {
 public:
 	//静的アクセッサ
-	inline static stdMemConsole& instance(){ return s_instance; }
+	inline static stdMemConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -187,7 +228,7 @@ public:
 
 private:
 	//静的フィールド
-	static stdMemConsole s_instance;
+	static stdMemConsole m_instance;
 };
 
 //----------------------------------------
@@ -196,7 +237,7 @@ class stdDummyConsole : public GASHA_ dummyConsole
 {
 public:
 	//静的アクセッサ
-	inline static stdDummyConsole& instance(){ return s_instance; }
+	inline static stdDummyConsole& instance(){ return m_instance; }
 
 public:
 	//コンストラクタ
@@ -206,7 +247,7 @@ public:
 
 private:
 	//静的フィールド
-	static stdDummyConsole s_instance;
+	static stdDummyConsole m_instance;
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

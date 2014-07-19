@@ -65,7 +65,7 @@ inline logPrintInfo::logPrintInfo(const logPrintInfo& obj)
 }
 
 //コンストラクタ
-inline logPrintInfo::logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
+inline logPrintInfo::logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ iConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]) :
 	m_id(id),
 	m_time(nowElapsedTime()),
 	m_message(message),

@@ -21,7 +21,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※アロケータの実装を隠ぺいして、共通インターフェースでアロケータを利用できるようにする。
 //※既存のアロケータをコンストラクタで受け渡して使用する。
 template<class ALLOCATOR>
-class allocatorAdapter : public IAllocatorAdapter
+class allocatorAdapter : public iAllocatorAdapter
 {
 public:
 	//型

@@ -229,7 +229,7 @@ inline bool regLogCategory<_CATEGORY>::operator()(const char* name)
 	return logCategoryContainer::regist(info);
 }
 template<unsigned char _CATEGORY>
-inline bool regLogCategory<_CATEGORY>::operator()(const char* name, GASHA_ IConsole* (&consoles)[logCategory::PURPOSE_NUM])
+inline bool regLogCategory<_CATEGORY>::operator()(const char* name, GASHA_ iConsole* (&consoles)[logCategory::PURPOSE_NUM])
 {
 	logCategory::info info =
 	{
@@ -255,7 +255,7 @@ namespace _private
 		static_assert(CATEGORY >= logCategory::NORMAL_MIN && CATEGORY <= logCategory::NORMAL_MAX, "Out of range of normal-log-category");//値の範囲チェック
 	public:
 		//関数オペレータ
-		inline bool operator()(const char* name, GASHA_ IConsole* (&consoles)[logCategory::PURPOSE_NUM])
+		inline bool operator()(const char* name, GASHA_ iConsole* (&consoles)[logCategory::PURPOSE_NUM])
 		{
 			logCategory::info info =
 			{

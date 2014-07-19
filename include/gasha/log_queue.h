@@ -81,16 +81,16 @@ public:
 #endif//GASHA_LOG_QUEUE_NOWAIT
 
 public:
-	//キューイング
-	//※キューイングに成功したら true を返す。
-	//※通常はキューイングが成功するまでリトライを繰り返す。
-	//※GASHA_LOG_QUEUE_NOWAIT が指定されている場合、キュー用のバッファがいっぱいだとキューイングせずに失敗する。
-	//※キューイング待ち時に中断が指定されたら失敗する。
+	//エンキュー
+	//※エンキューに成功したら true を返す。
+	//※通常はエンキューが成功するまでリトライを繰り返す。
+	//※GASHA_LOG_QUEUE_NOWAIT が指定されている場合、キュー用のバッファがいっぱいだとエンキューに失敗する。
+	//※エンキュー待ち時に中断が指定されたら失敗する。
 	//※引数 print_info.m_mesage_size に 0 を指定すると、print_info.m_message の長さを計測する。print_info.m_message には終端を含めたサイズを指定する。
 	//※引数 print_info.m_id には予約したIDを指定する。通常は 0 で、0 を指定すると、キューイングの際にIDを自動発番する。
 	bool enqueue(const logPrintInfo& print_info);
 
-	//キューイング予約
+	//エンキュー予約
 	//※予約数を指定する
 	id_type reserve(const int num);
 
@@ -110,8 +110,8 @@ public:
 	inline void release(logPrintInfo& info);
 
 	//中断
-	//※キューイング待ちがあったら中断させる
-	//※一度中断したら、キューイングを許可しなくなるため、
+	//※エンキュー待ちがあったら中断させる
+	//※一度中断したら、エンキューを許可しなくなるため、
 	//　再度使用するには明示的な初期化が必要
 	inline void abort();
 

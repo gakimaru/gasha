@@ -85,7 +85,7 @@ public:
 	#ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 		GASHA_ logLevel m_level;//ログレベル
 		GASHA_ logCategory m_category;//ログカテゴリ
-		GASHA_ IConsole* m_consoles[PURPOSE_NUM];//コンソール
+		GASHA_ iConsole* m_consoles[PURPOSE_NUM];//コンソール
 		const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//コンソールカラー
 		consolesCondition_type m_cond;//コンソール状態
 	#endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
@@ -132,8 +132,8 @@ public:
 		inline bool isExist() const { return m_logCategory.isExist(); }
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//カテゴリの値
 		inline const GASHA_ logLevel level(const purpose_type purpose) const { return logLevel(m_logMask->level(purpose, m_logCategory)); }//ログレベルマスク
-		inline const GASHA_ IConsole* console(const purpose_type purpose, const level_type level) const;//コンソール取得
-		inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level);//コンソール取得
+		inline const GASHA_ iConsole* console(const purpose_type purpose, const level_type level) const;//コンソール取得
+		inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level);//コンソール取得
 		inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level) const;//コンソールカラー取得
 	private:
 		//インクリメント
@@ -198,8 +198,8 @@ public:
 		inline bool isExist() const { return false; }
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//カテゴリの値
 		inline const GASHA_ logLevel level(const purpose_type purpose) const { return GASHA_ logLevel(); }//ログレベルマスク
-		inline const GASHA_ IConsole* console(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソール取得
-		inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level){ return nullptr; }//コンソール取得
+		inline const GASHA_ iConsole* console(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソール取得
+		inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level){ return nullptr; }//コンソール取得
 		inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソールカラー取得
 	public:
 		//メソッド
@@ -257,8 +257,8 @@ public:
 		inline bool isExist() const { return m_logCategory.isExist(); }
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//カテゴリの値
 		inline const GASHA_ logLevel level(const purpose_type purpose) const { return m_logMask->level(purpose, m_logCategory); }//ログレベルマスク
-		inline const GASHA_ IConsole* console(const purpose_type purpose, const level_type level) const;//コンソール取得
-		inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level);//コンソール取得
+		inline const GASHA_ iConsole* console(const purpose_type purpose, const level_type level) const;//コンソール取得
+		inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level);//コンソール取得
 		inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level) const;//コンソールカラー取得
 	private:
 		//メソッド
@@ -327,8 +327,8 @@ public:
 		inline bool isExist() const { return m_logCategory.isExist(); }
 		inline const GASHA_ logCategory& category() const { return m_logCategory; }//カテゴリの値
 		inline const GASHA_ logLevel level(const purpose_type purpose) const { return GASHA_ logLevel(); }//ログレベルマスク
-		inline const GASHA_ IConsole* console(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソール取得
-		inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level){ return nullptr; }//コンソール取得
+		inline const GASHA_ iConsole* console(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソール取得
+		inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level){ return nullptr; }//コンソール取得
 		inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level) const{ return nullptr; }//コンソールカラー取得
 	public:
 		//メソッド
@@ -381,10 +381,10 @@ public:
 	//コンソール／コンソールカラー取得
 	//※ログカテゴリもしくはログレベルの設定から取得する（ログカテゴリ優先）
 	//※【注意】ログレベルマスクの判定は行っていないので注意
-	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const;//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category) const;//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category);//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category);//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const;//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level, const category_type category) const;//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category);//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level, const category_type category);//コンソール取得
 	inline const GASHA_ consoleColor* color(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const;//コンソールカラー取得
 	inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level, const category_type category) const;//コンソールカラー取得
 	//コンソールとコンソールカラー、ログレベルオブジェクト、ログカテゴリオブジェクトをまとめて取得
@@ -492,10 +492,10 @@ public:
 	inline bool isEnableLevel(const purpose_type purpose, const GASHA_ logLevel& require_level, const category_type category) const{ return false; }//出力可能なログレベルか？
 	inline bool isEnableLevel(const purpose_type purpose, const level_type require_level, const category_type category) const{ return false; }//出力可能なログレベルか？
 	//コンソール／コンソールカラー取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const{ return nullptr; }//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category) const{ return nullptr; }//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category){ return nullptr; }//コンソール取得
-	inline GASHA_ IConsole* console(const purpose_type purpose, const level_type level, const category_type category){ return nullptr; }//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const{ return nullptr; }//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level, const category_type category) const{ return nullptr; }//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category){ return nullptr; }//コンソール取得
+	inline GASHA_ iConsole* console(const purpose_type purpose, const level_type level, const category_type category){ return nullptr; }//コンソール取得
 	inline const GASHA_ consoleColor* color(const purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const{ return nullptr; }//コンソールカラー取得
 	inline const GASHA_ consoleColor* color(const purpose_type purpose, const level_type level, const category_type category) const{ return nullptr; }//コンソールカラー取得
 	//コンソールとコンソールカラー、ログレベルオブジェクト、ログカテゴリオブジェクトをまとめて取得

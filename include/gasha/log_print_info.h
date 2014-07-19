@@ -67,8 +67,8 @@ public:
 	inline void setCategory(const category_type category){ m_category = category; }//ログカテゴリ
 	inline attr_type attr() const { return m_attr; }//ログ属性
 	inline void setAttr(const attr_type attr){ m_attr = attr; }//ログ属性
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return m_consoles[purpose]; }//ログ出力先
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){ m_consoles[purpose] = console; }//ログ出力先
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return m_consoles[purpose]; }//ログ出力先
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){ m_consoles[purpose] = console; }//ログ出力先
 	inline const GASHA_ consoleColor* color(const purpose_type purpose) const { return m_colors[purpose]; }//ログ出力カラー
 	inline void setColor(const purpose_type purpose, const GASHA_ consoleColor* color){ m_colors[purpose] = color; }//ログ出力カラー
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
@@ -86,8 +86,8 @@ public:
 	inline void setCategory(const category_type category){}//ログカテゴリ
 	inline attr_type attr() const { return 0; }//ログ属性
 	inline void setAttr(const attr_type attr){}//ログ属性
-	inline GASHA_ IConsole* console(const purpose_type purpose) const { return nullptr; }//ログ出力先
-	inline void setConsole(const purpose_type purpose, GASHA_ IConsole* console){}//ログ出力先
+	inline GASHA_ iConsole* console(const purpose_type purpose) const { return nullptr; }//ログ出力先
+	inline void setConsole(const purpose_type purpose, GASHA_ iConsole* console){}//ログ出力先
 	inline const GASHA_ consoleColor* color(const purpose_type purpose) const { return nullptr; }//ログ出力カラー
 	inline void setColor(const purpose_type purpose, const GASHA_ consoleColor* color){}//ログ出力カラー
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
@@ -104,7 +104,7 @@ public:
 	//コピーコンストラクタ
 	inline logPrintInfo(const logPrintInfo& obj);
 	//コンストラクタ
-	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ IConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
+	inline logPrintInfo(const id_type id, const char* message, const std::size_t message_size, const attr_type attr, const level_type level, const category_type category, GASHA_ iConsole* (&consoles)[PURPOSE_NUM], const GASHA_ consoleColor* (&colors)[PURPOSE_NUM]);
 	//デフォルトコンストラクタ
 	inline logPrintInfo();
 	//デストラクタ
@@ -120,7 +120,7 @@ private:
 	level_type m_level;//ログレベル
 	category_type m_category;//ログカテゴリ
 	attr_type m_attr;//ログ属性
-	GASHA_ IConsole* m_consoles[PURPOSE_NUM];//ログ出力先
+	GASHA_ iConsole* m_consoles[PURPOSE_NUM];//ログ出力先
 	const GASHA_ consoleColor* m_colors[PURPOSE_NUM];//ログ出力カラー
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 };
