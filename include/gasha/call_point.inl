@@ -42,7 +42,7 @@ inline const char* callPoint::name() const
 	return m_name;
 }
 //コールポイント開始時間
-inline GASHA_ time_type callPoint::beginTime() const
+inline GASHA_ sec_t callPoint::beginTime() const
 {
 	return m_beginTime;
 }
@@ -151,7 +151,7 @@ inline callPoint::callPoint() :
 	m_name(nullptr),
 	m_fileName(nullptr),
 	m_funcName(nullptr),
-	m_beginTime(static_cast<GASHA_ time_type>(0.)),
+	m_beginTime(static_cast<GASHA_ sec_t>(0.)),
 	m_elapsedTime(),
 	m_category(0),
 	m_type(isReference),

@@ -33,9 +33,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //書式付きログ出力
 template<typename... Tx>
-inline bool print(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args)
+inline bool print(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args)
 {
-	GASHA_ log log;
+	GASHA_ debugLog log;
 #ifdef GASHA_LOG_PRINT_USE_QUEUE
 	return log.print(level, category, fmt, std::forward<Tx>(args)...);
 #else//GASHA_LOG_PRINT_USE_QUEUE
@@ -44,9 +44,9 @@ inline bool print(const GASHA_ log::level_type level, const GASHA_ log::category
 }
 
 //書式なしログ出力
-inline bool put(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str)
+inline bool put(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str)
 {
-	GASHA_ log log;
+	GASHA_ debugLog log;
 #ifdef GASHA_LOG_PRINT_USE_QUEUE
 	return log.put(level, category, str);
 #else//GASHA_LOG_PRINT_USE_QUEUE
@@ -57,9 +57,9 @@ inline bool put(const GASHA_ log::level_type level, const GASHA_ log::category_t
 //書式付きログ出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args)
+inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args)
 {
-	GASHA_ log log;
+	GASHA_ debugLog log;
 #ifdef GASHA_LOG_PRINT_USE_QUEUE
 	return log.convPrint(converter_func, level, category, fmt, std::forward<Tx>(args)...);
 #else//GASHA_LOG_PRINT_USE_QUEUE
@@ -70,9 +70,9 @@ inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ log::level_typ
 //書式なしログ出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC>
-inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str)
+inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str)
 {
-	GASHA_ log log;
+	GASHA_ debugLog log;
 #ifdef GASHA_LOG_PRINT_USE_QUEUE
 	return log.convPut(converter_func, level, category, str);
 #else//GASHA_LOG_PRINT_USE_QUEUE
@@ -87,14 +87,14 @@ inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type 
 
 //書式付きログ出力
 template<typename... Tx>
-inline bool print(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args)
+inline bool print(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	//なにもしない
 	return true;//常に成功扱い
 }
 
 //書式なしログ出力
-inline bool put(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str)
+inline bool put(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str)
 {
 	//なにもしない
 	return true;//常に成功扱い
@@ -103,7 +103,7 @@ inline bool put(const GASHA_ log::level_type level, const GASHA_ log::category_t
 //書式付きログ出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args)
+inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	//なにもしない
 	return true;//常に成功扱い
@@ -112,7 +112,7 @@ inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ log::level_typ
 //書式なしログ出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC>
-inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str)
+inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str)
 {
 	//なにもしない
 	return true;//常に成功扱い

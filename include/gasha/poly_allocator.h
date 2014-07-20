@@ -60,14 +60,14 @@ struct debugAllocationInfo
 	const char* m_funcName;//呼び出し元関数名
 	const char* m_cpName;//コールポイント名
 	const char* m_criticalCpName;//重大コールポイント名
-	GASHA_ time_type m_time;//プログラム経過時間
+	GASHA_ sec_t m_time;//プログラム経過時間
 	const char* m_typeName;//型名
 	std::size_t m_typeSize;//型のサイズ
 	std::size_t m_arrayNum;//配列サイズ
 #endif//GASHA_DEBUG_FEATURE_IS_ENABLED
 
 	//コンストラクタ
-	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* cp_name, const char* critical_cp_name, const GASHA_ time_type time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
+	inline debugAllocationInfo(const char* file_name, const char* func_name, const char* cp_name, const char* critical_cp_name, const GASHA_ sec_t time, const char* type_name, const std::size_t type_size, const std::size_t array_num);
 };
 
 //--------------------

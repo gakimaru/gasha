@@ -29,15 +29,15 @@ inline std::chrono::system_clock::time_point nowTime()
 {
 	return std::chrono::system_clock::now();
 }
-inline time_type calcElapsedTime(const std::chrono::system_clock::time_point begin, const std::chrono::system_clock::time_point end)
+inline sec_t calcElapsedTime(const std::chrono::system_clock::time_point begin, const std::chrono::system_clock::time_point end)
 {
 	const auto duration = end - begin;
 	const auto duration_nano = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
 	const auto duration_count = duration_nano.count();
-	const time_type second = static_cast<time_type>(duration_count) / static_cast<time_type>(1000000000.);
+	const sec_t second = static_cast<sec_t>(duration_count) / static_cast<sec_t>(1000000000.);
 	return second;
 }
-inline time_type calcElapsedTime(const std::chrono::system_clock::time_point begin)
+inline sec_t calcElapsedTime(const std::chrono::system_clock::time_point begin)
 {
 	return calcElapsedTime(begin, nowTime());
 }
@@ -46,7 +46,7 @@ inline time_type calcElapsedTime(const std::chrono::system_clock::time_point beg
 //経過時間クラス
 
 //開始時間を取得
-inline time_type elapsedTime::now()
+inline sec_t elapsedTime::now()
 {
 	return calcElapsedTime(m_beginTime);
 }
@@ -90,7 +90,7 @@ inline elapsedTime::elapsedTime() :
 //プログラム経過時間
 
 //プログラム経過時間取得
-inline time_type nowElapsedTime()
+inline sec_t nowElapsedTime()
 {
 	extern elapsedTime g_elapsedTime;
 	return g_elapsedTime.now();

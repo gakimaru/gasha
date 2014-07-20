@@ -30,6 +30,7 @@ inline threadId& threadId::operator=(const threadId&& rhs)
 {
 	m_id = rhs.m_id;
 	m_name = rhs.m_name;
+	m_nameCrc = rhs.m_nameCrc;
 	return *this;
 }
 
@@ -38,19 +39,22 @@ inline threadId& threadId::operator=(const threadId& rhs)
 {
 	m_id = rhs.m_id;
 	m_name = rhs.m_name;
+	m_nameCrc = rhs.m_nameCrc;
 	return *this;
 }
 
 //ムーブコンストラクタ
 inline threadId::threadId(const threadId&& obj) :
 	m_id(obj.m_id),
-	m_name(obj.m_name)
+	m_name(obj.m_name),
+	m_nameCrc(obj.m_nameCrc)
 {}
 
 //コピーコンストラクタ
 inline threadId::threadId(const threadId& obj) :
 	m_id(obj.m_id),
-	m_name(obj.m_name)
+	m_name(obj.m_name),
+	m_nameCrc(obj.m_nameCrc)
 {}
 
 //コンストラクタ
@@ -59,12 +63,14 @@ inline threadId::threadId(const char* name) :
 	m_name(&m_thisName)
 {
 	setThisName(name);
+	m_nameCrc = m_thisNameCrc;
 }
 
 //デフォルトコンストラクタ
 inline threadId::threadId() :
 	m_id(&m_thisId),
-	m_name(&m_thisName)
+	m_name(&m_thisName),
+	m_nameCrc(m_thisNameCrc)
 {
 	setThisId();
 }

@@ -20,6 +20,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -150,8 +151,10 @@ inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(void* buff, const std::siz
 	m_size(0),
 	m_count(0)
 {
+#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
+#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
 template<class AUTO_CLEAR>
 template<typename T>

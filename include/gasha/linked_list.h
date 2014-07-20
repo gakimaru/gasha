@@ -704,6 +704,11 @@ namespace linked_list
 		//※merge(), splice(), reverse(), unique(), emplace_front(), emplace_back() には非対応
 
 	public:
+		//ムーブオペレータ
+		container& operator=(container&& con);
+		//コピーオペレータ
+		container& operator=(const container& con);
+	public:
 		//ムーブコンストラクタ
 		container(container&& con);
 		//コピーコンストラクタ

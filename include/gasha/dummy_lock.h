@@ -47,14 +47,14 @@ public:
 	inline void unlock();
 public:
 	//ムーブオペレータ
-	dummyLock& operator=(dummyLock&&) = delete;
+	inline dummyLock& operator=(dummyLock&& rhs);
 	//コピーオペレータ
-	dummyLock& operator=(const dummyLock&) = delete;
+	inline dummyLock& operator=(const dummyLock& rhs);
 public:
 	//ムーブコンストラクタ
-	dummyLock(dummyLock&&) = delete;
+	inline dummyLock(dummyLock&& obj);
 	//コピーコンストラクタ
-	dummyLock(const dummyLock&) = delete;
+	inline dummyLock(const dummyLock& obj);
 	//コンストラクタ
 	inline dummyLock();
 	//デストラクタ

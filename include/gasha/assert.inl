@@ -31,7 +31,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //ブレークポイント
 template<typename... Tx>
-bool breakPoint::operator()(const bool conditon, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args)
+bool breakPoint::operator()(const bool conditon, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args)
 {
 	//条件判定式が false なら何もしない
 	if (!conditon)
@@ -49,12 +49,12 @@ bool breakPoint::operator()(const bool conditon, const GASHA_ log::level_type le
 		return GASHA_ spprintf(message, max_size, pos, "\n%sfunc: %s\nfile: %s\n", expr, func_name, file_name);
 	};
 
-	GASHA_ log log;
+	GASHA_ debugLog log;
 
 #ifdef GASHA_LOG_PRINT_USE_QUEUE
 	
 	//ログキュー使用版
-	log.print(log::addCPStack, add_message_func, level, category, message, std::forward<Tx>(args)...);
+	log.print(GASHA_ debugLog::addCPStack, add_message_func, level, category, message, std::forward<Tx>(args)...);
 	
 	//ログキュー一時停止
 	//※以後、他のスレッドがログ出力しようとしても待機状態になる

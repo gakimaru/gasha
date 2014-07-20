@@ -22,6 +22,7 @@
 
 #include <utility>//C++11 std::forward
 #include <cstdlib>//malloc(), free()
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 

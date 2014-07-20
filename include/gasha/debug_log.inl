@@ -1,9 +1,9 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_LOG_INL
-#define GASHA_INCLUDED_LOG_INL
+#ifndef GASHA_INCLUDED_DEBUG_LOG_INL
+#define GASHA_INCLUDED_DEBUG_LOG_INL
 
 //--------------------------------------------------------------------------------
-// log.inl
+// debug_log.inl
 // ログ操作【インライン関数／テンプレート関数定義部】
 //
 // ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
@@ -14,7 +14,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log.h>//ログ操作【宣言部】
+#include <gasha/debug_log.h>//ログ操作【宣言部】
 
 #include <gasha/log_attr.h>//ログ属性
 #include <gasha/log_print_info.h>//ログ出力情報
@@ -43,7 +43,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //ログ出力：書式付き出力
 template<class ADD_MESSAGE_FUNC, typename... Tx>
-bool log::print(const log::ope_type ope, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::print(const debugLog::ope_type ope, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	bool result = false;
 
@@ -87,13 +87,13 @@ bool log::print(const log::ope_type ope, ADD_MESSAGE_FUNC add_message_func, cons
 }
 //※通常版
 template<typename... Tx>
-inline bool log::print(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+inline bool debugLog::print(const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return print(normalOpe, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※予約出力版
 template<typename... Tx>
-inline bool log::reservedPrint(const char* fmt, Tx&&... args)
+inline bool debugLog::reservedPrint(const char* fmt, Tx&&... args)
 {
 	//予約IDを確認
 	if (m_reservedNum == 0)
@@ -103,7 +103,7 @@ inline bool log::reservedPrint(const char* fmt, Tx&&... args)
 
 //ログ出力：書式なし出力
 template<class ADD_MESSAGE_FUNC>
-bool log::put(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::put(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
 	if (isAddMessage(ope, add_message_func))
@@ -131,12 +131,12 @@ bool log::put(const ope_type ope, ADD_MESSAGE_FUNC add_message_func, const log::
 	return result;
 }
 //※通常版
-inline bool log::put(const log::level_type level, const log::category_type category, const char* str)
+inline bool debugLog::put(const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return put(normalOpe, dummyAddMessageFunctor(), level, category, str);
 }
 //※予約出力版
-inline bool log::reservedPut(const char* str)
+inline bool debugLog::reservedPut(const char* str)
 {
 	//予約IDを確認
 	if (m_reservedNum == 0)
@@ -147,7 +147,7 @@ inline bool log::reservedPut(const char* str)
 //ログ出力：書式付き出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
-bool log::convPrint(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::convPrint(const debugLog::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	bool result = false;
 
@@ -197,13 +197,13 @@ bool log::convPrint(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_
 }
 //※通常版
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::convPrint(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+inline bool debugLog::convPrint(CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return convPrint(normalOpe, converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※予約出力版
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::reservedConvPrint(CONVERTER_FUNC converter_func, const char* fmt, Tx&&... args)
+inline bool debugLog::reservedConvPrint(CONVERTER_FUNC converter_func, const char* fmt, Tx&&... args)
 {
 	//予約IDを確認
 	if (m_reservedNum == 0)
@@ -214,7 +214,7 @@ inline bool log::reservedConvPrint(CONVERTER_FUNC converter_func, const char* fm
 //ログ出力：書式なし出力
 //※文字コード変換処理指定版
 template<class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
-bool log::convPut(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::convPut(const debugLog::ope_type ope, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
 	if (isAddMessage(ope, add_message_func))
@@ -255,13 +255,13 @@ bool log::convPut(const log::ope_type ope, CONVERTER_FUNC converter_func, ADD_ME
 }
 //※通常版
 template<class CONVERTER_FUNC>
-inline bool log::convPut(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+inline bool debugLog::convPut(CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return convPut(normalOpe, converter_func, dummyAddMessageFunctor(), level, category, str);
 }
 //※予約出力版
 template<class CONVERTER_FUNC>
-inline bool log::reservedConvPut(CONVERTER_FUNC converter_func, const char* str)
+inline bool debugLog::reservedConvPut(CONVERTER_FUNC converter_func, const char* str)
 {
 	//予約IDを確認
 	if (m_reservedNum == 0)
@@ -271,7 +271,7 @@ inline bool log::reservedConvPut(CONVERTER_FUNC converter_func, const char* str)
 
 //ログ直接出力：書式付き出力
 template<class PRINT_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
-bool log::printDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::printDirect(const debugLog::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	bool result = false;
 
@@ -311,20 +311,20 @@ bool log::printDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAG
 }
 //※通常版
 template<class PRINT_FUNC, typename... Tx>
-bool log::printDirect(PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::printDirect(PRINT_FUNC print_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return printDirect(normalOpe, print_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<typename... Tx>
-inline bool log::printDirect(const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+inline bool debugLog::printDirect(const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return printDirect(normalOpe, GASHA_ stdLogPrint(), dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 
 //ログ直接出力：書式なし出力
 template<class PRINT_FUNC, class ADD_MESSAGE_FUNC>
-bool log::putDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::putDirect(const debugLog::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
 	if (isAddMessage(ope, add_message_func))
@@ -349,12 +349,12 @@ bool log::putDirect(const log::ope_type ope, PRINT_FUNC print_func, ADD_MESSAGE_
 }
 //※通常版
 template<class PRINT_FUNC>
-bool log::putDirect( PRINT_FUNC print_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::putDirect( PRINT_FUNC print_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return putDirect(normalOpe, print_func, dummyAddMessageFunctor(), level, category, str);
 }
 //※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
-inline bool log::putDirect(const log::level_type level, const log::category_type category, const char* str)
+inline bool debugLog::putDirect(const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return putDirect(normalOpe, GASHA_ stdLogPrint(), dummyAddMessageFunctor(), level, category, str);
 }
@@ -362,7 +362,7 @@ inline bool log::putDirect(const log::level_type level, const log::category_type
 //ログ直接出力：書式付き出力
 //※文字コード変換処理指定版
 template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC, typename... Tx>
-bool log::convPrintDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::convPrintDirect(const debugLog::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	bool result = false;
 
@@ -407,13 +407,13 @@ bool log::convPrintDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVER
 }
 //※通常版
 template<class PRINT_FUNC, class CONVERTER_FUNC, typename... Tx>
-bool log::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+bool debugLog::convPrintDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return convPrintDirect(normalOpe, print_func, converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
 //※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool log::convPrintDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* fmt, Tx&&... args)
+inline bool debugLog::convPrintDirect(CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* fmt, Tx&&... args)
 {
 	return convPrintDirect(normalOpe, GASHA_ stdLogPrint(), converter_func, dummyAddMessageFunctor(), level, category, fmt, std::forward<Tx>(args)...);
 }
@@ -421,7 +421,7 @@ inline bool log::convPrintDirect(CONVERTER_FUNC converter_func, const log::level
 //ログ直接出力：書式なし出力
 //※文字コード変換処理指定版
 template<class PRINT_FUNC, class CONVERTER_FUNC, class ADD_MESSAGE_FUNC>
-bool log::convPutDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::convPutDirect(const debugLog::ope_type ope, PRINT_FUNC print_func, CONVERTER_FUNC converter_func, ADD_MESSAGE_FUNC add_message_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	//メッセージ付加がある場合、書式付き出力に回してワークバッファを使用した出力を行う
 	if (isAddMessage(ope, add_message_func))
@@ -458,19 +458,19 @@ bool log::convPutDirect(const log::ope_type ope, PRINT_FUNC print_func, CONVERTE
 }
 //※通常版
 template<class PRINT_FUNC, class CONVERTER_FUNC>
-bool log::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+bool debugLog::convPutDirect(PRINT_FUNC print_func, CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return convPutDirect(normalOpe, print_func, converter_func, dummyAddMessageFunctor(), level, category, str);
 }
 //※ログ出力処理省略版（標準ログ出力：stdLogPrint 使用）
 template<class CONVERTER_FUNC>
-inline bool log::convPutDirect(CONVERTER_FUNC converter_func, const log::level_type level, const log::category_type category, const char* str)
+inline bool debugLog::convPutDirect(CONVERTER_FUNC converter_func, const debugLog::level_type level, const debugLog::category_type category, const char* str)
 {
 	return convPutDirect(normalOpe, GASHA_ stdLogPrint(), converter_func, dummyAddMessageFunctor(), level, category, str);
 }
 
 //メッセージ付加
-inline bool log::addMessage(const log::ope_type ope, char* message, const std::size_t max_size, std::size_t& message_len)
+inline bool debugLog::addMessage(const debugLog::ope_type ope, char* message, const std::size_t max_size, std::size_t& message_len)
 {
 	bool result = false;
 	if (hasOpe(ope, addCPStack))
@@ -484,20 +484,20 @@ inline bool log::addMessage(const log::ope_type ope, char* message, const std::s
 }
 
 //操作種別判定
-inline bool log::hasOpe(const log::ope_type target_ope, const log::ope_type ope)
+inline bool debugLog::hasOpe(const debugLog::ope_type target_ope, const debugLog::ope_type ope)
 {
 	return (static_cast<std::uint32_t>(target_ope)& static_cast<std::uint32_t>(ope)) != 0;
 }
 
 //メッセージ付加操作判定
 template<class ADD_MESSAGE_FUNC>
-inline bool log::isAddMessage(const log::ope_type ope, ADD_MESSAGE_FUNC add_message_func)
+inline bool debugLog::isAddMessage(const debugLog::ope_type ope, ADD_MESSAGE_FUNC add_message_func)
 {
 	return std::is_same<ADD_MESSAGE_FUNC, dummyAddMessageFunctor>::value || hasOpe(ope, addMessageMask);
 }
 
 //ログレベルマスク判定とコンソール取得
-inline bool log::consolesInfo(bool& result, GASHA_ logMask::consolesInfo_type& consoles_info, const log::level_type level, const log::category_type category)
+inline bool debugLog::consolesInfo(bool& result, GASHA_ logMask::consolesInfo_type& consoles_info, const debugLog::level_type level, const debugLog::category_type category)
 {
 	GASHA_ logMask mask;
 	mask.consolesInfo(consoles_info, level, category);
@@ -515,7 +515,7 @@ inline bool log::consolesInfo(bool& result, GASHA_ logMask::consolesInfo_type& c
 }
 
 //ログ出力情報を作成
-inline void log::makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const log::ope_type ope, const log::level_type level, const log::category_type category, const char* message, const std::size_t message_size, GASHA_ logMask::consolesInfo_type& consoles_info)
+inline void debugLog::makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const debugLog::ope_type ope, const debugLog::level_type level, const debugLog::category_type category, const char* message, const std::size_t message_size, GASHA_ logMask::consolesInfo_type& consoles_info)
 {
 	//ログ出力情報作成
 	print_info.setId(properId(ope));
@@ -533,7 +533,7 @@ inline void log::makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const log::op
 }
 
 //ログ出力予約
-inline bool log::reserve(const log::level_type level, const log::category_type category, const int num)
+inline bool debugLog::reserve(const debugLog::level_type level, const debugLog::category_type category, const int num)
 {
 	//ログレベルマスク判定とコンソール取得
 	GASHA_ logMask mask;
@@ -553,7 +553,7 @@ inline bool log::reserve(const log::level_type level, const log::category_type c
 }
 
 //予約IDの取得と更新
-inline log::id_type log::reservedId()
+inline debugLog::id_type debugLog::reservedId()
 {
 	id_type id = 0;
 	if (m_reservedNum > 0)
@@ -569,27 +569,27 @@ inline log::id_type log::reservedId()
 }
 
 //適切なIDの取得
-inline log::id_type log::properId(const log::ope_type ope)
+inline debugLog::id_type debugLog::properId(const debugLog::ope_type ope)
 {
 	return (ope & useReservedId) ? reservedId() : 0;
 }
 
 //ログキューをエンキュー
-inline bool log::enqueue(GASHA_ logPrintInfo& print_info)
+inline bool debugLog::enqueue(GASHA_ logPrintInfo& print_info)
 {
 	GASHA_ logQueue queue;
 	return queue.enqueue(print_info);
 }
 
 //ログキューモニターに通知
-inline bool log::notifyMonitor()
+inline bool debugLog::notifyMonitor()
 {
 	GASHA_ logQueueMonitor mon;
 	return mon.notify();
 }
 
 //ログ出力予約を取り消す
-inline bool log::cancelToReserve()
+inline bool debugLog::cancelToReserve()
 {
 	if (m_reservedNum == 0)
 		return false;
@@ -603,7 +603,7 @@ inline bool log::cancelToReserve()
 }
 
 //コンストラクタ
-inline log::log() :
+inline debugLog::debugLog() :
 	//m_reservedId(0),
 	m_reservedNum(0)
 	//m_reservedLevel(0),
@@ -611,7 +611,7 @@ inline log::log() :
 {}
 
 //デストラクタ
-inline log::~log()
+inline debugLog::~debugLog()
 {
 	cancelToReserve();//予約があったらキャンセル
 }
@@ -620,6 +620,6 @@ inline log::~log()
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
-#endif//GASHA_INCLUDED_LOG_INL
+#endif//GASHA_INCLUDED_DEBUG_LOG_INL
 
 // End of file

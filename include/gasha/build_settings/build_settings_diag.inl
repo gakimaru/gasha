@@ -81,7 +81,7 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 	GASHA_ spprintf(message, max_size, message_len, "[NG] `stdin` is NOT available!\n");
 #endif//GASHA_STDIN_IS_AVAILABLE
 
-	//デバッガブレークポイント割り込み利用可能
+	//シンプルアサーション割り込み利用可能
 #ifdef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
 	GASHA_ spprintf(message, max_size, message_len, "[OK] Debugger-break-point is AVAILABLE.\n");
 #else//GASHA_DEBUGGER_BREAK_IS_AVAILABLE

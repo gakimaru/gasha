@@ -22,6 +22,7 @@
 #include <gasha/string.h>//文字列処理：spprintf()
 
 #include <utility>//C++11 std::forward
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -205,9 +206,11 @@ inline lfPoolAllocator<_MAX_POOL_SIZE>::lfPoolAllocator(void* buff, const std::s
 	m_recyclableHead(INVALID_INDEX),
 	m_usingPoolSize(0)
 {
+#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
 	assert(m_poolSize > 0);
+#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 	
 	for (std::size_t i = 0; i < m_poolSize; ++i)
 	{

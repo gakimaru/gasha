@@ -51,6 +51,11 @@ inline constexpr const T1& maxObj(const T1& obj1, const T2& obj2, const T3& obj3
 template<typename T1, typename T2, typename T3, typename... Tx>
 inline constexpr T1& maxObj(T1&& obj1, T2&& obj2, T3&& obj3, Tx&&... nx){ return GASHA_ maxObj(GASHA_ maxObj(obj1, obj2), obj3, std::forward<Tx>(nx)...); }
 
+//値が二つの max()
+//ただし、n1 が NULL_VALUE なら、無条件で n2 を返す
+template<typename T1, typename T2>
+inline constexpr T1 maxIf(const T1 n1, const T2 n2, const T1 null_value){ return n1 == null_value ? static_cast<T1>(n2) : max(n1, n2); }
+
 //----------------------------------------
 //最小値取得
 //----------------------------------------
@@ -70,6 +75,11 @@ template<typename T1, typename T2, typename T3, typename... Tx>
 inline constexpr const T1& minObj(const T1& obj1, const T2& obj2, const T3& obj3, const Tx&... nx){ return GASHA_ minObj(GASHA_ minObj(obj1, obj2), obj3, nx...); }
 template<typename T1, typename T2, typename T3, typename... Tx>
 inline constexpr T1& minObj(T1&& obj1, T2&& obj2, T3&& obj3, Tx&&... nx){ return GASHA_ minObj(GASHA_ minObj(obj1, obj2), obj3, std::forward<Tx>(nx)...); }
+
+//値が二つの min()
+//ただし、n1 が NULL_VALUE なら、無条件で n2 を返す
+template<typename T1, typename T2>
+inline constexpr T1 minIf(const T1 n1, const T2 n2, const T1 null_value){ return n1 == null_value ? static_cast<T1>(n2) : min(n1, n2); }
 
 //--------------------------------------------------------------------------------
 //値の交換

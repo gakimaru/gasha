@@ -63,6 +63,31 @@ void simpleSharedSpinLock::downgrade()
 	m_lockCounter.fetch_add(SHARED_LOCK_COUNTER_UNLOCKED - 1);//カウンタを戻す
 }
 
+//ムーブオペレータ
+inline simpleSharedSpinLock& simpleSharedSpinLock::operator=(simpleSharedSpinLock&& rhs)
+{
+	m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+	rhs.m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+	return *this;
+}
+//コピーオペレータ
+inline simpleSharedSpinLock& simpleSharedSpinLock::operator=(const simpleSharedSpinLock& rhs)
+{
+	m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+	return *this;
+}
+//ムーブコンストラクタ
+inline simpleSharedSpinLock::simpleSharedSpinLock(simpleSharedSpinLock&& obj)
+{
+	m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+	obj.m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+}
+//コピーコンストラクタ
+inline simpleSharedSpinLock::simpleSharedSpinLock(const simpleSharedSpinLock& obj)
+{
+	m_lockCounter.store(SHARED_LOCK_COUNTER_UNLOCKED);
+}
+
 //コンストラクタ
 inline simpleSharedSpinLock::simpleSharedSpinLock()
 {

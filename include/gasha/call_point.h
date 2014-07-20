@@ -14,7 +14,7 @@
 
 #include <gasha/log_category.h>//ログカテゴリ
 
-#include <gasha/chrono.h>//時間処理ユーティリティ：time_type, elapsedTime
+#include <gasha/chrono.h>//時間処理ユーティリティ：sec_t, elapsedTime
 
 #include <cstddef>//std::size_t
 
@@ -51,7 +51,7 @@ public:
 	inline callpoint_type type() const;//コールポイント種別
 	inline category_type category() const;//カテゴリ
 	inline const char* name() const;//コールポイント名
-	inline GASHA_ time_type beginTime() const;//コールポイント開始時間
+	inline GASHA_ sec_t beginTime() const;//コールポイント開始時間
 	inline const GASHA_ elapsedTime elapsedTime() const;//経過時間
 	inline const char* fileName() const;//呼び出し元ソースファイル名
 	inline const char* funcName() const;//呼び出し元関数名
@@ -102,7 +102,7 @@ private:
 	const char* m_name;//コールポイント名
 	const char* m_fileName;//呼び出し元ソースファイル名
 	const char* m_funcName;//呼び出し元関数名
-	GASHA_ time_type m_beginTime;//コールポイント開始時間
+	GASHA_ sec_t m_beginTime;//コールポイント開始時間
 	GASHA_ elapsedTime m_elapsedTime;//経過時間
 	category_type m_category;//カテゴリ
 	callpoint_type m_type;//コールポイント種別
@@ -118,7 +118,7 @@ public:
 	inline callpoint_type type() const{ return isReference; }//コールポイント種別
 	inline category_type category() const{ return 0; }//カテゴリ
 	inline const char* name() const{ return ""; }//コールポイント名
-	inline GASHA_ time_type beginTime() const{ return static_cast<GASHA_ time_type>(0.); }//コールポイント開始時間
+	inline GASHA_ sec_t beginTime() const{ return static_cast<GASHA_ sec_t>(0.); }//コールポイント開始時間
 	inline const GASHA_ elapsedTime elapsedTime() const{ return GASHA_ elapsedTime(); }//経過時間
 	inline const char* fileName() const{ return ""; }//呼び出し元ソースファイル名
 	inline const char* funcName() const{ return ""; }//呼び出し元関数名
@@ -209,9 +209,21 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //コールポイントのコンストラクタ引数用マクロ
 //※ソースファイル名と関数名
 #ifdef GASHA_CALLPOINT_IS_ENABLED//デバッグログ無効時は無効化
-	#define GASHA_CP_ARGS GASHA_FILE_AND_FUNC
+
+	#define GASHA_CP_ARGS GASHA_FILE_AND_FUNC//コールポイントのコンストラクタ引数用マクロ
+	#define GASHA_CP(var, category, name) GASHA_ callPoint var(category, name, GASHA_CP_ARGS)//コールポイント設定用マクロ
+	#define GASHA_CP_AUTOPRO(var, category, name) GASHA_ callPoint var(category, name, GASHA_ callPoint::useAutoProfiling, GASHA_CP_ARGS)//コールポイント設定用マクロ ※自動プロファイリング付き
+	#define GASHA_CRITICAL_CP(var, category, name) GASHA_ criticalCallPoint var(category, name, GASHA_CP_ARGS)//重大コールポイント設定用マクロ
+	#define GASHA_CRITICAL_CP_AUTOPRO(var, category, name) GASHA_ criticalCallPoint var(category, name, GASHA_ callPoint::useAutoProfiling, GASHA_CP_ARGS)//重大コールポイント設定用マクロ ※自動プロファイリング付き
+
 #else//GASHA_CALLPOINT_IS_ENABLED
-	#define GASHA_CP_ARGS nullptr, nullptr
+
+	#define GASHA_CP_ARGS nullptr, nullptr//コールポイントのコンストラクタ引数用マクロ
+	#define GASHA_CP(var, category, name) GASHA_ callPoint var(category, name, GASHA_CP_ARGS)//コールポイント設定用マクロ
+	#define GASHA_CP_AUTOPRO(var, category, name) GASHA_ callPoint var(category, name, GASHA_CP_ARGS)//コールポイント設定用マクロ ※自動プロファイリング付き
+	#define GASHA_CRITICAL_CP(var, category, name) GASHA_ criticalCallPoint var(category, name, GASHA_CP_ARGS)//重大コールポイント設定用マクロ
+	#define GASHA_CRITICAL_CP_AUTOPRO(var, category, name) GASHA_ criticalCallPoint var(category, name, GASHA_CP_ARGS)//重大コールポイント設定用マクロ ※自動プロファイリング付き
+
 #endif//GASHA_CALLPOINT_IS_ENABLED
 
 #endif//GASHA_INCLUDED_CALL_POINT_H

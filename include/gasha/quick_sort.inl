@@ -143,10 +143,13 @@ namespace _private
 				const std::size_t new_size = recursive == 0 ? begin - _array : term - end - 1;
 				if (new_size >= 1)
 				{
-					stack_p = &stack[stack_curr++];
-					assert(stack_curr <= STACK_DEPTH_MAX);
-					stack_p->array = new_array;
-					stack_p->size = new_size;
+					//assert(stack_curr < STACK_DEPTH_MAX);
+					if (stack_curr < STACK_DEPTH_MAX - 1)
+					{
+						stack_p = &stack[stack_curr++];
+						stack_p->array = new_array;
+						stack_p->size = new_size;
+					}
 				}
 			}
 		}

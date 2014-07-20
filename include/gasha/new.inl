@@ -73,7 +73,7 @@ namespace _private
 		const char* cp_name = nullptr;//コールポイント名
 		const char* critical_cp_name = nullptr;//重大コールポイント名
 		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
-		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ sec_t time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
@@ -95,7 +95,7 @@ namespace _private
 		const char* cp_name = nullptr;//コールポイント名
 		const char* critical_cp_name = nullptr;//重大コールポイント名
 		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
-		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ sec_t time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), N);//デバッグ情報生成
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
@@ -119,7 +119,7 @@ namespace _private
 		const char* cp_name = nullptr;//コールポイント名
 		const char* critical_cp_name = nullptr;//重大コールポイント名
 		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
-		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ sec_t time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete p;//メモリ破棄
@@ -136,7 +136,7 @@ namespace _private
 		const char* cp_name = nullptr;//コールポイント名
 		const char* critical_cp_name = nullptr;//重大コールポイント名
 		getCallpointName(cp_name, critical_cp_name);//コールポイント名取得
-		const GASHA_ time_type time = nowElapsedTime();//プログラム経過取得
+		const GASHA_ sec_t time = nowElapsedTime();//プログラム経過取得
 		const GASHA_ debugAllocationInfo info(m_fileName, m_funcName, cp_name, critical_cp_name, time, typeid(T).name(), sizeof(T), 0);//デバッグ情報生成
 		GASHA_ polyAllocator::setDebugInfo(&info);//デバッグ情報
 		delete[] p;//メモリ破棄

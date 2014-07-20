@@ -496,7 +496,7 @@
 	#define GASHA_STDSTRNLENFUNC ::strnlen
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-	//#define GASHA_STDSTRNLENFUNC 
+	#define GASHA_STDSTRNLENFUNC ::strnlen
 #endif//GASHA_IS_GCC
 
 //----------------------------------------

@@ -48,6 +48,31 @@ inline void lwSpinLock::unlock()
 	m_lock.store(false);
 }
 
+//ムーブオペレータ
+inline lwSpinLock& lwSpinLock::operator=(lwSpinLock&& rhs)
+{
+	m_lock.store(false);
+	rhs.m_lock.store(false);
+	return *this;
+}
+//コピーオペレータ
+inline lwSpinLock& lwSpinLock::operator=(const lwSpinLock& rhs)
+{
+	m_lock.store(false);
+	return *this;
+}
+//ムーブコンストラクタ
+inline lwSpinLock::lwSpinLock(lwSpinLock&& obj)
+{
+	m_lock.store(false);
+	obj.m_lock.store(false);
+}
+//コピーコンストラクタ
+inline lwSpinLock::lwSpinLock(const lwSpinLock& obj)
+{
+	m_lock.store(false);
+}
+
 //コンストラクタ
 inline lwSpinLock::lwSpinLock()
 {

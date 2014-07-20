@@ -461,6 +461,24 @@ namespace linked_list
 		return first;
 	}
 
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>& container<OPE_TYPE>::operator=(container&& con)
+	{
+		m_first = con.m_first;
+		m_last = con.m_last;
+		return *this;
+	}
+
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>& container<OPE_TYPE>::operator=(const container& con)
+	{
+		m_first = con.m_first;
+		m_last = con.m_last;
+		return *this;
+	}
+
 	//ムーブコンストラクタ
 	template<class OPE_TYPE>
 	container<OPE_TYPE>::container(container&& con) :

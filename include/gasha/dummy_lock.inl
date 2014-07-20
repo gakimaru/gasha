@@ -50,6 +50,28 @@ inline void dummyLock::unlock()
 {
 	//何もしない
 }
+//ムーブオペレータ
+inline dummyLock& dummyLock::operator=(dummyLock&& rhs)
+{
+	//何もしない
+	return *this;
+}
+//コピーオペレータ
+inline dummyLock& dummyLock::operator=(const dummyLock& rhs)
+{
+	//何もしない
+	return *this;
+}
+//ムーブコンストラクタ
+inline dummyLock::dummyLock(dummyLock&& obj)
+{
+	//何もしない
+}
+//コピーコンストラクタ
+inline dummyLock::dummyLock(const dummyLock& obj)
+{
+	//何もしない
+}
 //コンストラクタ
 inline dummyLock::dummyLock()
 {

@@ -1555,7 +1555,9 @@ namespace rb_tree
 							//※「条件④」により、根から葉までのあらゆる経路で黒の数は一定のため、
 							//　黒ノードを削除した場合、必ず兄弟ノードもしくはその子孫に黒がいる。
 							printf_dbg_remove("【赤黒木にバグあり！】黒ノード（削除）の兄弟ノードが存在しない\n");
+						#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 							assert(sibling_node != nullptr);
+						#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
 
 							parent_node_prev = parent_node;//親ノードを記録（次のループ処理の親の子に連結する）
 						}

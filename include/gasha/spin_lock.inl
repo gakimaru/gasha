@@ -47,6 +47,31 @@ inline void spinLock::unlock()
 	m_lock.clear();
 }
 
+//ムーブオペレータ
+inline spinLock& spinLock::operator=(spinLock&& rhs)
+{
+	m_lock.clear();
+	rhs.m_lock.clear();
+	return *this;
+}
+//コピーオペレータ
+inline spinLock& spinLock::operator=(const spinLock& rhs)
+{
+	m_lock.clear();
+	return *this;
+}
+//ムーブコンストラクタ
+inline spinLock::spinLock(spinLock&& obj)
+{
+	m_lock.clear();
+	obj.m_lock.clear();
+}
+//コピーコンストラクタ
+inline spinLock::spinLock(const spinLock& obj)
+{
+	m_lock.clear();
+}
+
 //コンストラクタ
 inline spinLock::spinLock()
 {

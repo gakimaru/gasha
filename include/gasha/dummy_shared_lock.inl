@@ -100,6 +100,29 @@ inline void dummySharedLock::unlock_shared()
 {
 	//何もしない
 }
+
+//ムーブオペレータ
+inline dummySharedLock& dummySharedLock::operator=(dummySharedLock&& rhs)
+{
+	//何もしない
+	return *this;
+}
+//コピーオペレータ
+inline dummySharedLock& dummySharedLock::operator=(const dummySharedLock& rhs)
+{
+	//何もしない
+	return *this;
+}
+//ムーブコンストラクタ
+inline dummySharedLock::dummySharedLock(dummySharedLock&& obj)
+{
+	//何もしない
+}
+//コピーコンストラクタ
+inline dummySharedLock::dummySharedLock(const dummySharedLock& obj)
+{
+	//何もしない
+}
 //コンストラクタ
 inline dummySharedLock::dummySharedLock()
 {

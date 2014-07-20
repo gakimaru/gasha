@@ -51,6 +51,7 @@ CXXFLAGS := \
 	-Wno-switch \
 	-Wno-unknown-pragmas \
 	-Wno-unused-local-typedefs \
+	-Wno-unused-value \
 	-mavx \
 	-fabi-version=0 \
 	-fopenmp \
@@ -73,6 +74,7 @@ CXXFLAGS := \
 #  -Wunused
 #  -Wuninitialized
 #  -Wunknown-pragmas ←この警告を出したくない ... -Wno-unknown-pragmas
+#  -Wunused-value ←この警告を出したくない ... -Wno-unused-value
 #  以下、GCC4.8追加(?)
 #  -Wunused-local-typedefs ←この警告を出したくない ... -Wno-unused-local-typedefs
 # 以下、使用しているオプションの解説

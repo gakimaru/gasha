@@ -17,7 +17,7 @@
 #include <gasha/string.h>//文字列処理【宣言部】
 
 #include <cstring>//std::strlen(), std::strcmp(), std::strncmp(), std::strchr(), std::strrchr(), std::strstr(), std::strcpy(), std::strncpy()
-                  //::strnlen() ※VC++
+                  //::strnlen() ※GCC, VC++
 #include <cstdio>//::snprintf() ※GCC, ::_snprintf_s() ※VC++
 #include <utility>//C++11 std::forward
 
@@ -44,9 +44,9 @@ inline std::size_t strlen(const char* str)
 #if !defined(GASHA_STDSTRNLENFUNC)
 inline std::size_t strnlen(const char* str, const std::size_t max_len)
 {
-	//nullチェックしない
-	//	if (!str)
-	//		return 0;
+//nullチェックしない
+//	if (!str)
+//		return 0;
 	const char* p_end = str + max_len;
 	const char* p = str;
 	while (p <= p_end)

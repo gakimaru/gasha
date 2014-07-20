@@ -47,7 +47,7 @@ public:
 		std::size_t m_seqNo;//シーケンス番号
 		const char* m_procedureName;//手続き名
 		threadId m_threadId;//スレッドID
-		GASHA_ time_type m_sysTime;//システム時間
+		GASHA_ sec_t m_sysTime;//システム時間
 		inline bool operator<(const accessInfo& rhs) const { return m_seqNo < rhs.m_seqNo; }
 		inline bool operator==(const id_type id) const { return m_seqNo == id; }
 	};
@@ -73,8 +73,8 @@ public:
 	inline const list_type& list() const { return m_list; }//アクセス情報の連結情報
 	const char* createdProcedureName() const { return m_createdProcedureName; }//インスタンス生成手続き名
 	const char* destroyedProcedureName() const { return m_destroyedProcedureName; }//インスタンス破棄手続き名
-	GASHA_ time_type createdSysTime() const { return m_createdSysTime; }//インスタンス生成時システム時間
-	GASHA_ time_type destroyedSysTime() const { return m_destroyedSysTime; }//インスタンス破棄時システム時間
+	GASHA_ sec_t createdSysTime() const { return m_createdSysTime; }//インスタンス生成時システム時間
+	GASHA_ sec_t destroyedSysTime() const { return m_destroyedSysTime; }//インスタンス破棄時システム時間
 	std::size_t accessCount() const { return m_accessCount.load(); }//アクセス中のカウント数
 public:
 	//シングルトン生成時呼び出し
@@ -101,8 +101,8 @@ private:
 	list_type m_list;//アクセス情報の連結情報
 	const char* m_createdProcedureName;//インスタンス生成手続き名
 	const char* m_destroyedProcedureName;//インスタンス破棄手続き名
-	GASHA_ time_type m_createdSysTime;//インスタンス生成時システム時間
-	GASHA_ time_type m_destroyedSysTime;//インスタンス破棄時システム時間
+	GASHA_ sec_t m_createdSysTime;//インスタンス生成時システム時間
+	GASHA_ sec_t m_destroyedSysTime;//インスタンス破棄時システム時間
 	std::atomic<std::size_t> m_accessCount;//アクセス中のカウント数
 	std::atomic<std::size_t> m_seqNo;//シーケンス番号
 };

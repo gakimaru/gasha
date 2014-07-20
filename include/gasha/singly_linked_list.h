@@ -801,6 +801,11 @@ namespace singly_linked_list
 		//※merge(), splice_after(), reverse(), unique(),  emplace_front(), emplace_after() には非対応
 
 	public:
+		//ムーブオペレータ
+		container& operator=(container&& con);
+		//コピーオペレータ
+		container& operator=(const container& con);
+	public:
 		//ムーブコンストラクタ
 		container(container&& con);
 		//コピーコンストラクタ

@@ -49,14 +49,18 @@ public:
 	inline void unlock();
 public:
 	//ムーブオペレータ
-	spinLock& operator=(spinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline spinLock& operator=(spinLock&& rhs);
 	//コピーオペレータ
-	spinLock& operator=(const spinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline spinLock& operator=(const spinLock& rhs);
 public:
 	//ムーブコンストラクタ
-	spinLock(spinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline spinLock(spinLock&& obj);
 	//コピーコンストラクタ
-	spinLock(const spinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline spinLock(const spinLock& obj);
 	//コンストラクタ
 	inline spinLock();
 	//デストラクタ

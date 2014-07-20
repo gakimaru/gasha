@@ -36,7 +36,9 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type& node, const bool is_large)
 	{
-		assert(m_depth < DEPTH_MAX);
+		//assert(m_depth < DEPTH_MAX);
+		if (m_depth >= DEPTH_MAX)
+			return nullptr;
 		info_t* stack_node = &m_array[m_depth++];
 		stack_node->m_nodeRef = &node;
 		stack_node->m_isLarge = is_large;
@@ -668,6 +670,22 @@ namespace rb_tree
 		ite.m_isEnd = (ite.m_value == nullptr);
 		while (ite.m_value && ope_type::getKey(*ite) == key)
 			++ite;
+	}
+	
+	//ムーブオペレータ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>& container<OPE_TYPE>::operator=(container&& con)
+	{
+		m_root = con.m_root;
+		return *this;
+	}
+
+	//コピーオペレータ
+	template<class OPE_TYPE>
+	container<OPE_TYPE>& container<OPE_TYPE>::operator=(const container& con)
+	{
+		m_root = con.m_root;
+		return *this;
 	}
 	
 	//ムーブコンストラクタ

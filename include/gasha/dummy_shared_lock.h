@@ -72,14 +72,14 @@ public:
 	inline void downgrade();
 public:
 	//ムーブオペレータ
-	dummySharedLock& operator=(dummySharedLock&&) = delete;
+	inline dummySharedLock& operator=(dummySharedLock&& rhs);
 	//コピーオペレータ
-	dummySharedLock& operator=(const dummySharedLock&) = delete;
+	inline dummySharedLock& operator=(const dummySharedLock& rhs);
 public:
 	//ムーブコンストラクタ
-	dummySharedLock(dummySharedLock&&) = delete;
+	inline dummySharedLock(dummySharedLock&& obj);
 	//コピーコンストラクタ
-	dummySharedLock(const dummySharedLock&) = delete;
+	inline dummySharedLock(const dummySharedLock& obj);
 	//コンストラクタ
 	inline dummySharedLock();
 	//デストラクタ

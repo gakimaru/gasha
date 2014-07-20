@@ -82,14 +82,18 @@ public:
 	inline void downgrade();
 public:
 	//ムーブオペレータ
-	sharedSpinLock& operator=(sharedSpinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline sharedSpinLock& operator=(sharedSpinLock&& rhs);
 	//コピーオペレータ
-	sharedSpinLock& operator=(const sharedSpinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline sharedSpinLock& operator=(const sharedSpinLock& rhs);
 public:
 	//ムーブコンストラクタ
-	sharedSpinLock(sharedSpinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline sharedSpinLock(sharedSpinLock&& obj);
 	//コピーコンストラクタ
-	sharedSpinLock(const sharedSpinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline sharedSpinLock(const sharedSpinLock& obj);
 	//コンストラクタ
 	inline sharedSpinLock();
 	//デストラクタ

@@ -55,8 +55,8 @@ public:
 #ifdef GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 	inline id_type id() const { return m_id;}//ID
 	inline void setId(const id_type id){ m_id = id; }//ID
-	inline GASHA_ time_type time() const { return m_time; }//時間
-	inline void setTime(GASHA_ time_type time){ m_time = time; }//時間
+	inline GASHA_ sec_t time() const { return m_time; }//時間
+	inline void setTime(GASHA_ sec_t time){ m_time = time; }//時間
 	inline const char* message() const { return m_message; }//メッセージ
 	inline void setMessage(const char* message){ m_message = message; }//メッセージ
 	inline message_size_type messageSize() const { return m_messageSize; }//メッセージサイズ
@@ -74,8 +74,8 @@ public:
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 	inline id_type id() const { return 0; }//ID
 	inline void setId(const id_type id){}//ID
-	inline GASHA_ time_type time() const { return static_cast<GASHA_ time_type>(0); }//時間
-	inline void setTime(GASHA_ time_type time){}//時間
+	inline GASHA_ sec_t time() const { return static_cast<GASHA_ sec_t>(0); }//時間
+	inline void setTime(GASHA_ sec_t time){}//時間
 	inline const char* message() const { return nullptr; }//メッセージ
 	inline void setMessage(const char* message){}//メッセージ
 	inline message_size_type messageSize() const { return 0; }//メッセージサイズ
@@ -114,7 +114,7 @@ public:
 private:
 	//フィールド
 	id_type m_id;//ID ※0 で自動発番 ※ログキュー使用時に、キューを一意に識別し、キューどうしの順序性を判定するためのIDとして扱う
-	GASHA_ time_type m_time;//時間 ※出力時もしくはキューイング時の時間（予約時の時間ではないので注意）
+	GASHA_ sec_t m_time;//時間 ※出力時もしくはキューイング時の時間（予約時の時間ではないので注意）
 	const char* m_message;//メッセージ
 	message_size_type m_messageSize;//メッセージサイズ ※0で自動計測 ※終端を含んだ長さ
 	level_type m_level;//ログレベル

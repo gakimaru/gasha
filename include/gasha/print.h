@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/log.h>//ログ操作
+#include <gasha/debug_log.h>//ログ操作
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -38,15 +38,15 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※書式付き出力時は専用のワークバッファを使用するため、スタックサイズの小さなスレッドからでも問題なく出力可能。
 
 template<typename... Tx>
-inline bool print(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args);//書式付き出力
-inline bool put(const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str);//書式なし出力
+inline bool print(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args);//書式付き出力
+inline bool put(const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str);//書式なし出力
 
 //※文字コード変換処理指定版
 //　CONVERTER のプロトタイプ：std::size_t converter(char* dst, const std::size_t dst_size, const char* src, const std::size_t src_size)
 template<class CONVERTER_FUNC, typename... Tx>
-inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* fmt, Tx&&... args);//書式付き出力
+inline bool convPrint(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* fmt, Tx&&... args);//書式付き出力
 template<class CONVERTER_FUNC>
-inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* str);//書式なし出力
+inline bool convPut(CONVERTER_FUNC converter_func, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* str);//書式なし出力
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

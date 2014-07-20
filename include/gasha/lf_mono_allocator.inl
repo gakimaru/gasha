@@ -109,8 +109,10 @@ inline lfMonoAllocator::lfMonoAllocator(void* buff, const std::size_t max_size) 
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0)
 {
+#ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
+#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
 }
 template<typename T>
 inline lfMonoAllocator::lfMonoAllocator(T* buff, const std::size_t num) :

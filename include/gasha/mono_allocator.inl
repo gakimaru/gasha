@@ -20,6 +20,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -121,8 +122,10 @@ inline monoAllocator<LOCK_TYPE>::monoAllocator(void* buff, const std::size_t max
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0)
 {
+#ifdef GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
+#endif//GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 }
 template<class LOCK_TYPE>
 template<typename T>

@@ -98,6 +98,31 @@ inline void unsharedSpinLock::downgrade()
 	return;
 }
 
+//ムーブオペレータ
+inline unsharedSpinLock& unsharedSpinLock::operator=(unsharedSpinLock&& rhs)
+{
+	m_lock.clear();
+	rhs.m_lock.clear();
+	return *this;
+}
+//コピーオペレータ
+inline unsharedSpinLock& unsharedSpinLock::operator=(const unsharedSpinLock& rhs)
+{
+	m_lock.clear();
+	return *this;
+}
+//ムーブコンストラクタ
+inline unsharedSpinLock::unsharedSpinLock(unsharedSpinLock&& obj)
+{
+	m_lock.clear();
+	obj.m_lock.clear();
+}
+//コピーコンストラクタ
+inline unsharedSpinLock::unsharedSpinLock(const unsharedSpinLock& obj)
+{
+	m_lock.clear();
+}
+
 //コンストラクタ
 inline unsharedSpinLock::unsharedSpinLock()
 {

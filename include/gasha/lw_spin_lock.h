@@ -50,14 +50,18 @@ public:
 	inline void unlock();
 public:
 	//ムーブオペレータ
-	lwSpinLock& operator=(lwSpinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline lwSpinLock& operator=(lwSpinLock&& rhs);
 	//コピーオペレータ
-	lwSpinLock& operator=(const lwSpinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline lwSpinLock& operator=(const lwSpinLock& rhs);
 public:
 	//ムーブコンストラクタ
-	lwSpinLock(lwSpinLock&&) = delete;
+	//※ムーブではなく、両者のフラグの状態をリセットするので注意
+	inline lwSpinLock(lwSpinLock&& obj);
 	//コピーコンストラクタ
-	lwSpinLock(const lwSpinLock&) = delete;
+	//※コピーではなく、フラグの状態をリセットするので注意
+	inline lwSpinLock(const lwSpinLock& obj);
 	//コンストラクタ
 	inline lwSpinLock();
 	//デストラクタ

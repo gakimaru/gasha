@@ -837,6 +837,11 @@ namespace rb_tree
 		inline iterator equal_range(const std::string& key);
 		inline iterator equal_range(const node_type& node);
 	public:
+		//ムーブオペレータ
+		container& operator=(container&& con);
+		//コピーオペレータ
+		container& operator=(const container& con);
+	public:
 		//ムーブコンストラクタ
 		container(container&& con);
 		//コピーコンストラクタ

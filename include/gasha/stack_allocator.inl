@@ -20,6 +20,7 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <utility>//C++11 std::forward
+#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -156,8 +157,10 @@ inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const s
 	m_size(0),
 	m_count(0)
 {
+#ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
 	assert(m_buffRef != nullptr);
 	assert(m_maxSize > 0);
+#endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
 template<class LOCK_TYPE, class AUTO_CLEAR>
 template<typename T>

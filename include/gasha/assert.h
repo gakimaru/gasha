@@ -53,7 +53,7 @@ class breakPoint
 public:
 	//関数オペレータ
 	template<typename... Tx>
-	bool operator()(const bool conditon, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args);
+	bool operator()(const bool conditon, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args);
 
 public:
 	//デバッグポーズ処理の参照／変更
@@ -77,7 +77,7 @@ private:
 public:
 	//関数オペレータ
 	template<typename... Tx>
-	inline bool operator()(const bool conditon, const GASHA_ log::level_type level, const GASHA_ log::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args){ return true; }//ブレークポイント
+	inline bool operator()(const bool conditon, const GASHA_ debugLog::level_type level, const GASHA_ debugLog::category_type category, const char* expr, const char* file_name, const char* func_name, const char* message, Tx&&... args){ return true; }//ブレークポイント
 
 public:
 	//デバッグポーズ処理の参照／変更
@@ -99,15 +99,15 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #ifdef GASHA_ASSERTION_IS_ENABLED//アサーション無効時は無効化
 
-#define GASHA_ASSERT(level, category, expr, message, ...) GASHA_ breakPoint()(!expr, level, category, "ASSERTION FAILURE!: " #expr "\n", GASHA_FILE_AND_FUNC, message, __VA_ARGS__)
-#define GASHA_BREAKPOINT(level, category, message, ...) GASHA_ breakPoint()(true, level, category, "", GASHA_FILE_AND_FUNC, message, __VA_ARGS__)
-#define GASHA_WATCHPOINT(level, category, expr, message, ...) GASHA_ breakPoint()(expr, level, category, "HIT!: " #expr "\n", GASHA_FILE_AND_FUNC, message, __VA_ARGS__)
+#define GASHA_ASSERT(level, category, expr, ...) GASHA_ breakPoint()(!(expr), level, category, "ASSERTION FAILURE!: " #expr "\n", GASHA_FILE_AND_FUNC, __VA_ARGS__)
+#define GASHA_BREAKPOINT(level, category, ...) GASHA_ breakPoint()(true, level, category, "", GASHA_FILE_AND_FUNC, __VA_ARGS__)
+#define GASHA_WATCHPOINT(level, category, expr, ...) GASHA_ breakPoint()((expr), level, category, "HIT!: " #expr "\n", GASHA_FILE_AND_FUNC, __VA_ARGS__)
 
 #else//GASHA_ASSERTION_IS_ENABLED//アサーション無効時はまるごと無効化
 
-#define GASHA_ASSERT(level, category, expr, message, ...)
-#define GASHA_BREAKPOINT(level, category, message, ...)
-#define GASHA_WATCHPOINT(level, category, expr, message, ...)
+#define GASHA_ASSERT(level, category, expr, ...)
+#define GASHA_BREAKPOINT(level, category, ...)
+#define GASHA_WATCHPOINT(level, category, expr, ...)
 
 #endif//GASHA_ASSERTION_IS_ENABLED//アサーション無効時はまるごと無効化
 

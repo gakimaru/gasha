@@ -225,7 +225,7 @@ template<typename T, std::size_t N>
 inline void cross(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 {
 	//static_assert(N == 3 || N == 4, "cross is only used by 3D vector.");
-	assert(N == 3 || N == 4);
+	//assert(N == 3 || N == 4);
 	result[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
 	result[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
 	result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];

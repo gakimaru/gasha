@@ -1,9 +1,9 @@
 ﻿#pragma once
-#ifndef GASHA_INCLUDED_LOG_H
-#define GASHA_INCLUDED_LOG_H
+#ifndef GASHA_INCLUDED_DEBUG_LOG_H
+#define GASHA_INCLUDED_DEBUG_LOG_H
 
 //--------------------------------------------------------------------------------
-// log.h
+// debug_log.h
 // ログ操作【宣言部】
 //
 // Gakimaru's researched and standard library for C++ - GASHA
@@ -37,7 +37,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //※ログ出力時はログ出力属性が適用され、ログレベル名やログカテゴリ名などを付加することができる。
 //※ログレベルマスクを変更したい場合は、別途 logMask を使用する。
 //※ログ出力属性を変更したい場合は、別途 logAttr を使用する。
-class log
+class debugLog
 {
 	friend class breakPoint;
 public:
@@ -236,6 +236,8 @@ private:
 
 public:
 	//【使用注意】ログ関係の処理を一括して初期化する
+	//※ログレベル、ログカテゴリ、ログレベルマスク、ログ出力属性、ログワークバッファ、ログキュー、ログキューモニターをまとめて初期化
+	//※プロファイラーは初期化しない
 	void initialize();
 
 	//【使用注意】ログキューモニターに溜まっているキューを全て出力する
@@ -261,9 +263,9 @@ public:
 
 public:
 	//コンストラクタ
-	inline log();
+	inline debugLog();
 	//デストラクタ
-	inline ~log();
+	inline ~debugLog();
 
 private:
 	//フィールド
@@ -333,8 +335,8 @@ public:
 	inline void resume(){}//ログ関係の処理を一括して一時停止解除する
 
 public:
-	inline log(){}//コンストラクタ
-	inline ~log(){}//デストラクタ
+	inline debugLog(){}//コンストラクタ
+	inline ~debugLog(){}//デストラクタ
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
@@ -343,8 +345,8 @@ public:
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
-#include <gasha/log.inl>
+#include <gasha/debug_log.inl>
 
-#endif//GASHA_INCLUDED_LOG_H
+#endif//GASHA_INCLUDED_DEBUG_LOG_H
 
 // End of file
