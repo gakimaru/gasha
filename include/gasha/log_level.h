@@ -19,7 +19,6 @@
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint8_t
 #include <utility>//C++11 std::move
-#include <cassert>//assert()
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

@@ -17,9 +17,9 @@
 #include <gasha/lf_mono_allocator.h>//ロックフリー単一アロケータ【宣言部】
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::forward
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -29,6 +29,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリ解放
 inline bool lfMonoAllocator::free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	return _free(p);
@@ -65,6 +67,8 @@ T* lfMonoAllocator::newArray(const std::size_t num, Tx&&... args)
 template<typename T>
 bool lfMonoAllocator::deleteObj(T* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	GASHA_ callDestructor(p);//デストラクタ呼び出し
@@ -74,6 +78,8 @@ bool lfMonoAllocator::deleteObj(T* p)
 template<typename T>
 bool lfMonoAllocator::deleteArray(T* p, const std::size_t num)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
 	T* obj = p;
@@ -93,13 +99,12 @@ inline void lfMonoAllocator::clear()
 //ポインタが範囲内か判定
 inline bool lfMonoAllocator::isInUsingRange(void* p)
 {
+#ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(p >= m_buffRef && p < m_buffRef + m_size, "Pointer is not in range.");
+#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
 	if (p >= m_buffRef && p < m_buffRef + m_size)//範囲内
 		return true;
 	//範囲外のポインタ
-#ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
-	static const bool IS_INVALID_POINTER = false;
-	assert(IS_INVALID_POINTER);
-#endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
 	return false;
 }
 
@@ -110,8 +115,8 @@ inline lfMonoAllocator::lfMonoAllocator(void* buff, const std::size_t max_size) 
 	m_size(0)
 {
 #ifdef GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
-	assert(m_buffRef != nullptr);
-	assert(m_maxSize > 0);
+	GASHA_SIMPLE_ASSERT(m_buffRef != nullptr, "buff is nullptr.");
+	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_LF_MONO_ALLOCATOR_ENABLE_ASSERTION
 }
 template<typename T>

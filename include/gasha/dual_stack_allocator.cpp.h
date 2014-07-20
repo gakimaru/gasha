@@ -23,8 +23,7 @@
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 #include <gasha/string.h>//文字列処理：spprintf()
-
-#include <cassert>//assert()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -127,14 +126,11 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocAsc(const std::size_t siz
 	const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 	const size_type new_size = now_size + alloc_size;
 	const size_type new_size_all = new_size + m_sizeDesc;
+#ifdef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(new_size_all <= m_maxSize, "dualStackAllocator is not enough memory.");
+#endif//GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	if (new_size_all > m_maxSize)
-	{
-	#ifdef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-		static const bool NOT_ENOUGH_SPACE = false;
-		assert(NOT_ENOUGH_SPACE);
-	#endif//GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
-	}
 	
 	//使用中のサイズとメモリ確保数を更新
 	m_sizeAsc = new_size;
@@ -160,14 +156,11 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocDesc(const std::size_t si
 	const size_type alloc_size = static_cast<size_type>(now_ptr - new_ptr);
 	const size_type new_size = now_size + alloc_size;
 	const size_type new_size_all = new_size + m_sizeAsc;
+#ifdef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(new_size_all <= m_maxSize, "dualStackAllocator is not enough memory.");
+#endif//GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	if (new_size_all > m_maxSize)
-	{
-	#ifdef GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-		static const bool NOT_ENOUGH_SPACE = false;
-		assert(NOT_ENOUGH_SPACE);
-	#endif//GASHA_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
-	}
 	
 	//使用中のサイズとメモリ確保数を更新
 	m_sizeDesc = new_size;

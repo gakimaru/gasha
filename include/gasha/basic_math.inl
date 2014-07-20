@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/basic_math.h>//基本算術【宣言部】
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <cmath>//std::sqrt()
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -224,8 +224,8 @@ inline T normalizedDot(const T(&vec1)[N], const T(&vec2)[N])
 template<typename T, std::size_t N>
 inline void cross(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 {
-	//static_assert(N == 3 || N == 4, "cross is only used by 3D vector.");
-	//assert(N == 3 || N == 4);
+	//static_assert(N == 3 || N == 4, "Cross-product is only available for 3D vector.");
+	GASHA_SIMPLE_ASSERT(N == 3 || N == 4, "Cross-product is only available for 3D vector.");
 	result[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
 	result[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
 	result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];

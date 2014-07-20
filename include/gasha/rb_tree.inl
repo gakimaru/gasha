@@ -18,9 +18,9 @@
 #include <gasha/rb_tree.h>//赤黒木コンテナ【宣言部】
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::forward
-#include <cassert>//assert()
 
 #if defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_ADD) || defined(GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE)
 #include <cstdio>//std::printf()
@@ -1555,9 +1555,7 @@ namespace rb_tree
 							//※「条件④」により、根から葉までのあらゆる経路で黒の数は一定のため、
 							//　黒ノードを削除した場合、必ず兄弟ノードもしくはその子孫に黒がいる。
 							printf_dbg_remove("【赤黒木にバグあり！】黒ノード（削除）の兄弟ノードが存在しない\n");
-						#ifdef GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
-							assert(sibling_node != nullptr);
-						#endif//GASHA_RB_TREE_USE_DEBUG_PRINT_FOR_REMOVE
+							GASHA_SIMPLE_ASSERT(sibling_node != nullptr, "red-black nodes are inconsistency. (because of programing misstake.)");
 
 							parent_node_prev = parent_node;//親ノードを記録（次のループ処理の親の子に連結する）
 						}

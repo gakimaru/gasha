@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/i_debug_pause.h>//デバッグポーズインターフェース
+#include <gasha/debugger_break.h>//デバッガ用ブレークポイント割り込み
 
 #include <cstdio>//std::printf()
 
@@ -22,19 +22,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //シンプルアサーション
 //--------------------------------------------------------------------------------
 
-#ifdef GASHA_DEBUGGER_BREAK_IS_AVAILABLE//デバッガ用ブレークポイント無効時はまるごと無効化
-
-//----------------------------------------
-//デバッガブレークポイント
-inline bool debuggerBreak();
-
-#else//GASHA_DEBUGGER_BREAK_IS_AVAILABLE//デバッガ用ブレークポイント無効時はまるごと無効化
-
-//----------------------------------------
-//デバッガブレークポイント
-inline bool debuggerBreak(){ return true; }
-
-#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE//デバッガ用ブレークポイント無効時はまるごと無効化
+//（なし）
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
@@ -43,9 +31,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #ifdef GASHA_ASSERTION_IS_ENABLED//アサーション無効時は無効化
 
-#define GASHA_SIMPLE_ASSERT(expr, ...) ((!(expr)) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nASSERTION FAILURE!: %s\nfile: %s\nfunc: %s\n", #expr, GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && debuggerBreak())
-#define GASHA_SIMPLE_BREAKPOINT(...) (true && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nfile: %s\nfunc: %s\n", GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && debuggerBreak())
-#define GASHA_SIMPLE_WATCHPOINT(expr, ...) ((expr) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nHIT!: %s\nfile: %s\nfunc: %s\n", #expr, GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && debuggerBreak())
+#define GASHA_SIMPLE_ASSERT(expr, ...) ((!(expr)) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nASSERTION FAILURE!: %s\nfile: %s\nfunc: %s\n", #expr, GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && GASHA_ debuggerBreak())
+#define GASHA_SIMPLE_BREAKPOINT(...) (true && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nfile: %s\nfunc: %s\n", GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && GASHA_ debuggerBreak())
+#define GASHA_SIMPLE_WATCHPOINT(expr, ...) ((expr) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, __VA_ARGS__) != 0) && (std::fprintf(GASHA_SIMPLE_ASSERT_STDOUT, "\nHIT!: %s\nfile: %s\nfunc: %s\n", #expr, GASHA_SRC_FILE_LINE_TIME(), GASHA_FUNC_NAME()) != 0) && GASHA_ debuggerBreak())
 
 #else//GASHA_ASSERTION_IS_ENABLED//アサーション無効時はまるごと無効化
 

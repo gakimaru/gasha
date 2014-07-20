@@ -22,8 +22,7 @@
 #include <gasha/lf_dual_stack_allocator.inl>//ロックフリー双方向スタックアロケータ【インライン関数／テンプレート関数定義部】
 
 #include <gasha/string.h>//文字列処理：spprintf()
-
-#include <cassert>//assert()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -187,14 +186,11 @@ void* lfDualStackAllocator<AUTO_CLEAR>::_allocAsc(const std::size_t size, const 
 		const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 		const size_type new_size_all = now_size_all + alloc_size;
 		const size_type new_size = now_size + alloc_size;
+	#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+		GASHA_SIMPLE_ASSERT(new_size_all <= m_maxSize, "lfDualStackAllocator is not enough memory.");
+	#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 		if (new_size_all > m_maxSize)
-		{
-		#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-			static const bool NOT_ENOUGH_SPACE = false;
-			assert(NOT_ENOUGH_SPACE);
-		#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 			return nullptr;
-		}
 		const size2_type new_size2 = size2(new_size, now_size_desc);
 
 		//使用中のサイズとメモリ確保数を更新
@@ -230,14 +226,11 @@ void* lfDualStackAllocator<AUTO_CLEAR>::_allocDesc(const std::size_t size, const
 		const size_type alloc_size = static_cast<size_type>(now_ptr - new_ptr);
 		const size_type new_size_all = now_size_all + alloc_size;
 		const size_type new_size = now_size + alloc_size;
+	#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+		GASHA_SIMPLE_ASSERT(new_size_all <= m_maxSize, "lfDualStackAllocator is not enough memory.");
+	#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 		if (new_size_all > m_maxSize)
-		{
-		#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-			static const bool NOT_ENOUGH_SPACE = false;
-			assert(NOT_ENOUGH_SPACE);
-		#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 			return nullptr;
-		}
 		const size2_type new_size2 = size2(now_size_asc, new_size);
 
 		//使用中のサイズとメモリ確保数を更新

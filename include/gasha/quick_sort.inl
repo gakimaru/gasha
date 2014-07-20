@@ -18,8 +18,7 @@
 #include <gasha/quick_sort.h>//クイックソート【宣言部】
 
 #include <gasha/utility.h>//汎用ユーティリティ（値交換用）
-
-#include <cassert>//assert()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -143,7 +142,7 @@ namespace _private
 				const std::size_t new_size = recursive == 0 ? begin - _array : term - end - 1;
 				if (new_size >= 1)
 				{
-					//assert(stack_curr < STACK_DEPTH_MAX);
+					GASHA_SIMPLE_ASSERT(stack_curr < STACK_DEPTH_MAX, "Stack overflow.");
 					if (stack_curr < STACK_DEPTH_MAX - 1)
 					{
 						stack_p = &stack[stack_curr++];
@@ -244,7 +243,7 @@ namespace _private
 						{
 						#pragma omp critical
 							{ queue_write_tmp = queue_write++; }
-							assert(queue_write_tmp >= queue_read ? queue_write_tmp - queue_read < size : size - queue_write_tmp + queue_read < size);
+							GASHA_SIMPLE_ASSERT(queue_write_tmp >= queue_read ? queue_write_tmp - queue_read < size : size - queue_write_tmp + queue_read < size, "Stack overflow.");
 							queue_p = &queue[queue_write_tmp % size];
 							queue_p->array = new_array;
 							queue_p->size = new_size;

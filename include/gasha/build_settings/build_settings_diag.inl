@@ -56,16 +56,20 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 	GASHA_ spprintf(message, max_size, message_len, "\n");
 	
 	bool has_error = false;
-	
-	//CPU機能判定
-#ifdef GASHA_IS_X86
-	//x86系CPU情報取得
-	char cpu_info_str[12] = { 0 };
-	int cpu_info[4] = { 0, 0, 0, 0 };
-	__cpuid(cpu_info, 0);//CPU情報取得：Type0
-	strncpy_fast(cpu_info_str, reinterpret_cast<const char*>(&cpu_info[1]), sizeof(cpu_info_str) - 1);
-	GASHA_ spprintf(message, max_size, message_len, "cpu_string=\"%s\"\n", cpu_info_str);
-	__cpuid(cpu_info, 1);//CPU情報取得：Type1
+
+	//デバッガ用ブレークポイント割り込み利用可能
+#ifdef GASHA_ENABLE_POLY_ALLOCATOR
+	GASHA_ spprintf(message, max_size, message_len, "[ENABLED] Poly-allocator(override on standard new/delete operator) is AVAILABLE.\n");
+#else//GASHA_ENABLE_POLY_ALLOCATOR
+	GASHA_ spprintf(message, max_size, message_len, "[DISABLED] Poly-allocator(override on standard new/delete operator) is NOT available.\n");
+#endif//GASHA_ENABLE_POLY_ALLOCATOR
+
+	//デバッガ用ブレークポイント割り込み利用可能
+#ifdef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+	GASHA_ spprintf(message, max_size, message_len, "[OK] Debugger-break-point is AVAILABLE.\n");
+#else//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+	GASHA_ spprintf(message, max_size, message_len, "[NG] Debugger-break-point is NOT available!\n");
+#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
 
 	//TLS対応
 #ifdef GASHA_INCOMPLETE_TLS_INITIALIZER
@@ -81,12 +85,15 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 	GASHA_ spprintf(message, max_size, message_len, "[NG] `stdin` is NOT available!\n");
 #endif//GASHA_STDIN_IS_AVAILABLE
 
-	//シンプルアサーション割り込み利用可能
-#ifdef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
-	GASHA_ spprintf(message, max_size, message_len, "[OK] Debugger-break-point is AVAILABLE.\n");
-#else//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
-	GASHA_ spprintf(message, max_size, message_len, "[NG] Debugger-break-point is NOT available!\n");
-#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+	//CPU機能判定
+#ifdef GASHA_IS_X86
+	//x86系CPU情報取得
+	char cpu_info_str[12] = { 0 };
+	int cpu_info[4] = { 0, 0, 0, 0 };
+	__cpuid(cpu_info, 0);//CPU情報取得：Type0
+	strncpy_fast(cpu_info_str, reinterpret_cast<const char*>(&cpu_info[1]), sizeof(cpu_info_str) - 1);
+	GASHA_ spprintf(message, max_size, message_len, "cpu_string=\"%s\"\n", cpu_info_str);
+	__cpuid(cpu_info, 1);//CPU情報取得：Type1
 
 #ifdef GASHA_USE_SSE
 	const bool sse_is_supported = (cpu_info[3] & (1 << 25)) || false;//SSE対応

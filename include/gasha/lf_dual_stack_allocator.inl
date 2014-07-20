@@ -18,9 +18,9 @@
 #include <gasha/lf_dual_stack_allocator.h>//ロックフリー双方向スタックアロケータ【宣言部】
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::forward
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -158,6 +158,8 @@ inline  void* lfDualStackAllocator<AUTO_CLEAR>::allocOrd(const allocationOrder_t
 template<class AUTO_CLEAR>
 inline bool lfDualStackAllocator<AUTO_CLEAR>::free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	const allocationOrder_t order = isInUsingRange(p);//ポインタの所属を判定
 	if(order == ALLOC_ASC)
 		return _freeAsc(p);
@@ -215,6 +217,8 @@ template<class AUTO_CLEAR>
 template<typename T>
 bool lfDualStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	const allocationOrder_t order = isInUsingRange(p);//ポインタの所属を判定
 	if(order == ALLOC_UNKNOWN_ORDER)
 		return false;
@@ -229,6 +233,8 @@ template<class AUTO_CLEAR>
 template<typename T>
 bool lfDualStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	const allocationOrder_t order = isInUsingRange(p);
 	if(order == ALLOC_UNKNOWN_ORDER)//ポインタの所属を判定
 		return false;
@@ -305,6 +311,9 @@ bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const typename lfDualSt
 template<class AUTO_CLEAR>
 inline allocationOrder_t lfDualStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
 {
+#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(p != nullptr, "Pointer is nullptr.");
+#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	if (p)
 	{
 		const size2_type size = m_size.load();
@@ -316,10 +325,6 @@ inline allocationOrder_t lfDualStackAllocator<AUTO_CLEAR>::isInUsingRange(void* 
 			return ALLOC_DESC;
 	}
 	//範囲外のポインタ
-#ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-	static const bool IS_INVALID_POINTER = false;
-	assert(IS_INVALID_POINTER);
-#endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	return ALLOC_UNKNOWN_ORDER;
 }
 
@@ -334,8 +339,8 @@ inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(void* buff, const 
 	m_allocateOrder(ALLOC_ASC)
 {
 #ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
-	assert(m_buffRef != nullptr);
-	assert(m_maxSize > 0);
+	GASHA_SIMPLE_ASSERT(m_buffRef != nullptr, "buff is nullptr.");
+	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
 template<class AUTO_CLEAR>

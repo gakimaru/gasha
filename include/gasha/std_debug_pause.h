@@ -33,7 +33,7 @@ public:
 public:
 	//メソッド
 
-	//デバッガのブレークポイント発動
+	//デバッガ用ブレークポイント割り込み
 	void breakPoint() override;
 
 	//ポーズ処理呼び出し
@@ -47,7 +47,7 @@ public:
 #else// GASHA_ASSERTION_IS_ENABLED//アサーション無効時はまるごと無効化
 
 public:
-	inline void breakPoint(){}//デバッガのブレークポイント発動
+	inline void breakPoint(){}//デバッガ用ブレークポイント割り込み
 	inline void pause(){}//ポーズ処理呼び出し
 public:
 	inline ~stdDebugPause(){}//デストラクタ

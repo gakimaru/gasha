@@ -16,10 +16,10 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/memory.h>//メモリ操作【宣言部】
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 //#include <memory>//C++11 std::align
 #include <cstdint>//std::uintptr_t
-#include <cassert>//assert()
 
 #ifdef GASHA_IS_GCC
 #include <stdlib.h>//posix_memalign(), free()
@@ -55,7 +55,7 @@ inline std::size_t adjustAlign(const std::size_t value, const std::size_t align)
 {
 	if (align == 0)
 		return value;
-	assert(countBits(static_cast<unsigned int>(align)) == 1);
+	GASHA_SIMPLE_ASSERT(countBits(static_cast<unsigned int>(align)) == 1, "align is not a power of 2.");
 	const std::size_t align_1 = align - 1;
 	return (value + align_1) & ~align_1;
 }

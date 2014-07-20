@@ -19,10 +19,10 @@
 
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign(), _aligned_malloc(), _aligned_free()
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::forward
 #include <cstdlib>//malloc(), free()
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -104,14 +104,11 @@ template<class LOCK_TYPE, class IMPL>
 inline void* stdAllocator<LOCK_TYPE, IMPL>::alloc(const std::size_t size, const std::size_t align)
 {
 	void* p = implemnt_type::alloc(size, align);
+#ifdef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(p != nullptr, "stdAllocator is failed allocation.");
+#endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 	if (!p)
-	{
-	#ifdef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
-		static const bool NOT_ENOUGH_SPACE = false;
-		assert(NOT_ENOUGH_SPACE);
-	#endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
-	}
 	return p;
 }
 
@@ -119,6 +116,8 @@ inline void* stdAllocator<LOCK_TYPE, IMPL>::alloc(const std::size_t size, const 
 template<class LOCK_TYPE, class IMPL>
 inline bool stdAllocator<LOCK_TYPE, IMPL>::free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
@@ -159,6 +158,8 @@ template<class LOCK_TYPE, class IMPL>
 template<typename T>
 bool stdAllocator<LOCK_TYPE, IMPL>::deleteObj(T* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
@@ -170,6 +171,8 @@ template<class LOCK_TYPE, class IMPL>
 template<typename T>
 bool stdAllocator<LOCK_TYPE, IMPL>::deleteArray(T* p, const std::size_t num)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
 		return false;
@@ -185,6 +188,8 @@ bool stdAllocator<LOCK_TYPE, IMPL>::deleteArray(T* p, const std::size_t num)
 template<class LOCK_TYPE, class IMPL>
 inline bool stdAllocator<LOCK_TYPE, IMPL>::_free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	implemnt_type::free(p);
 	return true;
 }
@@ -198,10 +203,9 @@ inline bool stdAllocator<LOCK_TYPE, IMPL>::isInUsingRange(void* p)
 	//※コンパイラによって判定可能なら処理を実装する
 
 //	//範囲外のポインタ
-//#ifdef GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
-//	static const bool IS_INVALID_POINTER = false;
-//	assert(IS_INVALID_POINTER);
-//#endif//GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
+//#ifdef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
+//	GASHA_SIMPLE_ASSERT(???, "Pointer is not in range.");
+//#endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 //	return false;
 }
 

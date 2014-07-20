@@ -47,10 +47,10 @@ class profiler
 {
 public:
 	//定数
-	static const std::size_t STR_POOL_BUFF_SIZE = 8192;//文字列プールバッファサイズ（バイト数）
-	static const std::size_t STR_POOL_TABLE_SIZE = 2048;//文字列プールテーブルサイズ（個数）
-	static const std::size_t PROFILE_INFO_POOL_SIZE = 2048;//プロファイル情報プールサイズ（個数）
-	static const std::size_t THREAD_INFO_TABLE_SIZE = 64;//スレッド情報テーブルサイズ（個数）
+	static const std::size_t STR_POOL_BUFF_SIZE = GASHA_PROFILER_STR_POOL_BUFF_SIZE;//文字列プールバッファサイズ（バイト数） ※全スレッド名＋全処理名を登録
+	static const std::size_t STR_POOL_TABLE_SIZE = GASHA_PROFILER_STR_POOL_TABLE_SIZE;//文字列プールテーブルサイズ（個数） ※全スレッド名＋全処理名を登録
+	static const std::size_t PROFILE_INFO_POOL_SIZE = GASHA_PROFILER_PROFILE_INFO_POOL_SIZE;//プロファイル情報プールサイズ（個数） ※全スレッドの全処理の処理時間計測結果を記録
+	static const std::size_t THREAD_INFO_TABLE_SIZE = GASHA_PROFILER_THREAD_INFO_TABLE_SIZE;//スレッド情報テーブルサイズ（個数） ※全スレッドのスレッド情報を記録
 	//集計種別
 	enum profileSumup_type
 	{

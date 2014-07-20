@@ -20,9 +20,9 @@
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 #include <gasha/utility.h>//汎用ユーティリティ：min()
 #include <gasha/string.h>//文字列処理：spprintf()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::forward
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -62,6 +62,8 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
@@ -74,6 +76,8 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 template<typename T>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
@@ -151,22 +155,16 @@ template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)
 {
 	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p)-reinterpret_cast<char*>(m_buffRef)) / m_blockSize);
+#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(index < m_poolSize, "Pointer is not in range.");
+#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 	if (index >= m_poolSize)//範囲外のインデックスなら終了
-	{
-	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_POINTER = false;
-		assert(IS_INVALID_POINTER);
-	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
-	}
+#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(m_using[index] == true, "Pointer is not available.");
+#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 	if (!m_using[index])//インデックスが既に未使用状態なら終了
-	{
-	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_ALREADY_DELETE_POINTER = false;
-		assert(IS_ALREADY_DELETE_POINTER);
-	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return INVALID_INDEX;
-	}
 	return index;
 }
 
@@ -196,9 +194,9 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const
 	m_usingPoolSize(0)
 {
 #ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
-	assert(m_buffRef != nullptr);
-	assert(m_maxSize > 0);
-	assert(m_poolSize > 0);
+	GASHA_SIMPLE_ASSERT(m_buffRef != nullptr, "buff is nullptr.");
+	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
+	GASHA_SIMPLE_ASSERT(m_poolSize > 0, "Pool-size is zero.(because of block_size is too large or max_size is not enough.)");
 #endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 }
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>

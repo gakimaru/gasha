@@ -34,6 +34,22 @@
 #endif//GASHA_LOG_IS_ENABLED
 
 //--------------------------------------------------------------------------------
+//【デバッガ用ブレークポイント割り込み】
+
+//デバッガ用ブレークポイントは、ビルド構成でアサーションが有効でなければ、もしくは、開発ツールが有効でなければ無効化する
+#if defined(GASHA_DEBUGGER_BREAK_IS_AVAILABLE) && (!defined(GASHA_ASSERTION_IS_ENABLED) || !defined(GASHA_DEV_TOOLS_IS_AVAILABLE))
+	#undef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+
+//--------------------------------------------------------------------------------
+//【シンプルアサーション／ブレークポイント／ウォッチポイント】
+
+//シンプルアサーション／ブレークポイント／ウォッチポイントの「メッセージの出力先」が未定義なら、stderrにする
+#if !defined(GASHA_SIMPLE_ASSERT_STDOUT)
+	#define GASHA_SIMPLE_ASSERT_STDOUT stderr
+#endif//GASHA_SIMPLE_ASSERT_STDOUT
+
+//--------------------------------------------------------------------------------
 //【全体設定：TLS】
 
 //MAC OS Xなど、TLSの初期化ができない環境では、TLSの初期化が不完全であることを明示する
@@ -49,14 +65,6 @@
 //#if defined(GASHA_STDIN_IS_AVAILABLE) && defined(***IS_GAME_PLATFORM***)
 //	#undef GASHA_STDIN_IS_AVAILABLE
 //#endif//GASHA_STDIN_IS_AVAILABLE
-
-//--------------------------------------------------------------------------------
-//【全体設定：デバッガ用ブレークポイント】
-
-//デバッガ用ブレークポイントは、ビルド構成でアサーションが有効でなければ、もしくは、開発ツールが有効でなければ無効化する
-#if defined(GASHA_DEBUGGER_BREAK_IS_AVAILABLE) && (!defined(GASHA_ASSERTION_IS_ENABLED) || !defined(GASHA_DEV_TOOLS_IS_AVAILABLE))
-	#undef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
-#endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
 
 //--------------------------------------------------------------------------------
 //【全体設定：SSE命令】
@@ -256,7 +264,7 @@
 //--------------------------------------------------------------------------------
 //【時間処理ユーティリティ】
 
-//経過時間計算用の「秒数」型が未定義なら、double にする
+//経過時間計算用の「秒数型」が未定義なら、double にする
 #if !defined(GASHA_TIME_TYPE)
 	#define GASHA_TIME_TYPE double
 #endif//GASHA_TIME_TYPE
@@ -364,7 +372,7 @@
 //--------------------------------------------------------------------------------
 //【メモリコンソール】
 
-//標準メモリコンソールのバッファサイズが未定義なら、デフォルト値にする
+//「標準メモリコンソールのバッファサイズ」が未定義なら、デフォルト値にする
 #if !defined(GASHA_STD_MEM_CONSOLE_BUFF_SIZE)
 	#define GASHA_STD_MEM_CONSOLE_BUFF_SIZE 4096
 #endif//GASHA_STD_MEM_CONSOLE_BUFF_SIZE
@@ -372,12 +380,12 @@
 //--------------------------------------------------------------------------------
 //【ログカテゴリ】
 
-//ログカテゴリの数が未定義なら、デフォルト値にする
+//「ログカテゴリの数」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_CATEGORY_NUM)
 	#define GASHA_LOG_CATEGORY_NUM 64
 #endif//GASHA_LOG_CATEGORY_NUM
 
-//ログカテゴリの数が10未満なら、10に再定義する
+//「ログカテゴリの数」が10未満なら、10に再定義する
 #if GASHA_LOG_CATEGORY_NUM < 10
 	#unde GASHA_LOG_CATEGORY_NUM
 	#define GASHA_LOG_CATEGORY_NUM 10
@@ -386,12 +394,12 @@
 //--------------------------------------------------------------------------------
 //【ログレベルマスク】
 
-//デフォルトのログレベルマスクが未定義なら、1（asNormal：通常メッセージ）にする
+//「デフォルトのログレベルマスク」が未定義なら、1（asNormal：通常メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_LOG)
 	#define GASHA_DEFAULT_LOG_MASK_OF_LOG 1
 #endif//GASHA_DEFAULT_LOG_MASK_OF_LOG
 
-//デフォルトの画面通知ログレベルマスクが未定義なら、9（asCritical：重大メッセージ）にする
+//「デフォルトの画面通知ログレベルマスク」が未定義なら、9（asCritical：重大メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_NOTICE)
 	#define GASHA_DEFAULT_LOG_MASK_OF_NOTICE 9
 #endif//GASHA_DEFAULT_LOG_MASK_OF_NOTICE
@@ -399,7 +407,7 @@
 //--------------------------------------------------------------------------------
 //【ログ属性】
 
-//デフォルトのログ属性が未定義なら、0x0000（属性なし）にする
+//「デフォルトのログ属性」が未定義なら、0x0000（属性なし）にする
 #if !defined(GASHA_DEFAULT_LOG_ATTR)
 	#define GASHA_DEFAULT_LOG_ATTR 0x0000
 #endif//GASHA_DEFAULT_LOG_ATTR
@@ -407,12 +415,12 @@
 //--------------------------------------------------------------------------------
 //【ログワークバッファ】
 
-//ログ出力用ワークバッファ一つ当たりのサイズが未定義なら、デフォルト値にする
+//「ログ出力用ワークバッファ一つ当たりのサイズ」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_WORK_BUFF_BLOCK_SIZE)
 	#define GASHA_LOG_WORK_BUFF_BLOCK_SIZE 4096
 #endif//GASHA_LOG_WORK_BUFF_BLOCK_SIZE
 
-//ログ出力用ワークバッファのプール数が未定義なら、デフォルト値にする
+//「ログ出力用ワークバッファのプール数」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_WORK_BUFF_POOL_SIZE)
 	#define GASHA_LOG_WORK_BUFF_POOL_SIZE 4
 #endif//GASHA_LOG_WORK_BUFF_POOL_SIZE
@@ -420,12 +428,12 @@
 //--------------------------------------------------------------------------------
 //【ログキュー】
 
-//ログキューメッセージ用スタックバッファサイズが未定義なら、デフォルト値にする
+//「ログキューメッセージ用スタックバッファサイズ」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE)
 	#define GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE 32768
 #endif//GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE
 
-//ログキュー用のノード数が未定義なら、デフォルト値にする
+//「ログキュー用のノード数」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_NODE_SIZE)
 	#define GASHA_LOG_QUEUE_NODE_SIZE 256
 #endif//GASHA_LOG_QUEUE_NODE_SIZE
@@ -433,18 +441,33 @@
 //--------------------------------------------------------------------------------
 //【ログキューモニター】
 
-//次のIDのキューが来ない時にリトライ（待機）する最大回数が未定義なら、デフォルト値にする
+//「次のIDのキューが来ない時にリトライ（待機）する最大回数」が未定義なら、デフォルト値にする
 #if !defined(GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT)
 	#define GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT 256
 #endif//GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT
 
 //--------------------------------------------------------------------------------
-//【シンプルアサーション／ブレークポイント／ウォッチポイント】
+//【プロファイラー】
 
-//シンプルアサーション／ブレークポイント／ウォッチポイントのメッセージの出力先が未定義なら、stderrにする
-#if !defined(GASHA_SIMPLE_ASSERT_STDOUT)
-	#define GASHA_SIMPLE_ASSERT_STDOUT stderr
-#endif//GASHA_SIMPLE_ASSERT_STDOUT
+//「文字列プールバッファサイズ（バイト数）」が未定義なら、デフォルト値にする
+#if !defined(GASHA_PROFILER_STR_POOL_BUFF_SIZE)
+	#define GASHA_PROFILER_STR_POOL_BUFF_SIZE 8192
+#endif//GASHA_PROFILER_STR_POOL_BUFF_SIZE
+
+//「文字列プールテーブルサイズ（個数）」が未定義なら、デフォルト値にする
+#if !defined(GASHA_PROFILER_STR_POOL_TABLE_SIZE)
+	#define GASHA_PROFILER_STR_POOL_TABLE_SIZE 1024
+#endif//GASHA_PROFILER_STR_POOL_TABLE_SIZE
+
+//「プロファイル情報プールサイズ（個数）」が未定義なら、デフォルト値にする
+#if !defined(GASHA_PROFILER_PROFILE_INFO_POOL_SIZE)
+	#define GASHA_PROFILER_PROFILE_INFO_POOL_SIZE 2048
+#endif//GASHA_PROFILER_PROFILE_INFO_POOL_SIZE
+
+//「スレッド情報テーブルサイズ（個数）」が未定義なら、デフォルト値にする
+#if !defined(GASHA_PROFILER_THREAD_INFO_TABLE_SIZE)
+	#define GASHA_PROFILER_THREAD_INFO_TABLE_SIZE 64
+#endif//GASHA_PROFILER_THREAD_INFO_TABLE_SIZE
 
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】

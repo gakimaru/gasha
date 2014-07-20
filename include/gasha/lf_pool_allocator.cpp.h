@@ -20,11 +20,10 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/lf_pool_allocator.inl>//ロックフリープールアロケータ【インライン関数／テンプレート関数定義部】
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <gasha/type_traits.h>//型特性ユーティリティ
 #include <gasha/string.h>//文字列処理：spprintf()
-
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -37,14 +36,11 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t
 {
 	//サイズとアラインメントをチェック
 	const std::size_t _align = align == m_blockAlign ? 0 : align;
+#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(adjustAlign(m_blockAlign, _align) - m_blockAlign + size <= m_blockSize, "Required-aligned-size is overed from bock-size.");
+#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 	if (adjustAlign(m_blockAlign, _align) - m_blockAlign + size > m_blockSize)
-	{
-	#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_SIZE_OR_ALIGNMENT = false;
-		assert(IS_INVALID_SIZE_OR_ALIGNMENT);
-	#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
-	}
 
 	//空きプールを確保
 	if (m_vacantHead.load() < m_poolSize)//空きプールの先頭インデックスがプールサイズ未満なら空きプールを利用
@@ -66,6 +62,9 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t
 		index_type recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
 		while (true)
 		{
+		#ifdef GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
+			GASHA_SIMPLE_ASSERT(recycable_index_and_tag != INVALID_INDEX, "lfPoolAllocator is not enough memory.");
+		#endif//GASHA_LF_POOL_ALLOCATOR_ENABLE_ASSERTION
 			if (recycable_index_and_tag == INVALID_INDEX)//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
 				return nullptr;//メモリ確保失敗
 			const index_type recyclable_index = recycable_index_and_tag & 0x00ffffff;//タグ削除
@@ -101,6 +100,8 @@ void* lfPoolAllocator<_MAX_POOL_SIZE>::alloc(const std::size_t size, std::size_t
 template<std::size_t _MAX_POOL_SIZE>
 bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p, const typename lfPoolAllocator<_MAX_POOL_SIZE>::index_type index)
 {
+	//if (!p)//nullptrの解放は常に成功扱い
+	//	return true;
 	const index_type tag = static_cast<index_type>(m_tag.fetch_add(1));//タグ取得
 	const index_type index_and_tag = index | (tag << 24);//タグ付きインデックス作成
 	index_type recycable_index_and_tag = m_recyclableHead.load();//再利用プールの先頭インデックスを取得
@@ -130,6 +131,8 @@ bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p, const typename lfPoolAllocat
 template<std::size_t _MAX_POOL_SIZE>
 bool lfPoolAllocator<_MAX_POOL_SIZE>::free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)
 		return false;

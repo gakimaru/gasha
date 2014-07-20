@@ -14,10 +14,6 @@
 
 #include <gasha/i_debug_pause.h>//デバッグポーズカラー【宣言部】
 
-#include <gasha/string.h>//文字列処理：spprintf()
-
-#include <utility>//C++11 std::forward, std::move
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------

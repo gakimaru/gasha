@@ -27,7 +27,7 @@ class iDebugPause
 public:
 	//メソッド
 
-	//デバッガのブレークポイント発動
+	//デバッガ用ブレークポイント割り込み
 	virtual void breakPoint() = 0;
 
 	//ポーズ処理呼び出し
@@ -42,7 +42,7 @@ public:
 
 public:
 	//メソッド
-	inline void breakPoint(){}//デバッガのブレークポイント発動
+	inline void breakPoint(){}//デバッガ用ブレークポイント割り込み
 	inline void pause(){}//ポーズ処理呼び出し
 public:
 	inline ~iDebugPause(){}//デストラクタ

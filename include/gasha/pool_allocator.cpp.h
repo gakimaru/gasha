@@ -23,8 +23,7 @@
 
 #include <gasha/type_traits.h>//型特性ユーティリティ
 #include <gasha/string.h>//文字列処理：spprintf
-
-#include <cassert>//assert()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -37,14 +36,11 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 {
 	//サイズとアラインメントをチェック
 	const std::size_t _align = align == m_blockAlign ? 0 : align;
+#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(adjustAlign(m_blockAlign, _align) - m_blockAlign + size <=m_blockSize, "Required-aligned-size is overed from block-size.");
+#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 	if (adjustAlign(m_blockAlign, _align) - m_blockAlign + size > m_blockSize)
-	{
-	#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
-		static const bool IS_INVALID_SIZE_OR_ALIGNMENT = false;
-		assert(IS_INVALID_SIZE_OR_ALIGNMENT);
-	#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 		return nullptr;
-	}
 
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//空きプールを確保
@@ -57,6 +53,9 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 		return adjustAlign(ptr, _align);//アラインメント調整して返す
 	}
 	//再利用プールの先頭インデックスが無効ならメモリ確保失敗（再利用プールが無い）
+#ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
+	GASHA_SIMPLE_ASSERT(m_recyclableHead != INVALID_INDEX, "poolAllocator is not enough memory.");
+#endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 	if (m_recyclableHead == INVALID_INDEX)
 		return nullptr;//メモリ確保失敗
 	//再利用プールを確保
@@ -77,6 +76,8 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
 {
+	//if (!p)//nullptrの解放は常に成功扱い
+	//	return true;
 	recycable_t* deleted_pool = reinterpret_cast<recycable_t*>(refBuff(index));//解放されたメモリを参照
 	deleted_pool->m_next_index = m_recyclableHead;//次の再利用プールのインデックスを保存
 	m_recyclableHead = index;//再利用プールの先頭インデックスを変更
@@ -89,6 +90,8 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename pool
 template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
 bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
 {
+	if (!p)//nullptrの解放は常に成功扱い
+		return true;
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const index_type index = ptrToIndex(p);//ポインタをインデックスに変換
 	if (index == INVALID_INDEX)

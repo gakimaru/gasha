@@ -21,8 +21,7 @@
 
 #include <gasha/lf_stack_allocator.inl>//ロックフリースタックアロケータ【インライン関数／テンプレート関数定義部】
 #include <gasha/string.h>//文字列処理：spprintf()
-
-#include <cassert>//assert()
+#include <gasha/simple_assert.h>//シンプルアサーション
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -46,14 +45,11 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 		const std::ptrdiff_t padding_size = new_ptr - now_ptr;
 		const size_type alloc_size = static_cast<size_type>(padding_size + _size);
 		const size_type new_size = now_size + alloc_size;
+	#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
+		GASHA_SIMPLE_ASSERT(new_size <= m_maxSize, "lfStackAllocator is not enough memory.");
+	#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 		if (new_size > m_maxSize)
-		{
-		#ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
-			static const bool NOT_ENOUGH_SPACE = false;
-			assert(NOT_ENOUGH_SPACE);
-		#endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 			return nullptr;
-		}
 
 		//使用中のサイズとメモリ確保数を更新
 		m_count.fetch_add(1);//アロケート数

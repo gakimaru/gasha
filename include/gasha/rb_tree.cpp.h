@@ -21,9 +21,10 @@
 
 #include <gasha/rb_tree.inl>//赤黒木コンテナ【インライン関数／テンプレート関数定義部】
 
+#include <gasha/simple_assert.h>//シンプルアサーション
+
 #include <utility>//C++11 std::move
 #include <cstring>//std::memcpy()
-#include <cassert>//assert()
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -36,7 +37,7 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type& node, const bool is_large)
 	{
-		//assert(m_depth < DEPTH_MAX);
+		GASHA_SIMPLE_ASSERT(m_depth < DEPTH_MAX, "RB-tree stack overflow.");
 		if (m_depth >= DEPTH_MAX)
 			return nullptr;
 		info_t* stack_node = &m_array[m_depth++];

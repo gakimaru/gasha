@@ -64,7 +64,7 @@ bool breakPoint::operator()(const bool conditon, const GASHA_ debugLog::level_ty
 	//※溜まっているログが全て出力されるのを待つ
 	log.flush();
 
-	//ブレーク処理呼び出し
+	//デバッガ用ブレークポイント割り込み
 	if (m_tlsDebugPause)
 		m_tlsDebugPause->breakPoint();
 
@@ -80,7 +80,7 @@ bool breakPoint::operator()(const bool conditon, const GASHA_ debugLog::level_ty
 	//直接出力版
 	log.printDirect(log::addCPStack, GASHA_ stdLogPrint(), add_message_func, level, category, message, std::forward<Tx>(args)...);
 
-	//ブレーク処理呼び出し
+	//デバッガ用ブレークポイント割り込み
 	if (m_tlsDebugPause)
 		m_tlsDebugPause->breakPoint();
 
