@@ -74,8 +74,15 @@ inline profiler::strPoolInfo::~strPoolInfo()
 //----------------------------------------
 //処理時間情報
 
+//平均算出
+inline void profiler::timeInfo::calcAvg()
+{
+	if (m_count > 0)
+		m_avgTime = m_time / static_cast<GASHA_ sec_t>(m_count);
+}
+
 //クリア
-bool profiler::timeInfo::clear()
+inline bool profiler::timeInfo::clear()
 {
 	m_time = static_cast<GASHA_ sec_t>(0.);
 	m_maxTime = static_cast<GASHA_ sec_t>(0.);
@@ -130,6 +137,7 @@ inline profiler::timeInfo::timeInfo() :
 	m_time(static_cast<sec_t>(0.)),
 	m_maxTime(static_cast<sec_t>(0.)),
 	m_minTime(static_cast<sec_t>(0.)),
+	m_avgTime(static_cast<sec_t>(0.)),
 	m_count(0)
 {}
 
@@ -137,12 +145,19 @@ inline profiler::timeInfo::timeInfo() :
 inline profiler::timeInfo::~timeInfo()
 {}
 
-
 //----------------------------------------
 //処理時間集計情報
 
+//平均算出
+inline void profiler::summarizedTimeInfo::calcAvg()
+{
+	m_time.calcAvg();
+	if (m_summarizedCount > 0)
+		m_avgCount = static_cast<float>(static_cast<double>(m_time.m_count) / static_cast<double>(m_summarizedCount));
+}
+
 //クリア
-bool profiler::summarizedTimeInfo::clear()
+inline bool profiler::summarizedTimeInfo::clear()
 {
 	m_time.clear();
 	m_maxCount = 0;

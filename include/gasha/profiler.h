@@ -62,18 +62,6 @@ public:
 	{
 		unordered,//ソートなし
 
-		////現在（のフレーム）の処理時間でソート
-		//ascOfTime,//処理時間昇順
-		//descOfTime,//処理時間降順
-		//ascOfAvgTime,//平均処理時間昇順
-		//descOfAvgTime,//平均処理時間降順
-		//ascOfMaxTime,//最長処理時間昇順
-		//descOfMaxTime,//最長処理時間降順
-		//ascOfMinTime,//最短処理時間昇順
-		//descOfMinTime,//最短処理時間降順
-		//ascOfCount,//計測回数昇順
-		//descOfCount,//計測回数降順
-
 		//全体集計処理時間でソート
 		ascOfTotalTime,//処理時間昇順
 		descOfTotalTime,//処理時間降順
@@ -187,6 +175,7 @@ public:
 		//メソッド
 		bool add(const GASHA_ sec_t time);//処理時間加算
 		bool sumup(const timeInfo& time_info);//処理時間集計
+		inline void calcAvg();//平均算出
 		inline bool clear();//クリア
 	public:
 		//ムーブオペレータ
@@ -244,7 +233,7 @@ public:
 		inline GASHA_ sec_t time() const { return m_time.m_time; }//処理時間
 		inline GASHA_ sec_t maxTime() const { return m_time.m_maxTime; }//最長処理時間
 		inline GASHA_ sec_t minTime() const { return m_time.m_minTime; }//最短処理時間
-		inline GASHA_ sec_t avgTime() const { return m_time.m_minTime; }//平均処理時間
+		inline GASHA_ sec_t avgTime() const { return m_time.m_avgTime; }//平均処理時間
 		inline int count() const { return m_time.m_count; }//計測回数
 		inline int maxCount() const { return m_maxCount; }//最大計測回数
 		inline int minCount() const { return m_minCount; }//最小計測回数
@@ -253,6 +242,7 @@ public:
 	private:
 		//メソッド
 		bool sumup(const timeInfo& time_info);//処理時間集計
+		inline void calcAvg();//平均算出
 		inline bool clear();//クリア
 	public:
 		//ムーブオペレータ
