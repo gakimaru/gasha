@@ -26,7 +26,7 @@
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::int32_t
 #include <atomic>//C++11 std::atomic
-#include <condition_variable>//C++11 std::conditio_variable
+#include <condition_variable>//C++11 std::condition_variable
 
 //【VC++】ワーニング設定を退避
 #pragma warning(push)

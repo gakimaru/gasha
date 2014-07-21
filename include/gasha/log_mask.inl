@@ -156,19 +156,9 @@ inline logMask::reverse_iterator::~reverse_iterator()
 //ログレベルマスクを取得
 inline logMask::level_type logMask::level(const logMask::purpose_type purpose, const logMask::category_type category) const
 {
-	if (category < CATEGORY_MIN || category > CATEGORY_MAX)
-		return LEVEL_MIN;//無効なカテゴリの場合、最も低いログレベルを返す
-	logMask::category_type _category = category;
-	if (_category == GASHA_ forCallPoint || _category == GASHA_ forCriticalCallPoint)
-	{
-		GASHA_ callPoint cp;
-		const GASHA_ callPoint* recent_cp = ((_category == GASHA_ forCriticalCallPoint) ? cp.findCritical() : cp.find());
-		if (!recent_cp)
-			_category = GASHA_ forAny;
-		else
-			_category = recent_cp->category();
-	}
-	return m_maskRef->m_level[purpose][category];
+	GASHA_ callPoint cp;
+	const logMask::category_type _category = cp.properCategory(category);
+	return m_maskRef->m_level[purpose][_category];
 }
 
 //出力可能なログレベルか？
@@ -183,10 +173,11 @@ inline bool logMask::isEnableLevel(const logMask::purpose_type purpose, const lo
 	return isEnableLevel(purpose, require_level_obj, category);
 }
 
-
 //コンソール取得
 inline GASHA_ iConsole* logMask::console(const logMask::purpose_type purpose, const GASHA_ logLevel& level, const GASHA_ logCategory& category) const
 {
+	if (!level.isExist() || !category.isExist())
+		return nullptr;
 	GASHA_ iConsole* console_obj = category.console(purpose);
 	if (console_obj)
 		return console_obj;
@@ -246,6 +237,13 @@ inline bool logMask::deserialize(const void* src, const std::size_t src_size)
 		return false;
 	std::memcpy(m_maskRef, src, serializeSize());
 	return true;
+}
+
+//ログレベルマスクをリセット
+//※現在参照しているログレベルを初期設定にする
+inline void logMask::reset()
+{
+	reset(m_maskRef);
 }
 
 //ムーブオペレータ

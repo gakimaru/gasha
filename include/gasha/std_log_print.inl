@@ -87,24 +87,26 @@ inline void stdLogPrint::operator()(GASHA_ logPrintInfo& info)
 				//時間
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithTime))
 				{
+					with_sep();
 					char time_str[32];
 					GASHA_ timeToStr(time_str, info.time(), timeStr_HHMMSS_MICRO);
-					with_sep();
 					GASHA_ spprintf(header, max_header_size, header_len, time_str);
 				}
 				//ログレベル名
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithLevel))
 				{
-					GASHA_ logLevel level(info.level());
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_len, level.name());
+					GASHA_ logLevel level(info.level());
+					if (level.isExist())
+						GASHA_ spprintf(header, max_header_size, header_len, level.name());
 				}
 				//ログカテゴリ名
 				if (GASHA_ logAttr::has(attr, purpose, GASHA_ logPurposeWithCategory))
 				{
-					GASHA_ logCategory category(info.category());
 					with_sep();
-					GASHA_ spprintf(header, max_header_size, header_len, category.name());
+					GASHA_ logCategory category(info.category());
+					if (category.isExist())
+						GASHA_ spprintf(header, max_header_size, header_len, category.name());
 				}
 				//※ログキューを通すと正しいコールポイントが得られない
 				////コールポイント名

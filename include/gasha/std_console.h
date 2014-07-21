@@ -99,10 +99,10 @@ public:
 	//コンストラクタ
 	inline stdNoticeConsole() :
 		winConsole(stderr, "Win(stderr)"),
-		m_idAlreadyCr(false)
+		m_isAlreadyCr(false)
 	{}
 private:
-	bool m_idAlreadyCr;//改行出力済み
+	bool m_isAlreadyCr;//改行出力済み
 
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 
@@ -188,11 +188,11 @@ public:
 	//コンストラクタ
 	inline stdNoticeConsole():
 		ttyConsole(stderr, "TTY(stderr)"),
-		m_idAlreadyCr(false)
+		m_isAlreadyCr(false)
 	{}
 
 private:
-	bool m_idAlreadyCr;//改行出力済み
+	bool m_isAlreadyCr;//改行出力済み
 
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時は無効化
 

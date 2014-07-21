@@ -591,12 +591,12 @@ public:
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
 //----------------------------------------
 //ログレベル登録用補助マクロ
 #define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (GASHA_FROM_OUTPUT_LEVEL(OUTPUT_LEVEL) + SUB_VALIE)//ログレベル定数計算用マクロ
-#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
-
-GASHA_NAMESPACE_END;//ネームスペース：終了
+#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (GASHA_ logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)

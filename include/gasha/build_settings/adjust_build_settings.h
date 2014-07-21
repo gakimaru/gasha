@@ -42,6 +42,14 @@
 #endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
 
 //--------------------------------------------------------------------------------
+//【ログ出力操作】
+
+//デバッグログが無効なら、ログキューも無効
+#if defined(GASHA_LOG_PRINT_USE_QUEUE) && !defined(GASHA_LOG_IS_ENABLED)
+	#undef GASHA_LOG_PRINT_USE_QUEUE
+#endif//GASHA_LOG_PRINT_USE_QUEUE
+
+//--------------------------------------------------------------------------------
 //【シンプルアサーション／ブレークポイント／ウォッチポイント】
 
 //シンプルアサーション／ブレークポイント／ウォッチポイントの「メッセージの出力先」が未定義なら、stderrにする
@@ -394,9 +402,9 @@
 //--------------------------------------------------------------------------------
 //【ログレベルマスク】
 
-//「デフォルトのログレベルマスク」が未定義なら、1（asNormal：通常メッセージ）にする
+//「デフォルトのログレベルマスク」が未定義なら、3（asNormal：通常メッセージ）にする
 #if !defined(GASHA_DEFAULT_LOG_MASK_OF_LOG)
-	#define GASHA_DEFAULT_LOG_MASK_OF_LOG 1
+	#define GASHA_DEFAULT_LOG_MASK_OF_LOG 3
 #endif//GASHA_DEFAULT_LOG_MASK_OF_LOG
 
 //「デフォルトの画面通知ログレベルマスク」が未定義なら、9（asCritical：重大メッセージ）にする

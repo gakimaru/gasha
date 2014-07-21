@@ -477,7 +477,7 @@ inline bool debugLog::addMessage(const debugLog::ope_type ope, char* message, co
 	{
 		//コールポイントスタックを追加
 		GASHA_ callPoint cp;
-		message_len += cp.debugInfo(message + message_len, max_size);
+		message_len += cp.debugInfo(message + message_len, max_size - message_len);
 		result = true;
 	}
 	return result;
@@ -517,13 +517,17 @@ inline bool debugLog::consolesInfo(bool& result, GASHA_ logMask::consolesInfo_ty
 //ログ出力情報を作成
 inline void debugLog::makeLogPrintInfo(GASHA_ logPrintInfo& print_info, const debugLog::ope_type ope, const debugLog::level_type level, const debugLog::category_type category, const char* message, const std::size_t message_size, GASHA_ logMask::consolesInfo_type& consoles_info)
 {
+	//カテゴリを変換
+	GASHA_ callPoint cp;
+	const debugLog::category_type _category = cp.properCategory(category);
+	
 	//ログ出力情報作成
 	print_info.setId(properId(ope));
 	print_info.setTime(nowElapsedTime());
 	print_info.setMessage(message);
 	print_info.setMessageSize(message_size);
 	print_info.setLevel(level);
-	print_info.setCategory(category);
+	print_info.setCategory(_category);
 	print_info.setAttr(*GASHA_ logAttr());
 	for (purpose_type purpose = 0; purpose < PURPOSE_NUM; ++purpose)
 	{

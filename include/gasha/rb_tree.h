@@ -224,9 +224,14 @@ namespace rb_tree
 		//  0     ... lhs == rhs
 		//  1以上 ... lhs > rhs
 		// -1以下 ... lhs < rhs
-		inline static int compareKey(const key_type lhs, const key_type rhs)
+		inline static int compareKey(const key_type& lhs, const key_type& rhs)
 		{
-			return static_cast<int>(lhs) - static_cast<int>(rhs);
+			if (lhs == rhs)
+				return 0;
+			else if (lhs < rhs)
+				return -1;
+			else//if (lhs > rhs)
+				return 1;
 		}
 
 		//ノードとキーを比較

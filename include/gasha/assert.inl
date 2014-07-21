@@ -78,7 +78,7 @@ bool breakPoint::operator()(const bool conditon, const GASHA_ debugLog::level_ty
 #else//GASHA_LOG_PRINT_USE_QUEUE
 	
 	//直接出力版
-	log.printDirect(log::addCPStack, GASHA_ stdLogPrint(), add_message_func, level, category, message, std::forward<Tx>(args)...);
+	log.printDirect(debugLog::addCPStack, GASHA_ stdLogPrint(), add_message_func, level, category, message, std::forward<Tx>(args)...);
 
 	//デバッガ用ブレークポイント割り込み
 	if (m_tlsDebugPause)
@@ -113,7 +113,7 @@ inline GASHA_ iDebugPause* breakPoint::changeDebugPause(GASHA_ iDebugPause& new_
 }
 
 //デバッグポーズ処理を標準処理に変更
-inline GASHA_ iDebugPause* breakPoint::changeStdDebugPause()
+inline GASHA_ iDebugPause* breakPoint::resetDebugPause()
 {
 	return changeDebugPause(GASHA_ stdDebugPause::instance());
 }

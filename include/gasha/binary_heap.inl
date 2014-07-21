@@ -523,7 +523,7 @@ namespace binary_heap
 		node_type* obj = _pushBegin(std::forward<Tx>(args)...);
 		if (!obj)
 			return nullptr;
-		return pushEnd();
+		return _pushEnd();
 	}
 
 	//プッシュ

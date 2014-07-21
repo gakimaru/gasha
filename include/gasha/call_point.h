@@ -13,7 +13,6 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/log_category.h>//ログカテゴリ
-
 #include <gasha/chrono.h>//時間処理ユーティリティ：sec_t, elapsedTime
 
 #include <cstddef>//std::size_t
@@ -64,6 +63,8 @@ public:
 	const criticalCallPoint* findCritical() const;//直近の重大コールポイントを検索
 	inline void setAutoProfiling(const bool enabled);//自動プロファイリングを有効化／無効化
 	void profiling();//プロファイリングする ※現時点の経過時間をプロファイラーに記録する
+	//適切なカテゴリを取得
+	category_type properCategory(const category_type category);
 	//デバッグ情報作成
 	std::size_t debugInfo(char* message, const std::size_t max_size) const;
 
@@ -130,6 +131,7 @@ public:
 	inline const criticalCallPoint* findCritical() const{ return nullptr; }//直近の重大コールポイントを検索
 	inline void setAutoProfiling(const bool enabled){}//自動プロファイリングを有効化／無効化
 	inline void profiling(){}//プロファイリングする
+	inline category_type properCategory(const category_type category){ return 0; }//適切なカテゴリを取得
 	inline std::size_t debugInfo(char* message, const std::size_t max_size) const{ return 0; }//デバッグ情報作成
 public:
 	inline callPoint& operator=(callPoint&& rhs){ return *this; }//ムーブオペレータ

@@ -60,7 +60,7 @@ public:
 	inline iDebugPause* debugPause();//取得
 	inline iDebugPause* changeDebugPause(iDebugPause* new_debug_pause);//変更 ※変更前のオブジェクトを返す
 	inline iDebugPause* changeDebugPause(iDebugPause& new_debug_pause);//変更 ※変更前のオブジェクトを返す
-	inline iDebugPause* changeStdDebugPause();//標準処理に変更 ※変更前のオブジェクトを返す
+	inline iDebugPause* resetDebugPause();//標準処理に変更 ※変更前のオブジェクトを返す
 
 public:
 	//デフォルトコンストラクタ
@@ -84,7 +84,7 @@ public:
 	inline iDebugPause* debugPause(){ return nullptr; }//取得
 	inline iDebugPause* changeDebugPause(iDebugPause* new_debug_pause){ return nullptr; }//変更
 	inline iDebugPause* changeDebugPause(iDebugPause& new_debug_pause){ return nullptr; }//変更
-	inline iDebugPause* changeStdDebugPause(){ return nullptr; }//標準処理に変更
+	inline iDebugPause* resetDebugPause(){ return nullptr; }//標準処理に変更
 public:
 	inline breakPoint(){}//デフォルトコンストラクタ
 	inline ~breakPoint(){}//デストラクタ

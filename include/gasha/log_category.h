@@ -552,12 +552,12 @@ public:
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 };
 
+GASHA_NAMESPACE_END;//ネームスペース：終了
+
 //----------------------------------------
 //ログカテゴリ登録用補助マクロ
-#define MAKE_LOG_CATEGORY_VALUE(VALUE) (logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
-#define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
-
-GASHA_NAMESPACE_END;//ネームスペース：終了
+#define MAKE_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
+#define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
 
 //【VC++】ワーニング設定を復元
 #pragma warning(pop)

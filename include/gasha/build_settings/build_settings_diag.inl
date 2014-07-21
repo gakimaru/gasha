@@ -68,8 +68,24 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #ifdef GASHA_DEBUGGER_BREAK_IS_AVAILABLE
 	GASHA_ spprintf(message, max_size, message_len, "[OK] Debugger-break-point is AVAILABLE.\n");
 #else//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
-	GASHA_ spprintf(message, max_size, message_len, "[NG] Debugger-break-point is NOT available!\n");
+	GASHA_ spprintf(message, max_size, message_len, "[--] Debugger-break-point is NOT available.\n");
 #endif//GASHA_DEBUGGER_BREAK_IS_AVAILABLE
+
+	//デバッグログ有効化
+#ifdef GASHA_LOG_IS_ENABLED
+	GASHA_ spprintf(message, max_size, message_len, "[OK] Debug-log is ENABLED.\n");
+#else//GASHA_LOG_IS_ENABLED
+	GASHA_ spprintf(message, max_size, message_len, "[--] Debug-log is NOT enabled.\n");
+#endif//GASHA_LOG_IS_ENABLED
+
+#ifdef GASHA_LOG_IS_ENABLED
+	//ログキュー使用
+#ifdef GASHA_LOG_PRINT_USE_QUEUE
+	GASHA_ spprintf(message, max_size, message_len, "[OK] Debug-log USE log-queue.\n");
+#else//GASHA_LOG_PRINT_USE_QUEUE
+	GASHA_ spprintf(message, max_size, message_len, "[--] Debug-log NOT use log-queue.\n");
+#endif//GASHA_LOG_PRINT_USE_QUEUE
+#endif//GASHA_LOG_IS_ENABLED
 
 	//TLS対応
 #ifdef GASHA_INCOMPLETE_TLS_INITIALIZER

@@ -337,7 +337,7 @@ namespace binary_heap
 			return nullptr;
 		*obj = std::move(src);
 		m_status = PUSH_BEGINNING;
-		return pushEnd();
+		return _pushEnd();
 	}
 	
 	//プッシュ（本体）：コピー
@@ -351,7 +351,7 @@ namespace binary_heap
 			return nullptr;
 		*obj = src;
 		m_status = PUSH_BEGINNING;
-		return pushEnd();
+		return _pushEnd();
 	}
 		
 	//プッシュ終了（本体）
@@ -411,7 +411,7 @@ namespace binary_heap
 		if (!obj)
 			return false;
 		dst = *obj;
-		return popEnd();
+		return _popEnd();
 	}
 	
 	//ポップ開始（本体）

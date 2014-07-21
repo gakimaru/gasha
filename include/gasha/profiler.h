@@ -60,17 +60,19 @@ public:
 	//プロファイル情報順序
 	enum profileOrder_type
 	{
-		//現在（のフレーム）の処理時間でソート
-		ascOfTime,//処理時間昇順
-		descOfTime,//処理時間降順
-		ascOfAvgTime,//平均処理時間昇順
-		descOfAvgTime,//平均処理時間降順
-		ascOfMaxTime,//最長処理時間昇順
-		descOfMaxTime,//最長処理時間降順 ※デフォルト
-		ascOfMinTime,//最短処理時間昇順
-		descOfMinTime,//最短処理時間降順
-		ascOfCount,//計測回数昇順
-		descOfCount,//計測回数降順
+		unordered,//ソートなし
+
+		////現在（のフレーム）の処理時間でソート
+		//ascOfTime,//処理時間昇順
+		//descOfTime,//処理時間降順
+		//ascOfAvgTime,//平均処理時間昇順
+		//descOfAvgTime,//平均処理時間降順
+		//ascOfMaxTime,//最長処理時間昇順
+		//descOfMaxTime,//最長処理時間降順
+		//ascOfMinTime,//最短処理時間昇順
+		//descOfMinTime,//最短処理時間降順
+		//ascOfCount,//計測回数昇順
+		//descOfCount,//計測回数降順
 
 		//全体集計処理時間でソート
 		ascOfTotalTime,//処理時間昇順
@@ -96,7 +98,7 @@ public:
 		ascOfAvgPeriodicTime,//平均処理時間昇順
 		descOfAvgPeriodicTime,//平均処理時間降順
 		ascOfMaxPeriodicTime,//最長処理時間昇順
-		descOfMaxPeriodicTime,//最長処理時間降順
+		descOfMaxPeriodicTime,//最長処理時間降順 ※デフォルト
 		ascOfMinPeriodicTime,//最短処理時間昇順
 		descOfMinPeriodicTime,//最短処理時間降順
 		ascOfPeriodicCount,//計測回数昇順
@@ -312,10 +314,10 @@ public:
 		//アクセッサ
 		inline GASHA_ crc32_t nameCrc() const { return m_nameCrc; }//名前のCRC
 		inline const char* name() const { return m_name; }//名前
-		inline const timeInfo& time() const { return m_time; }//処理時間
 		inline const summarizedTimeInfo& totalTime() const { return m_totalTime; }//処理時間：全体集計
 		inline const summarizedTimeInfo& periodicTime() const { return m_periodicTime; }//処理時間：期間集計
-		//inline const summarizedTimeInfo& periodicTimeWork() const { return m_periodicTimeWork; }//処理時間：期間集計（集計中）
+		//inline const timeInfo& time() const { return m_time; }//処理時間（計測中）
+		//inline const summarizedTimeInfo& periodicTimeWork() const { return m_periodicTimeWork; }//処理時間：期間集計（期間集計中）
 	private:
 		//メソッド
 		bool add(const GASHA_ sec_t time);//処理時間加算
@@ -460,8 +462,8 @@ public:
 		//※取得した情報数を返す
 		//※プロファイル情報の並び順を指定する
 		template<std::size_t N>
-		inline std::size_t getProfileInfo(profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
-		std::size_t getProfileInfo(profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
+		inline std::size_t getProfileInfo(profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
+		std::size_t getProfileInfo(profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
 	public:
 		//比較オペレータ
 		inline bool operator==(const threadInfo& rhs) const { return m_threadNameCrc == rhs.m_threadNameCrc; }
@@ -503,8 +505,8 @@ public:
 	public:
 		//プロファイル情報を取得
 		template<std::size_t N>
-		inline std::size_t getProfileInfo(profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }
-		inline std::size_t getProfileInfo(profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }
+		inline std::size_t getProfileInfo(profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }
+		inline std::size_t getProfileInfo(profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }
 	public:
 		//比較オペレータ
 		inline bool operator==(const threadInfo& rhs) const { return true; }
@@ -600,21 +602,22 @@ public:
 	//※情報を受け取るための配列を渡す
 	//※取得した情報数を返す
 	//※プロファイル情報の並び順を指定する
+	//※【注意】「上位 n 件」のデータだけが必要な場合でも、全件分のバッファを渡す必要がある
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
+	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const char* thread_name, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
+	inline std::size_t getProfileInfo(const char* thread_name, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
+	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
+	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime);
-	std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
-	inline std::size_t getProfileInfo(const char* thread_name, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
-	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
-	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
-	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime);
+	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime);
+	std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
+	inline std::size_t getProfileInfo(const char* thread_name, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
+	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
+	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
+	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime);
 
 	//【使用注意】クリア
 	//※強制的に記録を全てをクリアするので注意。
@@ -661,20 +664,20 @@ public:
 	inline std::size_t getThreadInfo(threadInfo(&array)[N]){ return 0; }//スレッド情報を取得
 	inline std::size_t getThreadInfo(threadInfo* array, std::size_t max_size){ return 0; }//スレッド情報を取得
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const char* thread_name, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const char* thread_name, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	template<std::size_t N>
-	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
-	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
-	inline std::size_t getProfileInfo(const char* thread_name, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
-	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
-	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
-	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo(&array)[N], const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const GASHA_ crc32_t thread_name_crc, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const char* thread_name, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const threadInfo& thread_info, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(GASHA_ threadId&& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
+	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	inline void clear(){}//クリア
 public:
 	inline profiler(const explicitInit_type&){}//明示的な初期化用コンストラクタ

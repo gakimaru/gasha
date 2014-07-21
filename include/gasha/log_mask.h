@@ -429,6 +429,12 @@ public:
 	inline bool serialize(void* dst, const std::size_t dst_size) const;//シリアライズ（セーブ用）※dst に出力
 	inline bool deserialize(const void* src, const std::size_t dst_size);//デシリアライズ（ロード用）※src から復元
 
+	//ログレベルマスクをリセット
+	//※現在参照しているログレベルを初期設定にする
+	inline void reset();
+private:
+	static void reset(mask_type* mask);
+
 private:
 	//初期化メソッド（一回限り）
 	static void initializeOnce();
@@ -528,6 +534,7 @@ public:
 	inline std::size_t serializeSize() const{ return 0; }//シリアライズに必要なサイズを取得
 	inline bool serialize(void* dst, const std::size_t dst_size) const{ return true; }//シリアライズ（セーブ用）※dst に出力
 	inline bool deserialize(const void* src, const std::size_t dst_size){ return true; }//デシリアライズ（ロード用）※src から復元
+	inline void reset(){}//ログレベルマスクをリセット
 public:
 	inline logMask& operator=(logMask&& rhs){ return *this; }//ムーブオペレータ
 	inline logMask& operator=(const logMask& rhs) = delete;//コピーオペレータ
