@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/crc32.h>//CRC32
+#include <gasha/crc32.h>//CRC32計算
 #include <gasha/limits.h>//限界値
 
 //【VC++】ワーニング設定を退避

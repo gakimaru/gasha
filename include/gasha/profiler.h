@@ -18,7 +18,7 @@
 #include <gasha/rb_tree.h>//赤黒木
 #include <gasha/singly_linked_list.h>//片方向連結リスト
 #include <gasha/shared_spin_lock.h>//共有スピンロック
-#include <gasha/crc32.h>//CRC32
+#include <gasha/crc32.h>//CRC32計算
 #include <gasha/chrono.h>//時間処理ユーティリティ
 #include <gasha/thread_id.h>//スレッドID
 
@@ -380,7 +380,7 @@ public:
 public:
 	//----------------------------------------
 	//プロファイル情報操作型
-	struct profileInfoOpe : public GASHA_ rb_tree::baseOpe<profileInfoOpe, profileInfo>
+	struct profileInfoOpe : public GASHA_ rb_tree::baseOpe<profileInfoOpe, profileInfo, GASHA_ crc32_t>
 	{
 		typedef GASHA_ sharedSpinLock lock_type;//ロック型
 

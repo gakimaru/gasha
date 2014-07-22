@@ -24,7 +24,7 @@
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 #include <gasha/basic_math.h>//基本算術（素数計算）
 #include <gasha/limits.h>//限界値
-#include <gasha/crc32.h>//CRC32
+#include <gasha/crc32.h>//CRC32計算
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
 #include <cstddef>//std::size_t, std::ptrdiff_t

@@ -23,7 +23,7 @@
 #include <gasha/shared_lock_guard.h>//スコープ共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
 
-#include <gasha/crc32.h>//CRC32
+#include <gasha/crc32.h>//CRC32計算
 
 #include <cstddef>//std::size_t, std::ptrdiff_t
 #include <cstdint>//C++11 std::int64_t, std::uint32_t
