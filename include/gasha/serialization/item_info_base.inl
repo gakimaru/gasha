@@ -31,6 +31,24 @@ namespace serialization
 	//--------------------
 	//データ項目情報基底クラス
 	
+	//名前のCRC
+	inline GASHA_ crc32_t itemInfoBase::nameCrc() const
+	{
+		return m_nameCrc;
+	}
+	
+	//データ項目名
+	inline const char* itemInfoBase::name() const
+	{
+		return m_name;
+	}
+	
+	//データ型情報
+	inline const std::type_info& itemInfoBase::typeInfo() const
+	{
+		return *m_itemType;
+	}
+	
 	//オブジェクト型か？
 	inline bool itemInfoBase::isObj() const
 	{
@@ -63,7 +81,7 @@ namespace serialization
 	
 	//【参考用】（セーブデータ上の）配列要素数を取得
 	//※シリアライズ形式によっては正しくない可能性がある
-	inline std::size_t itemInfoBase::getElemNum() const
+	inline std::size_t itemInfoBase::extent() const
 	{
 		return	m_arrNum == 0 ?
 					1 :
@@ -71,7 +89,7 @@ namespace serialization
 	}
 	
 	//現在の配列要素数を取得
-	inline std::size_t itemInfoBase::getNowElemNum() const
+	inline std::size_t itemInfoBase::nowExtent() const
 	{
 		return	m_hasNowInfo ?
 					m_nowArrNum == 0 ?
@@ -82,7 +100,7 @@ namespace serialization
 	
 	//【参考用】最小の配列要素数を取得
 	//※シリアライズ形式によっては正しくない可能性がある
-	inline std::size_t itemInfoBase::getMinimumElemNum() const
+	inline std::size_t itemInfoBase::minExtent() const
 	{
 		return	m_hasNowInfo ?
 					m_arrNum < m_nowArrNum ?
@@ -260,19 +278,19 @@ namespace serialization
 	}
 	
 	//セーブデータ上にのみ存在するデータか？を更新
-	inline void itemInfoBase::setIsOnlyOnSaveData() const
+	inline void itemInfoBase::setOnlyOnSaveData() const
 	{
 		m_isOnlyOnSaveData = true; m_isOnlyOnMem = false;
 	}
 	
 	//セーブデータ上にのみ存在するデータか？を更新
-	inline void itemInfoBase::setIsOnlyOnSaveData(const bool enabled) const
+	inline void itemInfoBase::setOnlyOnSaveData(const bool enabled) const
 	{
-		if (enabled) setIsOnlyOnSaveData();
+		if (enabled) setOnlyOnSaveData();
 	}
 	
 	//セーブデータ上にのみ存在するデータか？をリセット
-	inline void itemInfoBase::resetIsOnlyOnSaveData() const
+	inline void itemInfoBase::resetOnlyOnSaveData() const
 	{
 		m_isOnlyOnSaveData = false;
 	}
@@ -284,19 +302,19 @@ namespace serialization
 	}
 	
 	//セーブデータ上にないデータか？を更新
-	inline void itemInfoBase::setIsOnlyOnMem() const
+	inline void itemInfoBase::setOnlyOnMem() const
 	{
 		m_isOnlyOnMem = true; m_isOnlyOnSaveData = false;
 	}
 	
 	//セーブデータ上にないデータか？を更新
-	inline void itemInfoBase::setIsOnlyOnMem(const bool enabled) const
+	inline void itemInfoBase::setOnlyOnMem(const bool enabled) const
 	{
-		if (enabled) setIsOnlyOnMem();
+		if (enabled) setOnlyOnMem();
 	}
 	
 	//セーブデータ上にないデータか？をリセット
-	inline void itemInfoBase::resetIsOnlyOnMem() const
+	inline void itemInfoBase::resetOnlyOnMem() const
 	{
 		m_isOnlyOnMem = false;
 	}

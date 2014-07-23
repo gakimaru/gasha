@@ -13,6 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/serialization/version.h>//シリアライズ/バージョン
+#include <gasha/serialization/item_info_base.h>//シリアライズ/データ項目情報基底クラス
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -32,7 +33,7 @@ namespace serialization
 	template<class ARCHIVE_TYPE, class T>
 	struct load {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase* target_item)
 		{}
 	};
 	//--------------------

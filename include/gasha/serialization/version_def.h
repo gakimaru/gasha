@@ -62,7 +62,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //--------------------
 //データクラス用のバージョン定義マクロ
-#define SERIALIZATION_VERSION_DEF(T, _MAJOR, _MINOR) \
+#define GASHA_SERIALIZATION_VERSION_DEF(T, _MAJOR, _MINOR) \
 	GASHA_NAMESPACE_BEGIN \
 		namespace serialization { \
 			template<> \

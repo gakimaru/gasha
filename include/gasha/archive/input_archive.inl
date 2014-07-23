@@ -153,7 +153,7 @@ namespace archive
 
 		//一旦は「セーブデータに存在しないデータ項目」という扱いにしておく
 		//※ロード終了後もそのままならロードできなかったデータ項目として処理する
-		item_obj.setIsOnlyOnMem();
+		item_obj.setOnlyOnMem();
 		
 		//データ項目を記録
 		//※全ての記録が終わった後、データを読み込みながらデータ項目に書き込んでいく
@@ -248,7 +248,7 @@ namespace archive
 			inputArchive arc(parent_arc, DESERIALIZE_PHASE_BLOCK);
 			
 			//集計準備
-			const std::size_t elem_num = item_obj.getElemNum();//要素数（配列要素ではなく、非配列なら1）
+			const std::size_t elem_num = item_obj.extent();//要素数（配列要素ではなく、非配列なら1）
 			std::size_t elem_num_loaded = 0;//実際に読み込んだ要素数（配列要素ではなく、非配列なら1）
 			
 			if (!item_obj.isNul() && !arc.hasFatalError())//【セーブデータ上の】要素がヌルでなければ処理する
@@ -294,7 +294,7 @@ namespace archive
 						//const T* debug_p = reinterpret_cast<const T*>(item_obj.m_itemP);
 
 						//有効な配列要素か？（有効でなければ処理せず読み込むだけ）
-						const bool is_valid_element = (!item_obj.nowIsNul() && index < item_obj.getNowElemNum());
+						const bool is_valid_element = (!item_obj.nowIsNul() && index < item_obj.nowExtent());
 						if (is_valid_element)
 							++elem_num_loaded;
 
@@ -327,7 +327,7 @@ namespace archive
 							if (is_valid_element)
 							{
 								GASHA_ serialization::serialize<inputArchive, T> functor;
-								functor(arc, item_obj.template getConst<T>(), ver, now_ver);
+								functor(arc, item_obj.template getConst<T>(), ver, now_ver, nullptr);
 							}
 
 							//ロード処理（デシリアライズ専用処理）呼び出し
@@ -335,7 +335,7 @@ namespace archive
 							if (is_valid_element)
 							{
 								GASHA_ serialization::load<inputArchive, T> functor;
-								functor(arc, item_obj.template get<T>(), ver, now_ver);
+								functor(arc, item_obj.template get<T>(), ver, now_ver, nullptr);
 							}
 
 							//データのロードフェーズに変更
@@ -429,7 +429,7 @@ namespace archive
 										if (arc.status() != DESERIALIZE_PHASE_LOAD_OBJECT_END)
 										{
 											GASHA_ serialization::serialize<inputArchive, T> functor;
-											functor(arc, item_obj.template getConst<T>(), ver, now_ver);
+											functor(arc, item_obj.template getConst<T>(), ver, now_ver, &child_item);
 										}
 
 										//ロード処理（デシリアライズ専用処理）呼び出し
@@ -437,7 +437,7 @@ namespace archive
 										if (arc.status() != DESERIALIZE_PHASE_LOAD_OBJECT_END)
 										{
 											GASHA_ serialization::load<inputArchive, T> functor;
-											functor(arc, item_obj.template get<T>(), ver, now_ver);
+											functor(arc, item_obj.template get<T>(), ver, now_ver, &child_item);
 										}
 
 										//オブジェクト処理対象データ項目をリセット

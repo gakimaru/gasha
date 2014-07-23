@@ -30,35 +30,7 @@
 #include <gasha/serialization/item_info_base.h>//シリアライズ/データ項目情報基底クラス
 #include <gasha/serialization/item_info.h>//シリアライズ/データ項目情報クラス
 
-//--------------------
-//データクラスのフレンド化マクロ
-#define FRIEND_SERIALIZE() \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::serialize; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::save; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::load; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::beforeLoad; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::afterLoad; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::noticeUnrecognizedItem; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::noticeUnloadedItem; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::collector; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::distributor; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::beforeDistribute; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::afterDistribute; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::fatalSerializeErrorOccurred; \
-	template<class ARCHIVE_TYPE, class T> \
-	friend struct GASHA_ serialization::fatalDeserializeErrorOccurred;
+#include <gasha/serialization/friends.h>//シリアライズ/フレンド宣言
 
 #endif//GASHA_INCLUDED_SERIALIZATION_H
 

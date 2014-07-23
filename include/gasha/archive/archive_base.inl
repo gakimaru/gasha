@@ -59,15 +59,21 @@ namespace archive
 	//セーブデータサイズ取得
 	inline std::size_t archiveBase::saveDataSize() const
 	{
-		return m_result.getSaveDataSize();
+		return m_result.saveDataSize();
 	}
 	//セーブデータバッファの先頭ポインタを取得
 	inline const void* archiveBase::saveData() const
 	{
 		return m_buff;
 	}
+	//最も多く消費したワークバッファサイズ取得
+	inline std::size_t archiveBase::peakWorkSize() const
+	{
+		return m_result.peakWorkSize();
+	}
+
 	//セーブデータバッファの先頭ポインタを取得
-	inline const byte* archiveBase::buffTop() const
+	inline const byte* archiveBase::topPtr() const
 	{
 		return m_buff;
 	}
@@ -87,7 +93,7 @@ namespace archive
 		return m_buffSize - m_buffPos;
 	}
 	//セーブデータバッファの現在位置のポインタを取得
-	inline byte* archiveBase::buffNow()
+	inline byte* archiveBase::nowPtr()
 	{
 		return m_buff + m_buffPos;
 	}
@@ -130,7 +136,7 @@ namespace archive
 	//親を受け取るコンストラクタ
 	inline archiveBase::archiveBase(archiveBase& parent) :
 		m_nestLevel(parent.m_nestLevel + 1),
-		m_buff(parent.buffNow()),
+		m_buff(parent.nowPtr()),
 		m_buffSize(parent.remain()),
 		m_buffPos(0),
 		m_workBuff(reinterpret_cast<char*>(const_cast<void*>(parent.m_workBuff.buff())) + parent.m_workBuff.size(), parent.m_workBuff.remain()),

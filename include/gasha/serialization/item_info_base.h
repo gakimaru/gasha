@@ -36,6 +36,9 @@ namespace serialization
 	{
 	public:
 		//アクセッサ
+		inline GASHA_ crc32_t nameCrc() const;//名前のCRC
+		inline const char* name() const;//名前 ※セーブデータにしか存在しないデータ項目の場合、名前がないので注意（CRCのみ存在）
+		inline const std::type_info& typeInfo() const;//データ型情報
 		inline bool isObj() const;//オブジェクト型か？
 		inline bool isArr() const;//配列型か？
 		inline bool isPtr() const;//ポインタ型か？
@@ -43,12 +46,12 @@ namespace serialization
 		inline bool isVLen() const;//可変長か？
 		//【参考用】（セーブデータ上の）配列要素数を取得
 		//※シリアライズ形式によっては正しくない可能性がある
-		inline std::size_t getElemNum() const;
+		inline std::size_t extent() const;
 		//現在の配列要素数を取得
-		inline std::size_t getNowElemNum() const;
+		inline std::size_t nowExtent() const;
 		//【参考用】最小の配列要素数を取得
 		//※シリアライズ形式によっては正しくない可能性がある
-		inline std::size_t getMinimumElemNum() const;
+		inline std::size_t minExtent() const;
 		inline bool nowIsObj() const;//現在のデータはオブジェクト型か？
 		inline bool nowIsArr() const;//現在のデータは配列型か？
 		inline bool nowIsPtr() const;//現在のデータはポインタ型か？
@@ -76,13 +79,13 @@ namespace serialization
 		inline bool nowArrIsLarge() const;//現在の配列要素数の方がセーブデータの配列要素数より大きいか？
 		inline bool hasNowInfo() const;//現在の情報コピー済み取得
 		inline bool isOnlyOnSaveData() const;//セーブデータ上にのみ存在するデータか？
-		inline void setIsOnlyOnSaveData() const;//セーブデータ上にのみ存在するデータか？を更新
-		inline void setIsOnlyOnSaveData(const bool enabled) const;//セーブデータ上にのみ存在するデータか？を更新
-		inline void resetIsOnlyOnSaveData() const;//セーブデータ上にのみ存在するデータか？をリセット
+		inline void setOnlyOnSaveData() const;//セーブデータ上にのみ存在するデータか？を更新
+		inline void setOnlyOnSaveData(const bool enabled) const;//セーブデータ上にのみ存在するデータか？を更新
+		inline void resetOnlyOnSaveData() const;//セーブデータ上にのみ存在するデータか？をリセット
 		inline bool isOnlyOnMem() const;//セーブデータ上にないデータか？
-		inline void setIsOnlyOnMem() const;//セーブデータ上にないデータか？を更新
-		inline void setIsOnlyOnMem(const bool enabled) const;//セーブデータ上にないデータか？を更新
-		inline void resetIsOnlyOnMem() const;//セーブデータ上にないデータか？をリセット
+		inline void setOnlyOnMem() const;//セーブデータ上にないデータか？を更新
+		inline void setOnlyOnMem(const bool enabled) const;//セーブデータ上にないデータか？を更新
+		inline void resetOnlyOnMem() const;//セーブデータ上にないデータか？をリセット
 		inline bool isAlready() const;//処理済みか？
 		inline void setIsAlready() const;//処理済みにする
 		inline void resetIsAlready() const;//処理済みを解除する

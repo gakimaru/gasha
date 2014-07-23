@@ -36,11 +36,11 @@ namespace archive
 		inline GASHA_ archive::results& result();//処理結果を取得
 		inline const GASHA_ archive::results& result() const;//処理結果を取得
 		inline bool hasFatalError() const;//致命的なエラーありか？
-		inline const GASHA_ archive::byte* buffTop() const;//セーブデータバッファの先頭ポインタを取得
+		inline const GASHA_ archive::byte* topPtr() const;//セーブデータバッファの先頭ポインタを取得
 		inline const std::size_t maxSize() const;//セーブデータバッファのサイズを取得
 		inline const std::size_t size() const;//セーブデータバッファの使用量を取得
 		inline const std::size_t remain() const;//セーブデータバッファの残量を取得
-		inline GASHA_ archive::byte* buffNow();//セーブデータバッファの現在位置のポインタを取得
+		inline GASHA_ archive::byte* nowPtr();//セーブデータバッファの現在位置のポインタを取得
 		inline bool isFull() const;//バッファの現在位置が末端に到達したか？
 		inline std::size_t itemsNum() const;//データ項目数
 	public:

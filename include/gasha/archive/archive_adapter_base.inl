@@ -45,9 +45,9 @@ namespace archive
 		return m_arc.hasFatalError();
 	}
 	//セーブデータバッファの先頭ポインタを取得
-	inline const GASHA_ archive::byte* archiveAdapterBase::buffTop() const
+	inline const GASHA_ archive::byte* archiveAdapterBase::topPtr() const
 	{
-		return m_arc.buffTop();
+		return m_arc.topPtr();
 	}
 	//セーブデータバッファのサイズを取得
 	inline const std::size_t archiveAdapterBase::maxSize() const
@@ -65,9 +65,9 @@ namespace archive
 		return m_arc.remain();
 	}
 	//セーブデータバッファの現在位置のポインタを取得
-	inline GASHA_ archive::byte* archiveAdapterBase::buffNow()
+	inline GASHA_ archive::byte* archiveAdapterBase::nowPtr()
 	{
-		return m_arc.buffNow();
+		return m_arc.nowPtr();
 	}
 	//バッファの現在位置が末端に到達したか？
 	inline bool archiveAdapterBase::isFull() const

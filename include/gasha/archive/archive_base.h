@@ -80,12 +80,13 @@ namespace archive
 		inline bool hasFatalError() const;//致命的なエラーありか？
 		inline std::size_t saveDataSize() const;//セーブデータサイズ取得
 		inline const void* saveData() const;//セーブデータバッファの先頭ポインタを取得
+		inline std::size_t peakWorkSize() const;//最も多く消費したワークバッファサイズ取得
 	protected:
-		inline const byte* buffTop() const;//セーブデータバッファの先頭ポインタを取得
+		inline const byte* topPtr() const;//セーブデータバッファの先頭ポインタを取得
 		inline const std::size_t maxSize() const;//セーブデータバッファのサイズを取得
 		inline const std::size_t size() const;//セーブデータバッファの使用量を取得
 		inline const std::size_t remain() const;//セーブデータバッファの残量を取得
-		inline byte* buffNow();//セーブデータバッファの現在位置のポインタを取得
+		inline byte* nowPtr();//セーブデータバッファの現在位置のポインタを取得
 		inline bool isFull() const;//バッファの現在位置が末端に到達したか？
 		inline std::size_t itemsNum() const;//データ項目リスト
 	protected:

@@ -40,79 +40,80 @@ namespace archive
 		m_hasFatalError = true;
 	}
 	//致命的なエラーあり
-	inline void results::setHasFatalError(const bool enabled)
+	inline void results::setHasFatalError(const bool occured)
 	{
-		if (enabled) setHasFatalError();
+		if (occured)
+			setHasFatalError();
 	}
 	//サイズが縮小されたデータ項目の数を取得
-	inline int results::getNumSmallerSizeItem() const
+	inline int results::numSmallerSizeItem() const
 	{
 		return m_numSmallerSizeItem;
 	}
 	//サイズが拡大されたデータ項目の数を取得
-	inline int results::getNumLargerSizeItem() const
+	inline int results::numLargerSizeItem() const
 	{
 		return m_numLargerSizeItem;
 	}
 	//配列要素数が縮小されたデータ項目の数を取得
-	inline int results::getNumSmallerArrItem() const
+	inline int results::numSmallerArrItem() const
 	{
 		return m_numSmallerArrItem;
 	}
 	//配列要素数が拡大されたデータ項目の数を取得
-	inline int results::getNumLargerArrItem() const
+	inline int results::numLargerArrItem() const
 	{
 		return m_numLargerArrItem;
 	}
 	//セーブデータ上にのみ存在するデータ項目の数を取得
-	inline int results::getNumIsOnlyOnSaveData() const
+	inline int results::numOnlyOnSaveData() const
 	{
-		return m_numIsOnlyOnSaveData;
+		return m_numOnlyOnSaveData;
 	}
 	//セーブデータ上にないデータ項目の数を取得
-	inline int results::getNumIsOnlyOnMem() const
+	inline int results::numOnlyOnMem() const
 	{
-		return m_numIsOnlyOnMem;
+		return m_numOnlyOnMem;
 	}
 	//現在オブジェクト型ではないが、セーブデータ上ではそうだったデータ項目の数を取得
-	inline int results::getNumIsObjOnSaveDataOnly() const
+	inline int results::numObjOnSaveDataOnly() const
 	{
-		return m_numIsObjOnSaveDataOnly;
+		return m_numObjOnSaveDataOnly;
 	}
 	//現在オブジェクト型だが、セーブデータ上ではそうではなかったデータ項目の数を取得
-	inline int results::getNumIsObjOnMemOnly() const
+	inline int results::numObjOnMemOnly() const
 	{
-		return m_numIsObjOnMemOnly;
+		return m_numObjOnMemOnly;
 	}
 	//現在配列型ではないが、セーブデータ上ではそうだったデータ項目の数を取得
-	inline int results::getNumIsArrOnSaveDataOnly() const
+	inline int results::numArrOnSaveDataOnly() const
 	{
-		return m_numIsArrOnSaveDataOnly;
+		return m_numArrOnSaveDataOnly;
 	}
 	//現在配列型だが、セーブデータ上ではそうではなかったデータ項目の数を取得
-	inline int results::getNumIsArrOnMemOnly() const
+	inline int results::numArrOnMemOnly() const
 	{
-		return m_numIsArrOnMemOnly;
+		return m_numArrOnMemOnly;
 	}
 	//現在ポインタ型ではないが、セーブデータ上ではそうだったデータ項目の数を取得
-	inline int results::getNumIsPtrOnSaveDataOnly() const
+	inline int results::numPtrOnSaveDataOnly() const
 	{
-		return m_numIsPtrOnSaveDataOnly;
+		return m_numPtrOnSaveDataOnly;
 	}
 	//現在ポインタ型だが、セーブデータ上ではそうではなかったデータ項目の数を取得
-	inline int results::getNumIsPtrOnMemOnly() const
+	inline int results::numPtrOnMemOnly() const
 	{
-		return m_numIsPtrOnMemOnly;
+		return m_numPtrOnMemOnly;
 	}
 	//現在ヌルではないが、セーブデータ上ではそうだったデータ項目の数を取得
-	inline int results::getNumIsNulOnSaveDataOnly() const
+	inline int results::numNulOnSaveDataOnly() const
 	{
-		return m_numIsNulOnSaveDataOnly;
+		return m_numNulOnSaveDataOnly;
 	}
 	//現在ヌルだが、セーブデータ上ではそうではなかったデータ項目の数を取得
-	inline int results::getNumIsNulOnMemOnly() const
+	inline int results::numNulOnMemOnly() const
 	{
-		return m_numIsNulOnMemOnly;
+		return m_numNulOnMemOnly;
 	}
 	//サイズが縮小されたデータ項目の数をカウントアップ
 	inline void results::addNumSmallerSizeItem()
@@ -135,54 +136,54 @@ namespace archive
 		++m_numLargerArrItem;
 	}
 	//セーブデータ上にのみ存在するデータ項目の数をカウントアップ
-	inline void results::addNumIsOnlyOnSaveData()
+	inline void results::addNumOnlyOnSaveData()
 	{
-		++m_numIsOnlyOnSaveData;
+		++m_numOnlyOnSaveData;
 	}
 	//セーブデータ上にないデータ項目の数をカウントアップ
-	inline void results::addNumIsOnlyOnMem()
+	inline void results::addNumOnlyOnMem()
 	{
-		++m_numIsOnlyOnMem;
+		++m_numOnlyOnMem;
 	}
 	//現在オブジェクト型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsObjOnSaveDataOnly()
+	inline void results::addNumObjOnSaveDataOnly()
 	{
-		++m_numIsObjOnSaveDataOnly;
+		++m_numObjOnSaveDataOnly;
 	}
 	//現在オブジェクト型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsObjOnMemOnly()
+	inline void results::addNumObjOnMemOnly()
 	{
-		++m_numIsObjOnMemOnly;
+		++m_numObjOnMemOnly;
 	}
 	//現在配列型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsArrOnSaveDataOnly()
+	inline void results::addNumArrOnSaveDataOnly()
 	{
-		++m_numIsArrOnSaveDataOnly;
+		++m_numArrOnSaveDataOnly;
 	}
 	//現在配列型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsArrOnMemOnly()
+	inline void results::addNumArrOnMemOnly()
 	{
-		++m_numIsArrOnMemOnly;
+		++m_numArrOnMemOnly;
 	}
 	//現在ポインタ型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsPtrOnSaveDataOnly()
+	inline void results::addNumPtrOnSaveDataOnly()
 	{
-		++m_numIsPtrOnSaveDataOnly;
+		++m_numPtrOnSaveDataOnly;
 	}
 	//現在ポインタ型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsPtrOnMemOnly()
+	inline void results::addNumPtrOnMemOnly()
 	{
-		++m_numIsPtrOnMemOnly;
+		++m_numPtrOnMemOnly;
 	}
 	//現在ヌルではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsNulOnSaveDataOnly()
+	inline void results::addNumNulOnSaveDataOnly()
 	{
-		++m_numIsNulOnSaveDataOnly;
+		++m_numNulOnSaveDataOnly;
 	}
 	//現在ヌルだが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsNulOnMemOnly()
+	inline void results::addNumNulOnMemOnly()
 	{
-		++m_numIsNulOnMemOnly;
+		++m_numNulOnMemOnly;
 	}
 	//サイズが縮小されたデータ項目の数をカウントアップ
 	inline void results::addNumSmallerSizeItem(const bool enabled)
@@ -209,72 +210,72 @@ namespace archive
 			addNumLargerArrItem();
 	}
 	//セーブデータ上にのみ存在するデータ項目の数をカウントアップ
-	inline void results::addNumIsOnlyOnSaveData(const bool enabled)
+	inline void results::addNumOnlyOnSaveData(const bool enabled)
 	{
 		if (enabled)
-			addNumIsOnlyOnSaveData();
+			addNumOnlyOnSaveData();
 	}
 	//セーブデータ上にないデータ項目の数をカウントアップ
-	inline void results::addNumIsOnlyOnMem(const bool enabled)
+	inline void results::addNumOnlyOnMem(const bool enabled)
 	{
 		if (enabled)
-			addNumIsOnlyOnMem();
+			addNumOnlyOnMem();
 	}
 	//現在オブジェクト型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsObjOnSaveDataOnly(const bool enabled)
+	inline void results::addNumObjOnSaveDataOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsObjOnSaveDataOnly();
+			addNumObjOnSaveDataOnly();
 	}
 	//現在オブジェクト型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsObjOnMemOnly(const bool enabled)
+	inline void results::addNumObjOnMemOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsObjOnMemOnly();
+			addNumObjOnMemOnly();
 	}
 	//現在配列型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsArrOnSaveDataOnly(const bool enabled)
+	inline void results::addNumArrOnSaveDataOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsArrOnSaveDataOnly();
+			addNumArrOnSaveDataOnly();
 	}
 	//現在配列型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsArrOnMemOnly(const bool enabled)
+	inline void results::addNumArrOnMemOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsArrOnMemOnly();
+			addNumArrOnMemOnly();
 	}
 	//現在ポインタ型ではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsPtrOnSaveDataOnly(const bool enabled)
+	inline void results::addNumPtrOnSaveDataOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsPtrOnSaveDataOnly();
+			addNumPtrOnSaveDataOnly();
 	}
 	//現在ポインタ型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsPtrOnMemOnly(const bool enabled)
+	inline void results::addNumPtrOnMemOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsPtrOnMemOnly();
+			addNumPtrOnMemOnly();
 	}
 	//現在ヌルではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
-	inline void results::addNumIsNulOnSaveDataOnly(const bool enabled)
+	inline void results::addNumNulOnSaveDataOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsNulOnSaveDataOnly();
+			addNumNulOnSaveDataOnly();
 	}
 	//現在ヌルだが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
-	inline void results::addNumIsNulOnMemOnly(const bool enabled)
+	inline void results::addNumNulOnMemOnly(const bool enabled)
 	{
 		if (enabled)
-			addNumIsNulOnMemOnly();
+			addNumNulOnMemOnly();
 	}
 	//コピー済みサイズ取得
-	inline std::size_t results::getCopiedSize() const
+	inline std::size_t results::copiedSize() const
 	{
 		return m_copiedSize;
 	}
 	//セーブデータサイズ取得
-	inline std::size_t results::getSaveDataSize() const
+	inline std::size_t results::saveDataSize() const
 	{
 		return m_hasFatalError ? 0 : m_saveDataSize;
 	}
@@ -283,12 +284,25 @@ namespace archive
 	{
 		m_saveDataSize = save_data_size;
 	}
+	//最も多く消費したワークバッファサイズ取得
+	inline std::size_t results::peakWorkSize() const
+	{
+		return m_peakWorkSize;
+	}
 
 	//コピー済みサイズ追加
 	inline std::size_t results::addCopiedSize(const std::size_t size)
 	{
 		m_copiedSize += size;
 		return m_copiedSize;
+	}
+	
+	//最も多く消費したワークバッファサイズを更新
+	inline std::size_t results::updatePeakWorkSize(const std::size_t size)
+	{
+		if (m_peakWorkSize < size)
+			m_peakWorkSize = size;
+		return m_peakWorkSize;
 	}
 
 	//コンストラクタ
@@ -298,18 +312,19 @@ namespace archive
 		m_numLargerSizeItem(0),
 		m_numSmallerArrItem(0),
 		m_numLargerArrItem(0),
-		m_numIsOnlyOnSaveData(0),
-		m_numIsOnlyOnMem(0),
-		m_numIsObjOnSaveDataOnly(0),
-		m_numIsObjOnMemOnly(0),
-		m_numIsArrOnSaveDataOnly(0),
-		m_numIsArrOnMemOnly(0),
-		m_numIsPtrOnSaveDataOnly(0),
-		m_numIsPtrOnMemOnly(0),
-		m_numIsNulOnSaveDataOnly(0),
-		m_numIsNulOnMemOnly(0),
+		m_numOnlyOnSaveData(0),
+		m_numOnlyOnMem(0),
+		m_numObjOnSaveDataOnly(0),
+		m_numObjOnMemOnly(0),
+		m_numArrOnSaveDataOnly(0),
+		m_numArrOnMemOnly(0),
+		m_numPtrOnSaveDataOnly(0),
+		m_numPtrOnMemOnly(0),
+		m_numNulOnSaveDataOnly(0),
+		m_numNulOnMemOnly(0),
 		m_copiedSize(0),
-		m_saveDataSize(0)
+		m_saveDataSize(0),
+		m_peakWorkSize(0)
 	{}
 	
 	//デストラクタ

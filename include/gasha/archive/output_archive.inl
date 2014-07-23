@@ -181,7 +181,7 @@ namespace archive
 					const void* item_p_top = item_obj.m_itemP;
 
 					//要素ループ
-					const std::size_t loop_elem_num = item_obj.getElemNum();//配列の要素数もしくは（配列じゃなければ）1を返す
+					const std::size_t loop_elem_num = item_obj.extent();//配列の要素数もしくは（配列じゃなければ）1を返す
 					for (std::size_t index = 0; index < loop_elem_num && !arc.hasFatalError(); ++index)
 					{
 						//要素開始情報書き込み
@@ -201,7 +201,7 @@ namespace archive
 							//シリアライズ処理（シリアライズ＆デシリアライズ兼用処理）呼び出し
 							{
 								GASHA_ serialization::serialize<outputArchive, T> functor;
-								functor(arc, item_obj.template getConst<T>(), ver, ver);
+								functor(arc, item_obj.template getConst<T>(), ver, ver, nullptr);
 							}
 
 							//セーブ処理（シリアライズ専用処理）呼び出し
