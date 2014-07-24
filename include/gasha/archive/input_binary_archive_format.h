@@ -45,7 +45,7 @@ namespace archive
 		//配列ブロックヘッダー読み込み
 		bool readArrayHeader(GASHA_ archive::inputArchiveAdapter arc, const GASHA_ serialization::itemInfoBase& item, std::size_t& array_elem_num, std::size_t& array_block_size);
 		//要素ヘッダー読み込み
-		bool readElemHeader(GASHA_ archive::inputArchiveAdapter arc, const GASHA_ serialization::itemInfoBase& item, const std::size_t index, short& items_num, std::size_t& elem_size);
+		bool readElemHeader(GASHA_ archive::inputArchiveAdapter arc, const GASHA_ serialization::itemInfoBase& item, const std::size_t index, std::size_t& items_num, std::size_t& elem_size);
 		//データ項目読み込み
 		bool readDataItem(GASHA_ archive::inputArchiveAdapter arc, const GASHA_ serialization::itemInfoBase& item, const GASHA_ serialization::itemInfoBase* delegate_child_item_now, GASHA_ serialization::itemInfoBase& child_item, const bool item_is_valid, const bool is_required_retry);
 		//要素フッター読み込み

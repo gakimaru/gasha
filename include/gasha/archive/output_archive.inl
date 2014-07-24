@@ -84,12 +84,12 @@ namespace archive
 			if (item_obj.m_itemP)
 			{
 				//文字列長を格納し直す
-				*const_cast<std::size_t*>(&item_obj.m_itemSize) = GASHA_ strlen_fast(reinterpret_cast<const char*>(item_obj.m_itemP)) + 1;
+				*const_cast<std::uint32_t*>(&item_obj.m_itemSize) = static_cast<std::uint32_t>(GASHA_ strlen_fast(reinterpret_cast<const char*>(item_obj.m_itemP)) + 1);
 			}
 			else
 			{
 				//ヌル時は0に
-				*const_cast<std::size_t*>(&item_obj.m_itemSize) = 0;
+				*const_cast<std::uint32_t*>(&item_obj.m_itemSize) = 0;
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace archive
 						arc.m_format.writeElemHeader(arc, item_obj, index);
 
 						//要素開始
-						short items_num = 0;//データ項目数
+						std::size_t items_num = 0;//データ項目数
 						std::size_t elem_size = 0;//この要素のデータサイズ
 						{
 							//要素処理用のひ孫アーカイブオブジェクトを生成

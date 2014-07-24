@@ -19,6 +19,7 @@
 
 #include <cstddef>//std::size_t
 #include <typeinfo>//std::type_info
+#include <cstdint>//C++11 std::uint32_t
 
 #pragma warning(push)//【VC++】ワーニング設定を退避
 #pragma warning(disable: 4530)//【VC++】C4530を抑える
@@ -150,12 +151,12 @@ namespace serialization
 		const GASHA_ crc32_t m_nameCrc;//データ項目名CRC
 		const void* m_itemP;//データの参照ポインタ
 		const std::type_info* m_itemType;//データの型情報
-		const std::size_t m_itemSize;//データサイズ
-		const std::size_t m_arrNum;//データの配列要素数
+		const std::uint32_t m_itemSize;//データサイズ
+		const std::uint32_t m_arrNum;//データの配列要素数
 		const GASHA_ serialization::itemAttr m_attr;//属性
 		GASHA_ serialization::typeCtrlBase m_typeCtrl;//型操作
-		std::size_t m_nowItemSize;//データサイズ　※現在のサイズ（デシリアライズ処理用）
-		std::size_t m_nowArrNum;//データの配列要素数　※現在のサイズ（デシリアライズ処理用）
+		std::uint32_t m_nowItemSize;//データサイズ　※現在のサイズ（デシリアライズ処理用）
+		std::uint32_t m_nowArrNum;//データの配列要素数　※現在のサイズ（デシリアライズ処理用）
 		GASHA_ serialization::itemAttr m_nowAttr;//属性　※現在の状態（デシリアライズ処理用）
 		GASHA_ serialization::typeCtrlBase m_nowTypeCtrl;//型操作　※現在の状態（デシリアライズ処理用）
 		std::function<void()> m_deserialier;//個別デシリアライザー

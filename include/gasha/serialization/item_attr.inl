@@ -106,6 +106,10 @@ namespace serialization
 			(is_vlen ? IS_VLEN : 0)
 		)
 	{}
+	//デフォルトコンストラクタ
+	inline itemAttr::itemAttr() :
+		m_value(0)
+	{}
 
 	//デストラクタ
 	inline itemAttr::~itemAttr()

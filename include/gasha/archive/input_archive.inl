@@ -300,7 +300,7 @@ namespace archive
 
 						//要素開始情報読み込み
 						std::size_t elem_size = 0;
-						short items_num = 0;
+						std::size_t items_num = 0;
 						arc.m_format.readElemHeader(arc, item_obj, index, items_num, elem_size);
 
 						//要素開始

@@ -12,6 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <cstdint>//C++11 std::uint8_t
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -37,7 +39,7 @@ namespace serialization
 	{
 	public:
 		//型
-		typedef unsigned char value_type;//属性型
+		typedef std::uint8_t value_type;//属性型
 	public:
 		//アクセッサ
 		inline bool isObj() const;//オブジェクト型か？
@@ -69,6 +71,8 @@ namespace serialization
 		//コンストラクタ
 		inline itemAttr(const value_type value);
 		inline itemAttr(const bool is_object, const bool is_array, const bool is_ptr, const bool is_null, const bool is_vlen);
+		//デフォルトコンストラクタ
+		inline itemAttr();
 		//デストラクタ
 		inline ~itemAttr();
 	public://直接アクセス許可
