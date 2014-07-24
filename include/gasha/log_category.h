@@ -20,16 +20,12 @@
 #include <cstdint>//C++11 std::uint8_t
 #include <utility>//C++11 std::move
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <iterator> <bitset> <mutex> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4530)//【VC++】C4530を抑える
+#include <mutex>//C++11 std::call_once
 #include <iterator>//std::iterator
 #include <bitset>//std::bitset
-#include <mutex>//C++11 std::call_once
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -558,9 +554,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //ログカテゴリ登録用補助マクロ
 #define MAKE_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
 #define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_category.inl>

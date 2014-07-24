@@ -95,7 +95,9 @@ namespace archive
 
 		//データ項目を記録
 		//※重複チェックのため
-		addItem(item_obj);
+		const bool result = addItem(item_obj);
+		if (!result)
+			return *this;//データ項目が重複していたので処理しない（致命的なエラーとせず、処理は続行する）
 		
 		//データ書き込み
 		if (item_obj.isObj())

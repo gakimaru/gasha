@@ -32,10 +32,10 @@ namespace serialization
 	//※見つかったら時点で知されるので、objが不完全な状態である点に注意
 	//※委譲データ項目 delegate_item にデータ項目をセットして返すとリトライしてそこに読み込む
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct noticeUnrecognizedItem {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& unrecognized_item)
+		inline void operator()(ARCHIVE& arc, T& obj, GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& unrecognized_item)
 		{}
 	};
 	//--------------------
@@ -45,10 +45,10 @@ namespace serialization
 	//※objのロードが一通り終わったあと、まとめて通知する
 	//※noticeUnrecognizedItem の後、afterLoad より先に実行される
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct noticeUnloadedItem {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& unloaded_item)
+		inline void operator()(ARCHIVE& arc, T& obj, GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& unloaded_item)
 		{}
 	};
 

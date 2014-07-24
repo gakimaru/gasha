@@ -29,10 +29,10 @@ namespace serialization
 	//※シリアライズ専用処理
 	//※エラーが発生したタイミングではなく、最後に呼び出される
 	//※特殊化によりユーザー処理を実装
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct fatalSerializeErrorOccurred {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver)
+		inline void operator()(ARCHIVE& arc, const T& obj, const GASHA_ serialization::version& ver)
 		{}
 	};
 	//--------------------
@@ -40,10 +40,10 @@ namespace serialization
 	//※デシリアライズ専用処理
 	//※エラーが発生したタイミングではなく、最後に呼び出される
 	//※特殊化によりユーザー処理を実装
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct fatalDeserializeErrorOccurred {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
 		{}
 	};
 

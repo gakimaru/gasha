@@ -21,13 +21,6 @@
 #include <cstdio>//::snprintf() ※GCC, ::_snprintf_s() ※VC++
 #include <utility>//C++11 std::forward
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】str*** を使用すると、error C4996 が発生する
-//  error C4996: 'str***': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-#pragma warning(disable: 4996)//C4996を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
@@ -35,7 +28,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_USE_NAME_SPACE
 inline std::size_t strlen(const char* str)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strlen(str);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -71,7 +67,10 @@ inline std::size_t strnlen(const char* str, const std::size_t max_len)
 //strcmp
 inline int strcmp(const char* str1, const char* str2)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strcmp(str1, str2);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -80,7 +79,10 @@ inline int strcmp(const char* str1, const char* str2)
 #ifdef GASHA_USE_NAME_SPACE
 inline int strncmp(const char* str1, const char* str2, const std::size_t max_len)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strncmp(str1, str2, max_len);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -89,7 +91,10 @@ inline int strncmp(const char* str1, const char* str2, const std::size_t max_len
 //strchr
 inline const char* strchr(const char* str, const char c)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strchr(str, c);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -98,7 +103,10 @@ inline const char* strchr(const char* str, const char c)
 //strrchr
 inline const char* strrchr(const char* str, const char c)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strrchr(str, c);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -107,7 +115,10 @@ inline const char* strrchr(const char* str, const char c)
 //strstr
 inline const char* strstr(const char* str, const char* pattern)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strstr(str, pattern);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -127,7 +138,10 @@ inline const char* strstr0(const char* str, const char* pattern)
 //strcpy
 inline const char* strcpy(char* dst, const char* src)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strcpy(dst, src);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -136,7 +150,10 @@ inline const char* strcpy(char* dst, const char* src)
 //strcpy
 inline const char* strncpy(char* dst, const char* src, const std::size_t max_len)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::strncpy(dst, src, max_len);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -146,7 +163,10 @@ inline const char* strncpy(char* dst, const char* src, const std::size_t max_len
 template<typename... Tx>
 inline int sprintf(char* dst, const char* fmt, Tx&&... args)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	return std::sprintf(dst, fmt, std::forward<Tx>(args)...);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 }
 #endif//GASHA_USE_NAME_SPACE
 
@@ -155,7 +175,10 @@ inline int sprintf(char* dst, const char* fmt, Tx&&... args)
 template<typename... Tx>
 inline int spprintf(char* dst, std::size_t& pos, const char* fmt, Tx&&... args)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	int ret = std::sprintf(dst + pos, fmt, std::forward<Tx>(args)...);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 	pos += ret;
 	return ret;
 }
@@ -190,14 +213,14 @@ int spprintf(char* dst, const std::size_t max_size, std::size_t& pos, const char
 template<typename... Tx>
 inline int spprintf(char* dst, const char* fmt, Tx&&... args)
 {
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4996)//【VC++】C4996を抑える
 	int ret = std::sprintf(dst, fmt, std::forward<Tx>(args)...);
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 	return ret;
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_STRING_INL
 

@@ -22,19 +22,6 @@
 
 #include <utility>//C++11 std::forward
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new/配置delete用
-
-//【VC++】アライメントが指定されたクラス／構造体を new すると、warning C4316 が発生する
-//  warning C4316 : '(class_name)' : ヒープで割り当てられたオブジェクトが (16) にアラインメントされていない可能性があります
-#pragma warning(disable: 4316)//C4316を抑える
-
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -78,7 +65,12 @@ namespace _private
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
 		allocator.setDebugInfo(&info);//デバッグ情報
+		
+	#pragma warning(push)//【VC++】ワーニング設定を退避
+	#pragma warning(disable: 4316)//【VC++】C4316を抑える
 		T* p = new T(std::forward<Tx>(nx)...);//メモリ確保
+	#pragma warning(pop)//【VC++】ワーニング設定を復元
+
 		allocator.resetAlign();//アライメントリセット
 		allocator.resetDebugInfo();//デバッグ情報リセット
 		return p;
@@ -100,7 +92,12 @@ namespace _private
 		GASHA_ polyAllocator allocator;
 		allocator.setAlign(alignof(T));//アライメント
 		allocator.setDebugInfo(&info);//デバッグ情報
+		
+	#pragma warning(push)//【VC++】ワーニング設定を退避
+	#pragma warning(disable: 4316)//【VC++】C4316を抑える
 		T* p = new T[N];//メモリ確保
+	#pragma warning(pop)//【VC++】ワーニング設定を復元
+		
 		allocator.resetAlign();//アライメントリセット
 		allocator.resetDebugInfo();//デバッグ情報リセット
 		return p;
@@ -151,9 +148,6 @@ namespace _private
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 #endif//GASHA_INCLUDED_NEW_INL
 

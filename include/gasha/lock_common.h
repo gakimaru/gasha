@@ -14,14 +14,10 @@
 
 #include <chrono>//C++11 std::chrono
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <thread> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4530)//【VC++】C4530を抑える
 #include <thread>//C++11 std::ths_thread
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -89,9 +85,6 @@ inline void defaultContextSwitch(){ contextSwitch(); }//ゼロスリープでコ
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/lock_common.inl>

@@ -14,14 +14,10 @@
 
 #include <cstddef>//std::size_t
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <functional> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4530)//【VC++】C4530を抑える
 #include <functional>//C++11 std::function
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -134,9 +130,6 @@ template<typename... Tx>
 int spprintf(char* dst, const char* fmt, Tx&&... args);//最大バッファサイズ／出力位置指定なし版
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/string.inl>

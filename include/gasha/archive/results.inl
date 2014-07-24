@@ -45,6 +45,11 @@ namespace archive
 		if (occured)
 			setHasFatalError();
 	}
+	//（名前が衝突するなどして）無効となったデータ項目の数を取得
+	inline int results::numInvalidItem() const
+	{
+		return m_numInvalidItem;
+	}
 	//サイズが縮小されたデータ項目の数を取得
 	inline int results::numSmallerSizeItem() const
 	{
@@ -115,6 +120,11 @@ namespace archive
 	{
 		return m_numNulOnMemOnly;
 	}
+	//（名前が衝突するなどして）無効となったデータ項目の数をカウントアップ
+	inline void results::addNumInvalidItem()
+	{
+		++m_numInvalidItem;
+	}
 	//サイズが縮小されたデータ項目の数をカウントアップ
 	inline void results::addNumSmallerSizeItem()
 	{
@@ -184,6 +194,12 @@ namespace archive
 	inline void results::addNumNulOnMemOnly()
 	{
 		++m_numNulOnMemOnly;
+	}
+	//（名前が衝突するなどして）無効となったデータ項目の数を取得
+	inline void results::addNumInvalidItem(const bool enabled)
+	{
+		if (enabled)
+			addNumInvalidItem();
 	}
 	//サイズが縮小されたデータ項目の数をカウントアップ
 	inline void results::addNumSmallerSizeItem(const bool enabled)
@@ -308,6 +324,7 @@ namespace archive
 	//コンストラクタ
 	inline results::results() :
 		m_hasFatalError(false),
+		m_numInvalidItem(0),
 		m_numSmallerSizeItem(0),
 		m_numLargerSizeItem(0),
 		m_numSmallerArrItem(0),

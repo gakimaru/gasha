@@ -30,10 +30,10 @@ namespace serialization
 	//※デシリアライズ専用処理
 	//※特殊化によりユーザー処理を実装
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct load {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase* target_item)
+		inline void operator()(ARCHIVE& arc, const T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase* target_item)
 		{}
 	};
 	//--------------------
@@ -42,10 +42,10 @@ namespace serialization
 	//※特殊化によりユーザー処理を実装
 	//※objのロードを開始する前に実行される
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct beforeLoad {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE& arc, T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
 		{}
 	};
 	//--------------------
@@ -55,10 +55,10 @@ namespace serialization
 	//※objのロードが一通り終わったあと実行される
 	//※noticeUnrecognizedItem, noticeUnloadedItem の後に実行される
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct afterLoad {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE& arc, T& obj, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
 		{}
 	};
 

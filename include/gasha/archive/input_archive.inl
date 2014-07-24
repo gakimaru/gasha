@@ -458,6 +458,10 @@ namespace archive
 										//データのロードフェーズに戻す
 										arc.setStatus(DESERIALIZE_PHASE_LOAD_DATA);
 									}
+
+									//デシリアライザーを呼び出す
+									if (child_item.isAlready())
+										child_item.callDeserializer(item_obj.template get<T>());
 								}
 								//リトライ用の委譲項目リセット
 								delegate_child_item_now = nullptr;

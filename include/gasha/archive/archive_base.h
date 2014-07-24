@@ -17,7 +17,6 @@
 #include <gasha/stack_allocator.h>//スタックアロケータ
 #include <gasha/rb_tree.h>//赤黒木
 #include <gasha/crc32.h>//CRC32計算
-#include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <cstddef>//std::size_t
 

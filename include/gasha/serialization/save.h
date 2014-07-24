@@ -29,10 +29,10 @@ namespace serialization
 	//※シリアライズ専用処理
 	//※特殊化によりユーザー処理を実装
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct save {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, const T& obj, const GASHA_ serialization::version& ver)
+		inline void operator()(ARCHIVE& arc, const T& obj, const GASHA_ serialization::version& ver)
 		{}
 	};
 

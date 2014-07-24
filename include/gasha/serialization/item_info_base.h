@@ -20,6 +20,11 @@
 #include <cstddef>//std::size_t
 #include <typeinfo>//std::type_info
 
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4530)//【VC++】C4530を抑える
+#include <functional>//C++11 std::functional
+#pragma warning(pop)//【VC++】ワーニング設定を復元
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
@@ -116,6 +121,12 @@ namespace serialization
 		inline const T& getConst() const;
 		template<typename T>//constで値取得（配列要素）
 		inline const T& getConst(const int index) const;
+		//個別デシリアライザーをセット
+		template<typename OBJ>
+		inline void setDeserializer(std::function<void(OBJ&, const itemInfoBase&)> functor);
+		//個別デシリアライザーを呼び出し
+		template<typename OBJ>
+		inline void callDeserializer(OBJ& obj);
 		//読み込み情報をクリア
 		void clearForLoad();
 		//現在の情報をコピー
@@ -147,6 +158,7 @@ namespace serialization
 		std::size_t m_nowArrNum;//データの配列要素数　※現在のサイズ（デシリアライズ処理用）
 		GASHA_ serialization::itemAttr m_nowAttr;//属性　※現在の状態（デシリアライズ処理用）
 		GASHA_ serialization::typeCtrlBase m_nowTypeCtrl;//型操作　※現在の状態（デシリアライズ処理用）
+		std::function<void()> m_deserialier;//個別デシリアライザー
 		bool m_hasNowInfo;//現在の情報コピー済み
 		mutable bool m_isOnlyOnSaveData;//セーブデータ上にのみ存在するデータ
 		mutable bool m_isOnlyOnMem;//セーブデータ上にないデータ

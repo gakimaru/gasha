@@ -17,6 +17,7 @@
 #include <gasha/serialization/item_info_base.h>//シリアライズ/データ項目情報基底クラス【宣言部】
 
 #include <cstring>//std::memcpy()
+#include <type_traits>//C++11std::is_const
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -379,6 +380,20 @@ namespace serialization
 		return static_cast<const T*>(m_itemP)[index];
 	}
 	
+	//個別デシリアライザーをセット
+	template<typename OBJ>
+	inline void itemInfoBase::setDeserializer(std::function<void(OBJ&, const itemInfoBase&)> functor)
+	{
+		m_deserialier = *reinterpret_cast<std::function<void()>*>(&functor);
+	}
+	//個別デシリアライザーを呼び出し
+	template<typename OBJ>
+	inline void itemInfoBase::callDeserializer(OBJ& obj)
+	{
+		if (m_deserialier)
+			(*(reinterpret_cast<std::function<void(OBJ&, const itemInfoBase&)>*>(&m_deserialier)))(obj, *this);
+	}
+
 	//強制的に全情報をコピー
 	inline void itemInfoBase::copyForce(const itemInfoBase& src)
 	{
@@ -399,6 +414,7 @@ namespace serialization
 		m_nowArrNum(src.m_nowArrNum),
 		m_nowAttr(src.m_nowAttr),
 		m_nowTypeCtrl(src.m_nowTypeCtrl),
+		m_deserialier(src.m_deserialier),
 		m_hasNowInfo(src.m_hasNowInfo),
 		m_isOnlyOnSaveData(src.m_isOnlyOnSaveData),
 		m_isOnlyOnMem(src.m_isOnlyOnMem),
@@ -419,6 +435,7 @@ namespace serialization
 		m_nowArrNum(0),
 		m_nowAttr(false, false, false, false, false),
 		m_nowTypeCtrl(GASHA_ serialization::typeCtrlBase()),
+		m_deserialier(nullptr),
 		m_hasNowInfo(false),
 		m_isOnlyOnSaveData(false),
 		m_isOnlyOnMem(false),
@@ -439,6 +456,7 @@ namespace serialization
 		m_nowArrNum(0),
 		m_nowAttr(false, false, false, false, false),
 		m_nowTypeCtrl(GASHA_ serialization::typeCtrlBase()),
+		m_deserialier(nullptr),
 		m_hasNowInfo(false),
 		m_isOnlyOnSaveData(false),
 		m_isOnlyOnMem(false),
@@ -459,6 +477,7 @@ namespace serialization
 		m_nowArrNum(0),
 		m_nowAttr(false, false, false, false, false),
 		m_nowTypeCtrl(GASHA_ serialization::typeCtrlBase()),
+		m_deserialier(nullptr),
 		m_hasNowInfo(false),
 		m_isOnlyOnSaveData(false),
 		m_isOnlyOnMem(false),

@@ -54,7 +54,7 @@ namespace serialization
 	template<typename T>
 	inline itemInfo<T>::~itemInfo()
 	{}
-	
+
 	//--------------------
 	//データ項目情報作成テンプレート関数
 	template<class T>
@@ -63,7 +63,15 @@ namespace serialization
 		itemInfo<typename GASHA_ serialization::isPtr<T>::value_type> item_obj(name, GASHA_ serialization::isPtr<T>::toPtr(item), 0, GASHA_ serialization::isPtr<T>::value, false);
 		return item_obj;
 	}
-	
+	//※個別デシリアライズ処理指定版
+	template<class T, typename OBJ>
+	inline itemInfo<typename GASHA_ serialization::isPtr<T>::value_type> pair(const char* name, const T& item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pair(name, item);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
+
 	//--------------------
 	//データ項目情報作成テンプレート関数（配列自動判定用）
 	template<class T, std::size_t N>
@@ -72,7 +80,15 @@ namespace serialization
 		itemInfo<T> item_obj(name, item, N, false, false);
 		return item_obj;
 	}
-	
+	//※個別デシリアライズ処理指定版
+	template<class T, std::size_t N, typename OBJ>
+	inline itemInfo<T> pair(const char* name, const T(&item)[N], std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pair(name, item);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
+
 	//--------------------
 	//データ項目情報作成テンプレート関数（ポインタを配列扱いにしたい場合に使用）
 	template<class T>
@@ -81,7 +97,15 @@ namespace serialization
 		itemInfo<typename GASHA_ serialization::isPtr<T>::value_type> item_obj(name, GASHA_ serialization::isPtr<T>::toPtr(item), N, GASHA_ serialization::isPtr<T>::value, false);
 		return item_obj;
 	}
-	
+	//※個別デシリアライズ処理指定版
+	template<class T, typename OBJ>
+	inline itemInfo<typename GASHA_ serialization::isPtr<T>::value_type> pairArray(const char* name, const T& item, const std::size_t N, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pair(name, item, N);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
+
 	//--------------------
 	//データ項目情報作成テンプレート関数（バイナリ用）
 #if 1//バイナリ型扱いにする場合
@@ -93,6 +117,14 @@ namespace serialization
 		itemInfo<GASHA_ serialization::bin_type> item_obj(name, item_size, item_p, false, false);
 		return item_obj;
 	}
+	//※個別デシリアライズ処理指定版
+	template<class T, typename OBJ>
+	inline itemInfo<GASHA_ serialization::bin_type> pairBin(const char* name, const T& item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pairBin(name, item);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
 #else//charの配列扱いにする場合
 	template<class T>
 	inline itemInfo<char> pairBin(const char* name, const T& item)
@@ -102,16 +134,32 @@ namespace serialization
 		itemInfo<char> item_obj(name, item_p, arra_num, false, false);
 		return item_obj;
 	}
+	//※個別デシリアライズ処理指定版
+	template<class T, typename OBJ>
+	inline itemInfo<char> pairBin(const char* name, const T& item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pairBin(name, item);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
 #endif
-	
+
 	//--------------------
 	//データ項目情報作成テンプレート関数（文字列用）
 	template<std::size_t N>
-	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, const char (&item)[N])
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, const char(&item)[N])
 	{
 		const std::size_t item_size = sizeof(char)* N;
 		const GASHA_ serialization::str_type* item_p = reinterpret_cast<const GASHA_ serialization::str_type*>(&item);
 		itemInfo<GASHA_ serialization::str_type> item_obj(name, item_size, item_p, false, true);
+		return item_obj;
+	}
+	//※個別デシリアライズ処理指定版
+	template<std::size_t N, typename OBJ>
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, const char(&item)[N], std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pairStr(name, item);
+		item_obj.setDeserializer(deserializer);
 		return item_obj;
 	}
 	//※ポインタ用
@@ -122,7 +170,15 @@ namespace serialization
 		itemInfo<GASHA_ serialization::str_type> item_obj(name, item_size, item_p, true, true);
 		return item_obj;
 	}
-	
+	//※個別デシリアライズ処理指定版
+	template<typename OBJ>
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	{
+		auto item_obj = pairStr(name, item);
+		item_obj.setDeserializer(deserializer);
+		return item_obj;
+	}
+
 	//--------------------
 	//データ項目情報作成テンプレート関数（初回用）
 	template<class T>

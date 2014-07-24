@@ -12,30 +12,25 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-//【VC++】ワーニング設定を退避
-#pragma warning(push)
-
-//【VC++】例外を無効化した状態で <new> をインクルードすると、warning C4530 が発生する
-//  warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
-#pragma warning(disable: 4530)//C4530を抑える
-
-#include <new>//配置new/配置delete
-
-//【VC++】例外を無効化した状態で例外つきのnewをオーバーロードすると、warning C4290 が発生する
-//warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
-#pragma warning(disable: 4290)//C4290を抑える
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4530)//【VC++】C4530を抑える
+#include <new>//配置new/配置delete用
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 
 //--------------------------------------------------------------------------------
 //【多態アロケータ適用版】標準new/delete
 //--------------------------------------------------------------------------------
 #ifdef GASHA_ENABLE_POLY_ALLOCATOR
 
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4290)//【VC++】C4290を抑える
 void* operator new(const std::size_t size) GASHA_STDNEW_THROW;//new
 void* operator new[](const std::size_t size) GASHA_STDNEW_THROW;//配列new
 void* operator new(const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;//new
 void* operator new[](const std::size_t size, const std::nothrow_t&) GASHA_STDNEW_NOTHROW;//配列new
 void operator delete(void* p) GASHA_STDDELETE_THROW;//delete
 void operator delete[](void* p) GASHA_STDDELETE_THROW;//配列版delete
+#pragma warning(pop)//【VC++】ワーニング設定を復元
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -110,9 +105,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_DELETE_ARRAY(p) delete[] p
 
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
-
-//【VC++】ワーニング設定を復元
-#pragma warning(pop)
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/new.inl>

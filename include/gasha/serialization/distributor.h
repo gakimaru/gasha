@@ -39,30 +39,30 @@ namespace serialization
 	//※基本オブジェクト（obj）は、配列だった場合、その先頭の要素が渡される
 	//※セーブデータ上の配列要素数と、ロードできた配列要素数（メモリ上の配列要素数）が渡される
 	//※標準では何もしない
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct distributor {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& target_item)
+		inline void operator()(ARCHIVE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver, const GASHA_ serialization::itemInfoBase& target_item)
 		{}
 	};
 	//--------------------
 	//データ分配前処理用関数オブジェクトテンプレートクラス
 	//※デシリアライズ専用処理
 	//※特殊化によりユーザー処理を実装
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct beforeDistribute {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
 		{}
 	};
 	//--------------------
 	//データ分配後処理用関数オブジェクトテンプレートクラス
 	//※デシリアライズ専用処理
 	//※特殊化によりユーザー処理を実装
-	template<class ARCHIVE_TYPE, class T>
+	template<class ARCHIVE, class T>
 	struct afterDistribute {
 		typedef int IS_UNDEFINED;//SFINAE用:関数オブジェクトの未定義チェック用の型定義
-		inline void operator()(ARCHIVE_TYPE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
+		inline void operator()(ARCHIVE& arc, T& obj, const std::size_t array_num_on_save_data, const std::size_t array_num_loaded, const GASHA_ serialization::version& ver, const GASHA_ serialization::version& now_ver)
 		{}
 	};
 

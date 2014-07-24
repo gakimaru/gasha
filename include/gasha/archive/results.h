@@ -35,6 +35,7 @@ namespace archive
 		inline bool hasFatalError() const;//致命的なエラーあり
 		inline void setHasFatalError();//致命的なエラーあり
 		inline void setHasFatalError(const bool occured);//致命的なエラーあり
+		inline int numInvalidItem() const;//（名前が衝突するなどして）無効となったデータ項目の数を取得
 		inline int numSmallerSizeItem() const;//サイズが縮小されたデータ項目の数を取得
 		inline int numLargerSizeItem() const;//サイズが拡大されたデータ項目の数を取得
 		inline int numSmallerArrItem() const;//配列要素数が縮小されたデータ項目の数を取得
@@ -49,6 +50,7 @@ namespace archive
 		inline int numPtrOnMemOnly() const;//現在ポインタ型だが、セーブデータ上ではそうではなかったデータ項目の数を取得
 		inline int numNulOnSaveDataOnly() const;//現在ヌルではないが、セーブデータ上ではそうだったデータ項目の数を取得
 		inline int numNulOnMemOnly() const;//現在ヌルだが、セーブデータ上ではそうではなかったデータ項目の数を取得
+		inline void addNumInvalidItem();//（名前が衝突するなどして）無効となったデータ項目の数をカウントアップ
 		inline void addNumSmallerSizeItem();//サイズが縮小されたデータ項目の数をカウントアップ
 		inline void addNumLargerSizeItem();//サイズが拡大されたデータ項目の数をカウントアップ
 		inline void addNumSmallerArrItem();//配列要素数が縮小されたデータ項目の数をカウントアップ
@@ -63,6 +65,7 @@ namespace archive
 		inline void addNumPtrOnMemOnly();//現在ポインタ型だが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
 		inline void addNumNulOnSaveDataOnly();//現在ヌルではないが、セーブデータ上ではそうだったデータ項目の数をカウントアップ
 		inline void addNumNulOnMemOnly();//現在ヌルだが、セーブデータ上ではそうではなかったデータ項目の数をカウントアップ
+		inline void addNumInvalidItem(const bool enabled);//（名前が衝突するなどして）無効となったデータ項目の数を取得
 		inline void addNumSmallerSizeItem(const bool enabled);//サイズが縮小されたデータ項目の数をカウントアップ
 		inline void addNumLargerSizeItem(const bool enabled);//サイズが拡大されたデータ項目の数をカウントアップ
 		inline void addNumSmallerArrItem(const bool enabled);//配列要素数が縮小されたデータ項目の数をカウントアップ
@@ -99,6 +102,7 @@ namespace archive
 	private:
 		//フィールド
 		bool m_hasFatalError;//致命的なエラーあり
+		short m_numInvalidItem;//（名前が衝突するなどして）無効となったデータ項目の数
 		short m_numSmallerSizeItem;//サイズが縮小されたデータ項目の数
 		short m_numLargerSizeItem;//サイズが拡大されたデータ項目の数
 		short m_numSmallerArrItem;//配列要素数が縮小されたデータ項目の数
