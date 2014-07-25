@@ -20,6 +20,76 @@
 //--------------------------------------------------------------------------------
 //言語機能自動判別・設定
 
+//キーワード偽装禁止設定の調整
+//※ライブラリビルド時はキーワード偽装の禁止を行わない
+#ifdef GASHA_BUILD_FOR_LIB
+
+	#ifdef GASHA_NODEF_NULLPTR
+		#undef GASHA_NODEF_NULLPTR//nullptr の偽装を許可しない
+	#endif//GASHA_NODEF_NULLPTR
+
+	#ifdef GASHA_NODEF_OVERRIDE
+		#undef GASHA_NODEF_OVERRIDE//overrideの偽装を許可しない
+	#endif//GASHA_NODEF_OVERRIDE
+
+	#ifdef GASHA_NODEF_FINAL
+		#undef GASHA_NODEF_FINAL//finalの偽装を許可しない
+	#endif//GASHA_NODEF_FINAL
+
+	#ifdef GASHA_NODEF_CONSTEXPR
+		#undef GASHA_NODEF_CONSTEXPR//constexprの偽装を許可しない
+	#endif//GASHA_NODEF_CONSTEXPR
+
+	#ifdef GASHA_NODEF_STATIC_ASSERT
+		#undef GASHA_NODEF_STATIC_ASSERT//static_assertの偽装を許可しない
+	#endif//GASHA_NODEF_STATIC_ASSERT
+
+	#ifdef GASHA_NODEF_THREAD_LOCAL
+		#undef GASHA_NODEF_THREAD_LOCAL//thread_localの偽装を許可しない
+	#endif//GASHA_NODEF_THREAD_LOCAL
+
+	#ifdef GASHA_NODEF_NOEXCEPT
+		#undef GASHA_NODEF_NOEXCEPT//noexceptの偽装を許可しない
+	#endif//GASHA_NODEF_NOEXCEPT
+
+	#ifdef GASHA_NODEF_ALIGNAS
+		#undef GASHA_NODEF_ALIGNAS//alignas()の偽装を許可しない
+	#endif//GASHA_NODEF_ALIGNAS
+
+	#ifdef GASHA_NODEF_ALIGNOF
+		#undef GASHA_NODEF_ALIGNOF//alignof()の偽装を許可しない
+	#endif//GASHA_NODEF_ALIGNOF
+
+	#ifdef GASHA_NODEF_PRETTY_FUNCTION
+		#undef GASHA_NODEF_PRETTY_FUNCTION//__PRETTY_FUNCTION__の偽装を許可しない
+	#endif//GASHA_NODEF_PRETTY_FUNCTION
+
+	#ifdef GASHA_NODEF_func
+		#undef GASHA_NODEF_func//__func__の偽装を許可しない
+	#endif//GASHA_NODEF_func
+
+	#ifdef GASHA_NODEF_FUNCSIG
+		#undef GASHA_NODEF_FUNCSIG//__FUNCSIG__の偽装を許可しない
+	#endif//GASHA_NODEF_FUNCSIG
+
+	#ifdef GASHA_NODEF_FUNCDNAME
+		#undef GASHA_NODEF_FUNCDNAME//__FUNCDNAME__の偽装を許可しない
+	#endif//GASHA_NODEF_FUNCDNAME
+
+	#ifdef GASHA_NODEF_ALIGNED_MALLOC
+		#undef GASHA_NODEF_ALIGNED_MALLOC//_aligned_malloc()の偽装を許可しない
+	#endif//GASHA_NODEF_ALIGNED_MALLOC
+
+	#ifdef GASHA_NODEF_ALIGNED_FREE
+		#undef GASHA_NODEF_ALIGNED_FREE//_aligned_free()の偽装を許可しない
+	#endif//GASHA_NODEF_ALIGNED_FREE
+
+	#ifdef GASHA_NODEF_CPUID
+		#undef GASHA_NODEF_CPUID//__cpuid(), _xgetbv(), _XCR_XFEATURE_ENABLED_MASK の偽装を許可しない
+	#endif//GASHA_NODEF_CPUID
+
+#endif//GASHA_BUILD_FOR_LIB
+
 //----------------------------------------
 //C++11仕様対応
 //参考：https://sites.google.com/site/cpprefjp/implementation-status
@@ -53,6 +123,13 @@
 		#define GASHA_HAS_CAMOUFLAGE_NULLPTR
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_NULLPTR
+	#ifdef GASHA_HAS_CAMOUFLAGE_NULLPTR
+		#undef nullptr
+		#undef GASHA_HAS_CAMOUFLAGE_NULLPTR
+	#endif//GASHA_HAS_CAMOUFLAGE_NULLPTR
+#endif//GASHA_NODEF_NULLPTR
 
 //--------------------
 //【C++11仕様】override指定子
@@ -72,6 +149,13 @@
 		#define GASHA_HAS_DUMMY_OVERRIDE
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_OVERRIDE
+	#ifdef GASHA_HAS_DUMMY_OVERRIDE
+		#undef override
+		#undef GASHA_HAS_DUMMY_OVERRIDE
+	#endif//GASHA_HAS_DUMMY_OVERRIDE
+#endif//GASHA_NODEF_OVERRIDE
 
 //--------------------
 //【C++11仕様】final指定子
@@ -91,6 +175,13 @@
 		#define GASHA_HAS_DUMMY_FINAL
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_FINAL
+	#ifdef GASHA_HAS_DUMMY_FINAL
+		#undef final
+		#undef GASHA_HAS_DUMMY_FINAL
+	#endif//GASHA_HAS_DUMMY_FINAL
+#endif//GASHA_NODEF_FINAL
 
 //--------------------
 //【C++11仕様】auto型推論
@@ -151,6 +242,13 @@
 		#define GASHA_HAS_DUMMY_CONSTEXPR
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_CONSTEXPR
+	#ifdef GASHA_HAS_DUMMY_CONSTEXPR
+		#undef constexpr
+		#undef GASHA_HAS_DUMMY_CONSTEXPR
+	#endif//GASHA_HAS_DUMMY_CONSTEXPR
+#endif//GASHA_NODEF_CONSTEXPR
 
 //--------------------
 //【C++11仕様】ユーザー定義リテラル
@@ -302,7 +400,7 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//_MSC_VER
 		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
-		#define GASHA_HAS_ORIGINAL_STATIC_ASSERT
+		#define GASHA_HAS_CUSTOM_STATIC_ASSERT
 	#endif//_MSC_VER
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
@@ -310,9 +408,16 @@
 		#define GASHA_HAS_STATIC_ASSERT
 	#else//GASHA_HAS_CPP11
 		#define static_assert(expr, msg) typedef char GASHA_STATIC_ASSERT_DECLARATOIN[(expr) ? 1 : -1]
-		#define GASHA_HAS_ORIGINAL_STATIC_ASSERT
+		#define GASHA_HAS_CUSTOM_STATIC_ASSERT
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_STATIC_ASSERT
+	#ifdef GASHA_HAS_CUSTOM_STATIC_ASSERT
+		#undef static_assert
+		#undef GASHA_HAS_CUSTOM_STATIC_ASSERT
+	#endif//GASHA_HAS_CUSTOM_STATIC_ASSERT
+#endif//GASHA_NODEF_STATIC_ASSERT
 
 //--------------------
 //【C++11仕様】thread_local：スレッドローカルストレージ（TLS）修飾子
@@ -332,6 +437,13 @@
 		#define GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_THREAD_LOCAL
+	#ifdef GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
+		#undef thread_local
+		#undef GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
+	#endif//GASHA_HAS_CAMOUFLAGE_THREAD_LOCAL
+#endif//GASHA_NODEF_THREAD_LOCAL
 
 //--------------------
 //【C++11仕様】noexcept：例外無効
@@ -357,6 +469,13 @@
 		#define GASHA_NOTHROW throw()
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_NOEXCEPT
+	#ifdef GASHA_HAS_CAMOUFLAGE_NOEXCEPT
+		#undef noexcept
+		#undef GASHA_HAS_CAMOUFLAGE_NOEXCEPT
+	#endif//GASHA_HAS_CAMOUFLAGE_NOEXCEPT
+#endif//GASHA_NODEF_NOEXCEPT
 
 //--------------------
 //【C++11仕様】alignas：アラインメント修飾子
@@ -387,6 +506,13 @@
 		#define GASHA_HAS_CAMOUFLAGE_ALIGNAS
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_ALIGNAS
+	#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNAS
+		#undef alignas
+		#undef GASHA_HAS_CAMOUFLAGE_ALIGNAS
+	#endif//GASHA_HAS_CAMOUFLAGE_ALIGNAS
+#endif//GASHA_NODEF_ALIGNAS
 
 //--------------------
 //【C++11仕様】alignasの限界値
@@ -415,6 +541,13 @@
 		#define GASHA_HAS_CAMOUFLAGE_ALIGNOF
 	#endif//GASHA_HAS_CPP11
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_ALIGNOF
+	#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNOF
+		#undef alignof
+		#undef GASHA_HAS_CAMOUFLAGE_ALIGNOF
+	#endif//GASHA_HAS_CAMOUFLAGE_ALIGNOF
+#endif//GASHA_NODEF_ALIGNOF
 
 //--------------------
 //【C++11仕様】alignof(alignas(T))：アラインメントを取得して適用
@@ -451,15 +584,50 @@
 	#define GASHA_HAS_ALIGNED_FREE
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-	#define GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
-	#define GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+	#define GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
+	#define GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_ALIGNED_MALLOC
+	#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
+		#undef GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
+	#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
+#endif//GASHA_NODEF_ALIGNED_MALLOC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_ALIGNED_FREE
+	#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
+		#undef GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
+	#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
+#endif//GASHA_NODEF_ALIGNED_FREE
 
 //--------------------
 //mallinfo
 #ifdef GASHA_IS_GCC//※暫定（GCCだからといって使えるとは限らない）
 	#define GASHA_HAS_MALLINFO
 #endif//GASHA_IS_GCC
+
+//--------------------
+//CPU情報
+//※VC++仕様に合わせて下記関数を共通実装
+//  void __cpuid(int cpu_info[4], const int type);
+//  std::uint64_t _xgetbv(const std::uint32_t xcr);
+//  #define _XCR_XFEATURE_ENABLED_MASK 0 ... _xgetbv() 引数用
+#ifdef GASHA_IS_VC
+	#ifdef GASHA_IS_X86
+		#define GASHA_HAS_CPUID
+	#endif//GASHA_IS_X86
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#ifdef GASHA_IS_X86
+		#define GASHA_HAS_CAMOUFLAGE_CPUID
+	#endif//GASHA_IS_X86
+#endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_CPUID
+	#ifdef GASHA_HAS_CAMOUFLAGE_CPUID
+		#undef GASHA_HAS_CAMOUFLAGE_CPUID
+	#endif//GASHA_HAS_CAMOUFLAGE_CPUID
+#endif//GASHA_NODEF_CPUID
 
 //--------------------
 //noinline / always_inline
@@ -534,6 +702,34 @@
 	#define __FUNCSIG__ __PRETTY_FUNCTION__
 	#define __FUNCDNAME__ ""
 #endif//GASHA_IS_GCC
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_PRETTY_FUNCTION
+	#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+		#undef __PRETTY_FUNCTION__
+		#undef GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+	#endif//GASHA_HAS_CAMOUFLAGE_MACRO_PRETTY_FUNCTION
+#endif//GASHA_NODEF_PRETTY_FUNCTION
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_func
+	#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_func
+		#undef __func__
+		#undef GASHA_HAS_CAMOUFLAGE_MACRO_func
+	#endif//GASHA_HAS_CAMOUFLAGE_MACRO_func
+#endif//GASHA_NODEF_func
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_FUNCSIG
+	#ifdef GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+		#undef __FUNCSIG__
+		#undef GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+	#endif//GASHA_HAS_CAMOUFLAGE_MACRO_FUNCSIG
+#endif//GASHA_NODEF_FUNCSIG
+//※偽装禁止チェック
+#ifdef GASHA_NODEF_FUNCDNAME
+	#ifdef GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+		#undef __FUNCDNAME__
+		#undef GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+	#endif//GASHA_HAS_DUMMY_MACRO_FUNCDNAME
+#endif//GASHA_NODEF_FUNCDNAME
 
 #endif//GASHA_INCLUDED_LANGUAGE_AUTO_SETTINGS_H_
 

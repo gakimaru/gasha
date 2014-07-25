@@ -591,8 +591,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //----------------------------------------
 //ログレベル登録用補助マクロ
-#define MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (GASHA_FROM_OUTPUT_LEVEL(OUTPUT_LEVEL) + SUB_VALIE)//ログレベル定数計算用マクロ
-#define MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (GASHA_ logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
+#define GASHA_MAKE_LOG_LEVEL_VALUE(OUTPUT_LEVEL, SUB_VALIE) (GASHA_FROM_OUTPUT_LEVEL(OUTPUT_LEVEL) + SUB_VALIE)//ログレベル定数計算用マクロ
+#define GASHA_MAKE_SPECIAL_LOG_LEVEL_VALUE(VALUE) (GASHA_ logLevel::SPECIAL_MIN + VALUE)//特殊ログレベル定数計算用マクロ
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_level.inl>

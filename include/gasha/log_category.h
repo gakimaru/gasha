@@ -552,8 +552,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //----------------------------------------
 //ログカテゴリ登録用補助マクロ
-#define MAKE_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
-#define MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
+#define GASHA_MAKE_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::NORMAL_MIN + VALUE)//ログカテゴリ定数計算用マクロ
+#define GASHA_MAKE_SPECIAL_LOG_CATEGORY_VALUE(VALUE) (GASHA_ logCategory::SPECIAL_MIN + VALUE)//特殊ログカテゴリ定数計算用マクロ
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/log_category.inl>

@@ -96,10 +96,10 @@ namespace serialization
 	template<std::size_t N, typename OBJ>
 	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, const char(&item)[N], std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer);
 	//※ポインタ用
-	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item);
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, const std::size_t item_max_size = GASHA_ serialization::itemInfoBase::VARIABLE_SIZE);
 	//※個別デシリアライズ処理指定版
 	template<typename OBJ>
-	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer);
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer, const std::size_t item_max_size = GASHA_ serialization::itemInfoBase::VARIABLE_SIZE);
 	//--------------------
 	//データ項目情報作成テンプレート関数（初回用）
 	template<class T>

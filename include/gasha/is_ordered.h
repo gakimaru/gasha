@@ -25,7 +25,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //整列状態確認処理オーバーロード関数用マクロ
 //※プレディケート関数指定版
-#define isOrderedFuncSetByUserPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_IS_ORDERED_WITH_PREDICATE(func_name) \
 	template<class T, std::size_t N, class PREDICATE> \
 	inline bool func_name(T(&array)[N], PREDICATE predicate) \
 	{ \
@@ -50,7 +50,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 		return func_name(&(con.at(0)), size, predicate); \
 	}
 //※標準プレディケート関数使用版
-#define isOrderedFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T> \
 	inline bool func_name(T* array, const std::size_t size) \
 	{ \
@@ -77,15 +77,15 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 		return func_name(con, less<typename CONTAINER::value_type>()); \
 	}
 //※全種
-#define isOrderedFuncSet(func_name) \
-	isOrderedFuncSetByUserPredicate(func_name) \
-	isOrderedFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_IS_ORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_IS_ORDERED_WITH_PREDICATE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //整列状態確認処理オーバーロード関数用マクロ
 //※イテレータ対応版
 //※標準プレディケート関数使用版
-#define iteratorIsOrderedFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class ITERATOR> \
 	inline bool func_name(ITERATOR begin, ITERATOR end) \
 { \
@@ -93,48 +93,48 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	return func_name(begin, end, less<value_type>()); \
 }
 //※全種
-#define iteratorIsOrderedFuncSet(func_name) \
-	iteratorIsOrderedFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_IS_ORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //整列状態確認処理オーバーロード関数用マクロ
 //※片方向連結リスト対応版
 //※標準プレディケート関数使用版
-#define singlyLinkedListIsOrderedFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T, class GET_NEXT_FUNC> \
 	inline bool func_name(T* first, GET_NEXT_FUNC get_next_func) \
 	{ \
 		return func_name<T, GET_NEXT_FUNC>(first, get_next_func, less<T>()); \
 	}
 //※全種
-#define singlyLinkedListIsOrderedFuncSet(func_name) \
-	singlyLinkedListIsOrderedFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_IS_ORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_IS_ORDERED_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //非整列要素数計上処理オーバーロード関数用マクロ
 //※全種
-#define sumupUnorderedFuncSet(func_name) \
-	sortingFuncSet(func_name);
+#define GASHA_OVERLOAD_SET_FOR_SUMUP_UNORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SORT(func_name);
 
 //----------------------------------------
 //非整列要素数計上処理オーバーロード関数用マクロ
 //※イテレータ対応版
 //※全種
-#define iteratorSumupUnorderedFuncSet(func_name) \
-	iteratorSortingFuncSet(func_name);
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SUMUP_UNORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT(func_name);
 
 //----------------------------------------
 //非整列要素数計上処理オーバーロード関数用マクロ
 //※片方向連結リスト対応版
 //※標準プレディケート関数使用版
-#define singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SUMUP_UNORDERED_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T, class GET_NEXT_FUNC> \
 	inline std::size_t func_name(T* first, GET_NEXT_FUNC get_next_func) \
 	{ \
 		return func_name<T, GET_NEXT_FUNC>(first, get_next_func, less<T>()); \
 	}
-#define singlyLinkedListSumupUnorderedFuncSet(func_name) \
-	singlyLinkedListSumupUnorderedFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SUMUP_UNORDERED(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SUMUP_UNORDERED_WITH_DEFAULT_PREDICATE(func_name)
 
 //========================================
 //整列状態確認
@@ -147,7 +147,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 bool isUnordered(const T* array, const std::size_t size, PREDICATE predicate);
-isOrderedFuncSet(isUnordered);
+GASHA_OVERLOAD_SET_FOR_IS_ORDERED(isUnordered);
 
 //----------------------------------------
 //非整列状態確認
@@ -157,7 +157,7 @@ isOrderedFuncSet(isUnordered);
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 bool iteratorIsUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorIsOrderedFuncSet(iteratorIsUnordered);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_IS_ORDERED(iteratorIsUnordered);
 
 //----------------------------------------
 //非整列状態確認
@@ -167,7 +167,7 @@ iteratorIsOrderedFuncSet(iteratorIsUnordered);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
 bool singlyLinkedListIsUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
-singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
+GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_IS_ORDERED(singlyLinkedListIsUnordered);
 
 //----------------------------------------
 //整列状態確認
@@ -176,7 +176,7 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsUnordered);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 inline bool isOrdered(const T* array, const std::size_t size, PREDICATE predicate);
-isOrderedFuncSet(isOrdered);
+GASHA_OVERLOAD_SET_FOR_IS_ORDERED(isOrdered);
 
 //----------------------------------------
 //整列状態確認
@@ -186,7 +186,7 @@ isOrderedFuncSet(isOrdered);
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 bool iteratorIsOrdered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorIsOrderedFuncSet(iteratorIsOrdered);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_IS_ORDERED(iteratorIsOrdered);
 
 //----------------------------------------
 //整列状態確認
@@ -196,7 +196,7 @@ iteratorIsOrderedFuncSet(iteratorIsOrdered);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
 bool singlyLinkedListIsOrdered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
-singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
+GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_IS_ORDERED(singlyLinkedListIsOrdered);
 
 //----------------------------------------
 //非整列要素数計上
@@ -205,7 +205,7 @@ singlyLinkedListIsOrderedFuncSet(singlyLinkedListIsOrdered);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t sumupUnordered(const T* array, const std::size_t size, PREDICATE predicate);
-sumupUnorderedFuncSet(sumupUnordered);
+GASHA_OVERLOAD_SET_FOR_SUMUP_UNORDERED(sumupUnordered);
 
 //----------------------------------------
 //非整列要素数計上
@@ -215,7 +215,7 @@ sumupUnorderedFuncSet(sumupUnordered);
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 std::size_t iteratorSumupUnordered(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_SUMUP_UNORDERED(iteratorSumupUnordered);
 
 //----------------------------------------
 //非整列要素数計上
@@ -225,7 +225,7 @@ iteratorSumupUnorderedFuncSet(iteratorSumupUnordered);
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
 std::size_t singlyLinkedListSumupUnordered(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
-singlyLinkedListSumupUnorderedFuncSet(singlyLinkedListSumupUnordered);
+GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SUMUP_UNORDERED(singlyLinkedListSumupUnordered);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

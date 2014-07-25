@@ -246,7 +246,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 	//スタック処理版
 	std::size_t swapped_count = 0;
 
-	//#define RADIX_IS_16//基数を16にする場合は、このマクロを有効化する（無効化時の基数は256)
+	//#define GASHA_RADIX_SORT_RADIX_IS_16//基数を16にする場合は、このマクロを有効化する（無効化時の基数は256)
 	//※基数は、256の方が速いが、16の方が所用メモリ量を抑えられる
 
 	typedef typename GET_KEY_FUNCTOR::key_type KEY_TYPE;//キー型
@@ -287,7 +287,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 	}
 	//キーの最大値から最大の長さを算出
 	const index_type KEY_LEN = (
-	#ifndef RADIX_IS_16//基数が256(8bit)の場合の計算
+	#ifndef GASHA_RADIX_SORT_RADIX_IS_16//基数が256(8bit)の場合の計算
 		(key_max & 0xff00000000000000llu) != 0llu ? 8 :
 		(key_max & 0x00ff000000000000llu) != 0llu ? 7 :
 		(key_max & 0x0000ff0000000000llu) != 0llu ? 6 :
@@ -296,7 +296,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 		(key_max & 0x0000000000ff0000u)   != 0u   ? 3 :
 		(key_max & 0x000000000000ff00u)   != 0u   ? 2 :
 		(key_max & 0x00000000000000ffu)   != 0u   ? 1 :
-	#else//RADIX_IS_16//基数が16(4bit)の場合の計算
+	#else//GASHA_RADIX_SORT_RADIX_IS_16//基数が16(4bit)の場合の計算
 		(key_max & 0xf000000000000000llu) != 0llu ? 16 :
 		(key_max & 0x0f00000000000000llu) != 0llu ? 15 :
 		(key_max & 0x00f0000000000000llu) != 0llu ? 14 :
@@ -313,7 +313,7 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 		(key_max & 0x0000000000000f00u)   != 0u   ?  3 :
 		(key_max & 0x00000000000000f0u)   != 0u   ?  2 :
 		(key_max & 0x000000000000000fu)   != 0u   ?  1 :
-	#endif//RADIX_IS_16
+	#endif//GASHA_RADIX_SORT_RADIX_IS_16
 		0);
 	if (KEY_LEN == 0)//キーの桁数が 0 ならこの時点で終了
 	{
@@ -321,11 +321,11 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 		return 0;
 	}
 
-#ifndef RADIX_IS_16//基数が256(8bit)の場合の計算
+#ifndef GASHA_RADIX_SORT_RADIX_IS_16//基数が256(8bit)の場合の計算
 	static const index_type RADIX = 256;//基数が256(8bit)の場合 ※基数 = 分布数
-#else//RADIX_IS_16//基数が16(4bit)の場合の計算
+#else//GASHA_RADIX_SORT_RADIX_IS_16//基数が16(4bit)の場合の計算
 	static const index_type RADIX = 16;//基数が16(4bit)の場合 ※基数 = 分布数
-#endif//RADIX_IS_16
+#endif//GASHA_RADIX_SORT_RADIX_IS_16
 
 	//分布情報型定義
 	struct bucket_t
@@ -355,11 +355,11 @@ inline std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR g
 		//指定の桁の分布位置計算
 		inline static unsigned char calcDigit(const KEY_TYPE_U key, const index_type key_column)
 		{
-		#ifndef RADIX_IS_16//基数が256(8bit)の場合の計算
+		#ifndef GASHA_RADIX_SORT_RADIX_IS_16//基数が256(8bit)の場合の計算
 			return (key >> (key_column << 3)) & 0xff;//基数が256(8bit)の場合の計算
-		#else//RADIX_IS_16//基数が16(4bit)の場合の計算
+		#else//GASHA_RADIX_SORT_RADIX_IS_16//基数が16(4bit)の場合の計算
 			return (key >> (key_column << 2)) & 0xf;//基数が16(4bit)の場合の計算
-		#endif//RADIX_IS_16
+		#endif//GASHA_RADIX_SORT_RADIX_IS_16
 		};
 	};
 	//スタック型定義

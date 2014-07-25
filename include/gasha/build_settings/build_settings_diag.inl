@@ -448,11 +448,11 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #ifdef GASHA_HAS_STATIC_ASSERT
 	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `static_assert()` is AVAILABLE.\n");
 #else//GASHA_HAS_STATIC_ASSERT
-#ifdef GASHA_HAS_ORIGINAL_STATIC_ASSERT
+#ifdef GASHA_HAS_CUSTOM_STATIC_ASSERT
 	GASHA_ spprintf(message, max_size, message_len, "[Original]  `static_assert()` is available.\n");
-#else//GASHA_HAS_ORIGINAL_STATIC_ASSERT
+#else//GASHA_HAS_CUSTOM_STATIC_ASSERT
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `static_assert()` is NOT available.\n");
-#endif//GASHA_HAS_ORIGINAL_STATIC_ASSERT
+#endif//GASHA_HAS_CUSTOM_STATIC_ASSERT
 #endif//GASHA_HAS_STATIC_ASSERT
 
 	//【C++11仕様】TLS指定子
@@ -520,11 +520,11 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #ifdef GASHA_HAS_ALIGNED_MALLOC
 	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `_aligned_malloc()`(VC++ style) is AVAILABLE.\n");
 #else//GASHA_HAS_ALIGNED_MALLOC
-#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
 	GASHA_ spprintf(message, max_size, message_len, "[Camouflage]`_aligned_malloc()`(VC++ style) is available.\n");
-#else//GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+#else//GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `_aligned_malloc()`(VC++ style) is available.\n");
-#endif//GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
 #endif//GASHA_HAS_ALIGNED_MALLOC
 	
 	//_aligned_free
@@ -532,11 +532,11 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #ifdef GASHA_HAS_ALIGNED_FREE
 	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `_aligned_free()`(VC++ style) is AVAILABLE.\n");
 #else//GASHA_HAS_ALIGNED_FREE
-#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 	GASHA_ spprintf(message, max_size, message_len, "[Camouflage]`_aligned_free()`(VC++ style) is available.\n");
-#else//GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+#else//GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `_aligned_free()`(VC++ style) is available.\n");
-#endif//GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 #endif//GASHA_HAS_ALIGNED_FREE
 
 	//mallinfo
@@ -546,6 +546,18 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #else//GASHA_HAS_MALLINFO
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `mallinfo()`(GCC style) is available.\n");
 #endif//GASHA_HAS_MALLINFO
+
+	//__cpuid 
+	//※C++11仕様ではなく、コンパイラ独自仕様の共通化
+#ifdef GASHA_HAS_CPUID
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__cpuid()`,_`xgetbv()`,`_XCR_XFEATURE_ENABLED_MASK`(VC++ style) is AVAILABLE.\n");
+#else//GASHA_HAS_CPUID
+#ifdef GASHA_HAS_CAMOUFLAGE_CPUID
+	GASHA_ spprintf(message, max_size, message_len, "[Camouflage]`__cpuid()`,_`xgetbv()`,`_XCR_XFEATURE_ENABLED_MASK`(VC++ style) is available.\n");
+#else//GASHA_HAS_CAMOUFLAGE_CPUID
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__cpuid()`,_`xgetbv()`,`_XCR_XFEATURE_ENABLED_MASK`(VC++ style) is available.\n");
+#endif//GASHA_HAS_CAMOUFLAGE_CPUID
+#endif//GASHA_HAS_CPUID
 
 	//no_inline
 	//※C++11仕様ではなく、コンパイラ独自仕様の共通化

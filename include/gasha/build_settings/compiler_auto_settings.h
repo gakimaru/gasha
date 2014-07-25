@@ -60,7 +60,7 @@
 	#define GASHA_IS_CPP//言語：C++
 	#define GASHA_PROGRAM_LANGUAGE_NAME "C++"
 	#if __cplusplus >= 201103L || defined(__GXX_EXPERIMENTAL_CXX0X__)
-		//#define HAS_CPPTR1//言語：C++TR1対応（暫定）
+		//#define GASHA_HAS_CPPTR1//言語：C++TR1対応（暫定）
 		#define GASHA_HAS_CPP11//言語：C++11対応
 		#define GASHA_CPP_VER 2011
 	#endif

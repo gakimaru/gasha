@@ -164,7 +164,7 @@ namespace ring_buffer
 	
 	//--------------------
 	//基本型定義マクロ
-	#define DECLARE_OPE_TYPES(OPE_TYPE) \
+	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::value_type value_type; \
 		typedef value_type& reference; \
@@ -193,7 +193,7 @@ namespace ring_buffer
 	{
 	public:
 		//型
-		DECLARE_OPE_TYPES(OPE_TYPE);
+		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
 		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
@@ -752,7 +752,7 @@ namespace ring_buffer
 		struct ope : public baseOpe<ope, VALUE_TYPE>{};
 
 		//基本型定義
-		DECLARE_OPE_TYPES(ope);
+		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//リングバッファコンテナ
 		class con : public container<ope_type>
@@ -785,7 +785,7 @@ namespace ring_buffer
 
 	//--------------------
 	//基本型定義マクロ消去
-	#undef DECLARE_OPE_TYPES
+	#undef GASHA_DECLARE_OPE_TYPES
 }//namespace ring_buffer
 
 //--------------------

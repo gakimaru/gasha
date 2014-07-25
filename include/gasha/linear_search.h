@@ -39,7 +39,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value)//value == 探索値ならtrueを返す
 template<class T, class PREDICATE>
 T* linearSearch(T* array, const std::size_t size, PREDICATE predicate);
-searchFuncSetByPredicate(linearSearch);
+GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE(linearSearch);
 
 //----------------------------------------
 //アルゴリズム：線形探索
@@ -54,7 +54,7 @@ searchFuncSetByPredicate(linearSearch);
 //・bool PREDICATE(const typename ITERATOR::value_type& value)//value == 探索値ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 ITERATOR iteratorLinearSearch(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_PREDICATE(iteratorLinearSearch);
 
 //----------------------------------------
 //アルゴリズム：線形探索
@@ -70,7 +70,7 @@ iteratorSearchFuncSetByPredicate(iteratorLinearSearch);
 //・T* GET_NEXT_FUNC(T& node)//次のノードを返す
 template<class T, class GET_NEXT_FUNC, class PREDICATE>
 const T* singlyLinkedListLinearSearch(const T* first, GET_NEXT_FUNC get_next_func, PREDICATE predicate);
-singlyLinkedListSearchFuncSetByPredicate(singlyLinkedListLinearSearch);
+GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_PREDICATE(singlyLinkedListLinearSearch);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -163,18 +163,18 @@ namespace serialization
 		return item_obj;
 	}
 	//※ポインタ用
-	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item)
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, const std::size_t item_max_size)
 	{
-		const std::size_t item_size = 0;//シリアライズ読み込み用のサイズ（シリアライズ書き込み時は実際の文字列長+1に更新する／ヌルなら0）
+		//const std::size_t item_size = 0;//シリアライズ読み込み用のサイズ（シリアライズ書き込み時は実際の文字列長+1に更新する／ヌルなら0）
 		const GASHA_ serialization::str_type* item_p = reinterpret_cast<const GASHA_ serialization::str_type*>(item);
-		itemInfo<GASHA_ serialization::str_type> item_obj(name, item_size, item_p, true, true);
+		itemInfo<GASHA_ serialization::str_type> item_obj(name, item_max_size, item_p, true, true);
 		return item_obj;
 	}
 	//※個別デシリアライズ処理指定版
 	template<typename OBJ>
-	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer)
+	inline itemInfo<GASHA_ serialization::str_type> pairStr(const char* name, char* item, std::function<void(OBJ&, const GASHA_ serialization::itemInfoBase&)> deserializer, const std::size_t item_max_size)
 	{
-		auto item_obj = pairStr(name, item);
+		auto item_obj = pairStr(name, item, item_max_size);
 		item_obj.setDeserializer(deserializer);
 		return item_obj;
 	}

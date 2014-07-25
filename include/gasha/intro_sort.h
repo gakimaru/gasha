@@ -68,7 +68,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 inline std::size_t introSort(T* array, const std::size_t size, PREDICATE predicate);
-sortingFuncSet(introSort);
+GASHA_OVERLOAD_SET_FOR_SORT(introSort);
 
 //----------------------------------------
 //アルゴリズム：イントロソート
@@ -84,7 +84,7 @@ sortingFuncSet(introSort);
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 inline std::size_t iteratorIntroSort(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorSortingFuncSet(iteratorIntroSort);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT(iteratorIntroSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

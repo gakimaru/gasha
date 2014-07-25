@@ -52,7 +52,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t shellSort(T* array, const std::size_t size, PREDICATE predicate);
-sortingFuncSet(shellSort);
+GASHA_OVERLOAD_SET_FOR_SORT(shellSort);
 
 //----------------------------------------
 //アルゴリズム：シェルソート
@@ -68,7 +68,7 @@ sortingFuncSet(shellSort);
 //・bool PREDICATE(const typename ITERATOR::value_type& value1, const typename ITERATOR::value_type& value2)//value1 == value2 ならtrueを返す
 template<class ITERATOR, class PREDICATE>
 std::size_t iteratorShellSort(ITERATOR begin, ITERATOR end, PREDICATE predicate);
-iteratorSortingFuncSet(iteratorShellSort);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT(iteratorShellSort);
 
 //----------------------------------------
 //アルゴリズム：シェルソート ※双方向連結リスト対応版
@@ -87,7 +87,7 @@ iteratorSortingFuncSet(iteratorShellSort);
 //・void REMOVE_NODE_FUNC(T& target_node, T*& first_ref, T*& last_ref)//target_nodeを連結から解除する
 template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC, class PREDICATE>
 std::size_t linkedListShellSort(T*& first, T*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func, PREDICATE predicate);
-linkedListSortingFuncSet(linkedListShellSort);
+GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SORT(linkedListShellSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

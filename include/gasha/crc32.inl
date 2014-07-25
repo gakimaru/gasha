@@ -27,14 +27,14 @@ namespace _private
 	//※constexpr関数内では変数/定数が使えないため、定数にマクロを使用
 #ifndef GASHA_CRC32_IS_CRC32C
 	//IEEE勧告の標準的なCRC32の生成多項式
-	//#define _POLYNOMIAL 0x04c11db7u//（標準）
-	#define _POLYNOMIAL 0xedb88320u//（反転）
+	//#define GASHA_CRC32_POLYNOMIAL 0x04c11db7u//（標準）
+	#define GASHA_CRC32_POLYNOMIAL 0xedb88320u//（反転）
 #else//GASHA_CRC32_IS_CRC32C
 	//CRC-32C(Castagnoli)の生成多項式
-	//#define _POLYNOMIAL 0x1edc6f41u//（標準）
-	#define _POLYNOMIAL 0x82f63b78u//（反転）
+	//#define GASHA_CRC32_POLYNOMIAL 0x1edc6f41u//（標準）
+	#define GASHA_CRC32_POLYNOMIAL 0x82f63b78u//（反転）
 #endif//GASHA_CRC32_IS_CRC32C
-	static const crc32_t POLYNOMIAL = _POLYNOMIAL;//CRC32生成多項式定数
+	static const crc32_t POLYNOMIAL = GASHA_CRC32_POLYNOMIAL;//CRC32生成多項式定数
 
 	//--------------------
 	//CRC32多項式計算
@@ -42,7 +42,7 @@ namespace _private
 	inline constexpr GASHA_ crc32_t calcPoly_core(const GASHA_ crc32_t poly)
 	{
 		//多項式計算
-		return poly & 1 ? _POLYNOMIAL ^ (poly >> 1) : (poly >> 1);
+		return poly & 1 ? GASHA_CRC32_POLYNOMIAL ^ (poly >> 1) : (poly >> 1);
 	}
 	inline constexpr GASHA_ crc32_t calcPoly(const GASHA_ crc32_t poly)
 	{

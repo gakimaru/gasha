@@ -54,7 +54,7 @@ struct compare_to{
 
 //----------------------------------------
 //探索処理オーバーロード関数用マクロ
-#define searchFuncSetByUserFunc(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE_OR_COMPARISON(func_name) \
 	template<class T, class PREDICATE_OR_COMPARISON> \
 	inline const T* func_name(const T* array, const std::size_t size, PREDICATE_OR_COMPARISON predicate_or_comparison) \
 	{ \
@@ -107,7 +107,7 @@ struct compare_to{
 		return size == 0 ? nullptr : func_name(&(const_cast<CONTAINER*>(&con)->at(0)), size, predicate_or_comparison); \
 	}
 //※探索値指定版：プレディケート関数と値で比較
-#define searchFuncSetPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE_ADN_VALUE(func_name) \
 	template<class T, typename V, class PREDICATE> \
 	inline T* func_name##Value(T* array, const std::size_t size, const V& value, PREDICATE predicate) \
 	{ \
@@ -175,7 +175,7 @@ struct compare_to{
 		return size == 0 ? nullptr : func_name(&(const_cast<CONTAINER*>(&con)->at(0)), size, _equal); \
 	}
 //※探索値指定版：標準のプレディケート関数と値で比較
-#define searchFuncSetByDefaultPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name) \
 	template<class T, typename V> \
 	inline T* func_name##Value(T* array, const std::size_t size, const V& value) \
 	{ \
@@ -242,12 +242,12 @@ struct compare_to{
 		auto _equal = [&value](const typename CONTAINER::value_type& val1) -> bool { return equal_to<typename CONTAINER::value_type>()(val1, value); }; \
 		return size == 0 ? nullptr : func_name(&(const_cast<CONTAINER*>(&con)->at(0)), size, _equal); \
 	}
-#define searchFuncSetByPredicate(func_name) \
-	searchFuncSetByUserFunc(func_name) \
-	searchFuncSetPredicateAndValue(func_name) \
-	searchFuncSetByDefaultPredicateAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE_OR_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE_ADN_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name)
 //※探索値指定版：比較関数と値で比較
-#define searchFuncSetByComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
 	template<class T, typename V, class COMPARISON> \
 	inline T* func_name##Value(T* array, const std::size_t size, const V& value, COMPARISON comparison) \
 	{ \
@@ -315,7 +315,7 @@ struct compare_to{
 		return size == 0 ? nullptr : func_name(&(const_cast<CONTAINER*>(&con)->at(0)), size, _comparison); \
 	}
 //※探索値指定版：標準比較関数と値で比較
-#define searchFuncSetByDefaultComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name) \
 	template<class T, typename V> \
 	inline T* func_name##Value(T* array, const std::size_t size, const V& value) \
 	{ \
@@ -382,16 +382,16 @@ struct compare_to{
 		auto _comparison = [&value](const typename CONTAINER::value_type& val1) -> int { return compare_to<typename CONTAINER::value_type>()(val1, value); }; \
 		return size == 0 ? nullptr : func_name(&(const_cast<CONTAINER*>(&con)->at(0)), size, _comparison); \
 	}
-#define searchFuncSetByComparison(func_name) \
-	searchFuncSetByUserFunc(func_name) \
-	searchFuncSetByComparisonAndValue(func_name) \
-	searchFuncSetByDefaultComparisonAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_PREDICATE_OR_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name)
 
 //----------------------------------------
 //探索処理オーバーロード関数用マクロ
 //※イテレータ対応版
 //※探索値指定版：プレディケート関数と値で比較
-#define iteratorSearchFuncSetPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_PREDICATE_AND_VALUE(func_name) \
 	template<class ITERATOR, typename V, class PREDICATE> \
 	inline ITERATOR func_name##Value(ITERATOR begin, ITERATOR end, const V& value, PREDICATE predicate) \
 { \
@@ -400,7 +400,7 @@ struct compare_to{
 	return func_name(begin, end, _equal); \
 }
 //※探索値指定版：標準のプレディケート関数と値で比較
-#define iteratorSearchFuncSetByDefaultPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name) \
 	template<class ITERATOR, typename V> \
 	inline ITERATOR func_name##Value(ITERATOR begin, ITERATOR end, const V& value) \
 { \
@@ -408,11 +408,11 @@ struct compare_to{
 	auto _equal = [&value](value_type& val1) -> bool { return equal_to<value_type>()(val1, value); }; \
 	return func_name(begin, end, _equal); \
 }
-#define iteratorSearchFuncSetByPredicate(func_name) \
-	iteratorSearchFuncSetPredicateAndValue(func_name) \
-	iteratorSearchFuncSetByDefaultPredicateAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_PREDICATE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_PREDICATE_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name)
 //※探索値指定版：比較関数と値で比較
-#define iteratorSearchFuncSetByComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
 	template<class ITERATOR, typename V, class COMPARISON> \
 	inline ITERATOR func_name##Value(ITERATOR begin, ITERATOR end, const V& value, COMPARISON comparison) \
 	{ \
@@ -421,7 +421,7 @@ struct compare_to{
 		return func_name(begin, end, _comparison); \
 	}
 //※探索値指定版：標準比較関数と値で比較
-#define iteratorSearchFuncSetByDefaultComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name) \
 	template<class ITERATOR, typename V> \
 	inline ITERATOR func_name##Value(ITERATOR begin, ITERATOR end, const V& value) \
 	{ \
@@ -429,15 +429,15 @@ struct compare_to{
 		auto _comparison = [&value](value_type& val1) -> int { return compare_to<value_type>()(val1, value); }; \
 		return func_name(begin, end, _comparison); \
 	}
-#define iteratorSearchFuncSetByComparison(func_name) \
-	iteratorSearchFuncSetByComparisonAndValue(func_name) \
-	iteratorSearchFuncSetByDefaultComparisonAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name)
 
 //----------------------------------------
 //探索処理オーバーロード関数用マクロ
 //※双方向連結リスト対応版
 //※探索値指定版：比較関数と値で比較
-#define linkedListSearchFuncSetByComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, typename V, class COMPARISON> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, const V& value, COMPARISON comparison) \
 	{ \
@@ -445,22 +445,22 @@ struct compare_to{
 		return func_name(first, get_next_func, get_prev_func, _comparison); \
 	}
 //※探索値指定版：標準比較関数と値で比較
-#define linkedListSearchFuncSetByDefaultComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, typename V> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, const V& value) \
 	{ \
 		auto _comparison = [&value](T& val1) -> int { return compare_to<T>()(val1, value); }; \
 		return func_name(first, get_next_func, get_prev_func, _comparison); \
 	}
-#define linkedListSearchFuncSetByComparison(func_name) \
-	linkedListSearchFuncSetByComparisonAndValue(func_name) \
-	linkedListSearchFuncSetByDefaultComparisonAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name)
 
 //----------------------------------------
 //探索処理オーバーロード関数用マクロ
 //※片方向連結リスト対応版
 //※探索値指定版：プレディケート関数と値で比較
-#define singlyLinkedListSearchFuncSetPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_PREDICATE_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, typename V, class PREDICATE> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value, PREDICATE predicate) \
 	{ \
@@ -468,18 +468,18 @@ struct compare_to{
 		return func_name(first, get_next_func, _equal); \
 	}
 //※探索値指定版：標準のプレディケート関数と値で比較
-#define singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, typename V> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value) \
 	{ \
 		auto _equal = [&value](T& val1) -> bool { return equal_to<T>()(val1, value); }; \
 		return func_name(first, get_next_func, _equal); \
 	}
-#define singlyLinkedListSearchFuncSetByPredicate(func_name) \
-	singlyLinkedListSearchFuncSetPredicateAndValue(func_name) \
-	singlyLinkedListSearchFuncSetByDefaultPredicateAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_PREDICATE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_PREDICATE_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_DEFAULT_PREDICATE_AND_VALUE(func_name)
 //※探索値指定版：比較関数と値で比較
-#define singlyLinkedListSearchFuncSetByComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, typename V, class COMPARISON> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value, COMPARISON comparison) \
 	{ \
@@ -487,16 +487,16 @@ struct compare_to{
 		return func_name(first, get_next_func, _comparison); \
 	}
 //※探索値指定版：標準比較関数と値で比較
-#define singlyLinkedListSearchFuncSetByDefaultComparisonAndValue(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name) \
 	template<class T, class GET_NEXT_FUNC, typename V> \
 	inline T* func_name##Value(T* first, GET_NEXT_FUNC get_next_func, const V& value) \
 	{ \
 		auto _comparison = [&value](T& val1) -> int { return compare_to<T>()(val1, value); }; \
 		return func_name(first, get_next_func, _comparison); \
 	}
-#define singlyLinkedListSearchFuncSetByComparison(func_name) \
-	singlyLinkedListSearchFuncSetByComparisonAndValue(func_name) \
-	singlyLinkedListSearchFuncSetByDefaultComparisonAndValue(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_COMPARISON(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_COMPARISON_AND_VALUE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_DEFAULT_COMPARISON_AND_VALUE(func_name)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

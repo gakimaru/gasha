@@ -128,6 +128,9 @@ template<typename... Tx>
 int spprintf(char* dst, const std::size_t max_size, std::size_t& pos, const char* fmt, Tx&&... args);//最大バッファサイズ指定あり版
 template<typename... Tx>
 int spprintf(char* dst, const char* fmt, Tx&&... args);//最大バッファサイズ／出力位置指定なし版
+//※既存の snprintf との衝突を避けた変則名
+template<typename... Tx>
+int spnprintf(char* dst, const std::size_t max_size, const char* fmt, Tx&&... args);//最大バッファサイズのみ指定版
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

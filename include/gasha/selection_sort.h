@@ -52,7 +52,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t selectionSort(T* array, const std::size_t size, PREDICATE predicate);
-sortingFuncSet(selectionSort);
+GASHA_OVERLOAD_SET_FOR_SORT(selectionSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

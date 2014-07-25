@@ -57,20 +57,20 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //--------------------
 //アラインメント指定付きメモリ確保
 //※VC++仕様に合わせて共通化
-#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
 #ifdef GASHA_IS_GCC
 inline void* _aligned_malloc(const std::size_t size, const std::size_t alignment);
 #endif//GASHA_IS_GCC
-#endif//GASHA_HASCAMOUFLAGE_ALIGNED_MALLOC
+#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_MALLOC
 
 //--------------------
 //アラインメント指定付きメモリ解放
 //※VC++仕様に合わせて共通化
-#ifdef GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+#ifdef GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 #ifdef GASHA_IS_GCC
 inline void _aligned_free(void* p);
 #endif//GASHA_IS_GCC
-#endif//GASHA_HASCAMOUFLAGE_ALIGNED_FREE
+#endif//GASHA_HAS_CAMOUFLAGE_ALIGNED_FREE
 
 //.hファイルのインクルードに伴い、常に.inlファイルを自動インクルード
 #include <gasha/memory.inl>

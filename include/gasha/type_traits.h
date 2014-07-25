@@ -95,11 +95,11 @@ template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t
 template<typename T, std::size_t N1, std::size_t N2, std::size_t N3, std::size_t N4, std::size_t N5> inline constexpr std::size_t extent5of(const T(&data)[N1][N2][N3][N4][N5]){ return N5; }
 
 //※constexprが使えない環境でのメタプログラミング用（extent*ofだけマクロで用意）
-#define extent1of_m(data) (sizeof(data) / sizeof(data[0]))
-#define extent2of_m(data) (sizeof(data[0]) / sizeof(data[0][0]))
-#define extent3of_m(data) (sizeof(data[0][0]) / sizeof(data[0][0][0]))
-#define extent4of_m(data) (sizeof(data[0][0][0]) / sizeof(data[0][0][0][0]))
-#define extent5of_m(data) (sizeof(data[0][0][0][0]) / sizeof(data[0][0][0][0][0]))
+#define GASHA_EXTENT1OF(data) (sizeof(data) / sizeof(data[0]))
+#define GASHA_EXTENT2OF(data) (sizeof(data[0]) / sizeof(data[0][0]))
+#define GASHA_EXTENT3OF(data) (sizeof(data[0][0]) / sizeof(data[0][0][0]))
+#define GASHA_EXTENT4OF(data) (sizeof(data[0][0][0]) / sizeof(data[0][0][0][0]))
+#define GASHA_EXTENT5OF(data) (sizeof(data[0][0][0][0]) / sizeof(data[0][0][0][0][0]))
 
 //--------------------------------------------------------------------------------
 //ポインター型情報

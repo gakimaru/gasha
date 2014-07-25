@@ -167,7 +167,7 @@ namespace linked_list
 
 	//--------------------
 	//基本型定義マクロ
-	#define DECLARE_OPE_TYPES(OPE_TYPE) \
+	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::node_type node_type; \
 		typedef node_type value_type; \
@@ -292,7 +292,7 @@ namespace linked_list
 	{
 	public:
 		//型
-		DECLARE_OPE_TYPES(OPE_TYPE);
+		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//--------------------
 		//イテレータ宣言
@@ -829,7 +829,7 @@ namespace linked_list
 		};
 
 		//基本型定義
-		DECLARE_OPE_TYPES(ope);
+		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//双方向連結リストコンテナ
 		class con : public container<ope_type>
@@ -859,7 +859,7 @@ namespace linked_list
 
 	//--------------------
 	//基本型定義マクロ消去
-	#undef DECLARE_OPE_TYPES
+	#undef GASHA_DECLARE_OPE_TYPES
 }//namespace linked_list
 
 //--------------------

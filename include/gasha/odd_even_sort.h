@@ -54,7 +54,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool PREDICATE(const T& value1, const T& value2)//value1 == value2 ならtrueを返す
 template<class T, class PREDICATE>
 std::size_t oddEvenSort(T* array, const std::size_t size, PREDICATE predicate);
-sortingFuncSet(oddEvenSort);
+GASHA_OVERLOAD_SET_FOR_SORT(oddEvenSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

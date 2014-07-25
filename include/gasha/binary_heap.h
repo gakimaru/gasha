@@ -125,7 +125,7 @@ namespace binary_heap
 
 	//--------------------
 	//基本型定義マクロ
-	#define DECLARE_OPE_TYPES(OPE_TYPE) \
+	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::node_type node_type; \
 		typedef node_type value_type; \
@@ -171,7 +171,7 @@ namespace binary_heap
 	{
 	public:
 		//型
-		DECLARE_OPE_TYPES(OPE_TYPE);
+		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
 		static const size_type TABLE_SIZE = _TABLE_SIZE;//配列要素数
@@ -734,7 +734,7 @@ namespace binary_heap
 		struct ope : public baseOpe<ope, NODE_TYPE>{};
 
 		//基本型定義
-		DECLARE_OPE_TYPES(ope);
+		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//二分ヒープコンテナ
 		class con : public container<ope_type, _TABLE_SIZE>
@@ -756,7 +756,7 @@ namespace binary_heap
 	
 	//--------------------
 	//基本型定義マクロ消去
-	#undef DECLARE_OPE_TYPES
+	#undef GASHA_DECLARE_OPE_TYPES
 }//namespace binary_heap
 
 //--------------------

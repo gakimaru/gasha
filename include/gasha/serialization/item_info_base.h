@@ -41,6 +41,9 @@ namespace serialization
 	class itemInfoBase
 	{
 	public:
+		//定数
+		static const std::uint32_t VARIABLE_SIZE = ~0;//可変長サイズ指定 ※可変長文字列を読み込む時に、セーブデータのサイズに合わせる場合に使用
+	public:
 		//アクセッサ
 		inline GASHA_ crc32_t nameCrc() const;//名前のCRC
 		inline const char* name() const;//名前 ※セーブデータにしか存在しないデータ項目の場合、名前がないので注意（CRCのみ存在）

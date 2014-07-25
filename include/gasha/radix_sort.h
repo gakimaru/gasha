@@ -55,7 +55,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //基数ソート本体
 template<class T, class GET_KEY_FUNCTOR>
 std::size_t radixSort(T* array, const std::size_t size, GET_KEY_FUNCTOR get_key_functor);
-distributedSortingFuncSet(radixSort);
+GASHA_OVERLOAD_SET_FOR_DISTRIBUTED_SORT(radixSort);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

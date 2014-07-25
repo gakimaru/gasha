@@ -189,7 +189,7 @@ namespace priority_queue
 	
 	//--------------------
 	//基本型定義マクロ
-	#define DECLARE_OPE_TYPES(OPE_TYPE) \
+	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::node_type node_type; \
 		typedef node_type value_type; \
@@ -218,7 +218,7 @@ namespace priority_queue
 	{
 	public:
 		//型
-		DECLARE_OPE_TYPES(OPE_TYPE);
+		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 		typedef CONTAINER_TYPE container_type;//コンテナ型
 		typedef typename container_type::status_t status_t;//ステータス型
 	public:
@@ -515,7 +515,7 @@ namespace priority_queue
 		};
 
 		//基本型定義
-		DECLARE_OPE_TYPES(ope);
+		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//優先度付きキューコンテナアダプタ
 		class con : public container<ope_type, _TABLE_SIZE>
@@ -537,7 +537,7 @@ namespace priority_queue
 
 	//--------------------
 	//基本型定義マクロ消去
-	#undef DECLARE_OPE_TYPES
+	#undef GASHA_DECLARE_OPE_TYPES
 }//namespace priority_queue
 
 //--------------------

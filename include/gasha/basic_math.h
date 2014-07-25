@@ -314,44 +314,44 @@ struct makeStaticPrimeGE{
 //【ランタイム版】ビット数を数える
 #ifdef GASHA_IS_VC
 #ifdef GASHA_USE_POPCNT
-#define ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
+#define GASHA_ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
 #endif//GASHA_USE_POPCNT
 #endif//GASHA_IS_VC
 #ifdef GASHA_IS_GCC
-#define ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
+#define GASHA_ENABLE_BUILTIN_POPCNT//ビルトインビット数計測が有効
 #endif//GASHA_IS_GCC
 
 #ifdef GASHA_USE_SSE4_2
-#define ENABLE_SSE_POPCNT//SSE命令版ビット数計測が有効
+#define GASHA_ENABLE_SSE_POPCNT//SSE命令版ビット数計測が有効
 #endif//GASHA_USE_SSE4_2
 
 //※独自実装版
 int countBits_custom(const unsigned int value);
 
-#ifdef ENABLE_BUILTIN_POPCNT
+#ifdef GASHA_ENABLE_BUILTIN_POPCNT
 //※ビルトイン処理版
 int countBits_builtin(const unsigned int value);
-#endif//ENABLE_BUILTIN_POPCNT
+#endif//GASHA_ENABLE_BUILTIN_POPCNT
 
-#ifdef ENABLE_SSE_POPCNT
+#ifdef GASHA_ENABLE_SSE_POPCNT
 //※SSE命令版
 int countBits_sse(const unsigned int value);
-#endif//ENABLE_SSE_POPCNT
+#endif//GASHA_ENABLE_SSE_POPCNT
 
 //標準版（中身は上記のいずれか）
 //※SS命令E版→ビルトイン版→独自版の優先順位で適用する
 //※なお、ビルトイン版とSSE命令版は本質的に同じ（はず）。
 inline int countBits(const unsigned int value)
 {
-#ifdef ENABLE_SSE_POPCNT
+#ifdef GASHA_ENABLE_SSE_POPCNT
 	return countBits_sse(value);//SSE命令版
-#else//ENABLE_SSE_POPCNT
-#ifdef ENABLE_BUILTIN_POPCNT
+#else//GASHA_ENABLE_SSE_POPCNT
+#ifdef GASHA_ENABLE_BUILTIN_POPCNT
 	return countBits_builtin(value);//ビルトイン版
-#else//ENABLE_BUILTIN_POPCNT
+#else//GASHA_ENABLE_BUILTIN_POPCNT
 	return countBits_custom(value);//独自実装版
-#endif//ENABLE_BUILTIN_POPCNT
-#endif//ENABLE_SSE_POPCNT
+#endif//GASHA_ENABLE_BUILTIN_POPCNT
+#endif//GASHA_ENABLE_SSE_POPCNT
 }
 
 //----------------------------------------

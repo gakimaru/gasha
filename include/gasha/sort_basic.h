@@ -55,7 +55,7 @@ struct less{
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※プレディケート関数指定版
-#define sortingFuncSetByUserPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SORT_WITH_PREDICATE(func_name) \
 	template<class T, std::size_t N, class PREDICATE> \
 	inline std::size_t func_name(T(&array)[N], PREDICATE predicate) \
 	{ \
@@ -80,7 +80,7 @@ struct less{
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, predicate); \
 	}
 //※標準プレディケート関数使用版
-#define sortingFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SORT_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T> \
 	inline std::size_t func_name(T* array, const std::size_t size) \
 	{ \
@@ -107,15 +107,15 @@ struct less{
 		return func_name(con, less<typename CONTAINER::value_type>()); \
 	}
 //※全種
-#define sortingFuncSet(func_name) \
-	sortingFuncSetByUserPredicate(func_name) \
-	sortingFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SORT(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SORT_WITH_PREDICATE(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SORT_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※イテレータ対応版
 //※標準プレディケート関数使用版
-#define iteratorSortingFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class ITERATOR> \
 	inline std::size_t func_name(ITERATOR begin, ITERATOR end) \
 	{ \
@@ -123,41 +123,41 @@ struct less{
 		return func_name(begin, end, less<value_type>()); \
 	}
 //※全種
-#define iteratorSortingFuncSet(func_name) \
-	iteratorSortingFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT(func_name) \
+	GASHA_OVERLOAD_SET_FOR_ITERATOR_SORT_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※双方向連結リスト対応版
 //※標準プレディケート関数使用版
-#define linkedListSortingFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SORT_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class INSERT_NODE_BEFORE_FUNC, class REMOVE_NODE_FUNC> \
 	inline std::size_t func_name(T*& first, T*& last, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, INSERT_NODE_BEFORE_FUNC insert_node_before_func, REMOVE_NODE_FUNC remove_node_func) \
 	{ \
 		return func_name<T, GET_NEXT_FUNC, GET_PREV_FUNC, INSERT_NODE_BEFORE_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, get_prev_func, insert_node_before_func, remove_node_func, less<T>()); \
 	}
 //※全種
-#define linkedListSortingFuncSet(func_name) \
-	linkedListSortingFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SORT(func_name) \
+	GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SORT_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //比較ソート処理オーバーロード関数用マクロ
 //※片方向連結リスト対応版
 //※標準プレディケート関数使用版
-#define singlyLinkedListSortingFuncSetByDefaultPredicate(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SORT_WITH_DEFAULT_PREDICATE(func_name) \
 	template<class T, class GET_NEXT_FUNC, class INSERT_NODE_AFTER_FUNC, class REMOVE_NODE_FUNC> \
 	inline std::size_t func_name(T*& first, T*& last, GET_NEXT_FUNC get_next_func, INSERT_NODE_AFTER_FUNC insert_node_after_func, REMOVE_NODE_FUNC remove_node_func) \
 	{ \
 		return func_name<T, GET_NEXT_FUNC, INSERT_NODE_AFTER_FUNC, REMOVE_NODE_FUNC>(first, last, get_next_func, insert_node_after_func, remove_node_func, less<T>()); \
 	}
 //※全種
-#define singlyLinkedListSortingFuncSet(func_name) \
-	singlyLinkedListSortingFuncSetByDefaultPredicate(func_name)
+#define GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SORT(func_name) \
+	GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SORT_WITH_DEFAULT_PREDICATE(func_name)
 
 //----------------------------------------
 //非比較ソート処理オーバーロード関数用マクロ
 //※キー取得用関数オブジェクト指定版
-#define distributedSortingFuncSetByUserFunctor(func_name) \
+#define GASHA_OVERLOAD_SET_FOR_DISTRIBUTED_SORT_WITH_FUNCTOR(func_name) \
 	template<class T, std::size_t N, class GET_KEY_FUNCTOR> \
 	inline std::size_t func_name(T(&array)[N], GET_KEY_FUNCTOR get_key_functor) \
 	{ \
@@ -182,8 +182,8 @@ struct less{
 		return size == 0 ? 0 : func_name(&(con.at(0)), size, get_key_functor); \
 	}
 //※全種
-#define distributedSortingFuncSet(func_name) \
-	distributedSortingFuncSetByUserFunctor(func_name)
+#define GASHA_OVERLOAD_SET_FOR_DISTRIBUTED_SORT(func_name) \
+	GASHA_OVERLOAD_SET_FOR_DISTRIBUTED_SORT_WITH_FUNCTOR(func_name)
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

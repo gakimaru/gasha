@@ -177,7 +177,7 @@ namespace hash_table
 	
 	//--------------------
 	//基本型定義マクロ
-	#define DECLARE_OPE_TYPES(OPE_TYPE) \
+	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
 		typedef OPE_TYPE ope_type; \
 		typedef typename ope_type::value_type value_type; \
 		typedef typename ope_type::key_type key_type; \
@@ -199,7 +199,7 @@ namespace hash_table
 	{
 	public:
 		//型
-		DECLARE_OPE_TYPES(OPE_TYPE);
+		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
 		static const size_type ORIGINAL_TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ（元々指定されたサイズ）
@@ -808,7 +808,7 @@ namespace hash_table
 		struct ope : public baseOpe<ope, VALUE_TYPE, KEY_TYPE>{};
 
 		//基本型定義
-		DECLARE_OPE_TYPES(ope);
+		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//開番地法ハッシュテーブルコンテナ
 		class con : public container<ope_type, _TABLE_SIZE>
@@ -830,7 +830,7 @@ namespace hash_table
 
 	//--------------------
 	//基本型定義マクロ消去
-	#undef DECLARE_OPE_TYPES
+	#undef GASHA_DECLARE_OPE_TYPES
 }//namespace hash_table
 
 //--------------------

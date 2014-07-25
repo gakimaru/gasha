@@ -220,6 +220,15 @@ inline int spprintf(char* dst, const char* fmt, Tx&&... args)
 	return ret;
 }
 
+//最大バッファサイズのみ指定版
+//※既存の snprintf との衝突を避けた変則名
+template<typename... Tx>
+int spnprintf(char* dst, const std::size_t max_size, const char* fmt, Tx&&... args)
+{
+	std::size_t pos = 0;
+	return spprintf(dst, max_size, pos, fmt, std::forward<Tx>(args)...);
+}
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 #endif//GASHA_INCLUDED_STRING_INL

@@ -39,7 +39,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //・bool COMPARISON(const T& value)//value == 探索値なら0を、value < 探索値なら-1以下を、value > 探索値なら1以上を返す
 template<class T, class COMPARISON>
 T* binarySearch(T* array, const std::size_t size, COMPARISON comparison);
-searchFuncSetByComparison(binarySearch);
+GASHA_OVERLOAD_SET_FOR_SEARCH_WITH_COMPARISON(binarySearch);
 
 //----------------------------------------
 //アルゴリズム：二分探索
@@ -54,7 +54,7 @@ searchFuncSetByComparison(binarySearch);
 //・bool COMPARISON(const typename ITERATOR::value_type& value)//value == 探索値なら0を、value < 探索値なら-1以下を、value > 探索値なら1以上を返す
 template<class ITERATOR, class COMPARISON>
 ITERATOR iteratorBinarySearch(ITERATOR begin, ITERATOR end, COMPARISON comparison);
-iteratorSearchFuncSetByComparison(iteratorBinarySearch);
+GASHA_OVERLOAD_SET_FOR_ITERATOR_SEARCH_WITH_COMPARISON(iteratorBinarySearch);
 
 //----------------------------------------
 //アルゴリズム：二分探索
@@ -71,7 +71,7 @@ iteratorSearchFuncSetByComparison(iteratorBinarySearch);
 //・T* GET_PREV_FUNC(T& node)//前のノードを返す
 template<class T, class GET_NEXT_FUNC, class GET_PREV_FUNC, class COMPARISON>
 const T* linkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_func, GET_PREV_FUNC get_prev_func, COMPARISON comparison);
-linkedListSearchFuncSetByComparison(linkedListBinarySearch);
+GASHA_OVERLOAD_SET_FOR_LINKED_LIST_SEARCH_WITH_COMPARISON(linkedListBinarySearch);
 
 //----------------------------------------
 //アルゴリズム：二分探索
@@ -87,7 +87,7 @@ linkedListSearchFuncSetByComparison(linkedListBinarySearch);
 //・T* GET_NEXT_FUNC(T& node)//次のノードを返す
 template<class T, class GET_NEXT_FUNC, class COMPARISON>
 const T* singlyLinkedListBinarySearch(const T* first, GET_NEXT_FUNC get_next_func, COMPARISON comparison);
-singlyLinkedListSearchFuncSetByComparison(singlyLinkedListBinarySearch);
+GASHA_OVERLOAD_SET_FOR_SINGLY_LINKED_LIST_SEARCH_WITH_COMPARISON(singlyLinkedListBinarySearch);
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
