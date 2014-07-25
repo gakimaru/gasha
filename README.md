@@ -6,7 +6,7 @@ Released under the [MIT license][MIT].
 [MIT]: http://www.opensource.org/licenses/mit-license.php
 
 ###ライブラリ本体リポジトリ###
-**このリポジトリは、**GASHA** のライブラ本体です。**
+**このリポジトリは、「GASHA」 のライブラ本体です。**
 > ライブラリのヘッダーファイル（`.h` ファイル）とライブラリファイル（`.lib` / `.a` ファイル）を扱っています。  
 > また、ライブラリの改訂履歴も置いています。  
 
