@@ -7,7 +7,7 @@
 // is_ordered.h
 // 整列状態（ソート済み状態）確認【宣言部】
 //
-// Gakimaru's researched and standard library for C++ - GASHA
+// Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE

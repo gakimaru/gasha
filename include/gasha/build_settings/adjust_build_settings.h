@@ -14,7 +14,7 @@
 //                   project_last_settings.h//プロジェクト固有のビルド設定（最終設定）
 //                   ※build_settings.h により、依存関係順にインクルード
 //
-// Gakimaru's researched and standard library for C++ - GASHA
+// Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
