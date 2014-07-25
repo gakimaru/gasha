@@ -2,7 +2,7 @@
 # Makefile_common
 # メイクファイル（共通部分）
 #
-# Gakimaru's researched and standard library for C++ - GASHA
+# Gakimaru's standard library for C++ - GASHA
 #   Copyright (c) 2014 Itagaki Mamoru
 #   Released under the MIT license
 #     https://github.com/gakimaru/gasha/blob/master/LICENSE
@@ -48,8 +48,43 @@ CPPFLAGS := \
 # C++コンパイルオプション
 CXXFLAGS := \
 	-Wall \
-	-msse4.2 \
+	-Wno-switch \
+	-Wno-unknown-pragmas \
+	-Wno-unused-local-typedefs \
+	-Wno-unused-value \
+	-mavx \
+	-fabi-version=0 \
 	-fopenmp \
+	-U__STRICT_ANSI__ \
+
+#【補足】C++コンパイルオプションの警告オプション
+# 以下、-Wallに含まれるもの
+#  -Wcomment
+#  -Wformat
+#  -Wimplicit-int                        ←C++には不要
+#  -Wimplicit-function-declaration       ←C++には不要
+#  -Werror-implicit-function-declaration ←C++には不要
+#  -Wimplicit                            ←C++には不要
+#  -Wmain
+#  -Wmultichar
+#  -Wparentheses
+#  -Wreturn-type
+#  -Wswitch ←この警告を出したくない ... -Wno-switch
+#  -Wtrigraphs
+#  -Wunused
+#  -Wuninitialized
+#  -Wunknown-pragmas ←この警告を出したくない ... -Wno-unknown-pragmas
+#  -Wunused-value ←この警告を出したくない ... -Wno-unused-value
+#  以下、GCC4.8追加(?)
+#  -Wunused-local-typedefs ←この警告を出したくない ... -Wno-unused-local-typedefs
+# 以下、使用しているオプションの解説
+#  -wavx ... AVX有効化
+#  -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
+#  -fopenmp ... OpenMP有効化
+#  -U__STRICT_ANSI__ ... fdopen() を使用可能にするための対処
+# 以下、必要に応じて使用
+#  -Winline ... インライン指定されていながら、インライン化されなかった関数を警告
+#  -fpermissive ... テンプレートのインスタンス化重複エラーなど、「非適合なコード」のエラーを警告に格下げする
 
 # C++コンパイルオプション（ビルド設定別）
 ifeq ($(BUILD_TYPE),Release)
@@ -77,6 +112,15 @@ endif
 CXXFLAGS_DEF := \
 
 # C++コンパイルオプション（定数：ビルド設定別）
+# -DGASHA_BUILD_CONFIG_IS_DEBUG           ... フルデバッグ設定
+# -DGASHA_BUILD_CONFIG_IS_DEBUG_MODERATE  ... プログラム開発向け設定
+# -DGASHA_BUILD_CONFIG_IS_DEBUG_OPT       ... コンテンツ制作・QA向け設定
+# -DGASHA_BUILD_CONFIG_IS_REGRESSION_TEST ... 自動回帰テスト向け設定
+# -DGASHA_BUILD_CONFIG_IS_LOCAL_RELEASE   ... 製品テスト向け設定
+# -DGASHA_BUILD_CONFIG_IS_RELEASE         ... 製品向け設定
+# -DNDEBUG ... DGASHA_BUILD_CONFIG_IS_RELEASE と同じ
+# -D_DEBUG ... DGASHA_BUILD_CONFIG_IS_DEBUG   と同じ
+
 ifeq ($(BUILD_TYPE),Release)
 	# リリースビルド用
 	CXXFLAGS_DEF += \
@@ -115,13 +159,16 @@ CXXFLAGS_GCH := \
 # ※（なぜか）ここでプリコンパイル済みヘッダーを依存ファイルに指定すると、うまく依存ファイルを生成してくれる。
 $(OUT_DIR)/%.o : %.cpp $(PC_STD_HEADER)
 	mkdir -p $(dir $@); \
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_CPP) -MMD -MP -MF $(@:%.o=%.d) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_CPP) -MD -MP -MF $(@:%.o=%.d) -c $< -o $@
 
 # 型ルール：プリコンパイル済みヘッダーファイル
 # ※依存関係定義ファイルも自動生成
 $(OUT_DIR)/%.h.gch : %.h
 	mkdir -p $(dir $@); \
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MMD -MP -MF $(@:%.gch=%.d) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS_COMMON) $(CXXFLAGS) $(CXXFLAGS_DEF) $(CXXFLAGS_GCH)  -MD -MP -MF $(@:%.gch=%.d) -c $< -o $@
+
+# プリコンパイル済みヘッダーをMakefileが削除しないように設定
+.PRECIOUS: $(PC_STD_HEADER)
 
 #-------------------------------------------------------------------------------
 
