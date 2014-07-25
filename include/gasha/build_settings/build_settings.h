@@ -12,6 +12,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/version.h>//GASHAバージョン情報
+
 #include <gasha/build_settings/project_first_settings.h>//プロジェクト固有のビルド設定（先行設定） ※リポジトリ：gasha_settings
 
 #include <gasha/build_settings/compiler_auto_settings.h>//コンパイラ自動判別・設定

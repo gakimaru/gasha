@@ -384,13 +384,17 @@ inline profiler::threadInfo::~threadInfo()
 //文字列プール参照
 inline const profiler::strPoolInfo* profiler::refStrPool(const GASHA_ crc32_t name_crc)
 {
-	return m_strPoolTable.at(name_crc);
+	auto lock = m_strPoolTable.lockScoped();//共有ロック ※登録中の情報にアクセスする可能性がある
+	const profiler::strPoolInfo* str_info = m_strPoolTable.at(name_crc);
+	return str_info;
 }
 
 //スレッド情報参照
 inline profiler::threadInfo* profiler::refThread(const GASHA_ crc32_t thread_name_crc)
 {
-	return m_threadInfoTable.at(thread_name_crc);
+	auto lock = m_threadInfoTable.lockScoped();//共有ロック ※登録中の情報にアクセスする可能性がある
+	threadInfo* thread_info = m_threadInfoTable.at(thread_name_crc);
+	return thread_info;
 }
 
 //スレッド情報を取得

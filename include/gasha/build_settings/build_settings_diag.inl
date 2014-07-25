@@ -52,6 +52,10 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 	GASHA_ spprintf(message, max_size, message_len, "\n");
 
 	GASHA_ spprintf(message, max_size, message_len, "------------------------------------------------------------------------------\n");
+	GASHA_ spprintf(message, max_size, message_len, "[ GASHA version : %d.%d ]\n", GASHA_MAJOR, GASHA_MINOR);
+	GASHA_ spprintf(message, max_size, message_len, "\n");
+
+	GASHA_ spprintf(message, max_size, message_len, "------------------------------------------------------------------------------\n");
 	GASHA_ spprintf(message, max_size, message_len, "[ Build-settings diagnostic test ]\n");
 	GASHA_ spprintf(message, max_size, message_len, "\n");
 	

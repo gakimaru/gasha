@@ -24,7 +24,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //ロック制御共通設定
 
-static const int DEFAULT_SPIN_COUNT = 1000;//スピンロックカウントのデフォルト値
+static const int DEFAULT_SPIN_COUNT = 100;//スピンロックカウントのデフォルト値
 
 static const int SHARED_LOCK_COUNTER_UNLOCKED = 0x01000000;//ロックが取得されていない時の共有ロックのカウンタ
 
@@ -64,14 +64,14 @@ struct yield_switch_t {};//イールド
 extern const yield_switch_t yield_switch;
 
 //コンテキストスイッチ
-inline void contextSwitch(){ std::this_thread::sleep_for(std::chrono::milliseconds(0)); }//ゼロスリープでコンテキストスイッチ
-inline void contextSwitch(const short_sleep_switch_t){ std::this_thread::sleep_for(std::chrono::nanoseconds(1)); }//短いスリープでスイッチ
-inline void contextSwitch(const force_switch_t){ std::this_thread::sleep_for(std::chrono::milliseconds(1)); }//確実なコンテキストスイッチ
-inline void contextSwitch(const yield_switch_t){ std::this_thread::yield(); }//イールド ※実際にはコンテキストスイッチではなく、同じ優先度の他のスレッドに一時的に処理を譲るだけなので注意。
+inline void contextSwitch();//ゼロスリープでコンテキストスイッチ
+inline void contextSwitch(const short_sleep_switch_t);//短いスリープでスイッチ
+inline void contextSwitch(const force_switch_t);//確実なコンテキストスイッチ
+inline void contextSwitch(const yield_switch_t);//イールド ※実際にはコンテキストスイッチではなく、同じ優先度の他のスレッドに一時的に処理を譲るだけなので注意。
 
 //デフォルトコンテキストスイッチ
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
-inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//確実なスイッチ
+inline void defaultContextSwitch(){ contextSwitch(force_switch); }//確実なスイッチ
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
 inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短いスリープでスイッチ
@@ -79,7 +79,11 @@ inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短い
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
 inline void defaultContextSwitch(){ contextSwitch(yield_switch); }//イールド
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
+#ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
 inline void defaultContextSwitch(){ contextSwitch(); }//ゼロスリープでコンテキストスイッチ
+#else//GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
+inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短いスリープでスイッチ
+#endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
