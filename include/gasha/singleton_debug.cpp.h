@@ -42,6 +42,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::create(const char* procedure_name)
 {
+	//m_accessCount.store(0);//アクセスカウントは初期化しない
 	m_createdProcedureName = procedure_name;
 	m_createdSysTime = nowElapsedTime();
 	m_destroyedProcedureName = nullptr;
@@ -62,7 +63,7 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::destroy(const char* procedure_name
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RECORDS, LOCK_TYPE>::enter(const char* procedure_name)
 {
-	std::size_t seq_no = 0xffffffff;
+	id_type seq_no = invalidId();
 	accessInfo* info = m_allocator.newDefault();
 	if (info)
 	{
@@ -71,7 +72,7 @@ typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RE
 		info->m_procedureName = procedure_name;
 		info->m_sysTime = nowElapsedTime();
 		{
-			auto lock = m_list.lockScoped();
+			auto lock = m_list.lockScoped();//排他ロック
 			m_list.push_back(*info);
 		}
 	}
@@ -83,7 +84,9 @@ typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RE
 template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
 bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type id)
 {
-	auto lock = m_list.lockScoped();
+	if (isInvalidId(id))
+		return false;
+	auto lock = m_list.lockScoped();//排他ロック
 	accessInfo* info = m_list.findValue(id);
 	if (info)
 	{
@@ -104,11 +107,11 @@ std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, co
 	GASHA_ spprintf(message, max_size, message_len, "Created:         %.9lf sec, \"%s\"\n", m_createdSysTime, m_createdProcedureName);
 	GASHA_ spprintf(message, max_size, message_len, "Destroyed:       %.9lf sec, \"%s\"\n", m_destroyedSysTime, m_destroyedProcedureName);
 	{
-		auto lock = m_list.lockSharedScoped();
+		auto lock = m_list.lockSharedScoped();//排他ロック
 		GASHA_ spprintf(message, max_size, message_len, "Access Info: (Count=%d)\n", m_list.size());
 		for (auto& info : m_list)
 		{
-			GASHA_ spprintf(message, max_size, message_len, "  - [%d] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
+			GASHA_ spprintf(message, max_size, message_len, "  - [%lld] %.9lf sec, \"%s\": thread=\"%s\"(0x%08x)\n", info.m_seqNo, info.m_sysTime, info.m_procedureName, info.m_threadId.name(), info.m_threadId.id());
 		}
 	}
 	GASHA_ spprintf(message, max_size, message_len, "-----------------------------------------");//最終行改行なし

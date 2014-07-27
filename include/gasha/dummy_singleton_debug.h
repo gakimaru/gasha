@@ -28,7 +28,16 @@ class dummySingletonDebug
 {
 public:
 	//型
-	struct id_type {};
+	struct id_type
+	{
+		inline bool operator==(id_type&& rhs) const { return true; }
+		inline bool operator==(const id_type& rhs) const { return true; }
+		inline bool operator!=(id_type&& rhs) const { return false; }
+		inline bool operator!=(const id_type& rhs) const { return false; }
+	};
+public:
+	inline id_type invalidId() const { return id_type(); }//不正なIDを取得（初期値用）
+	inline bool isInvalidId(const id_type& id) const { return true; }//不正なIDか？
 public:
 	//シングルトン生成時呼び出し
 	inline bool create(const char* procedure_name);

@@ -22,6 +22,7 @@
 #include <gasha/chrono.h>//時間処理ユーティリティ
 
 #include <cstddef>//std::size_t
+#include <cstdint>//C++11 std::uint32_t, uint64_t
 #include <atomic>//C++11 st::atomic
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -39,12 +40,12 @@ class singletonDebug
 {
 public:
 	//型
-	typedef std::size_t id_type;//ID型（アクセス中情報のポインタ）
+	typedef std::uint64_t id_type;//ID型（アクセス中情報のポインタ）
 	struct accessInfo//シングルトンアクセス中処理情報
 	{
 		mutable const accessInfo* m_next;//次の連結ノード
 		mutable const accessInfo* m_prev;//前の連結ノード
-		std::size_t m_seqNo;//シーケンス番号
+		id_type m_seqNo;//シーケンス番号
 		const char* m_procedureName;//手続き名
 		threadId m_threadId;//スレッドID
 		GASHA_ sec_t m_sysTime;//システム時間
@@ -63,6 +64,7 @@ public:
 public:
 	//定数
 	static const std::size_t MAX_RECORDS = _MAX_RECORDS;//記録数
+	static const id_type INVALID_DEBUG_ID = ~0LLU;//無効なID
 public:
 	//キャストオペレータ
 	inline operator list_type&(){ return m_list; }//アクセス情報の連結情報
@@ -71,11 +73,13 @@ public:
 	//アクセッサ
 	inline list_type& list(){ return m_list; }//アクセス情報の連結情報
 	inline const list_type& list() const { return m_list; }//アクセス情報の連結情報
-	const char* createdProcedureName() const { return m_createdProcedureName; }//インスタンス生成手続き名
-	const char* destroyedProcedureName() const { return m_destroyedProcedureName; }//インスタンス破棄手続き名
-	GASHA_ sec_t createdSysTime() const { return m_createdSysTime; }//インスタンス生成時システム時間
-	GASHA_ sec_t destroyedSysTime() const { return m_destroyedSysTime; }//インスタンス破棄時システム時間
-	std::size_t accessCount() const { return m_accessCount.load(); }//アクセス中のカウント数
+	inline const char* createdProcedureName() const { return m_createdProcedureName; }//インスタンス生成手続き名
+	inline const char* destroyedProcedureName() const { return m_destroyedProcedureName; }//インスタンス破棄手続き名
+	inline GASHA_ sec_t createdSysTime() const { return m_createdSysTime; }//インスタンス生成時システム時間
+	inline GASHA_ sec_t destroyedSysTime() const { return m_destroyedSysTime; }//インスタンス破棄時システム時間
+	inline std::uint32_t accessCount() const { return m_accessCount.load(); }//アクセス中のカウント数
+	inline id_type invalidId() const { return INVALID_DEBUG_ID; }//不正なIDを取得（初期値用）
+	inline bool isInvalidId(const id_type& id) const { return id == INVALID_DEBUG_ID; }//不正なIDか？
 public:
 	//シングルトン生成時呼び出し
 	bool create(const char* procedure_name);
@@ -103,8 +107,8 @@ private:
 	const char* m_destroyedProcedureName;//インスタンス破棄手続き名
 	GASHA_ sec_t m_createdSysTime;//インスタンス生成時システム時間
 	GASHA_ sec_t m_destroyedSysTime;//インスタンス破棄時システム時間
-	std::atomic<std::size_t> m_accessCount;//アクセス中のカウント数
-	std::atomic<std::size_t> m_seqNo;//シーケンス番号
+	std::atomic<std::uint32_t> m_accessCount;//アクセス中のカウント数
+	std::atomic<std::uint64_t> m_seqNo;//シーケンス番号
 };
 
 #else//GASHA_SINGLETON_DEBUG_ENABLED//シングルトンデバッグ用処理無効時
@@ -116,7 +120,16 @@ class singletonDebug
 {
 public:
 	//型
-	struct id_type {};
+	struct id_type
+	{
+		inline bool operator==(id_type&& rhs) const { return true; }
+		inline bool operator==(const id_type& rhs) const { return true; }
+		inline bool operator!=(id_type&& rhs) const { return false; }
+		inline bool operator!=(const id_type& rhs) const { return false; }
+	};
+public:
+	inline id_type invalidId() const { return id_type(); }//不正なIDを取得（初期値用）
+	inline bool isInvalidId(const id_type& id) const { return true; }//不正なIDか？
 public:
 	//シングルトン生成時呼び出し
 	inline bool create(const char* procedure_name);

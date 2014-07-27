@@ -143,7 +143,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ with_lock)
+		m_lock(m_staticLock, GASHA_ with_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;
@@ -157,7 +158,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ with_lock)
+		m_lock(m_staticLock, GASHA_ with_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;
@@ -171,7 +173,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_shared_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ with_lock_shared)
+		m_lock(m_staticLock, GASHA_ with_lock_shared),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;
@@ -185,7 +188,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ try_to_lock)
+		m_lock(m_staticLock, GASHA_ try_to_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		if (m_lock.owns_lock())
@@ -202,7 +206,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ try_to_lock_shared)
+		m_lock(m_staticLock, GASHA_ try_to_lock_shared),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		if (m_lock.owns_shared_lock())
@@ -219,7 +224,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_lock_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ adopt_lock)
+		m_lock(m_staticLock, GASHA_ adopt_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;
@@ -233,7 +239,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ adopt_shared_lock)
+		m_lock(m_staticLock, GASHA_ adopt_shared_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;
@@ -247,7 +254,8 @@ namespace _private
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ defer_lock_t) :
 		m_instanceRef(nullptr),
-		m_lock(m_staticLock, GASHA_ defer_lock)
+		m_lock(m_staticLock, GASHA_ defer_lock),
+		m_debugId(m_staticDebug.invalidId())
 	{
 		createDefault(procedure_name);
 		m_instanceRef = m_staticInstanceRef;

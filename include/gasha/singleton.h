@@ -17,6 +17,7 @@
 
 #include <gasha/dummy_shared_lock.h>//ダミー共有ロック
 #include <gasha/unique_shared_lock.h>//単一共有ロック
+#include <gasha/type_traits.h>//型特性ユーティリティ
 
 #include <atomic>//C++11 std::atomic_flag
 #include <type_traits>//c++11 std::is_default_constructible, std::conditional
@@ -70,7 +71,7 @@ namespace _private
 		};
 		//デフォルトコンストラクタによるインスタンス生成用クラス
 		typedef typename std::conditional<
-			std::is_default_constructible<class_type>::value,
+			GASHA_ is_default_constructible<class_type>::value,
 			createInstance_t,
 			dummyCreateInstance_t
 		>::type createDefaultInstance_t;
@@ -155,7 +156,11 @@ using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>
 //通常／シンプルシングルトンのフレンド宣言用マクロ
 #define GASHA_SINGLETON_FRIEND_CLASS() \
 	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE> \
-	friend class GASHA_ _private::singleton;
+	friend class GASHA_ _private::singleton; \
+	template<class TARGET_CLASS> \
+	friend class gasha::is_default_constructible; \
+	template<class TARGET_CLASS, typename... TARGET_CLASS_ARGS> \
+	friend class gasha::is_constructible; \
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

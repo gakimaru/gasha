@@ -126,11 +126,23 @@ class operatorCRTP
 {
 public:
 	friend inline bool operator==(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) == static_cast<cast_type>(rhs); }
+	friend inline bool operator==(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) == rhs; }
+	friend inline bool operator==(const cast_type& lhs, const base& rhs){ return lhs == static_cast<cast_type>(rhs); }
 	friend inline bool operator!=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) != static_cast<cast_type>(rhs); }
+	friend inline bool operator!=(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) != rhs; }
+	friend inline bool operator!=(const cast_type& lhs, const base& rhs){ return lhs != static_cast<cast_type>(rhs); }
 	friend inline bool operator<(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) < static_cast<cast_type>(rhs); }
+	friend inline bool operator<(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) < rhs; }
+	friend inline bool operator<(const cast_type& lhs, const base& rhs){ return lhs < static_cast<cast_type>(rhs); }
 	friend inline bool operator>(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) > static_cast<cast_type>(rhs); }
+	friend inline bool operator>(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) > rhs; }
+	friend inline bool operator>(const cast_type& lhs, const base& rhs){ return lhs > static_cast<cast_type>(rhs); }
 	friend inline bool operator<=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) <= static_cast<cast_type>(rhs); }
+	friend inline bool operator<=(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) <= rhs; }
+	friend inline bool operator<=(const cast_type& lhs, const base& rhs){ return lhs <= static_cast<cast_type>(rhs); }
 	friend inline bool operator>=(const base& lhs, const base& rhs){ return static_cast<cast_type>(lhs) >= static_cast<cast_type>(rhs); }
+	friend inline bool operator>=(const base& lhs, const cast_type& rhs){ return static_cast<cast_type>(lhs) >= rhs; }
+	friend inline bool operator>=(const cast_type& lhs, const base& rhs){ return lhs >= static_cast<cast_type>(rhs); }
 };
 
 //--------------------------------------------------------------------------------
@@ -307,6 +319,41 @@ template<>
 const char* toHexStr<double>(char* buff, const double value);
 template<>
 const char* toByteStr<double>(char* buff, const double value);
+
+//--------------------------------------------------------------------------------
+//型チェック
+//--------------------------------------------------------------------------------
+
+//デフォルトコンストラクタ実装チェック
+//※標準ライブラリの is_default_constructible では private/protected なデフォルトコンストラクタに反応しないため、独自版を定義。
+//※フレンド宣言で対応できる問題だが、標準ライブラリはコンパイラによって実装が異なり、フレンド宣言しにくい。独自版により、その問題を解消。
+template <class T>
+class is_default_constructible
+{
+	template<typename U, typename = decltype(T())>
+	static std::true_type test(decltype(T())*);
+	
+	template<typename>
+	static std::false_type test(...);
+public:
+	typedef decltype(test<T>(nullptr)) type;
+	static const bool value = type::value;
+};
+
+//任意のコンストラクタ実装チェック
+//※ is_default_constructible の独自定義に伴い、同様に定義。
+template <class T, typename... Tx>
+class is_constructible
+{
+	template<typename U, typename = decltype(T(std::declval<Tx>()...))>
+	static std::true_type test(decltype(T(std::declval<Tx>()...))*);
+	
+	template<typename>
+	static std::false_type test(...);
+public:
+	typedef decltype(test<T>(nullptr)) type;
+	static const bool value = type::value;
+};
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
