@@ -60,7 +60,7 @@ private:
 		useReservedId = 0x0001,//予約IDを使用
 		addCPStack = 0x0002,//コールポイントスタックを付加
 
-		addMessageMask = (addCPStack),//メッセージ付加あり判定マスク（メッセージ付加がある場合、必ずワークバッファを使用してメッセ―ジ出力する）
+		addMessageMask = (addCPStack),//メッセージ付加あり判定マスク（メッセージ付加がある場合、必ずワークバッファを使用してメッセージ出力する）
 	};
 
 private:

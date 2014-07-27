@@ -32,53 +32,53 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	//静的フィールド：静的シングルトンインスタンス用バッファ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	unsigned char singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceBuff[sizeof(typename singleton<T, LOCK_TYPE, DEBUG_TYPE>::class_type)];
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	unsigned char singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceBuff[sizeof(typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::class_type)];
 
 	//静的フィールド：静的シングルトンインスタンス参照
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	T* singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceRef = nullptr;
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::class_type* singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceRef = nullptr;
 
 	//静的フィールド：インスタンス生成済み
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	std::atomic<bool> singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceIsCreated(false);
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	std::atomic<bool> singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceIsCreated(false);
 
 	//静的フィールド：静的ロックオブジェクト
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	typename singleton<T, LOCK_TYPE, DEBUG_TYPE>::lock_type singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticLock;
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::lock_type singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticLock;
 
 	//静的フィールド：デバッグ用オブジェクト
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	typename singleton<T, LOCK_TYPE, DEBUG_TYPE>::debug_type singleton<T, LOCK_TYPE, DEBUG_TYPE>::m_staticDebug;
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::debug_type singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticDebug;
 }//namepace _private
 
 //----------------------------------------
 //明示的なインスタンス化
 
 //通常シングルトンの明示的なインスタンス化用マクロ
-//※ロック制御クラスとデバッグ処理クラスはクラス T の中で定義する。
+//※ロック制御クラスとデバッグ処理クラスはクラス TARGET_CLASS の中で定義する。
 //　（例１）
 //　    typedef sharedSpinLock spilock_type;//ロック制御クラス：共有スピンロック
 //      typedef singletonDebug debug_type;//シングルトンデバッグ用処理クラス
 //　（例２）
 //　    typedef dummySharedLock spilock_type;//ロック制御クラス：ダミー共有ロック（ロックしない）
 //      typedef dummySingletonDebug debug_type;//シングルトンデバッグ用ダミー処理クラス（デバッグしない）
-#define GASHA_INSTANCING_singleton(T) \
-	template class GASHA_ _private::singleton<T, T::lock_type, T::debug_type>;
+#define GASHA_INSTANCING_singleton(TARGET_CLASS) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, TARGET_CLASS::lock_type, TARGET_CLASS::debug_type>;
 
 //シンプルシングルトンの明示的なインスタンス化用マクロ
 //※ロックなし、デバッグなし版
-#define GASHA_INSTANCING_simpleSingleton(T) \
-	template class GASHA_ _private::singleton<T, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
+#define GASHA_INSTANCING_simpleSingleton(TARGET_CLASS) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
 //※ロック指定、デバッグなし版
-#define GASHA_INSTANCING_simpleSingleton_withLock(T, LOCK_TYPE) \
-	template class GASHA_ _private::singleton<T, LOCK_TYPE, GASHA_ dummySingletonDebug>;
+#define GASHA_INSTANCING_simpleSingleton_withLock(TARGET_CLASS, LOCK_TYPE) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_TYPE, GASHA_ dummySingletonDebug>;
 //※ロックなし、デバッグ指定版
-#define GASHA_INSTANCING_simpleSingleton_withDebug(T, DEBUG_TYPE) \
-	template class GASHA_ _private::singleton<T, GASHA_ dummySharedLock, DEBUG_TYPE>;
+#define GASHA_INSTANCING_simpleSingleton_withDebug(TARGET_CLASS, DEBUG_TYPE) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, GASHA_ dummySharedLock, DEBUG_TYPE>;
 //※ロック指定、デバッグ指定版
-#define GASHA_INSTANCING_simpleSingleton_withLock_withDebug(T, LOCK_TYPE, DEBUG_TYPE) \
-	template class GASHA_ _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
+#define GASHA_INSTANCING_simpleSingleton_withLock_withDebug(TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>;
 
 //※別途、必要に応じてシングルトンデバッグ用処理の明示的なインスタンス化も必要
 //    GASHA_INSTANCING_singletonDebug(_MAX_RECORDS);//ロックなし版

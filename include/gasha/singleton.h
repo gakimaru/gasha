@@ -36,12 +36,12 @@ namespace _private
 {
 	//固定バッファシングルトン（本体）
 	//※直接使用しないクラス
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	class singleton
 	{
 	public:
 		//型
-		typedef T class_type;//シングルトン対象クラス型
+		typedef TARGET_CLASS class_type;//シングルトン対象クラス型
 		typedef LOCK_TYPE lock_type;//ロック型
 		typedef GASHA_ unique_shared_lock<lock_type> unique_lock_type;//単一ロック型
 		typedef DEBUG_TYPE debug_type;//デバッグ処理型
@@ -90,10 +90,10 @@ namespace _private
 		inline operator debug_type&() const { return m_staticDebug; }//デバッグ用オブジェクト ※mutable
 	public:
 		//基本オペレータ
-		inline const T* operator->() const { return m_instanceRef; }
-		inline T* operator->(){ return m_instanceRef; }
-		inline const T& operator*() const { return *m_instanceRef; }
-		inline T& operator*(){ return *m_instanceRef; }
+		inline const class_type* operator->() const { return m_instanceRef; }
+		inline class_type* operator->(){ return m_instanceRef; }
+		inline const class_type& operator*() const { return *m_instanceRef; }
+		inline class_type& operator*(){ return *m_instanceRef; }
 	public:
 		//メソッド
 		//シングルトンインスタンスの明示的な生成
@@ -126,13 +126,13 @@ namespace _private
 		inline ~singleton();
 	private:
 		//フィールド
-		mutable T* m_instanceRef;//シングルトンインスタンス参照
+		mutable class_type* m_instanceRef;//シングルトンインスタンス参照
 		mutable unique_lock_type m_lock;//単一ロック
 		mutable typename debug_type::id_type m_debugId;//デバッグアクセスID
 	private:
 		//静的フィールド
 		static unsigned char m_staticInstanceBuff[];//静的シングルトンインスタンス用バッファ
-		static T* m_staticInstanceRef;//静的シングルトンインスタンス参照
+		static class_type* m_staticInstanceRef;//静的シングルトンインスタンス参照
 		static std::atomic<bool> m_staticInstanceIsCreated;//インスタンス生成済み ※インスタンスの明示的な破棄があるので、std::call_once を使用しない
 		static lock_type m_staticLock;//静的ロックオブジェクト
 		static debug_type m_staticDebug;//デバッグ用オブジェクト
@@ -142,22 +142,20 @@ namespace _private
 //----------------------------------------
 //固定バッファシングルトン：通常シングルトン
 //※対象クラスメンバーに lock_type と debug_type の定義が必要。
-template<class T>
-using singleton = _private::singleton<T, typename T::lock_type, typename T::debug_type>;
+template<class TARGET_CLASS>
+using singleton = _private::singleton<TARGET_CLASS, typename TARGET_CLASS::lock_type, typename TARGET_CLASS::debug_type>;
 
 //----------------------------------------
 //固定バッファシングルトン：シンプルシングルトン
 //※対象クラスメンバーに lock_type と debug_type の定義が不要。
-template<class T, class LOCK_TYPE = GASHA_ dummySharedLock, class DEBUG_TYPE = GASHA_ dummySingletonDebug>
-using simpleSingleton = _private::singleton<T, LOCK_TYPE, DEBUG_TYPE>;
+template<class TARGET_CLASS, class LOCK_TYPE = GASHA_ dummySharedLock, class DEBUG_TYPE = GASHA_ dummySingletonDebug>
+using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>;
 
 //----------------------------------------
-//通常シングルトンのフレンド宣言用マクロ
-#define GASHA_SINGLETON_FRIEND_CLASS(T) friend class _private::singleton<T, T::lock_type, T::debug_type>;
-
-//----------------------------------------
-//シンプルシングルトンのフレンド宣言用マクロ
-#define GASHA_SIMPLE_SINGLETON_FRIEND_CLASS(T) friend class _private::singleton<T, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
+//通常／シンプルシングルトンのフレンド宣言用マクロ
+#define GASHA_SINGLETON_FRIEND_CLASS() \
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE> \
+	friend class GASHA_ _private::singleton;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

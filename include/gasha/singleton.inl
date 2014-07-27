@@ -37,34 +37,34 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	//インスタンス生成用クラス：インスタンス生成
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	template<typename... Tx>
-	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::createInstance_t::create(const char* procedure_name, Tx&&... args)
+	inline bool singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::createInstance_t::create(const char* procedure_name, Tx&&... args)
 	{
 		return m_singleton.create(procedure_name, std::forward<Tx>(args)...);
 	}
 	//インスタンス生成用クラス：コンストラクタ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::createInstance_t::createInstance_t(singleton<T, LOCK_TYPE, DEBUG_TYPE>& obj) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::createInstance_t::createInstance_t(singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>& obj) :
 		m_singleton(obj)
 	{}
 
 	//インスタンス生成用ダミークラス：インスタンス生成
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	template<typename... Tx>
-	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::dummyCreateInstance_t::create(const char* procedure_name, Tx&&... args)
+	inline bool singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::dummyCreateInstance_t::create(const char* procedure_name, Tx&&... args)
 	{
 		return false;
 	}
 	//インスタンス生成用ダミークラス：コンストラクタ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::dummyCreateInstance_t::dummyCreateInstance_t(singleton<T, LOCK_TYPE, DEBUG_TYPE>& obj)
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::dummyCreateInstance_t::dummyCreateInstance_t(singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>& obj)
 	{}
 
 	//シングルトンインスタンスの明示的な生成
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
 	template<typename... Tx>
-	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::create(const char* procedure_name, Tx&&... args)
+	inline bool singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::create(const char* procedure_name, Tx&&... args)
 	{
 		//ロック取得またはアップグレード
 		const bool is_any_locked = m_lock.owns_any_lock();
@@ -93,8 +93,8 @@ namespace _private
 	}
 	
 	//シングルトンインスタンスの明示的な破棄
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::destroy(const char* procedure_name)
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline bool singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::destroy(const char* procedure_name)
 	{
 		//ロック取得またはアップグレード
 		const bool is_any_locked = m_lock.owns_any_lock();
@@ -125,23 +125,23 @@ namespace _private
 	//※使用したバッファのサイズを返す。
 	//※作成中、ロックを取得する。
 	//インスタンス生成用クラス：インスタンス生成
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline std::size_t singleton<T, LOCK_TYPE, DEBUG_TYPE>::debugInfo(char* message, const std::size_t max_size) const
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline std::size_t singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::debugInfo(char* message, const std::size_t max_size) const
 	{
 		return m_staticDebug.debugInfo(message, max_size);
 	}
 
 	//デフォルトコンストラクタでインスタンスを生成
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline bool singleton<T, LOCK_TYPE, DEBUG_TYPE>::createDefault(const char* procedure_name)
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline bool singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::createDefault(const char* procedure_name)
 	{
 		createDefaultInstance_t create_instance(*this);
 		return create_instance.create(procedure_name);
 	}
 
 	//コンストラクタ：デフォルト：排他ロック
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ with_lock)
 	{
@@ -154,8 +154,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：排他ロック
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ with_lock)
 	{
@@ -168,8 +168,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：共有ロック
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_shared_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ with_lock_shared_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ with_lock_shared)
 	{
@@ -182,8 +182,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：排他ロックを試行
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ try_to_lock)
 	{
@@ -199,8 +199,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：共有ロックを試行
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ try_to_lock_shared)
 	{
@@ -216,8 +216,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：排他ロック状態を引き継ぐ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_lock_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_lock_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ adopt_lock)
 	{
@@ -230,8 +230,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：共有ロック状態を引き継ぐ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ adopt_shared_lock)
 	{
@@ -244,8 +244,8 @@ namespace _private
 		}
 	}
 	//コンストラクタ：ロックなし
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ defer_lock_t) :
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::singleton(const char* procedure_name, const GASHA_ defer_lock_t) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ defer_lock)
 	{
@@ -259,8 +259,8 @@ namespace _private
 	}
 	
 	//デストラクタ
-	template<class T, class LOCK_TYPE, class DEBUG_TYPE>
-	inline singleton<T, LOCK_TYPE, DEBUG_TYPE>::~singleton()
+	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	inline singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::~singleton()
 	{
 		//シングルトンデバッグ用処理呼び出し
 		m_staticDebug.leave(m_debugId);

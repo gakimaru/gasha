@@ -699,7 +699,7 @@ namespace dynamic_array
 		template<typename V, class PREDICATE>
 		iterator findValue(const V& value, PREDICATE predicate);
 		//※比較関数指定版
-		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
+		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
 		iterator find(PREDICATE predicate);
 		
@@ -714,7 +714,7 @@ namespace dynamic_array
 		template<typename V, class COMPARISON>
 		iterator binarySearchValue(const V& value, COMPARISON comparison);
 		//※比較関数指定版
-		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
+		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
 		iterator binary_search(COMPARISON comparison);
 	

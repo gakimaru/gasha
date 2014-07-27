@@ -699,7 +699,7 @@ namespace ring_buffer
 		template<typename V, class PREDICATE>
 		inline iterator findValue(const V& value, PREDICATE predicate);
 		//※比較関数指定版
-		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
+		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
 		inline iterator find(PREDICATE predicate);
 		
@@ -714,7 +714,7 @@ namespace ring_buffer
 		template<typename V, class COMPARISON>
 		inline iterator binarySearchValue(const V& value, COMPARISON comparison);
 		//※比較関数指定版
-		//※値の指定は関数に含んでおく（クロ―ジャを用いるなどする）
+		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
 		inline iterator binary_search(COMPARISON comparison);
 	public:
