@@ -660,7 +660,7 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_assign(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
 	{
-		if (m_usingCount == TABLE_SIZE && m_deletedCount == 0 && ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE)
+		if (m_usingCount == static_cast<int>(TABLE_SIZE) && m_deletedCount == 0 && ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE)
 			return nullptr;
 		if ((KEY_MIN != 0 || KEY_MAX != 0) && (key < KEY_MIN || key > KEY_MAX))
 			return nullptr;
@@ -683,7 +683,7 @@ namespace hash_table
 				++find_cycle;
 				if (!m_using[index] || m_deleted[index])//未使用／削除済みインデックスなら割り当て成功
 					break;
-				if (FINDING_CYCLE_LIMIT > 0 && find_cycle == FINDING_CYCLE_LIMIT)//巡回回数が制限に達したら割り当て失敗
+				if (FINDING_CYCLE_LIMIT > 0 && find_cycle == static_cast<int>(FINDING_CYCLE_LIMIT))//巡回回数が制限に達したら割り当て失敗
 					return nullptr;
 				index = calcNextIndex(key, index);//次のインデックスへ
 			} while (index != index_first);//最初のインデックスに戻ったら終了（割り当て失敗）
@@ -750,7 +750,7 @@ namespace hash_table
 		}
 		m_maxFindingCycle = 1;//最大巡回回数を1にリセット
 		//値の移動
-		for (index_type index = 0; index < TABLE_SIZE; ++index)
+		for (index_type index = 0; index < static_cast<index_type>(TABLE_SIZE); ++index)
 		{
 			if (!m_using[index] || m_deleted[index])//未使用インデックスまたは削除済みインデックスは処理をスキップ
 				continue;
