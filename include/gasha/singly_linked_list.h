@@ -319,7 +319,7 @@ namespace singly_linked_list
 		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
-		static const std::size_t BEFORE_BEGIN = 0xffffffff;//before_begin識別子
+		static const std::size_t BEFORE_BEGIN = ~static_cast<std::size_t>(0);//before_begin識別子
 	public:
 		//--------------------
 		//イテレータ宣言

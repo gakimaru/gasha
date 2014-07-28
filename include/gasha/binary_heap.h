@@ -175,7 +175,7 @@ namespace binary_heap
 	public:
 		//定数
 		static const size_type TABLE_SIZE = _TABLE_SIZE;//配列要素数
-		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
+		static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 		enum status_t//ステータス
 		{
 			IDLE = 0,//アイドル

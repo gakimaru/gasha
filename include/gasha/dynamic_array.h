@@ -198,7 +198,7 @@ namespace dynamic_array
 		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
-		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
+		static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 	public:
 		//--------------------
 		//イテレータ宣言

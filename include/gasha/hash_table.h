@@ -211,7 +211,7 @@ namespace hash_table
 		static const key_type KEY_MIN = ope_type::KEY_MIN;//キーの最小値
 		static const key_type KEY_MAX = ope_type::KEY_MAX;//キーの最大値
 		static const index_type INDEX_STEP_BASE = static_cast<index_type>(ope_type::INDEX_STEP_BASE);//検索巡回時のインデックスのス歩幅の基準値 ※必ず素数でなければならない
-		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
+		static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 	public:
 		//メタ関数
 		//キー範囲定数計算（２バリエーション）

@@ -38,7 +38,7 @@ inline std::size_t adjustAlign(const std::size_t value)
 {
 	static_assert(countStaticBits<ALIGN>::value == 1, "ALIGN is only supported power of 2.");//2のべき乗（=ビット数が1の値）でなければNG
 	static const std::size_t ALIGN_1 = ALIGN - 1;
-	//if ((value | ALIGN_1) == 0xffffffff)
+	//if ((value | ALIGN_1) == ~static_cast<std::size_t>(0))
 	//	return 0;//value & ~ALIGN_1;
 	return (value + ALIGN_1) & ~ALIGN_1;
 }
