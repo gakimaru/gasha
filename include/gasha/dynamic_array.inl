@@ -350,6 +350,15 @@ namespace dynamic_array
 	//----------------------------------------
 	//コンテナ本体のインライン関数／テンプレート関数
 
+	//インデックスを範囲内に補正
+	template<class OPE_TYPE>
+	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_adjIndex(const typename container<OPE_TYPE>::index_type index) const
+	{
+		const index_type invalid_index = INVALID_INDEX;
+		//return index >= 0 && index < m_maxSize ? index : invalid_index;
+		return index < m_maxSize ? index : invalid_index;
+	}
+
 	//配列の再割り当て
 	template<class OPE_TYPE>
 	template<std::size_t N>

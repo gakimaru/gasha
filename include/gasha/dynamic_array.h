@@ -486,8 +486,7 @@ namespace dynamic_array
 		inline value_type* _refFront(){ return _refElement(0); }//先頭要素参照
 		inline value_type* _refBack(){ return _refElement(m_size - 1); }//末尾要素参照
 		inline value_type* _refNew(){ return _refElement(m_size); }//新規要素参照
-		//inline index_type _adjIndex(const index_type index) const { return index >= 0 && index < m_maxSize ? index : INVALID_INDEX; }//インデックスを範囲内に補正
-		inline index_type _adjIndex(const index_type index) const { return index < m_maxSize ? index : INVALID_INDEX; }//インデックスを範囲内に補正
+		inline index_type _adjIndex(const index_type index) const;//インデックスを範囲内に補正
 		inline index_type _refIndex(const value_type* node) const{ return node - _refFront(); }//要素をインデックスに変換 ※範囲チェックなし
 	public:
 		//メソッド：要素アクセス系（独自拡張版）

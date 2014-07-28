@@ -480,6 +480,15 @@ namespace binary_heap
 	//----------------------------------------
 	//コンテナ本体のメソッド
 	
+	//インデックスを範囲内に補正
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_adjIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	{
+		const index_type invalid_index = INVALID_INDEX;//【注】最適化オプションを付けていないと、三項演算子が実体のポインタを参照して直値展開されなくなり、結果リンクエラーになることがある（GCCで確認）
+		//return index < TABLE_SIZE ? index : invalid_index;
+		return index >= 0 && index < TABLE_SIZE ? index : invalid_index;
+	}
+
 	//メソッド：要素アクセス系（独自拡張版）
 	//※範囲チェックなし（非公開）
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>

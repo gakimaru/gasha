@@ -607,7 +607,8 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::getPrevIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
 	{
-		index_type now_index = index == INVALID_INDEX ? TABLE_SIZE : index;
+		const std::size_t table_size = TABLE_SIZE;//【注】最適化オプションを付けていないと、三項演算子が実体のポインタを参照して直値展開されなくなり、結果リンクエラーになることがある（GCCで確認）
+		index_type now_index = index == INVALID_INDEX ? table_size : index;
 		if (index <= 0 || index >= TABLE_SIZE || m_usingCount == 0 || m_deletedCount == m_usingCount)
 			return INVALID_INDEX;
 		for (; now_index > 0; --now_index)
