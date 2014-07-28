@@ -30,6 +30,7 @@ public:
 
 public:
 	//アクセッサ
+	inline bool isInstanced() const { return m_isInstanced; }//インスタンスが生成されているか？
 	virtual const char* name() const = 0;//アロケータ名
 	virtual const char* mode() const = 0;//アロケータの実装モード名
 	virtual size_type maxSize() const = 0;//バッファの全体サイズ（バイト数）
@@ -64,9 +65,13 @@ public:
 	virtual std::size_t debugInfo(char* message, const std::size_t max_size) const = 0;
 
 public:
+	//デフォルトコンストラクタ
+	inline iAllocatorAdapter();
 	//デストラクタ
-	virtual ~iAllocatorAdapter()
-	{}
+	virtual ~iAllocatorAdapter();
+private:
+	//フィールド
+	bool m_isInstanced;
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

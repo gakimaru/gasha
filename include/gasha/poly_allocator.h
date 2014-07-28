@@ -135,6 +135,7 @@ public:
 	//キャストオペレータ
 	inline operator const GASHA_ iAllocatorAdapter&() const;
 	inline operator GASHA_ iAllocatorAdapter&();
+	inline operator bool() const;
 
 public:
 	//デバッグ観察者を変更

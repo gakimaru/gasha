@@ -68,6 +68,7 @@ inline const GASHA_ iAllocatorAdapter& polyAllocator::operator*() const { return
 inline GASHA_ iAllocatorAdapter& polyAllocator::operator*(){ return *m_adapter; }
 inline const GASHA_ iAllocatorAdapter* polyAllocator::operator->() const { return m_adapter; }
 inline GASHA_ iAllocatorAdapter* polyAllocator::operator->(){ return m_adapter; }
+inline polyAllocator::operator bool() const { return m_adapter != nullptr && m_adapter->isInstanced(); }
 
 //キャストオペレータ
 inline polyAllocator::operator const GASHA_ iAllocatorAdapter&() const { return *m_adapter; }

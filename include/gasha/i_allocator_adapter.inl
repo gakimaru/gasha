@@ -6,6 +6,8 @@
 // i_allocator_adapter.inl
 // アロケータアダプターインターフェース【インライン関数／テンプレート関数定義部】
 //
+// ※基本的に明示的なインクルードの必要はなし。（.h ファイルの末尾でインクルード）
+//
 // Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -19,7 +21,10 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //アロケータアダプターインターフェースクラス
 
-//（なし）
+//デフォルトコンストラクタ
+inline iAllocatorAdapter::iAllocatorAdapter() :
+	m_isInstanced(true)
+{}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
