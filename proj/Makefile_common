@@ -56,6 +56,8 @@ CXXFLAGS := \
 	-fabi-version=0 \
 	-fopenmp \
 	-U__STRICT_ANSI__ \
+	-D_GLIBCXX_USE_NANOSLEEP \
+	-D_GLIBCXX_USE_SCHED_YIELD \
 
 #【補足】C++コンパイルオプションの警告オプション
 # 以下、-Wallに含まれるもの
@@ -82,6 +84,8 @@ CXXFLAGS := \
 #  -fabi-version ... ABIバージョン ※4以上にしないと、__m128と__m256の型が区別されず、両者のオーバーロードができない。
 #  -fopenmp ... OpenMP有効化
 #  -U__STRICT_ANSI__ ... fdopen() を使用可能にするための対処
+#  -D_GLIBCXX_USE_NANOSLEEP ... GCC4.7.x で、std::this_thread::sleep_for() を使えるようにするためのオプション
+#  -D_GLIBCXX_USE_SCHED_YIELD ... GCC4.7.x で、std::this_thread::yield() を使えるようにするためのオプション
 # 以下、必要に応じて使用
 #  -Winline ... インライン指定されていながら、インライン化されなかった関数を警告
 #  -fpermissive ... テンプレートのインスタンス化重複エラーなど、「非適合なコード」のエラーを警告に格下げする

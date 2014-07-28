@@ -200,7 +200,7 @@ int spprintf(char* dst, const std::size_t max_size, std::size_t& pos, const char
 #endif
 #ifdef GASHA_IS_GCC
 	ret = ::snprintf(dst_now, remain, fmt, std::forward<Tx>(args)...);
-	if (ret >= remain)
+	if (ret >= static_cast<int>(remain))
 	{
 		pos += (remain - 1);
 		ret = 0;

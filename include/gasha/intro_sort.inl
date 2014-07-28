@@ -224,7 +224,7 @@ namespace _private
 				const int _new_depth = _depth - 1;
 				if (_new_size >= 1)
 				{
-					if (_new_size < SIZE_THRESHOLD)
+					if (_new_size < static_cast<typename ITERATOR::difference_type>(SIZE_THRESHOLD))
 					{
 						//swapped_count += GASHA_ iteratorInsertionSort(_new_begin, _new_end, predicate);//【本来の処理】挿入ソートに切り替え
 						//swapped_count += GASHA_ iteratorCombSort(_new_begin, _new_end, predicate);//【改良】コムソートに切り替え

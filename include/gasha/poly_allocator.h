@@ -185,10 +185,10 @@ private:
 	//静的フィールド
 	static GASHA_ stdAllocator<> m_stdAllocator;//標準アロケータ
 	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプター
-	thread_local static GASHA_ iAllocatorAdapter* m_adapter;//現在のアロケータアダプター
-	thread_local static const GASHA_ debugAllocationObserver* m_observer;//現在の観察者
-	thread_local static std::size_t m_align;//現在のアラインメントサイズ（一時利用のみ）
-	thread_local static const GASHA_ debugAllocationInfo* m_debugInfo;//現在のデバッグ情報（一時利用のみ）
+	static thread_local  GASHA_ iAllocatorAdapter* m_adapter;//現在のアロケータアダプター
+	static thread_local const GASHA_ debugAllocationObserver* m_observer;//現在の観察者
+	static thread_local std::size_t m_align;//現在のアラインメントサイズ（一時利用のみ）
+	static thread_local const GASHA_ debugAllocationInfo* m_debugInfo;//現在のデバッグ情報（一時利用のみ）
 #else//GASHA_ENABLE_POLY_ALLOCATOR
 	static GASHA_ iAllocatorAdapter* m_dummyAdapter;//アロケータアダプターダミー
 #endif//GASHA_ENABLE_POLY_ALLOCATOR

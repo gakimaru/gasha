@@ -155,7 +155,7 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isExist() const
 	{
-		return m_logicalIndex != INVALID_INDEX && m_logicalIndex < m_con->m_size;
+		return m_logicalIndex != INVALID_INDEX && m_logicalIndex < static_cast<index_type>(m_con->m_size);
 	}
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isEnabled() const
@@ -165,7 +165,7 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline bool container<OPE_TYPE>::iterator::isEnd() const//終端か？
 	{
-		return m_logicalIndex == m_con->m_size;
+		return m_logicalIndex == static_cast<index_type>(m_con->m_size);
 	}
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::iterator::getRealIndex() const//物理インデックス
@@ -384,7 +384,7 @@ namespace ring_buffer
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_adjLogicalIndex(const typename container<OPE_TYPE>::index_type logical_index) const
 	{
-		return static_cast<index_type>(logical_index >= 0 && logical_index < static_cast<int>(m_maxSize) ? logical_index : INVALID_INDEX);
+		return static_cast<index_type>(logical_index >= 0 && logical_index < static_cast<index_type>(m_maxSize) ? logical_index : INVALID_INDEX);
 	}
 	//要素を物理インデックスに変換 ※範囲チェックなし
 	template<class OPE_TYPE>
