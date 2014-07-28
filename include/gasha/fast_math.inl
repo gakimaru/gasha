@@ -55,65 +55,65 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 	template <typename T> inline CLASS_NAME<T>::~CLASS_NAME(){} \
 
 #define GASHA_FAST_ARITH_CLASS_ARRAY_INSTANCING(CLASS_NAME) \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&val)[N]){ for (int i = 0; i < N; ++i) m_val[i] = val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>&& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
-	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>& val){ for(int i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&&val)[N]){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const T(&val)[N]){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const fastestA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const semiA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const sseA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const normA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>& CLASS_NAME<T[N]>::operator=(const dummyA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; return *this; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&&val)[N]){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const T(&val)[N]){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const fastestA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const semiA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const sseA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const normA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>&& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
+	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(const dummyA<T[N]>& val){ for (std::size_t i = 0; i < N; ++i) m_val[i] = val.m_val[i]; } \
 	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::CLASS_NAME(){ for (int i = 0; i < N; ++i) m_val[i] = static_cast<T>(0); } \
 	template <typename T, std::size_t N> inline CLASS_NAME<T[N]>::~CLASS_NAME(){} \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&val)[N][M]){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>&& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>& val){ for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
-	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(){ for (int i = 0; i < N; ++i) for (int j = 0; i < M; ++i) m_val[i][j] = static_cast<T>(0); } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&&val)[N][M]){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const T(&val)[N][M]){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const fastestA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const semiA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const sseA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const normA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>& CLASS_NAME<T[N][M]>::operator=(const dummyA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; return *this; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&&val)[N][M]){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const T(&val)[N][M]){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const fastestA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const semiA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const sseA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const normA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>&& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(const dummyA<T[N][M]>& val){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; j < M; ++j) m_val[i][j] = val.m_val[i][j]; } \
+	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::CLASS_NAME(){ for (std::size_t i = 0; i < N; ++i) for (std::size_t j = 0; i < M; ++i) m_val[i][j] = static_cast<T>(0); } \
 	template <typename T, std::size_t N, std::size_t M> inline CLASS_NAME<T[N][M]>::~CLASS_NAME(){} \
 
 #define GASHA_FAST_ARITH_CLASS_SSE_FLOAT_INSTANCING(CLASS_NAME) \

@@ -10,6 +10,17 @@ Released under the [MIT license][MIT].
 > ライブラリのヘッダーファイル（`.h` ファイル）とライブラリファイル（`.lib` / `.a` ファイル）を扱っています。  
 > また、ライブラリの改訂履歴 RelaseNotes.txt も置いています。  
 
+###最新の更新内容###
+Ver.`1.01` [master] `Jul.28.2014` M.Itagaki  
+> GCC x64 に対応しました。  
+> 下記の環境でコンパイルと実行を確認しています。  
+> * Windows 8.1(64bit) + Visual Studio 2013 (x86/x64)  
+> * Cygwin(32bit) + GCC 4.8.2 (x86)  
+> * FedoraCore18(64bit) + GCC 4.7.2(x64)  
+> * CentOS7.0(64bit) + GCC 4.8.2(x64)  
+> 
+> また、これまで GASHA の対応コンパイラを GCC4.6 以上としていましたが、4.7 以降に改めます。  
+
 #「GASHA」とは？#
 ###個人制作による、オープンソースのC++用基本ライブラリです。###
 > 詳しくは、「GASHA」の[サンプルプログラム][gasha_examples]に記述しています。  

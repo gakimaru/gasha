@@ -42,7 +42,7 @@ namespace serialization
 	{
 	public:
 		//定数
-		static const std::uint32_t VARIABLE_SIZE = ~0;//可変長サイズ指定 ※可変長文字列を読み込む時に、セーブデータのサイズに合わせる場合に使用
+		static const std::uint32_t VARIABLE_SIZE = ~static_cast<std::uint32_t>(0);//可変長サイズ指定 ※可変長文字列を読み込む時に、セーブデータのサイズに合わせる場合に使用
 	public:
 		//アクセッサ
 		inline GASHA_ crc32_t nameCrc() const;//名前のCRC

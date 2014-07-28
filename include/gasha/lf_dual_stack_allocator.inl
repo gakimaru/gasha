@@ -104,7 +104,7 @@ inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator
 template<class AUTO_CLEAR>
 inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::sizeDesc(const typename lfDualStackAllocator<AUTO_CLEAR>::size2_type size) const
 {
-	return static_cast<size_type>((size >> 32)& 0xffffffffllu);
+	return static_cast<size_type>((size >> 32) & 0xffffffffllu);
 }
 
 //使用中のサイズ（バイト数）

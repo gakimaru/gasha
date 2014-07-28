@@ -51,7 +51,7 @@ public:
 	static const size_type MAX_POOL_SIZE = _MAX_POOL_SIZE;//最大プール数
 	                                                      //※実際のプール数はコンストラクタで渡されたバッファサイズに基づく。
 	                                                      //※最大プール数は、それと同じかそれ以上の値を指定する必要がある。
-	static const index_type INVALID_INDEX = 0xffffffff;//無効なインデックス
+	static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 	static const index_type DIRTY_INDEX = 0xfefefefe;//再利用プール連結インデックス削除用
 
 public:

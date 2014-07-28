@@ -175,7 +175,7 @@ namespace binary_heap
 	public:
 		//定数
 		static const size_type TABLE_SIZE = _TABLE_SIZE;//配列要素数
-		static const index_type INVALID_INDEX = 0xffffffffu;//無効なインデックス
+		static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 		enum status_t//ステータス
 		{
 			IDLE = 0,//アイドル
@@ -556,8 +556,7 @@ namespace binary_heap
 		inline node_type* _refTop(){ return _refNode(0); }//先頭ノード参照
 		inline node_type* _refBottom(){ return _refNode(m_used - 1); }//終端ノード参照
 		inline node_type* _refNew(){ return _refNode(m_used); }//新規ノード参照
-		//inline index_type _adjIndex(const index_type index) const { return index >= 0 && index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
-		inline index_type _adjIndex(const index_type index) const { return index < TABLE_SIZE ? index : INVALID_INDEX; }//インデックスを範囲内に補正
+		inline index_type _adjIndex(const index_type index) const;//インデックスを範囲内に補正
 		inline index_type _refIndex(const node_type* node) const{ return node - _refTop(); }//ノードをインデックスに変換 ※範囲チェックなし
 		inline index_type _calcParent(const index_type index) const;//親インデックス計算 ※範囲チェックなし
 		inline index_type _calcChildL(const index_type index) const;//左側の子インデックス計算 ※範囲チェックなし

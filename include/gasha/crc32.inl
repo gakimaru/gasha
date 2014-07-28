@@ -87,13 +87,13 @@ namespace _private
 //【メタプログラミング：constexpr版】文字列から算出
 inline constexpr crc32_t calcStaticCRC32(const char* str)
 {
-	return ~_private::calcStr(~0u, str);
+	return ~_private::calcStr(~static_cast<crc32_t>(0), str);
 }
 //--------------------
 //【メタプログラミング：constexpr版】バイナリデータから算出
 inline constexpr crc32_t calcStaticCRC32(const char* data, const std::size_t len)
 {
-	return ~_private::calcData(~0u, data, len);
+	return ~_private::calcData(~static_cast<crc32_t>(0), data, len);
 }
 #ifdef GASHA_HAS_USER_DEFINED_LITERAL
 //--------------------

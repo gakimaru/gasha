@@ -39,7 +39,7 @@ inline bool isValidAlign(const std::size_t align);//アラインメントとし�
 namespace _private
 {
 	template<std::size_t VAL, std::size_t ALIGN_1, std::size_t VAL_OR> struct adjustStaticAlign{ static const std::size_t value = (VAL + ALIGN_1) & ~ALIGN_1; };
-	template<std::size_t VAL, std::size_t ALIGN_1>                     struct adjustStaticAlign<VAL, ALIGN_1, 0xffffffff>{ static const std::size_t value = 0; };//VAL & ~ALIGN_1; };
+	template<std::size_t VAL, std::size_t ALIGN_1>                     struct adjustStaticAlign<VAL, ALIGN_1, ~static_cast<std::size_t>(0)>{ static const std::size_t value = 0; };//VAL & ~ALIGN_1; };
 }//namespace _private
 template<std::size_t VAL, std::size_t ALIGN> struct adjustStaticAlign{ static const std::size_t ALIGN_1 = ALIGN - 1;  static const std::size_t value = _private::adjustStaticAlign<VAL, ALIGN_1, VAL | ALIGN_1>::value; };
 template<std::size_t VAL>                    struct adjustStaticAlign<VAL, 1>{ static const std::size_t value = VAL; };
