@@ -37,7 +37,7 @@ namespace rb_tree
 	template<class OPE_TYPE>
 	typename stack_t<OPE_TYPE>::info_t* stack_t<OPE_TYPE>::push(const typename OPE_TYPE::node_type& node, const bool is_large)
 	{
-		GASHA_SIMPLE_ASSERT(m_depth < DEPTH_MAX, "RB-tree stack overflow.");
+		GASHA_SIMPLE_ASSERT(m_depth < static_cast<int>(DEPTH_MAX), "RB-tree stack overflow.");
 		if (m_depth >= static_cast<int>(DEPTH_MAX))
 			return nullptr;
 		info_t* stack_node = &m_array[m_depth++];

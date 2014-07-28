@@ -104,7 +104,7 @@ template<typename T, std::size_t N>
 inline T norm(const T(&vec)[N])
 {
 	T norm_sq = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		norm_sq += vec[i] * vec[i];
 	return GASHA_ sqr(norm_sq);
 }
@@ -115,7 +115,7 @@ template<typename T, std::size_t N>
 inline T normSq(const T(&vec)[N])
 {
 	T norm_sq = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		norm_sq += vec[i] * vec[i];
 	return norm_sq;
 }
@@ -125,7 +125,7 @@ inline T normSq(const T(&vec)[N])
 template<typename T, std::size_t N>
 inline void merge(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 {
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		result[i] = vec1[i] + vec2[i];
 }
 
@@ -134,7 +134,7 @@ inline void merge(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 template<typename T, std::size_t N>
 inline void difference(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 {
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		result[i] = vec1[i] - vec2[i];
 }
 
@@ -144,7 +144,7 @@ template<typename T, std::size_t N>
 inline T length(const T(&vec1)[N], const T(&vec2)[N])
 {
 	T len_sq = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 	{
 		const T diff = vec1[i] - vec2[i];
 		len_sq += diff * diff;
@@ -158,7 +158,7 @@ template<typename T, std::size_t N>
 inline T lengthSq(const T(&vec1)[N], const T(&vec2)[N])
 {
 	T len_sq = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 	{
 		const T diff = vec1[i] - vec2[i];
 		len_sq += diff * diff;
@@ -172,7 +172,7 @@ template<typename T, std::size_t N>
 inline void normalize(T(&result)[N], const T(&vec)[N])
 {
 	const T n = norm(vec);
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		result[i] = vec[i] / n;
 }
 
@@ -181,7 +181,7 @@ inline void normalize(T(&result)[N], const T(&vec)[N])
 template<typename T, std::size_t N>
 inline void mul(T(&result)[N], const T(&vec)[N], const T scalar)
 {
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		result[i] = vec[i] * scalar;
 }
 
@@ -191,7 +191,7 @@ template<typename T, std::size_t N>
 inline void forward(T(&result)[N], const T(&vec)[N], const T scalar)
 {
 	const T n = norm(vec);
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		result[i] = vec[i] + vec[i] / n * scalar;
 }
 
@@ -201,7 +201,7 @@ template<typename T, std::size_t N>
 inline T dot(const T(&vec1)[N], const T(&vec2)[N])
 {
 	T dot = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		dot += (vec1[i] * vec2[i]);
 	return dot;
 }
@@ -214,7 +214,7 @@ inline T normalizedDot(const T(&vec1)[N], const T(&vec2)[N])
 	const T n1 = norm(vec1);
 	const T n2 = norm(vec2);
 	T dot = 0.f;
-	for (int i = 0; i < N; ++i)
+	for (std::size_t i = 0; i < N; ++i)
 		dot += ((vec1[i] / n1) * (vec2[i] / n2));
 	return dot;
 }
@@ -240,8 +240,8 @@ inline void cross(T(&result)[N], const T(&vec1)[N], const T(&vec2)[N])
 template<typename T, std::size_t N, std::size_t M>
 void add(T(&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
 {
-	for (int n = 0; n < N; ++n)
-		for (int m = 0; m < M; ++m)
+	for (std::size_t n = 0; n < N; ++n)
+		for (std::size_t m = 0; m < M; ++m)
 			mat_result[n][m] = mat1[n][m] + mat2[n][m];
 }
 //※ループアンローリング版
@@ -279,8 +279,8 @@ void addLU(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
 template<typename T, std::size_t N, std::size_t M>
 void sub(T (&mat_result)[N][M], const T (&mat1)[N][M], const T (&mat2)[N][M])
 {
-	for (int n = 0; n < N; ++n)
-		for (int m = 0; m < M; ++m)
+	for (std::size_t n = 0; n < N; ++n)
+		for (std::size_t m = 0; m < M; ++m)
 			mat_result[n][m] = mat1[n][m] - mat2[n][m];
 }
 //※ループアンローリング版
@@ -318,8 +318,8 @@ void subLU(T(&mat_result)[N][M], const T(&mat1)[N][M], const T(&mat2)[N][M])
 template<typename T, std::size_t N, std::size_t M>
 void mul(T (&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
 {
-	for (int n = 0; n < N; ++n)
-		for (int m = 0; m < M; ++m)
+	for (std::size_t n = 0; n < N; ++n)
+		for (std::size_t m = 0; m < M; ++m)
 			mat_result[n][m] = mat[n][m] * scalar;
 }
 //※ループアンローリング版
@@ -357,12 +357,12 @@ void mulLU(T(&mat_result)[N][M], const T (&mat)[N][M], const T scalar)
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
 void mul(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T(&mat2)[NM][M])
 {
-	for (int n = 0; n < N; ++n)
-		for (int m = 0; m < M; ++m)
+	for (std::size_t n = 0; n < N; ++n)
+		for (std::size_t m = 0; m < M; ++m)
 			mat_result[n][m] = static_cast<T>(0);
-	for (int n = 0; n < N; ++n)
-		for (int m = 0; m < M; ++m)
-			for (int nm = 0; nm < NM; ++nm)
+	for (std::size_t n = 0; n < N; ++n)
+		for (std::size_t m = 0; m < M; ++m)
+			for (std::size_t nm = 0; nm < NM; ++nm)
 				mat_result[n][m] += (mat1[n][nm] * mat2[nm][m]);
 }
 //※ループアンローリング版
@@ -400,8 +400,8 @@ struct _mulRU2<T, N, M, NM, 0, 0, 0>{
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
 void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M])
 {
-	for (int i = 0; i < N; ++i)
-		for (int j = 0; j < M; ++j)
+	for (std::size_t i = 0; i < N; ++i)
+		for (std::size_t j = 0; j < M; ++j)
 			mat_result[i][j] = static_cast<T>(0);
 	_mulRU2<T, N, M, NM, N - 1, M - 1, NM - 1>::calc(mat_result, mat1, mat2);
 }

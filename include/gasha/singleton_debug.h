@@ -64,7 +64,7 @@ public:
 public:
 	//定数
 	static const std::size_t MAX_RECORDS = _MAX_RECORDS;//記録数
-	static const id_type INVALID_DEBUG_ID = ~0LLU;//無効なID
+	static const id_type INVALID_DEBUG_ID = ~static_cast<id_type>(0);//無効なID
 public:
 	//キャストオペレータ
 	inline operator list_type&(){ return m_list; }//アクセス情報の連結情報

@@ -732,7 +732,7 @@ namespace hash_table
 		if (index == INVALID_INDEX)//検索失敗なら削除失敗
 			return false;
 		_eraseByIndex(index);
-		if (m_usingCount == m_deletedCount || m_deletedCount == AUTO_REHASH_SIZE)//自動リハッシュ
+		if (m_usingCount == m_deletedCount || m_deletedCount == static_cast<int>(AUTO_REHASH_SIZE))//自動リハッシュ
 			_rehash();
 		return true;
 	}
