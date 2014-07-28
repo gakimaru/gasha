@@ -19,7 +19,7 @@
 #define GASHA_VERSION_MAKE(MAJOR, MINOR) (MAJOR * GASHA_VERSION_FIGURE + MINOR)//合成バージョン作成マクロ
 
 #define GASHA_MAJOR (1)//メジャーバージョン
-#define GASHA_MINOR (0)//マイナーバージョン
+#define GASHA_MINOR (1)//マイナーバージョン
 
 #define GASHA_VERSION GASHA_VERSION_MAKE(GASHA_MAJOR, GASHA_MINOR)//合成バージョン
 
@@ -27,6 +27,7 @@
 
 //----------------------------------------
 //バージョン更新履歴
+//・Ver.1.01 [master] Jul.28.2014 M.Itagaki
 //・Ver.1.00 [master] Jul.26.2014 M.Itagaki
 
 #endif//GASHA_INCLUDED_VERSION_H
