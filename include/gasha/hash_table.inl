@@ -442,7 +442,7 @@ namespace hash_table
 	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
 	inline typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::calcIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
 	{
-		typedef calcIndexImpl<(TABLE_SIZE >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, key_range_type, TABLE_SIZE, KEY_MIN, KEY_RANGE> calc_type;
+		typedef calcIndexImpl<(static_cast<index_type>(TABLE_SIZE) >= KEY_RANGE && KEY_RANGE > 0), size_type, index_type, key_type, key_range_type, TABLE_SIZE, KEY_MIN, KEY_RANGE> calc_type;
 		return calc_type::calc(key);
 	}
 	//次のインデックスを計算（指定のインデックスに歩幅を加算）
