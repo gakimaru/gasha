@@ -26,12 +26,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //単一アロケータクラス
 //※バッファをコンストラクタで受け渡して使用
-template<class LOCK_TYPE = GASHA_ dummyLock>
+template<class LOCK_POLICY = GASHA_ dummyLock>
 class monoAllocator
 {
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
+	typedef LOCK_POLICY lock_type;//ロック型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
@@ -46,7 +46,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_TYPE>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<monoAllocator<LOCK_POLICY>> adapter(){ GASHA_ allocatorAdapter<monoAllocator<LOCK_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -109,8 +109,8 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付き単一アロケータクラス
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-class monoAllocator_withBuff : public monoAllocator<LOCK_TYPE>
+template<std::size_t _MAX_SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+class monoAllocator_withBuff : public monoAllocator<LOCK_POLICY>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
@@ -125,8 +125,8 @@ private:
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock>
-class monoAllocator_withType : public monoAllocator<LOCK_TYPE>
+template<typename T, std::size_t _NUM, class LOCK_POLICY = GASHA_ dummyLock>
+class monoAllocator_withType : public monoAllocator<LOCK_POLICY>
 {
 public:
 	//型

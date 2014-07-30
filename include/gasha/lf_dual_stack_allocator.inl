@@ -31,36 +31,36 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロックフリー双方向スタック自動クリア
 
 //正順方向の自動クリア
-template<class AUTO_CLEAR>
-void lfDualStackAllocatorAutoClear::autoClearAsc(lfDualStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocatorAutoClear::autoClearAsc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	while(true)
 	{
-		typename lfDualStackAllocator<AUTO_CLEAR>::size2_type now_size2 = allocator.m_size.load();
+		typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type now_size2 = allocator.m_size.load();
 		if (allocator.m_countAsc.load() > 0)
 			return;
-		typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.sizeAsc(now_size2);
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size_desc = allocator.sizeDesc(now_size2);
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type new_size = 0;
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size2_type new_size2 = allocator.size2(new_size, now_size_desc);
+		typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type now_size = allocator.sizeAsc(now_size2);
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type now_size_desc = allocator.sizeDesc(now_size2);
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type new_size = 0;
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type new_size2 = allocator.size2(new_size, now_size_desc);
 		if (allocator.m_size.compare_exchange_weak(now_size2, new_size2))//サイズのCAS
 			return;
 	}
 }
 
 //逆順方向の自動クリア
-template<class AUTO_CLEAR>
-void lfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	while(true)
 	{
-		typename lfDualStackAllocator<AUTO_CLEAR>::size2_type now_size2 = allocator.m_size.load();
+		typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type now_size2 = allocator.m_size.load();
 		if (allocator.m_countDesc.load() > 0)
 			return;
-		typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.sizeDesc(now_size2);
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type now_size_asc = allocator.sizeAsc(now_size2);
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size_type new_size = 0;
-		const typename lfDualStackAllocator<AUTO_CLEAR>::size2_type new_size2 = allocator.size2(now_size_asc, new_size);
+		typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type now_size = allocator.sizeDesc(now_size2);
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type now_size_asc = allocator.sizeAsc(now_size2);
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type new_size = 0;
+		const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type new_size2 = allocator.size2(now_size_asc, new_size);
 		if (allocator.m_size.compare_exchange_weak(now_size2, new_size2))//サイズのCAS
 			return;
 	}
@@ -70,15 +70,15 @@ void lfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEA
 //ロックフリー双方向スタック自動クリア（ダミー）
 
 //正順方向の自動クリア
-template<class AUTO_CLEAR>
-inline void dummyLfDualStackAllocatorAutoClear::autoClearAsc(lfDualStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+inline void dummyLfDualStackAllocatorAutoClear::autoClearAsc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	//何もしない
 }
 
 //逆方向の自動クリア
-template<class AUTO_CLEAR>
-inline void dummyLfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+inline void dummyLfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	//何もしない
 }
@@ -87,66 +87,66 @@ inline void dummyLfDualStackAllocatorAutoClear::autoClearDesc(lfDualStackAllocat
 //ロックフリー双方向スタックアロケータクラス
 
 //使用中のサイズ（バイト数） ※正順サイズと逆順サイズから取得
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size2_type lfDualStackAllocator<AUTO_CLEAR>::size2(const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_desc) const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2(const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size_desc) const
 {
 	return static_cast<size2_type>(size_desc) << 32 | static_cast<size2_type>(size_asc);
 }
 
 //正順で使用中のサイズ（バイト数） ※サイズから取得
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::sizeAsc(const typename lfDualStackAllocator<AUTO_CLEAR>::size2_type size) const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::sizeAsc(const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type size) const
 {
 	return static_cast<size_type>(size & 0xffffffffllu);
 }
 
 //逆順で使用中のサイズ（バイト数） ※サイズから取得
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::sizeDesc(const typename lfDualStackAllocator<AUTO_CLEAR>::size2_type size) const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::sizeDesc(const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size2_type size) const
 {
 	return static_cast<size_type>((size >> 32) & 0xffffffffllu);
 }
 
 //使用中のサイズ（バイト数）
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::size() const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::size() const
 {
 	const size2_type size = m_size.load();
 	return sizeAsc(size) + sizeDesc(size);
 }
 
 //正順で使用中のサイズ（バイト数）
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::sizeAsc() const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::sizeAsc() const
 {
 	const size2_type size = m_size.load();
 	return sizeAsc(size);
 }
 
 //逆順で使用中のサイズ（バイト数）
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::sizeDesc() const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::sizeDesc() const
 {
 	const size2_type size = m_size.load();
 	return sizeDesc(size);
 }
 //残りサイズ（バイト数）
-template<class AUTO_CLEAR>
-inline typename lfDualStackAllocator<AUTO_CLEAR>::size_type lfDualStackAllocator<AUTO_CLEAR>::remain() const
+template<class AUTO_CLEAR_POLICY>
+inline typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type lfDualStackAllocator<AUTO_CLEAR_POLICY>::remain() const
 {
 	return m_maxSize - size();
 }
 
 //メモリ確保
-template<class AUTO_CLEAR>
-inline void* lfDualStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR_POLICY>
+inline void* lfDualStackAllocator<AUTO_CLEAR_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	return allocOrd(m_allocateOrder.load(), size, align);
 }
 
 //※アロケート方向指定版
-template<class AUTO_CLEAR>
-inline  void* lfDualStackAllocator<AUTO_CLEAR>::allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR_POLICY>
+inline  void* lfDualStackAllocator<AUTO_CLEAR_POLICY>::allocOrd(const allocationOrder_t order, const std::size_t size, const std::size_t align)
 {
 	if(order == ALLOC_ASC)
 		return _allocAsc(size, align);
@@ -155,8 +155,8 @@ inline  void* lfDualStackAllocator<AUTO_CLEAR>::allocOrd(const allocationOrder_t
 }
 
 //メモリ解放
-template<class AUTO_CLEAR>
-inline bool lfDualStackAllocator<AUTO_CLEAR>::free(void* p)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -170,16 +170,16 @@ inline bool lfDualStackAllocator<AUTO_CLEAR>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-inline T* lfDualStackAllocator<AUTO_CLEAR>::newObj(Tx&&... args)
+inline T* lfDualStackAllocator<AUTO_CLEAR_POLICY>::newObj(Tx&&... args)
 {
 	return this->template newObjOrd<T>(m_allocateOrder.load(), std::forward<Tx>(args)...);
 }
 //※アロケート方向指定版
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-inline T* lfDualStackAllocator<AUTO_CLEAR>::newObjOrd(const allocationOrder_t order, Tx&&... args)
+inline T* lfDualStackAllocator<AUTO_CLEAR_POLICY>::newObjOrd(const allocationOrder_t order, Tx&&... args)
 {
 	void* p = allocOrd(order, sizeof(T), alignof(T));
 	if (!p)
@@ -187,16 +187,16 @@ inline T* lfDualStackAllocator<AUTO_CLEAR>::newObjOrd(const allocationOrder_t or
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-inline T* lfDualStackAllocator<AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
+inline T* lfDualStackAllocator<AUTO_CLEAR_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	return this->template newArrayOrd<T>(m_allocateOrder.load(), num, std::forward<Tx>(args)...);
 }
 //※配列用アロケート方向指定版
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-T* lfDualStackAllocator<AUTO_CLEAR>::newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args)
+T* lfDualStackAllocator<AUTO_CLEAR_POLICY>::newArrayOrd(const allocationOrder_t order, const std::size_t num, Tx&&... args)
 {
 	void* p = allocOrd(order, sizeof(T) * num, alignof(T));
 	if (!p)
@@ -213,9 +213,9 @@ T* lfDualStackAllocator<AUTO_CLEAR>::newArrayOrd(const allocationOrder_t order, 
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-bool lfDualStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -229,9 +229,9 @@ bool lfDualStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
 		return _freeDesc(p);
 }
 //※配列用
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-bool lfDualStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -251,14 +251,14 @@ bool lfDualStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 
 //使用中のサイズを指定位置に戻す
 //※位置指定版
-template<class AUTO_CLEAR>
-inline bool lfDualStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::rewind(const size_type pos)
 {
 	return rewindOrd(m_allocateOrder.load(), pos);
 }
 //※位置指定とアロケート方向指定版
-template<class AUTO_CLEAR>
-inline bool lfDualStackAllocator<AUTO_CLEAR>::rewindOrd(const allocationOrder_t order, const size_type pos)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::rewindOrd(const allocationOrder_t order, const size_type pos)
 {
 	if(order == ALLOC_ASC)
 		return _rewindAsc(m_buffRef + pos);
@@ -267,8 +267,8 @@ inline bool lfDualStackAllocator<AUTO_CLEAR>::rewindOrd(const allocationOrder_t 
 	return false;
 }
 //※ポインタ指定版
-template<class AUTO_CLEAR>
-inline bool lfDualStackAllocator<AUTO_CLEAR>::rewind(void* p)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::rewind(void* p)
 {
 	const allocationOrder_t order = isInUsingRange(p);
 	if(order == ALLOC_ASC)
@@ -279,21 +279,21 @@ inline bool lfDualStackAllocator<AUTO_CLEAR>::rewind(void* p)
 }
 
 //メモリクリア
-template<class AUTO_CLEAR>
-inline void lfDualStackAllocator<AUTO_CLEAR>::clearAll()
+template<class AUTO_CLEAR_POLICY>
+inline void lfDualStackAllocator<AUTO_CLEAR_POLICY>::clearAll()
 {
 	_clearAsc();
 	_clearDesc();
 }
 //※現在のアロケート方向のみ
-template<class AUTO_CLEAR>
-inline void lfDualStackAllocator<AUTO_CLEAR>::clear()
+template<class AUTO_CLEAR_POLICY>
+inline void lfDualStackAllocator<AUTO_CLEAR_POLICY>::clear()
 {
 	return clearOrd(m_allocateOrder.load());
 }
 //※アロケート方向指定
-template<class AUTO_CLEAR>
-inline void lfDualStackAllocator<AUTO_CLEAR>::clearOrd(const allocationOrder_t order)
+template<class AUTO_CLEAR_POLICY>
+inline void lfDualStackAllocator<AUTO_CLEAR_POLICY>::clearOrd(const allocationOrder_t order)
 {
 	if(order == ALLOC_ASC)
 		return _clearAsc();
@@ -301,15 +301,15 @@ inline void lfDualStackAllocator<AUTO_CLEAR>::clearOrd(const allocationOrder_t o
 		return _clearDesc();
 }
 //使用中のサイズと数をリセット
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::resetSizeAndCount(const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type count)
 {
 	return resetSizeAndCount(m_allocateOrder.load(), size, count);
 }
 
 //ポインタが範囲内か判定
-template<class AUTO_CLEAR>
-inline allocationOrder_t lfDualStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
+template<class AUTO_CLEAR_POLICY>
+inline allocationOrder_t lfDualStackAllocator<AUTO_CLEAR_POLICY>::isInUsingRange(void* p)
 {
 #ifdef GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 	GASHA_SIMPLE_ASSERT(p != nullptr, "Pointer is nullptr.");
@@ -329,8 +329,8 @@ inline allocationOrder_t lfDualStackAllocator<AUTO_CLEAR>::isInUsingRange(void* 
 }
 
 //コンストラクタ
-template<class AUTO_CLEAR>
-inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(void* buff, const std::size_t max_size) :
+template<class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator<AUTO_CLEAR_POLICY>::lfDualStackAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
@@ -343,34 +343,34 @@ inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(void* buff, const 
 	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_LF_DUAL_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(T* buff, const std::size_t num) :
+inline lfDualStackAllocator<AUTO_CLEAR_POLICY>::lfDualStackAllocator(T* buff, const std::size_t num) :
 	lfDualStackAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
 {}
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, std::size_t N>
-inline lfDualStackAllocator<AUTO_CLEAR>::lfDualStackAllocator(T(&buff)[N]) :
+inline lfDualStackAllocator<AUTO_CLEAR_POLICY>::lfDualStackAllocator(T(&buff)[N]) :
 lfDualStackAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<class AUTO_CLEAR>
-inline lfDualStackAllocator<AUTO_CLEAR>::~lfDualStackAllocator()
+template<class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator<AUTO_CLEAR_POLICY>::~lfDualStackAllocator()
 {}
 
 //--------------------------------------------------------------------------------
 //バッファ付きロックフリー双方向スタックアロケータクラス
 
 //コンストラクタ
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
-inline lfDualStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::lfDualStackAllocator_withBuff() :
-lfDualStackAllocator<AUTO_CLEAR>(m_buff, MAX_SIZE)
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR_POLICY>::lfDualStackAllocator_withBuff() :
+lfDualStackAllocator<AUTO_CLEAR_POLICY>(m_buff, MAX_SIZE)
 {}
 
 //デストラクタ
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
-inline lfDualStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::~lfDualStackAllocator_withBuff()
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR_POLICY>::~lfDualStackAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
@@ -378,36 +378,36 @@ inline lfDualStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::~lfDualStackAllocat
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
 template<typename... Tx>
-inline typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type* lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::newDefault(Tx&&... args)
+inline typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::value_type* lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::newDefault(Tx&&... args)
 {
 	return this->template newObj<value_type>(std::forward<Tx>(args)...);
 }
 //※アロケート方向指定版
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
 template<typename... Tx>
-inline typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type* lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::newDefaultOrd(const allocationOrder_t order, Tx&&... args)
+inline typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::value_type* lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::newDefaultOrd(const allocationOrder_t order, Tx&&... args)
 {
 	return this->template newObjOrd<value_type>(order, std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline bool lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::deleteDefault(typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type*& p)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline bool lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::deleteDefault(typename lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::value_type*& p)
 {
 	return this->template deleteObj<value_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::lfDualStackAllocator_withType() :
-	lfDualStackAllocator<AUTO_CLEAR>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::lfDualStackAllocator_withType() :
+	lfDualStackAllocator<AUTO_CLEAR_POLICY>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR>::~lfDualStackAllocator_withType()
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline lfDualStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::~lfDualStackAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

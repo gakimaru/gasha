@@ -33,15 +33,15 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //マルチスレッド共有スタッククラス
 
 //プッシュ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-inline bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::_push(typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::stack_t* new_node)
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+inline bool sharedStack<T, POOL_SIZE, LOCK_POLICY>::_push(typename sharedStack<T, POOL_SIZE, LOCK_POLICY>::stack_t* new_node)
 {
 	new_node->m_next = m_head;//新規ノードの次ノードに現在の先頭ノードをセット
 	m_head = new_node;//先頭ノードを新規ノードにする
 	return true;//プッシュ成功
 }
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type&& value)//※ムーブ版
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedStack<T, POOL_SIZE, LOCK_POLICY>::push(typename sharedStack<T, POOL_SIZE, LOCK_POLICY>::value_type&& value)//※ムーブ版
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
@@ -50,8 +50,8 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZ
 	stack_t* new_node = GASHA_ callConstructor<stack_t>(p, std::move(value));//新規ノードのコンストラクタ呼び出し
 	return _push(new_node);
 }
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)//※コピー版
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedStack<T, POOL_SIZE, LOCK_POLICY>::push(typename sharedStack<T, POOL_SIZE, LOCK_POLICY>::value_type& value)//※コピー版
 {
 	//return push(std::move(value));//常にムーブ処理を適用
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
@@ -63,8 +63,8 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::push(typename sharedStack<T, POOL_SIZ
 }
 
 //ポップ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedStack<T, POOL_SIZE, LOCK_POLICY>::pop(typename sharedStack<T, POOL_SIZE, LOCK_POLICY>::value_type& value)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	stack_t* head = m_head;//先頭ノードを取得
@@ -79,8 +79,8 @@ bool sharedStack<T, POOL_SIZE, LOCK_TYPE>::pop(typename sharedStack<T, POOL_SIZE
 }
 
 //デバッグ情報作成
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedStack<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+std::size_t sharedStack<T, POOL_SIZE, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedStack<T, POOL_SIZE, LOCK_POLICY>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -105,15 +105,15 @@ std::size_t sharedStack<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 }
 
 //初期化
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-void sharedStack<T, POOL_SIZE, LOCK_TYPE>::initialize()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+void sharedStack<T, POOL_SIZE, LOCK_POLICY>::initialize()
 {
 	m_head = nullptr;//先頭ノードの初期値はnullptr
 }
 
 //終了
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-void sharedStack<T, POOL_SIZE, LOCK_TYPE>::finalize()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+void sharedStack<T, POOL_SIZE, LOCK_POLICY>::finalize()
 {
 	//空になるまでポップ
 	value_type value;
@@ -121,15 +121,15 @@ void sharedStack<T, POOL_SIZE, LOCK_TYPE>::finalize()
 }
 
 //コンストラクタ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-sharedStack<T, POOL_SIZE, LOCK_TYPE>::sharedStack()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+sharedStack<T, POOL_SIZE, LOCK_POLICY>::sharedStack()
 {
 	initialize();
 }
 
 //デストラクタ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-sharedStack<T, POOL_SIZE, LOCK_TYPE>::~sharedStack()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+sharedStack<T, POOL_SIZE, LOCK_POLICY>::~sharedStack()
 {
 	finalize();
 }
@@ -145,9 +145,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ sharedStack<T, _POOL_SIZE>; \
 	template class GASHA_ poolAllocator_withType<typename GASHA_ sharedStack<T, _POOL_SIZE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
 //※ロック指定版
-#define GASHA_INSTANCING_sharedStack_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class GASHA_ sharedStack<T, _POOL_SIZE, LOCK_TYPE>; \
-	template class GASHA_ poolAllocator_withType<typename GASHA_ sharedStack<T, _POOL_SIZE, LOCK_TYPE>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
+#define GASHA_INSTANCING_sharedStack_withLock(T, _POOL_SIZE, LOCK_POLICY) \
+	template class GASHA_ sharedStack<T, _POOL_SIZE, LOCK_POLICY>; \
+	template class GASHA_ poolAllocator_withType<typename GASHA_ sharedStack<T, _POOL_SIZE, LOCK_POLICY>::stack_t, _POOL_SIZE, GASHA_ dummyLock>;
 
 //※別途、必要に応じてプールアロケータの明示的なインスタンス化も必要（ロックなし版のみ使用）
 //　　GASHA_INSTANCING_poolAllocator(_POOL_SIZE);//※ロックなし版

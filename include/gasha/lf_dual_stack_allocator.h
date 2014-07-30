@@ -29,7 +29,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロックフリー双方向スタックアロケータ補助クラス
 
 //クラス宣言
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 class lfDualStackAllocator;
 
 //----------------------------------------
@@ -40,11 +40,11 @@ public:
 	//名前
 	inline static const char* name(){ return "AutoClear"; }
 	//正順方向の自動クリア
-	template<class AUTO_CLEAR>
-	void autoClearAsc(lfDualStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	void autoClearAsc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 	//逆順方向の自動クリア
-	template<class AUTO_CLEAR>
-	void autoClearDesc(lfDualStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	void autoClearDesc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 };
 
 //----------------------------------------
@@ -56,24 +56,24 @@ public:
 	//名前
 	inline static const char* name(){ return "ManualClear"; }
 	//正順方向の自動クリア
-	template<class AUTO_CLEAR>
-	inline void autoClearAsc(lfDualStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	inline void autoClearAsc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 	//逆順方向の自動クリア
-	template<class AUTO_CLEAR>
-	inline void autoClearDesc(lfDualStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	inline void autoClearDesc(lfDualStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 };
 
 //--------------------------------------------------------------------------------
 //ロックフリー双方向スタックアロケータクラス
 //※ロックフリー双方向スタック用のバッファをコンストラクタで受け渡して使用
 //※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
-template<class AUTO_CLEAR = dummyLfDualStackAllocatorAutoClear>
+template<class AUTO_CLEAR_POLICY = dummyLfDualStackAllocatorAutoClear>
 class lfDualStackAllocator
 {
 	friend lfDualStackAllocatorAutoClear;//ロックフリー双方向スタック自動クリア
 public:
 	//型
-	typedef AUTO_CLEAR auto_clear_type;//ロックフリー双方向スタック自動クリア型
+	typedef AUTO_CLEAR_POLICY auto_clear_type;//ロックフリー双方向スタック自動クリア型
 	typedef std::uint32_t size_type;//サイズ型
 	typedef std::uint64_t size2_type;//二種サイズ混成型
 
@@ -99,12 +99,12 @@ public:
 
 public:
 	//スコープスタックアロケータ取得
-	inline GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
-	inline GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR_POLICY>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfDualStackAllocator<AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
+	inline GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR_POLICY>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<lfDualStackAllocator<AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR_POLICY>> adapter(){ GASHA_ allocatorAdapter<lfDualStackAllocator<AUTO_CLEAR_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -230,8 +230,8 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付きロックフリー双方向スタックアロケータクラス
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR = dummyLfDualStackAllocatorAutoClear>
-class lfDualStackAllocator_withBuff : public lfDualStackAllocator<AUTO_CLEAR>
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY = dummyLfDualStackAllocatorAutoClear>
+class lfDualStackAllocator_withBuff : public lfDualStackAllocator<AUTO_CLEAR_POLICY>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
@@ -246,8 +246,8 @@ private:
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class AUTO_CLEAR = dummyLfDualStackAllocatorAutoClear>
-class lfDualStackAllocator_withType : public lfDualStackAllocator<AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY = dummyLfDualStackAllocatorAutoClear>
+class lfDualStackAllocator_withType : public lfDualStackAllocator<AUTO_CLEAR_POLICY>
 {
 public:
 	//型

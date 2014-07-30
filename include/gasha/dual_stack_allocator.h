@@ -29,7 +29,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //双方向スタックアロケータ補助クラス
 
 //クラス宣言
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 class dualStackAllocator;
 
 //----------------------------------------
@@ -40,11 +40,11 @@ public:
 	//名前
 	static const char* name(){ return "AutoClear"; }
 	//正順方向の自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClearAsc(dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 	//逆順方向の自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClearDesc(dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 };
 
 //----------------------------------------
@@ -56,25 +56,25 @@ public:
 	//名前
 	static const char* name(){ return "ManualClear"; }
 	//正順方向の自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClearAsc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClearAsc(dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 	//逆順方向の自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClearDesc(dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClearDesc(dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 };
 
 //--------------------------------------------------------------------------------
 //双方向スタックアロケータクラス
 //※双方向スタック用のバッファをコンストラクタで受け渡して使用
 //※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
-template<class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
+template<class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyDualStackAllocatorAutoClear>
 class dualStackAllocator
 {
 	friend dualStackAllocatorAutoClear;//双方向スタック自動クリア
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
-	typedef AUTO_CLEAR auto_clear_type;//双方向スタック自動クリア型
+	typedef LOCK_POLICY lock_type;//ロック型
+	typedef AUTO_CLEAR_POLICY auto_clear_type;//双方向スタック自動クリア型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
@@ -96,12 +96,12 @@ public:
 
 public:
 	//スコープスタックアロケータ取得
-	inline GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
-	inline GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> scopedAllocator(){ GASHA_ scopedStackAllocator<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
+	inline GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> scopedDualAllocator(){ GASHA_ scopedDualStackAllocator<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> adapter(){ GASHA_ allocatorAdapter<dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -227,8 +227,8 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付き双方向スタックアロケータクラス
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
-class dualStackAllocator_withBuff : public dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>
+template<std::size_t _MAX_SIZE, class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyDualStackAllocatorAutoClear>
+class dualStackAllocator_withBuff : public dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
@@ -243,8 +243,8 @@ private:
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyDualStackAllocatorAutoClear>
-class dualStackAllocator_withType : public dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyDualStackAllocatorAutoClear>
+class dualStackAllocator_withType : public dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>
 {
 public:
 	//型
@@ -278,16 +278,16 @@ private:
 //※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
 
 //※双方向スタック用のバッファをコンストラクタで受け渡して使用
-template<class LOCK_TYPE = GASHA_ dummyLock>
-using smartDualStackAllocator = dualStackAllocator<LOCK_TYPE, dualStackAllocatorAutoClear>;
+template<class LOCK_POLICY = GASHA_ dummyLock>
+using smartDualStackAllocator = dualStackAllocator<LOCK_POLICY, dualStackAllocatorAutoClear>;
 
 //※バッファ付き
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartDualStackAllocator_withBuff = dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, dualStackAllocatorAutoClear>;
+template<std::size_t _MAX_SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+using smartDualStackAllocator_withBuff = dualStackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, dualStackAllocatorAutoClear>;
 
 //※バッファ付き（基本型とその個数で指定）
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartDualStackAllocator_withType = dualStackAllocator_withType<T, _SIZE, LOCK_TYPE, dualStackAllocatorAutoClear>;
+template<typename T, std::size_t _SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+using smartDualStackAllocator_withType = dualStackAllocator_withType<T, _SIZE, LOCK_POLICY, dualStackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

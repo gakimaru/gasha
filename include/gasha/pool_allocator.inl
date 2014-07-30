@@ -29,9 +29,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //プールアロケータクラス
 //メモリ確保とコンストラクタ呼び出し
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T, typename...Tx>
-T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newObj(Tx&&... args)
+T* poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -39,9 +39,9 @@ T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T, typename...Tx>
-T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
+T* poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -58,9 +58,9 @@ T* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::newArray(const std::size_t num, Tx&
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T* p)
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -72,9 +72,9 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteObj(T* p)
 	return free(p, index);
 }
 //※配列用
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -91,9 +91,9 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::deleteArray(T* p, const std::size
 }
 
 //デバッグ情報作成
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T, class FUNC>
-std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const
+std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, FUNC print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -133,15 +133,15 @@ std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, c
 	return message_len;
 }
 //デバッグ情報作成
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	return debugInfo(message, max_size, false);
 }
 
 //強制クリア
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline void poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::clear()
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline void poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	m_vacantHead = 0;
@@ -151,8 +151,8 @@ inline void poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::clear()
 }
 
 //ポインタをインデックスに変換
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::ptrToIndex(void* p)
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::index_type poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::ptrToIndex(void* p)
 {
 	const index_type index = static_cast<index_type>((reinterpret_cast<char*>(p)-reinterpret_cast<char*>(m_buffRef)) / m_blockSize);
 #ifdef GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
@@ -169,20 +169,20 @@ inline typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type poolAllocat
 }
 
 //インデックスに対応するバッファのポインタを取得
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline const void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index) const
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline const void* poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::index_type index) const
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline void* poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::refBuff(const typename poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::index_type index)
 {
 	return reinterpret_cast<char*>(m_buffRef) + (index * m_blockSize);
 }
 
 //コンストラクタ
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const std::size_t buff_size, const std::size_t block_size, const std::size_t block_align) :
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::poolAllocator(void* buff, const std::size_t buff_size, const std::size_t block_size, const std::size_t block_align) :
 	m_buffRef(reinterpret_cast<char*>(adjustAlign(buff, block_align))),
 	m_offset(static_cast<size_type>(m_buffRef - reinterpret_cast<char*>(buff))),
 	m_maxSize(static_cast<size_type>(buff_size - m_offset)),
@@ -199,34 +199,34 @@ inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(void* buff, const
 	GASHA_SIMPLE_ASSERT(m_poolSize > 0, "Pool-size is zero.(because of block_size is too large or max_size is not enough.)");
 #endif//GASHA_POOL_ALLOCATOR_ENABLE_ASSERTION
 }
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T* buff, const std::size_t pool_size) :
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::poolAllocator(T* buff, const std::size_t pool_size) :
 poolAllocator(reinterpret_cast<void*>(buff), sizeof(T)* pool_size, sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
 template<typename T, std::size_t N>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::poolAllocator(T(&buff)[N]) :
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::poolAllocator(T(&buff)[N]) :
 poolAllocator(reinterpret_cast<void*>(buff), sizeof(buff), sizeof(T), alignof(T))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::~poolAllocator()
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+inline poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::~poolAllocator()
 {}
 
 //--------------------------------------------------------------------------------
 //バッファ付きプールアロケータクラス
 
 //コンストラクタ
-template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN, class LOCK_TYPE>
-inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE>::poolAllocator_withBuff() :
-poolAllocator<_POOL_SIZE, LOCK_TYPE>(m_buff, MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
+template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN, class LOCK_POLICY>
+inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_POLICY>::poolAllocator_withBuff() :
+poolAllocator<_POOL_SIZE, LOCK_POLICY>(m_buff, MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
 {}
 
 //デストラクタ
-template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN, class LOCK_TYPE>
-inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE>::~poolAllocator_withBuff()
+template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN, class LOCK_POLICY>
+inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_POLICY>::~poolAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
@@ -234,29 +234,29 @@ inline poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE>:
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
+template<typename T, std::size_t _POOL_SIZE, class LOCK_POLICY>
 template<typename... Tx>
-inline typename poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::block_type* poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::newDefault(Tx&&... args)
+inline typename poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::block_type* poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::newDefault(Tx&&... args)
 {
 	return this->template newObj<block_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-inline bool poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::deleteDefault(typename poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::block_type*& p)
+template<typename T, std::size_t _POOL_SIZE, class LOCK_POLICY>
+inline bool poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::deleteDefault(typename poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::block_type*& p)
 {
 	return this->template deleteObj<block_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::poolAllocator_withType() :
-	poolAllocator<_POOL_SIZE, LOCK_TYPE>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
+template<typename T, std::size_t _POOL_SIZE, class LOCK_POLICY>
+inline poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::poolAllocator_withType() :
+	poolAllocator<_POOL_SIZE, LOCK_POLICY>(reinterpret_cast<void*>(m_buff), MAX_SIZE, BLOCK_SIZE, BLOCK_ALIGN)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE>
-inline poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>::~poolAllocator_withType()
+template<typename T, std::size_t _POOL_SIZE, class LOCK_POLICY>
+inline poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>::~poolAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

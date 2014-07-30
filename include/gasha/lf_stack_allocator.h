@@ -28,7 +28,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロックフリースタックアロケータ補助クラス
 
 //クラス宣言
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 class lfStackAllocator;
 
 //----------------------------------------
@@ -39,8 +39,8 @@ public:
 	//名前
 	inline static const char* name(){ return "AutoClear"; }
 	//自動クリア
-	template<class AUTO_CLEAR>
-	void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	void autoClear(lfStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 };
 
 //----------------------------------------
@@ -52,21 +52,21 @@ public:
 	//名前
 	inline static const char* name(){ return "ManualClear"; }
 	//自動クリア
-	template<class AUTO_CLEAR>
-	inline void autoClear(lfStackAllocator<AUTO_CLEAR>& allocator);
+	template<class AUTO_CLEAR_POLICY>
+	inline void autoClear(lfStackAllocator<AUTO_CLEAR_POLICY>& allocator);
 };
 
 //--------------------------------------------------------------------------------
 //ロックフリースタックアロケータクラス
 //※スタック用のバッファをコンストラクタで受け渡して使用
 //※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
-template<class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
+template<class AUTO_CLEAR_POLICY = dummyLfStackAllocatorAutoClear>
 class lfStackAllocator
 {
 	friend lfStackAllocatorAutoClear;//スタック自動クリア
 public:
 	//型
-	typedef AUTO_CLEAR auto_clear_type;//スタック自動クリア型
+	typedef AUTO_CLEAR_POLICY auto_clear_type;//スタック自動クリア型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
@@ -81,11 +81,11 @@ public:
 
 public:
 	//スコープスタックアロケータ取得
-	inline GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR_POLICY>> scopedAllocator(){ GASHA_ scopedStackAllocator<lfStackAllocator<AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR_POLICY>> adapter(){ GASHA_ allocatorAdapter<lfStackAllocator<AUTO_CLEAR_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -172,8 +172,8 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付きロックフリースタックアロケータクラス
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
-class lfStackAllocator_withBuff : public lfStackAllocator<AUTO_CLEAR>
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY = dummyLfStackAllocatorAutoClear>
+class lfStackAllocator_withBuff : public lfStackAllocator<AUTO_CLEAR_POLICY>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
@@ -188,8 +188,8 @@ private:
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class AUTO_CLEAR = dummyLfStackAllocatorAutoClear>
-class lfStackAllocator_withType : public lfStackAllocator<AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY = dummyLfStackAllocatorAutoClear>
+class lfStackAllocator_withType : public lfStackAllocator<AUTO_CLEAR_POLICY>
 {
 public:
 	//型

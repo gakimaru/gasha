@@ -33,16 +33,16 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //マルチスレッド共有キュークラス
 
 //エンキュー
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-inline bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::_enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::queue_t* new_node)
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+inline bool sharedQueue<T, POOL_SIZE, LOCK_POLICY>::_enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_POLICY>::queue_t* new_node)
 {
 	new_node->m_next = nullptr;//新規ノードの次ノードを初期化
 	m_tail->m_next = new_node;//末尾ノードの次ノードを新規ノードにする
 	m_tail = new_node;//末尾ノードを新規ノードにする
 	return true;//エンキュー成功
 }
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type&& value)//※ムーブ版
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedQueue<T, POOL_SIZE, LOCK_POLICY>::enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_POLICY>::value_type&& value)//※ムーブ版
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
@@ -51,8 +51,8 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_
 	queue_t* new_node = GASHA_ callConstructor<queue_t>(p, std::move(value));//新規ノードのコンストラクタ呼び出し
 	return _enqueue(new_node);
 }
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type& value)//※コピー版
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedQueue<T, POOL_SIZE, LOCK_POLICY>::enqueue(typename sharedQueue<T, POOL_SIZE, LOCK_POLICY>::value_type& value)//※コピー版
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	void* p = m_allocator.alloc();//新規ノードのメモリを確保
@@ -63,8 +63,8 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::enqueue(typename sharedQueue<T, POOL_
 }
 
 //デキュー
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::dequeue(typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type& value)
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+bool sharedQueue<T, POOL_SIZE, LOCK_POLICY>::dequeue(typename sharedQueue<T, POOL_SIZE, LOCK_POLICY>::value_type& value)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (m_head != m_tail)
@@ -79,8 +79,8 @@ bool sharedQueue<T, POOL_SIZE, LOCK_TYPE>::dequeue(typename sharedQueue<T, POOL_
 }
 
 //デバッグ情報作成
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedQueue<T, POOL_SIZE, LOCK_TYPE>::value_type& value)> print_node) const
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+std::size_t sharedQueue<T, POOL_SIZE, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size, const bool with_detail, std::function<std::size_t(char* message, const std::size_t max_size, std::size_t& size, const typename sharedQueue<T, POOL_SIZE, LOCK_POLICY>::value_type& value)> print_node) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -108,8 +108,8 @@ std::size_t sharedQueue<T, POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const
 }
 
 //初期化
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-void sharedQueue<T, POOL_SIZE, LOCK_TYPE>::initialize()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+void sharedQueue<T, POOL_SIZE, LOCK_POLICY>::initialize()
 {
 	queue_t* dummy_node = m_allocator.newDefault();//ダミーノードを生成
 	dummy_node->m_next = nullptr;//ダミーノードの次ノードを初期化
@@ -118,8 +118,8 @@ void sharedQueue<T, POOL_SIZE, LOCK_TYPE>::initialize()
 }
 
 //終了
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-void sharedQueue<T, POOL_SIZE, LOCK_TYPE>::finalize()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+void sharedQueue<T, POOL_SIZE, LOCK_POLICY>::finalize()
 {
 	//空になるまでデキュー
 	value_type value;
@@ -129,15 +129,15 @@ void sharedQueue<T, POOL_SIZE, LOCK_TYPE>::finalize()
 }
 
 //コンストラクタ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-sharedQueue<T, POOL_SIZE, LOCK_TYPE>::sharedQueue()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+sharedQueue<T, POOL_SIZE, LOCK_POLICY>::sharedQueue()
 {
 	initialize();
 }
 
 //デストラクタ
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE>
-sharedQueue<T, POOL_SIZE, LOCK_TYPE>::~sharedQueue()
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY>
+sharedQueue<T, POOL_SIZE, LOCK_POLICY>::~sharedQueue()
 {
 	finalize();
 }
@@ -152,8 +152,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_sharedQueue(T, _POOL_SIZE) \
 	template class GASHA_ sharedQueue<T, _POOL_SIZE>;
 //※ロック指定版
-#define GASHA_INSTANCING_sharedQueue_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class GASHA_ sharedQueue<T, _POOL_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_sharedQueue_withLock(T, _POOL_SIZE, LOCK_POLICY) \
+	template class GASHA_ sharedQueue<T, _POOL_SIZE, LOCK_POLICY>;
 
 //※別途、必要に応じてプールアロケータの明示的なインスタンス化も必要（ロックなし版のみ使用）
 //　　GASHA_INSTANCING_poolAllocator(_POOL_SIZE);//※ロックなし版

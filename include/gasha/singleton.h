@@ -37,15 +37,15 @@ namespace _private
 {
 	//固定バッファシングルトン（本体）
 	//※直接使用しないクラス
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
 	class singleton
 	{
 	public:
 		//型
 		typedef TARGET_CLASS class_type;//シングルトン対象クラス型
-		typedef LOCK_TYPE lock_type;//ロック型
+		typedef LOCK_POLICY lock_type;//ロック型
 		typedef GASHA_ unique_shared_lock<lock_type> unique_lock_type;//単一ロック型
-		typedef DEBUG_TYPE debug_type;//デバッグ処理型
+		typedef DEBUG_POLICY debug_type;//デバッグ処理型
 	private:
 		//インスタンス生成用クラス
 		class createInstance_t
@@ -149,13 +149,13 @@ using singleton = _private::singleton<TARGET_CLASS, typename TARGET_CLASS::lock_
 //----------------------------------------
 //固定バッファシングルトン：シンプルシングルトン
 //※対象クラスメンバーに lock_type と debug_type の定義が不要。
-template<class TARGET_CLASS, class LOCK_TYPE = GASHA_ dummySharedLock, class DEBUG_TYPE = GASHA_ dummySingletonDebug>
-using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>;
+template<class TARGET_CLASS, class LOCK_POLICY = GASHA_ dummySharedLock, class DEBUG_POLICY = GASHA_ dummySingletonDebug>
+using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>;
 
 //----------------------------------------
 //通常／シンプルシングルトンのフレンド宣言用マクロ
 #define GASHA_SINGLETON_FRIEND_CLASS() \
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE> \
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY> \
 	friend class GASHA_ _private::singleton; \
 	template<class TARGET_CLASS> \
 	friend class gasha::is_default_constructible; \

@@ -31,8 +31,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //双方向スタックアロケータクラス
 
 //デバッグ情報作成
-template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+std::size_t dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -43,8 +43,8 @@ std::size_t dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message, 
 }
 
 //使用中のサイズと数を取得
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::getSizeAndCount(typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& size, typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& count)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を取得
@@ -59,8 +59,8 @@ void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename dualSta
 		count = m_countDesc;
 	}
 }
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(allocationOrder_t& order, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size_asc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size_desc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count_asc, typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count_desc)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::getSizeAndCount(allocationOrder_t& order, typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& size_asc, typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& size_desc, typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& count_asc, typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& count_desc)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を取得
@@ -72,8 +72,8 @@ void dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(allocationOrder_
 }
 
 //使用中のサイズと数をリセット
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size_asc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size_desc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count_asc, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count_desc)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::resetSizeAndCount(const allocationOrder_t order, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type size_asc, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type size_desc, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type count_asc, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type count_desc)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (m_sizeAsc < size_asc || m_countAsc < count_asc || m_sizeDesc < size_desc || m_countDesc < count_desc)//現在の値の方が小さい場合は失敗
@@ -86,8 +86,8 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocati
 	m_countDesc = count_desc;
 	return true;
 }
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size, const typename dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::resetSizeAndCount(const allocationOrder_t order, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type size, const typename dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type count)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (order == ALLOC_ASC)
@@ -110,8 +110,8 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const allocati
 }
 
 //正順メモリ確保
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocAsc(const std::size_t size, const std::size_t align)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void* dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_allocAsc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
@@ -141,8 +141,8 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocAsc(const std::size_t siz
 }
 
 //逆順メモリ確保
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocDesc(const std::size_t size, const std::size_t align)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void* dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_allocDesc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
@@ -171,33 +171,33 @@ void* dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_allocDesc(const std::size_t si
 }
 
 //正順メモリ解放（共通処理）
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_freeAsc(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_freeAsc(void* p)
 {
 	//メモリ確保数を更新
 	--m_countAsc;
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClearAsc(*this);
 	return true;
 }
 
 //逆順メモリ解放（共通処理）
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_freeDesc(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_freeDesc(void* p)
 {
 	//メモリ確保数を更新
 	--m_countDesc;
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClearDesc(*this);
 	return true;
 }
 
 //正順で使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_rewindAsc(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_rewindAsc(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const size_type new_size = static_cast<size_type>(reinterpret_cast<char*>(p) - m_buffRef);
@@ -210,8 +210,8 @@ bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_rewindAsc(void* p)
 
 //逆順で使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool dualStackAllocator<LOCK_TYPE, AUTO_CLEAR>::_rewindDesc(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool dualStackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_rewindDesc(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	const size_type new_size = static_cast<size_type>(m_buffRef + m_maxSize - reinterpret_cast<char*>(p));
@@ -232,16 +232,16 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_dualStackAllocator() \
 	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_dualStackAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_dualStackAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY>;
 
 //スマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartDualStackAllocator() \
 	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartDualStackAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartDualStackAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>;
 
 #if 0//不要
 //バッファ付き双方向スタックアロケータの明示的なインスタンス化用マクロ
@@ -250,9 +250,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE>; \
 	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_dualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_dualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>; \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY>;
 
 //バッファ付きスマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -260,9 +260,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>; \
 	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>;
 
 //型指定バッファ付き双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -271,10 +271,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ dualStackAllocator_withBuff<sizeof(T) * _NUM>; \
 	template class GASHA_ dualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_dualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_dualStackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_POLICY>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY>; \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY>;
 
 //型指定バッファ付きスマート双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -283,10 +283,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>; \
 	template class GASHA_ dualStackAllocator<GASHA_ dummyLock, GASHA_ dualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartDualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
-	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>; \
-	template class GASHA_ dualStackAllocator<LOCK_TYPE, GASHA_ dualStackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartDualStackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ dualStackAllocator_withType<T, _NUM, LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>; \
+	template class GASHA_ dualStackAllocator<LOCK_POLICY, GASHA_ dualStackAllocatorAutoClear>;
 #endif
 
 //--------------------------------------------------------------------------------

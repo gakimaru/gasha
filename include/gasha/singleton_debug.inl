@@ -36,40 +36,40 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //シングルトンデバッグ用ダミー処理
 
 //シングルトン生成時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::create(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+inline bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::create(const char* procedure_name)
 {
 	//何もしない
 	return true;
 }
 
 //シングルトン破棄時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::destroy(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+inline bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::destroy(const char* procedure_name)
 {
 	//何もしない
 	return true;
 }
 
 //シングルトンアクセス開始時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RECORDS, LOCK_TYPE>::enter(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+inline typename singletonDebug<_MAX_RECORDS, LOCK_POLICY>::id_type singletonDebug<_MAX_RECORDS, LOCK_POLICY>::enter(const char* procedure_name)
 {
 	//何もしない
 	return id_type();
 }
 
 //シングルトンアクセス終了時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type id)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+inline bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::leave(const typename singletonDebug<_MAX_RECORDS, LOCK_POLICY>::id_type id)
 {
 	//何もしない
 	return true;
 }
 
 //デバッグ情報作成
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-inline std::size_t  singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+inline std::size_t  singletonDebug<_MAX_RECORDS, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	//何もしない
 	message[0] = '\0';

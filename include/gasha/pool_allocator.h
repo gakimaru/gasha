@@ -31,12 +31,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //--------------------------------------------------------------------------------
 //プールアロケータクラス
 //※プールバッファをコンストラクタで受け渡して使用
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY = GASHA_ dummyLock>
 class poolAllocator
 {
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
+	typedef LOCK_POLICY lock_type;//ロック型
 	typedef std::uint32_t index_type;//インデックス型
 	typedef std::uint32_t size_type;//サイズ型
 
@@ -71,7 +71,7 @@ public:
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -151,8 +151,8 @@ private:
 //--------------------------------------------------------------------------------
 //バッファ付きプールアロケータクラス
 //※アラインメント分余計にバッファを確保するので注意
-template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = GASHA_ DEFAULT_ALIGN, class LOCK_TYPE = GASHA_ dummyLock>
-class poolAllocator_withBuff : public poolAllocator<_POOL_SIZE, LOCK_TYPE>
+template<std::size_t _BLOCK_SIZE, std::size_t _POOL_SIZE, std::size_t _BLOCK_ALIGN = GASHA_ DEFAULT_ALIGN, class LOCK_POLICY = GASHA_ dummyLock>
+class poolAllocator_withBuff : public poolAllocator<_POOL_SIZE, LOCK_POLICY>
 {
 	//静的アサーション
 	static_assert(isValidStaticAlign<_BLOCK_ALIGN>::value == true, "poolAllocator_withBuff: _BLOCK_ALIGN is invalid. ");
@@ -173,8 +173,8 @@ private:
 //----------------------------------------
 //※バッファを型で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _POOL_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-class poolAllocator_withType : public poolAllocator<_POOL_SIZE, LOCK_TYPE>
+template<typename T, std::size_t _POOL_SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+class poolAllocator_withType : public poolAllocator<_POOL_SIZE, LOCK_POLICY>
 {
 public:
 	//型

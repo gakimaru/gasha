@@ -28,7 +28,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //スタックアロケータ補助クラス
 
 //クラス宣言
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 class stackAllocator;
 
 //----------------------------------------
@@ -39,8 +39,8 @@ public:
 	//名前
 	inline static const char* name(){ return "AutoClear"; }
 	//自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClear(stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 };
 
 //----------------------------------------
@@ -52,22 +52,22 @@ public:
 	//名前
 	inline static const char* name(){ return "ManualClear"; }
 	//自動クリア
-	template<class LOCK_TYPE, class AUTO_CLEAR>
-	inline void autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator);
+	template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+	inline void autoClear(stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator);
 };
 
 //--------------------------------------------------------------------------------
 //スタックアロケータクラス
 //※スタック用のバッファをコンストラクタで受け渡して使用
 //※free()を呼んでも、明示的に clear() または rewind() しない限り、バッファが解放されないので注意。
-template<class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
+template<class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyStackAllocatorAutoClear>
 class stackAllocator
 {
 	friend stackAllocatorAutoClear;//スタック自動クリア
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
-	typedef AUTO_CLEAR auto_clear_type;//スタック自動クリア型
+	typedef LOCK_POLICY lock_type;//ロック型
+	typedef AUTO_CLEAR_POLICY auto_clear_type;//スタック自動クリア型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
@@ -82,11 +82,11 @@ public:
 
 public:
 	//スコープスタックアロケータ取得
-	inline GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> scopedAllocator(){ GASHA_ scopedStackAllocator<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> allocator(*this); return allocator; }
+	inline GASHA_ scopedStackAllocator<stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> scopedAllocator(){ GASHA_ scopedStackAllocator<stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> allocator(*this); return allocator; }
 
 public:
 	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(){ GASHA_ allocatorAdapter<stackAllocator<LOCK_TYPE, AUTO_CLEAR>> adapter(*this, name(), mode()); return adapter; }
+	inline GASHA_ allocatorAdapter<stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> adapter(){ GASHA_ allocatorAdapter<stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -173,8 +173,8 @@ private:
 
 //--------------------------------------------------------------------------------
 //バッファ付きスタックアロケータクラス
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
-class stackAllocator_withBuff : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
+template<std::size_t _MAX_SIZE, class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyStackAllocatorAutoClear>
+class stackAllocator_withBuff : public stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>
 {
 	//定数
 	static const std::size_t MAX_SIZE = _MAX_SIZE;//バッファの全体サイズ
@@ -189,8 +189,8 @@ private:
 //----------------------------------------
 //※バッファを基本型とその個数で指定
 //※アラインメント分余計にバッファを確保するので注意
-template<typename T, std::size_t _NUM, class LOCK_TYPE = GASHA_ dummyLock, class AUTO_CLEAR = dummyStackAllocatorAutoClear>
-class stackAllocator_withType : public stackAllocator<LOCK_TYPE, AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class LOCK_POLICY = GASHA_ dummyLock, class AUTO_CLEAR_POLICY = dummyStackAllocatorAutoClear>
+class stackAllocator_withType : public stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>
 {
 public:
 	//型
@@ -222,16 +222,16 @@ private:
 //※明示的にクリアしなくても、参照がなくなった時に自動的にクリアする。
 
 //※スタック用のバッファをコンストラクタで受け渡して使用
-template<class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator = stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+template<class LOCK_POLICY = GASHA_ dummyLock>
+using smartStackAllocator = stackAllocator<LOCK_POLICY, stackAllocatorAutoClear>;
 
 //※バッファ付き
-template<std::size_t _MAX_SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator_withBuff = stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
+template<std::size_t _MAX_SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+using smartStackAllocator_withBuff = stackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, stackAllocatorAutoClear>;
 
 //※バッファ付き（基本型とその個数で指定）
-template<typename T, std::size_t _SIZE, class LOCK_TYPE = GASHA_ dummyLock>
-using smartStackAllocator_withType = stackAllocator_withType<T, _SIZE, LOCK_TYPE, stackAllocatorAutoClear>;
+template<typename T, std::size_t _SIZE, class LOCK_POLICY = GASHA_ dummyLock>
+using smartStackAllocator_withType = stackAllocator_withType<T, _SIZE, LOCK_POLICY, stackAllocatorAutoClear>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

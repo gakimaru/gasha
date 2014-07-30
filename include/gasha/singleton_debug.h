@@ -35,7 +35,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //----------------------------------------
 //シングルトンデバッグ用処理
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE = GASHA_ dummySharedLock>
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY = GASHA_ dummySharedLock>
 class singletonDebug
 {
 public:
@@ -58,7 +58,7 @@ public:
 		inline static const accessInfo* getPrev(const accessInfo& node){ return node.m_prev; }
 		inline static void setNext(accessInfo& node, const accessInfo* next){ node.m_next = next; }
 		inline static void setPrev(accessInfo& node, const accessInfo* prev){ node.m_prev = prev; }
-		typedef LOCK_TYPE lock_type;//ロックオブジェクト型
+		typedef LOCK_POLICY lock_type;//ロックオブジェクト型
 	};
 	typedef linked_list::container<listOpe> list_type;//双方向連結リスト型
 public:
@@ -115,7 +115,7 @@ private:
 
 //----------------------------------------
 //シングルトンデバッグ用処理
-template<std::size_t MAX_RECORDS, class LOCK_TYPE = GASHA_ dummySharedLock>
+template<std::size_t MAX_RECORDS, class LOCK_POLICY = GASHA_ dummySharedLock>
 class singletonDebug
 {
 public:

@@ -39,8 +39,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //シングルトンデバッグ用ダミー処理
 
 //シングルトン生成時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::create(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::create(const char* procedure_name)
 {
 	//m_accessCount.store(0);//アクセスカウントは初期化しない
 	m_createdProcedureName = procedure_name;
@@ -51,8 +51,8 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::create(const char* procedure_name)
 }
 
 //シングルトン破棄時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::destroy(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::destroy(const char* procedure_name)
 {
 	m_destroyedProcedureName = procedure_name;
 	m_destroyedSysTime = nowElapsedTime();
@@ -60,8 +60,8 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::destroy(const char* procedure_name
 }
 
 //シングルトンアクセス開始時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RECORDS, LOCK_TYPE>::enter(const char* procedure_name)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+typename singletonDebug<_MAX_RECORDS, LOCK_POLICY>::id_type singletonDebug<_MAX_RECORDS, LOCK_POLICY>::enter(const char* procedure_name)
 {
 	id_type seq_no = invalidId();
 	accessInfo* info = m_allocator.newDefault();
@@ -81,8 +81,8 @@ typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type singletonDebug<_MAX_RE
 }
 
 //シングルトンアクセス終了時呼び出し
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebug<_MAX_RECORDS, LOCK_TYPE>::id_type id)
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+bool singletonDebug<_MAX_RECORDS, LOCK_POLICY>::leave(const typename singletonDebug<_MAX_RECORDS, LOCK_POLICY>::id_type id)
 {
 	if (isInvalidId(id))
 		return false;
@@ -98,8 +98,8 @@ bool singletonDebug<_MAX_RECORDS, LOCK_TYPE>::leave(const typename singletonDebu
 }
 
 //デバッグ情報作成
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+std::size_t singletonDebug<_MAX_RECORDS, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t message_len = 0;
 	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for singletonDebug -----\n");
@@ -119,8 +119,8 @@ std::size_t singletonDebug<_MAX_RECORDS, LOCK_TYPE>::debugInfo(char* message, co
 }
 
 //コンストラクタ
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-singletonDebug<_MAX_RECORDS, LOCK_TYPE>::singletonDebug() :
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+singletonDebug<_MAX_RECORDS, LOCK_POLICY>::singletonDebug() :
 	m_allocator(),
 	m_list(),
 	m_createdProcedureName(nullptr),
@@ -132,8 +132,8 @@ singletonDebug<_MAX_RECORDS, LOCK_TYPE>::singletonDebug() :
 {}
 
 //デストラクタ
-template<std::size_t _MAX_RECORDS, class LOCK_TYPE>
-singletonDebug<_MAX_RECORDS, LOCK_TYPE>::~singletonDebug()
+template<std::size_t _MAX_RECORDS, class LOCK_POLICY>
+singletonDebug<_MAX_RECORDS, LOCK_POLICY>::~singletonDebug()
 {}
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED
@@ -150,13 +150,13 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ singletonDebug<_MAX_RECORDS>; \
 	template class GASHA_ linked_list::container<typename GASHA_ singletonDebug<_MAX_RECORDS>::listOpe>;
 //※ロック指定版
-#define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_TYPE) \
-	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>; \
-	template class GASHA_ linked_list::container<typename GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>::listOpe>;
+#define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_POLICY) \
+	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_POLICY>; \
+	template class GASHA_ linked_list::container<typename GASHA_ singletonDebug<_MAX_RECORDS, LOCK_POLICY>::listOpe>;
 
 //※別途、必要に応じてロックフリープールアロケータの明示的なインスタンス化も必要
 //　　GASHA_INSTANCING_lfPoolAllocator(_MAX_RECORDS);//※ロックなし版
-//　　GASHA_INSTANCING_lfPoolAllocator_withLock(_MAX_RECORDS, LOCK_TYPE);//※ロック指定版
+//　　GASHA_INSTANCING_lfPoolAllocator_withLock(_MAX_RECORDS, LOCK_POLICY);//※ロック指定版
 
 //----------------------------------------
 //明示的なインスタンス化：シングルトンデバッグ用処理無効時
@@ -167,8 +167,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_singletonDebug(_MAX_RECORDS) \
 	template class GASHA_ singletonDebug<_MAX_RECORDS>;
 //※ロック指定版
-#define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_TYPE) \
-	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_TYPE>;
+#define GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_POLICY) \
+	template class GASHA_ singletonDebug<_MAX_RECORDS, LOCK_POLICY>;
 
 #endif//GASHA_SINGLETON_DEBUG_ENABLED
 

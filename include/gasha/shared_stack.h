@@ -33,13 +33,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //マルチスレッド共有スタッククラス
-template<class T, std::size_t _POOL_SIZE, class LOCK_TYPE = GASHA_ spinLock>
+template<class T, std::size_t _POOL_SIZE, class LOCK_POLICY = GASHA_ spinLock>
 class sharedStack
 {
 public:
 	//型
 	typedef T value_type;//値型
-	typedef LOCK_TYPE lock_type;//ロック型
+	typedef LOCK_POLICY lock_type;//ロック型
 
 	//スタック型
 	struct stack_t

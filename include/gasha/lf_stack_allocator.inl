@@ -31,13 +31,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //スタック自動クリア
 
 //自動クリア
-template<class AUTO_CLEAR>
-void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	while(true)
 	{
-		typename lfStackAllocator<AUTO_CLEAR>::size_type now_size = allocator.m_size.load();
-		const typename lfStackAllocator<AUTO_CLEAR>::size_type new_size = 0;
+		typename lfStackAllocator<AUTO_CLEAR_POLICY>::size_type now_size = allocator.m_size.load();
+		const typename lfStackAllocator<AUTO_CLEAR_POLICY>::size_type new_size = 0;
 		if (allocator.m_count.load() > 0)
 			return;
 		if (allocator.m_size.compare_exchange_weak(now_size, new_size))//サイズのCAS
@@ -49,8 +49,8 @@ void lfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocato
 //スタック自動クリア（ダミー）
 
 //自動クリア
-template<class AUTO_CLEAR>
-inline void dummyLfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR>& allocator)
+template<class AUTO_CLEAR_POLICY>
+inline void dummyLfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEAR_POLICY>& allocator)
 {
 	//何もしない
 }
@@ -59,8 +59,8 @@ inline void dummyLfStackAllocatorAutoClear::autoClear(lfStackAllocator<AUTO_CLEA
 //ロックフリースタックアロケータクラス
 
 //メモリ解放
-template<class AUTO_CLEAR>
-inline bool lfStackAllocator<AUTO_CLEAR>::free(void* p)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfStackAllocator<AUTO_CLEAR_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -70,9 +70,9 @@ inline bool lfStackAllocator<AUTO_CLEAR>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-T* lfStackAllocator<AUTO_CLEAR>::newObj(Tx&&... args)
+T* lfStackAllocator<AUTO_CLEAR_POLICY>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -80,9 +80,9 @@ T* lfStackAllocator<AUTO_CLEAR>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-T* lfStackAllocator<AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
+T* lfStackAllocator<AUTO_CLEAR_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -99,9 +99,9 @@ T* lfStackAllocator<AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-bool lfStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
+bool lfStackAllocator<AUTO_CLEAR_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -111,9 +111,9 @@ bool lfStackAllocator<AUTO_CLEAR>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-bool lfStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
+bool lfStackAllocator<AUTO_CLEAR_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -129,15 +129,15 @@ bool lfStackAllocator<AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
 
 //使用中のサイズを指定位置に戻す
 //※位置指定版
-template<class AUTO_CLEAR>
-inline bool lfStackAllocator<AUTO_CLEAR>::rewind(const size_type pos)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfStackAllocator<AUTO_CLEAR_POLICY>::rewind(const size_type pos)
 {
 	return rewind(m_buffRef + pos);
 }
 
 //ポインタが範囲内か判定
-template<class AUTO_CLEAR>
-inline bool lfStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
+template<class AUTO_CLEAR_POLICY>
+inline bool lfStackAllocator<AUTO_CLEAR_POLICY>::isInUsingRange(void* p)
 {
 #ifdef GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 	GASHA_SIMPLE_ASSERT(p >= m_buffRef && p < m_buffRef + m_size, "Pointer is not in range.");
@@ -149,8 +149,8 @@ inline bool lfStackAllocator<AUTO_CLEAR>::isInUsingRange(void* p)
 }
 
 //コンストラクタ
-template<class AUTO_CLEAR>
-inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(void* buff, const std::size_t max_size) :
+template<class AUTO_CLEAR_POLICY>
+inline lfStackAllocator<AUTO_CLEAR_POLICY>::lfStackAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
@@ -161,34 +161,34 @@ inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(void* buff, const std::siz
 	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_LF_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T>
-inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(T* buff, const std::size_t num) :
+inline lfStackAllocator<AUTO_CLEAR_POLICY>::lfStackAllocator(T* buff, const std::size_t num) :
 	lfStackAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
 {}
-template<class AUTO_CLEAR>
+template<class AUTO_CLEAR_POLICY>
 template<typename T, std::size_t N>
-inline lfStackAllocator<AUTO_CLEAR>::lfStackAllocator(T(&buff)[N]) :
+inline lfStackAllocator<AUTO_CLEAR_POLICY>::lfStackAllocator(T(&buff)[N]) :
 lfStackAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<class AUTO_CLEAR>
-inline lfStackAllocator<AUTO_CLEAR>::~lfStackAllocator()
+template<class AUTO_CLEAR_POLICY>
+inline lfStackAllocator<AUTO_CLEAR_POLICY>::~lfStackAllocator()
 {}
 
 //--------------------------------------------------------------------------------
 //バッファ付きロックフリースタックアロケータクラス
 
 //コンストラクタ
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
-inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::lfStackAllocator_withBuff() :
-lfStackAllocator<AUTO_CLEAR>(m_buff, MAX_SIZE)
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY>
+inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR_POLICY>::lfStackAllocator_withBuff() :
+lfStackAllocator<AUTO_CLEAR_POLICY>(m_buff, MAX_SIZE)
 {}
 
 //デストラクタ
-template<std::size_t _MAX_SIZE, class AUTO_CLEAR>
-inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::~lfStackAllocator_withBuff()
+template<std::size_t _MAX_SIZE, class AUTO_CLEAR_POLICY>
+inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR_POLICY>::~lfStackAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
@@ -196,29 +196,29 @@ inline lfStackAllocator_withBuff<_MAX_SIZE, AUTO_CLEAR>::~lfStackAllocator_withB
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
 template<typename... Tx>
-inline typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type* lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::newDefault(Tx&&... args)
+inline typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::value_type* lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::newDefault(Tx&&... args)
 {
 	return this->template newObj<value_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline bool lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::deleteDefault(typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::value_type*& p)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline bool lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::deleteDefault(typename lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::value_type*& p)
 {
 	return this->template deleteObj<value_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::lfStackAllocator_withType() :
-	lfStackAllocator<AUTO_CLEAR>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::lfStackAllocator_withType() :
+	lfStackAllocator<AUTO_CLEAR_POLICY>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _NUM, class AUTO_CLEAR>
-inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR>::~lfStackAllocator_withType()
+template<typename T, std::size_t _NUM, class AUTO_CLEAR_POLICY>
+inline lfStackAllocator_withType<T, _NUM, AUTO_CLEAR_POLICY>::~lfStackAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

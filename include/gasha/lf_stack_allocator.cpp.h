@@ -29,8 +29,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロックフリースタックアロケータクラス
 
 //メモリ確保
-template<class AUTO_CLEAR>
-void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR_POLICY>
+void* lfStackAllocator<AUTO_CLEAR_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
 	//※要求サイズが0でも必ずメモリを割り当てる点に注意（ただし、アラインメントは守らない）
@@ -65,21 +65,21 @@ void* lfStackAllocator<AUTO_CLEAR>::alloc(const std::size_t size, const std::siz
 }
 
 //メモリ解放（共通処理）
-template<class AUTO_CLEAR>
-bool lfStackAllocator<AUTO_CLEAR>::_free(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool lfStackAllocator<AUTO_CLEAR_POLICY>::_free(void* p)
 {
 	//メモリ確保数を更新
 	m_count.fetch_sub(1);
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClear(*this);
 	return true;
 }
 
 //使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class AUTO_CLEAR>
-bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool  lfStackAllocator<AUTO_CLEAR_POLICY>::rewind(void* p)
 {
 	while(true)
 	{
@@ -94,8 +94,8 @@ bool  lfStackAllocator<AUTO_CLEAR>::rewind(void* p)
 }
 
 //メモリクリア
-template<class AUTO_CLEAR>
-void lfStackAllocator<AUTO_CLEAR>::clear()
+template<class AUTO_CLEAR_POLICY>
+void lfStackAllocator<AUTO_CLEAR_POLICY>::clear()
 {
 	while(true)
 	{
@@ -118,8 +118,8 @@ void lfStackAllocator<AUTO_CLEAR>::clear()
 }
 
 //デバッグ情報作成
-template<class AUTO_CLEAR>
-std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
+template<class AUTO_CLEAR_POLICY>
+std::size_t lfStackAllocator<AUTO_CLEAR_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t message_len = 0;
 	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for lfStackAllocator -----\n");
@@ -129,8 +129,8 @@ std::size_t lfStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std::si
 }
 
 //使用中のサイズと数を取得
-template<class LOCK_TYPE>
-void lfStackAllocator<LOCK_TYPE>::getSizeAndCount(typename lfStackAllocator<LOCK_TYPE>::size_type& size, typename lfStackAllocator<LOCK_TYPE>::size_type& count)
+template<class LOCK_POLICY>
+void lfStackAllocator<LOCK_POLICY>::getSizeAndCount(typename lfStackAllocator<LOCK_POLICY>::size_type& size, typename lfStackAllocator<LOCK_POLICY>::size_type& count)
 {
 	//使用中のサイズとメモリ確保数を取得
 	while (true)
@@ -143,8 +143,8 @@ void lfStackAllocator<LOCK_TYPE>::getSizeAndCount(typename lfStackAllocator<LOCK
 }
 
 //使用中のサイズと数をリセット
-template<class LOCK_TYPE>
-bool lfStackAllocator<LOCK_TYPE>::resetSizeAndCount(const typename lfStackAllocator<LOCK_TYPE>::size_type size, const typename lfStackAllocator<LOCK_TYPE>::size_type count)
+template<class LOCK_POLICY>
+bool lfStackAllocator<LOCK_POLICY>::resetSizeAndCount(const typename lfStackAllocator<LOCK_POLICY>::size_type size, const typename lfStackAllocator<LOCK_POLICY>::size_type count)
 {
 	while (true)
 	{
