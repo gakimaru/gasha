@@ -116,13 +116,13 @@ namespace _private
 		//※ロック制御を指定した場合、同時に単一ロックオブジェクトを生成し、デストラクタ時にロックを開放する。
 		//　try_to_lock に失敗した場合はインスタンスへの参照を得られない。
 		inline singleton(const char* procedure_name);//デフォルト：排他ロック
-		inline singleton(const char* procedure_name, const GASHA_ with_lock_t);//排他ロック
-		inline singleton(const char* procedure_name, const GASHA_ with_lock_shared_t);//共有ロック
-		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_t);//排他ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
-		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t);//共有ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
-		inline singleton(const char* procedure_name, const GASHA_ adopt_lock_t);//排他ロック状態を引き継ぐ（排他ロック済みであるものとして処理する）
-		inline singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t);//共有ロック状態を引き継ぐ（共有ロック済みであるものとして処理する）
-		inline singleton(const char* procedure_name, const GASHA_ defer_lock_t);//ロックなし（引数なし時と同じ）
+		inline singleton(const char* procedure_name, const GASHA_ with_lock_t&);//排他ロック
+		inline singleton(const char* procedure_name, const GASHA_ with_lock_shared_t&);//共有ロック
+		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_t&);//排他ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
+		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t&);//共有ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
+		inline singleton(const char* procedure_name, const GASHA_ adopt_lock_t&);//排他ロック状態を引き継ぐ（排他ロック済みであるものとして処理する）
+		inline singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t&);//共有ロック状態を引き継ぐ（共有ロック済みであるものとして処理する）
+		inline singleton(const char* procedure_name, const GASHA_ defer_lock_t&);//ロックなし（引数なし時と同じ）
 		//デストラクタ
 		inline ~singleton();
 	private:
@@ -158,9 +158,9 @@ using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POL
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY> \
 	friend class GASHA_ _private::singleton; \
 	template<class TARGET_CLASS> \
-	friend class gasha::is_default_constructible; \
+	friend class GASHA_ is_default_constructible; \
 	template<class TARGET_CLASS, typename... TARGET_CLASS_ARGS> \
-	friend class gasha::is_constructible; \
+	friend class GASHA_ is_constructible; \
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

@@ -105,26 +105,26 @@ inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj) :
 	lock();
 }
 template<class T>
-inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const with_lock_t) :
+inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const with_lock_t&) :
 	m_lock(&obj),
 	m_isLocked(false)
 {
 	lock();
 }
 template<class T>
-inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const try_to_lock_t) :
+inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const try_to_lock_t&) :
 	m_lock(&obj),
 	m_isLocked(false)
 {
 	try_lock();
 }
 template<class T>
-inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const adopt_lock_t) :
+inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const adopt_lock_t&) :
 	m_lock(&obj),
 	m_isLocked(true)
 {}
 template<class T>
-inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const defer_lock_t) :
+inline unique_lock<T>::unique_lock(typename unique_lock<T>::lock_type& obj, const defer_lock_t&) :
 	m_lock(&obj),
 	m_isLocked(false)
 {}

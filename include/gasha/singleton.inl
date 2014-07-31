@@ -156,7 +156,7 @@ namespace _private
 	}
 	//コンストラクタ：排他ロック
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ with_lock_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ with_lock_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ with_lock),
 		m_debugId(m_staticDebug.invalidId())
@@ -171,7 +171,7 @@ namespace _private
 	}
 	//コンストラクタ：共有ロック
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ with_lock_shared_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ with_lock_shared_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ with_lock_shared),
 		m_debugId(m_staticDebug.invalidId())
@@ -186,7 +186,7 @@ namespace _private
 	}
 	//コンストラクタ：排他ロックを試行
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ try_to_lock_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ try_to_lock_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ try_to_lock),
 		m_debugId(m_staticDebug.invalidId())
@@ -204,7 +204,7 @@ namespace _private
 	}
 	//コンストラクタ：共有ロックを試行
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ try_to_lock_shared),
 		m_debugId(m_staticDebug.invalidId())
@@ -222,7 +222,7 @@ namespace _private
 	}
 	//コンストラクタ：排他ロック状態を引き継ぐ
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ adopt_lock_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ adopt_lock_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ adopt_lock),
 		m_debugId(m_staticDebug.invalidId())
@@ -237,7 +237,7 @@ namespace _private
 	}
 	//コンストラクタ：共有ロック状態を引き継ぐ
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ adopt_shared_lock),
 		m_debugId(m_staticDebug.invalidId())
@@ -252,7 +252,7 @@ namespace _private
 	}
 	//コンストラクタ：ロックなし
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ defer_lock_t) :
+	inline singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::singleton(const char* procedure_name, const GASHA_ defer_lock_t&) :
 		m_instanceRef(nullptr),
 		m_lock(m_staticLock, GASHA_ defer_lock),
 		m_debugId(m_staticDebug.invalidId())

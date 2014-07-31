@@ -181,45 +181,45 @@ inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>:
 	lock_shared();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const with_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const with_lock_t&) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {
 	lock();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const with_lock_shared_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const with_lock_shared_t&) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {
 	lock_shared();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_t&) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {
 	try_lock();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_shared_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const try_to_lock_shared_t&) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {
 	try_lock_shared();
 }
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const adopt_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const adopt_lock_t&) :
 	m_lock(&obj),
 	m_status(LOCKING_EXCLUSIVELY)
 {}
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const adopt_shared_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const adopt_shared_lock_t&) :
 	m_lock(&obj),
 	m_status(LOCKING_SHARED)
 {}
 template<class T>
-inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const defer_lock_t) :
+inline unique_shared_lock<T>::unique_shared_lock(typename unique_shared_lock<T>::lock_type& obj, const defer_lock_t&) :
 	m_lock(&obj),
 	m_status(UNLOCKED)
 {}
