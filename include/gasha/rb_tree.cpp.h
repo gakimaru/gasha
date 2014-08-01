@@ -130,6 +130,7 @@ namespace rb_tree
 	//----------------------------------------
 	//イテレータのメソッド
 	
+#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	//演算オペレータ
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const iterator& rhs) const
@@ -172,6 +173,8 @@ namespace rb_tree
 		}
 		return 0;
 	}
+#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
+	
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
@@ -383,6 +386,7 @@ namespace rb_tree
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	//演算オペレータ
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
@@ -425,6 +429,8 @@ namespace rb_tree
 		}
 		return 0;
 	}
+#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
+	
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const

@@ -12,15 +12,29 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ
-#include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ
 #include <gasha/hash_table.h>//開番地法ハッシュテーブル
 #include <gasha/rb_tree.h>//赤黒木
 #include <gasha/singly_linked_list.h>//片方向連結リスト
-#include <gasha/shared_spin_lock.h>//共有スピンロック
 #include <gasha/crc32.h>//CRC32計算
 #include <gasha/chrono.h>//時間処理ユーティリティ
 #include <gasha/thread_id.h>//スレッドID
+
+#ifdef GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+//非スレッドセーフ
+#include <gasha/stack_allocator.h>//スタックアロケータ
+#include <gasha/pool_allocator.h>//プールアロケータ
+#include <gasha/dummy_shared_lock.h>//ダミー共有ロック
+
+#else//GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+//スレッドセーフ
+#include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ
+#include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ
+#include <gasha/shared_spin_lock.h>//共有スピンロック
+
+#endif//GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
 
 #include <cstdint>//C++11 std::uint32_t
 
@@ -142,13 +156,13 @@ public:
 	//文字列プール操作型
 	struct strPoolOpe : public GASHA_ hash_table::baseOpe<strPoolOpe, strPoolInfo, GASHA_ crc32_t>
 	{
-		typedef GASHA_ sharedSpinLock lock_type;//ロック型
+		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 
 		//キーを取得
 		inline static key_type getKey(const value_type& value){ return value.m_strCrc; }
 	};
 public:
-	typedef GASHA_ lfStackAllocator_withBuff<STR_POOL_BUFF_SIZE> strPoolBuff_type;//文字列プールバッファ型
+	typedef GASHA_PROFILER_STACK_ALLOCATOR_POLICY<STR_POOL_BUFF_SIZE> strPoolBuff_type;//文字列プールバッファ型
 	typedef GASHA_ hash_table::container<strPoolOpe, STR_POOL_TABLE_SIZE> strPoolTable_type;//文字列プールテーブル型
 public:
 	//----------------------------------------
@@ -298,6 +312,9 @@ public:
 		friend struct profileInfoOpe;
 		friend class threadInfo;
 	public:
+		//型
+		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
+	public:
 		//アクセッサ
 		inline GASHA_ crc32_t nameCrc() const { return m_nameCrc; }//名前のCRC
 		inline const char* name() const { return m_name; }//名前
@@ -338,7 +355,7 @@ public:
 		summarizedTimeInfo m_totalTime;//処理時間：全体集計
 		summarizedTimeInfo m_periodicTime;//処理時間：期間集計
 		summarizedTimeInfo m_periodicTimeWork;//処理時間：期間集計（集計中）
-		GASHA_ sharedSpinLock m_lock;//ロックオブジェクト
+		lock_type m_lock;//ロックオブジェクト
 		mutable const profileInfo* m_childS;//子ノード（小）
 		mutable const profileInfo* m_childL;//子ノード（大）
 		mutable bool m_isBlack;//色
@@ -379,7 +396,7 @@ public:
 	//プロファイル情報操作型
 	struct profileInfoOpe : public GASHA_ rb_tree::baseOpe<profileInfoOpe, profileInfo, GASHA_ crc32_t>
 	{
-		typedef GASHA_ sharedSpinLock lock_type;//ロック型
+		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 
 	#ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 		
@@ -419,7 +436,7 @@ public:
 	};
 public:
 	typedef GASHA_ rb_tree::container<profileInfoOpe> profileInfoTree_type;//プロファイル情報木型
-	typedef GASHA_ lfPoolAllocator_withType<profileInfo, PROFILE_INFO_POOL_SIZE> profileInfoPool_type;//プロファイル情報プール型
+	typedef GASHA_PROFILER_POOL_ALLOCATOR_POLICY<profileInfo, PROFILE_INFO_POOL_SIZE> profileInfoPool_type;//プロファイル情報プール型
 public:
 	//----------------------------------------
 	//スレッド情報
@@ -516,7 +533,7 @@ public:
 	//スレッド情報操作型
 	struct threadInfoOpe : public GASHA_ hash_table::baseOpe<threadInfoOpe, threadInfo, GASHA_ crc32_t>
 	{
-		typedef GASHA_ sharedSpinLock lock_type;//ロック型
+		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 
 	#ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 		
@@ -534,7 +551,7 @@ public:
 	//スレッド情報連結リスト操作型
 	struct threadInfoListOpe : public GASHA_ singly_linked_list::baseOpe<threadInfoListOpe, threadInfo>
 	{
-		typedef GASHA_ sharedSpinLock lock_type;//ロック型
+		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 		
 	#ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 		

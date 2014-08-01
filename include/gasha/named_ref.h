@@ -142,8 +142,10 @@ public:
 	//イテレータ型
 	typedef typename table_type::iterator iterator;
 	typedef typename table_type::const_iterator const_iterator;
+#ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	typedef typename table_type::reverse_iterator reverse_iterator;
 	typedef typename table_type::const_reverse_iterator const_reverse_iterator;
+#endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 public:
 	//定数
 	static const std::size_t TABLE_BUFF_SIZE = sizeof(table_type) + alignof(table_type);//ハッシュテーブルバッファサイズ

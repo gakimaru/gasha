@@ -477,6 +477,23 @@
 	#define GASHA_PROFILER_THREAD_INFO_TABLE_SIZE 64
 #endif//GASHA_PROFILER_THREAD_INFO_TABLE_SIZE
 
+//プロファイラのロックポリシーを設定
+#ifdef GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+	//非スレッドセーフ
+	#define GASHA_PROFILER_LOCK_POLICY GASHA_ dummySharedLock
+	#define GASHA_PROFILER_POOL_ALLOCATOR_POLICY GASHA_ poolAllocator_withType
+	#define GASHA_PROFILER_STACK_ALLOCATOR_POLICY GASHA_ stackAllocator_withBuff
+
+#else//GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+	//スレッドセーフ
+	#define GASHA_PROFILER_LOCK_POLICY GASHA_ sharedSpinLock
+	#define GASHA_PROFILER_POOL_ALLOCATOR_POLICY GASHA_ lfPoolAllocator_withType
+	#define GASHA_PROFILER_STACK_ALLOCATOR_POLICY GASHA_ lfStackAllocator_withBuff
+
+#endif//GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】
 
