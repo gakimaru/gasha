@@ -551,6 +551,28 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `mallinfo()`(GCC style) is available.\n");
 #endif//GASHA_HAS_MALLINFO
 
+	//__attribute__((constructor)), __attribute__((destructor))
+#ifdef GASHA_HAS_CONSTRUCTOR_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__attribute__((constructor))`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_CONSTRUCTOR_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((constructor))`(GCC style) is AVAILABLE.\n");
+#endif//GASHA_HAS_CONSTRUCTOR_ATTRIBUTE
+#ifdef GASHA_HAS_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__attribute__((constructor(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((constructor(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#endif//GASHA_HAS_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+#ifdef GASHA_HAS_DESTRUCTOR_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__attribute__((destructor))`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_DESTRUCTOR_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((destructor))`(GCC style) is AVAILABLE.\n");
+#endif//GASHA_HAS_DESTRUCTOR_ATTRIBUTE
+#ifdef GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__attribute__((destructor(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((destructor(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#endif//GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+
 	//__cpuid 
 	//※C++11仕様ではなく、コンパイラ独自仕様の共通化
 #ifdef GASHA_HAS_CPUID

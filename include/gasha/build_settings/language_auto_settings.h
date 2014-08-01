@@ -607,6 +607,26 @@
 #endif//GASHA_IS_GCC
 
 //--------------------
+//コンストラクタ／デストラクタ属性
+//※main()関数実行前および終了後に実行される関数を定義するための属性
+#ifdef GASHA_IS_VC
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY)
+	#define GASHA_DESTRUCTOR_ATTRIBUTE
+	#define GASHA_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY)
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE __attribute__((constructor))
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY) __attribute__((constructor (PRIORITY)))
+	#define GASHA_DESTRUCTOR_ATTRIBUTE __attribute__((destructor))
+	#define GASHA_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY) __attribute__((destructor (PRIORITY)))
+	#define GASHA_HAS_CONSTRUCTOR_ATTRIBUTE
+	#define GASHA_HAS_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	#define GASHA_HAS_DESTRUCTOR_ATTRIBUTE
+	#define GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+#endif//GASHA_IS_GCC
+
+//--------------------
 //CPU情報
 //※VC++仕様に合わせて下記関数を共通実装
 //  void __cpuid(int cpu_info[4], const int type);

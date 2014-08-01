@@ -681,7 +681,8 @@ namespace hash_table
 		m_deleted(),
 		m_usingCount(0),
 		m_deletedCount(0),
-		m_maxFindingCycle(0)
+		m_maxFindingCycle(0),
+		m_lock()
 	{}
 
 }//namespace hash_table

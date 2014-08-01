@@ -7,6 +7,10 @@
 // basic_math.h
 // 基本算術【宣言部】
 //
+//【注意】GCCの場合、#pragma GCC diagnostic ignored "-Wstrict-overflow" を
+//        設定しているため、インクルードすると "strict-overflow" 警告に
+//        反応しなくなる点に注意。
+//
 // Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
 //   Released under the MIT license.
@@ -17,6 +21,46 @@
 #include <type_traits>//C++11 std::conditional, std:integral_constant
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
+
+//--------------------------------------------------------------------------------
+//符号判定
+//--------------------------------------------------------------------------------
+
+//----------------------------------------
+//【ランタイム版】符号判定（sign）
+//----------------------------------------
+//※値の符号に応じて、int 値を返す。
+//※0 なら 0、正の数なら 1、負の数なら -1 を返す。
+//----------------------------------------
+
+template<typename T>
+inline constexpr int sign(const T value);
+template<>
+inline constexpr int sign<float>(const float value);
+template<>
+inline constexpr int sign<double>(const double value);
+template<>
+inline constexpr int sign<bool>(const bool value);
+
+//--------------------------------------------------------------------------------
+//範囲計算
+//--------------------------------------------------------------------------------
+
+//----------------------------------------
+//【ランタイム版】範囲計算（range）
+//----------------------------------------
+//※整数なら 最大値 - 最小値 + 1 を返す。
+//※浮動小数点なら 最大値 - 最小値 を返す。
+//----------------------------------------
+
+template<typename T>
+inline constexpr T range(const T max, const T min);
+template<>
+inline constexpr float range<float>(const float max, const float min);
+template<>
+inline constexpr double range<double>(const double max, const double min);
+template<>
+inline constexpr bool range<bool>(const bool max, const bool min);
 
 //--------------------------------------------------------------------------------
 //べき乗
@@ -529,6 +573,167 @@ void mul(T (&mat_result)[N][M], const T (&mat1)[N][NM], const T (&mat2)[NM][M]);
 //※ループアンローリング版（コンパイル時のループ展開をより確実にするため、コードサイズが増えるが速くなる）
 template<typename T, std::size_t N, std::size_t M, std::size_t NM>
 void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
+
+//--------------------------------------------------------------------------------
+//基本演算
+//--------------------------------------------------------------------------------
+
+//演算
+//※戻り値は演算後の値
+template<typename T>
+inline T inc(const T value);//インクリメント
+template<typename T>
+inline T incWA(const T value, const T max, const T min = static_cast<T>(0));//インクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+template<typename T>
+inline T incSA(const T value, const T max, const T min = static_cast<T>(0));//インクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+template<typename T>
+inline T dec(const T value);//デクリメント
+template<typename T>
+inline T decWA(const T value, const T max, const T min = static_cast<T>(0));//デクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+template<typename T>
+inline T decSA(const T value, const T max, const T min = static_cast<T>(0));//デクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+template<typename T>
+inline T add(const T lhs, const T rhs);//加算
+template<typename T>
+inline T addWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//加算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+template<typename T>
+inline T addSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//加算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+template<typename T>
+inline T sub(const T lhs, const T rhs);//減算
+template<typename T>
+inline T subWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//減算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+template<typename T>
+inline T subSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//減算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+template<typename T>
+inline T mul(const T lhs, const T rhs);//乗算
+template<typename T>
+inline T mulWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//乗算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+template<typename T>
+inline T mulSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//乗算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+template<typename T>
+inline T div(const T lhs, const T rhs);//除算
+template<typename T>
+inline T mod(const T lhs, const T rhs);//剰余算
+template<typename T>
+inline T bitAnd(const T lhs, const T rhs);//ビット論理積
+template<typename T>
+inline T bitOr(const T lhs, const T rhs);//ビット論理和
+template<typename T>
+inline T bitXor(const T lhs, const T rhs);//ビット排他的論理和
+template<typename T>
+inline T bitNot(const T value);//ビット反転
+template<typename T>
+inline T lShift(const T lhs, const int rhs);//左シフト
+template<typename T>
+inline T rShift(const T lhs, const int rhs);//右シフト
+template<typename T>
+inline T bitOn(const T lhs, const T rhs);//ビットオン（論理和）
+template<typename T>
+inline T bitOff(const T lhs, const T rhs);//ビットオフ（ビット反転して論理積）
+//※ポリシー用
+//※引数を統一化し、テンプレート引数にポリシーとして指定可能な式
+template<typename T>
+inline T inc_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//インクリメント
+template<typename T>
+inline T incWA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※ラップアラウンド演算（wrap-around）
+template<typename T>
+inline T incSA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※飽和演算（saturation）
+template<typename T>
+inline T dec_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//デクリメント
+template<typename T>
+inline T decWA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※ラップアラウンド演算（wrap-around）
+template<typename T>
+inline T decSA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※飽和演算（saturation）
+template<typename T>
+inline T add_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//加算
+template<typename T>
+inline T addWA_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※ラップアラウンド演算（wrap-around）
+template<typename T>
+inline T addSA_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※飽和演算（saturation）
+template<typename T>
+inline T sub_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//減算
+template<typename T>
+inline T subWA_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※ラップアラウンド演算（wrap-around）
+template<typename T>
+inline T subSA_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※飽和演算（saturation）
+template<typename T>
+inline T mul_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//乗算
+template<typename T>
+inline T mulWA_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※ラップアラウンド演算（wrap-around）
+template<typename T>
+inline T mulSA_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※飽和演算（saturation）
+template<typename T>
+inline T div_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//除算
+template<typename T>
+inline T mod_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//剰余算
+template<typename T>
+inline T bitAnd_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビット論理積
+template<typename T>
+inline T bitOr_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビット論理和
+template<typename T>
+inline T bitXor_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビット排他的論理和
+template<typename T>
+inline T bitNot_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//ビット反転
+template<typename T>
+inline T lShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//左シフト
+template<typename T>
+inline T rShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//右シフト
+template<typename T>
+inline T bitOn_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビットオン（論理和）
+template<typename T>
+inline T bitOff_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビットオフ（ビット反転して論理積）
+//比較
+//※戻り値は判定結果の論理値
+template<typename T>
+inline bool eq(const T lhs, const T rhs);//比較 ==
+template<typename T>
+inline bool ne(const T lhs, const T rhs);//比較 !=
+template<typename T>
+inline bool gt(const T lhs, const T rhs);//比較 >
+template<typename T>
+inline bool ge(const T lhs, const T rhs);//比較 >=
+template<typename T>
+inline bool lt(const T lhs, const T rhs);//比較 <
+template<typename T>
+inline bool le(const T lhs, const T rhs);//比較 <=
+template<typename T>
+inline bool isOn(const T lhs, const T rhs);//ビットが立っているか？
+template<typename T>
+inline bool isOff(const T lhs, const T rhs);//ビットが立っているか？
+template<typename T>
+inline bool logicalAnd(const T lhs, const T rhs);//比較 &&
+template<typename T>
+inline bool logicalOr(const T lhs, const T rhs);//比較 ||
+template<typename T>
+inline bool isTrue(const T value);//真か？（0以外か？）
+template<typename T>
+inline bool isFalse(const T value);//偽か？（0か？）
+//※ポリシー用
+//※引数を統一化し、テンプレート引数にポリシーとして指定可能な式
+template<typename T>
+inline bool eq_policy(const T lhs, const T rhs);//比較 ==
+template<typename T>
+inline bool ne_policy(const T lhs, const T rhs);//比較 !=
+template<typename T>
+inline bool gt_policy(const T lhs, const T rhs);//比較 >
+template<typename T>
+inline bool ge_policy(const T lhs, const T rhs);//比較 >=
+template<typename T>
+inline bool lt_policy(const T lhs, const T rhs);//比較 <
+template<typename T>
+inline bool le_policy(const T lhs, const T rhs);//比較 <=
+template<typename T>
+inline bool isOn_policy(const T lhs, const T rhs);//ビットが立っているか？
+template<typename T>
+inline bool isOff_policy(const T lhs, const T rhs);//ビットが立っているか？
+template<typename T>
+inline bool logicalAnd_policy(const T lhs, const T rhs);//比較 &&
+template<typename T>
+inline bool logicalOr_policy(const T lhs, const T rhs);//比較 ||
+template<typename T>
+inline bool isTrue_policy(const T lhs, const T rhs_dummy);//真か？（0以外か？）
+template<typename T>
+inline bool isFalse_policy(const T lhs, const T rhs_dummy);//偽か？（0か？）
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

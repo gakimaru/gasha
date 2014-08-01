@@ -18,6 +18,7 @@
 #include <gasha/singleton.h>//シングルトン【宣言部】
 
 //#include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
+#include <gasha/memory.h>//メモリ操作：adjustAlign()
 
 #include <utility>//C++11 std::forward()
 
@@ -76,8 +77,9 @@ namespace _private
 		//インスタンス生成
 		if (!m_staticInstanceIsCreated.exchange(true))
 		{
-			//m_staticInstanceRef = GASHA_ callConstructor<class_type>(m_staticInstanceBuff, std::forward<Tx>(args)...);//コンストラクタを private 化していることがあるので、共通関数を使用しない
-			m_staticInstanceRef = new(m_staticInstanceBuff)class_type(std::forward<Tx>(args)...);
+			char* buff_p = GASHA_ adjustAlign<char, alignof(class_type)>(m_staticInstanceBuff);
+			//m_staticInstanceRef = GASHA_ callConstructor<class_type>(buff_p, std::forward<Tx>(args)...);//コンストラクタを private 化していることがあるので、共通関数を使用しない
+			m_staticInstanceRef = new(buff_p)class_type(std::forward<Tx>(args)...);
 			if (m_staticInstanceRef)
 			{
 				//シングルトンデバッグ用処理呼び出し

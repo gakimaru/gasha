@@ -25,6 +25,26 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //名前付きデータ参照クラス
 
+//初期化メソッド（一回限り）
+template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
+void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::initializeOnce()
+{
+	GASHA_ callConstructor<table_type>(&m_refTableBuff);
+}
+
+//静的フィールド
+
+//ハッシュテーブル初期化済み
+template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
+std::once_flag namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::m_initialized;
+//ハッシュテーブル（バッファ）
+//※アラインメントサイズ分バッファサイズを余計に確保する
+template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
+char namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::m_refTableBuff[namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::TABLE_BUFF_SIZE];
+//明示的な初期化指定用
+template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
+const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInit_type namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInit;
+
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //----------------------------------------

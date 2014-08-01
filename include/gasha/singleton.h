@@ -46,6 +46,9 @@ namespace _private
 		typedef LOCK_POLICY lock_type;//ロック型
 		typedef GASHA_ unique_shared_lock<lock_type> unique_lock_type;//単一ロック型
 		typedef DEBUG_POLICY debug_type;//デバッグ処理型
+	public:
+		//定数
+		static const std::size_t INSTANCE_BUFF_SIZE = sizeof(class_type) + alignof(class_type);//インスタンスバッファサイズ
 	private:
 		//インスタンス生成用クラス
 		class createInstance_t
@@ -132,7 +135,7 @@ namespace _private
 		mutable typename debug_type::id_type m_debugId;//デバッグアクセスID
 	private:
 		//静的フィールド
-		static unsigned char m_staticInstanceBuff[];//静的シングルトンインスタンス用バッファ
+		static char m_staticInstanceBuff[];//静的シングルトンインスタンス用バッファ
 		static class_type* m_staticInstanceRef;//静的シングルトンインスタンス参照
 		static std::atomic<bool> m_staticInstanceIsCreated;//インスタンス生成済み ※インスタンスの明示的な破棄があるので、std::call_once を使用しない
 		static lock_type m_staticLock;//静的ロックオブジェクト

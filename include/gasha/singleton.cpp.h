@@ -32,8 +32,9 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	//静的フィールド：静的シングルトンインスタンス用バッファ
+	//※アラインメントサイズ分バッファサイズを余分に確保する
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
-	unsigned char singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticInstanceBuff[sizeof(typename singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::class_type)];
+	char singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticInstanceBuff[singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::INSTANCE_BUFF_SIZE];
 
 	//静的フィールド：静的シングルトンインスタンス参照
 	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
