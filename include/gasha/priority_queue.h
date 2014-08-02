@@ -65,8 +65,8 @@ namespace priority_queue
 	//--------------------
 	//優先度付きキュー操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public priority_queue::baseOpe<派生構造体名, 要素の型, 優先度の型, シーケンス番号の型>
-	//	struct ope : public priority_queue::baseOpe<ope, data_t, int, unsigned int>
+	//  //struct 派生構造体名 : public priority_queue::baseOpe<派生構造体名, テーブルサイズ, 要素の型, 優先度の型, シーケンス番号の型>
+	//	struct ope : public priority_queue::baseOpe<ope, TABLE_SIZE, data_t, int, unsigned int>
 	//	{
 	//		//優先度を取得
 	//		inline static priority_type getPriority(const node_type& node){ return node.m_priority; }
@@ -81,12 +81,12 @@ namespace priority_queue
 	//		//優先度を比較 ※必要に応じて定義
 	//		inline static int comparePriority(const priority_type lhs, const priority_type rhs){ return ???; }
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
-	//		typedef spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効なロック型（spinLockなど）を lock_type 型として定義する。
+	//		typedef spinLock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
 	struct baseOpe
 	{
 		//型
@@ -94,9 +94,12 @@ namespace priority_queue
 		typedef NODE_TYPE node_type;//ノード型
 		typedef PRIORITY_TYPE priority_type;//優先度型
 		typedef SEQ_NO_TYPE seq_no_type;//シーケンス番号型
-		
-		//ロック型
-		typedef dummyLock lock_type;//ロックオブジェクト型
+
+		//定数
+		static const std::size_t TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ ※扱えるデータの要素数
+
+		//ロックポリシー
+		typedef GASHA_ dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効なロック型（spinLock など）を
@@ -163,11 +166,10 @@ namespace priority_queue
 		static void callDestructor(node_type* obj){ GASHA_ callDestructor(obj); }
 
 		//コンテナ操作型
-		struct container_ope_type
+		//※コンテナを変更する場合、派生クラスで改めて container_ope_type を実装する。
+		struct container_ope_type : public GASHA_ binary_heap::baseOpe<container_ope_type, TABLE_SIZE, node_type>
 		{
 			typedef OPE_TYPE adapter_ope_type;//コンテナアダプタのノード操作型
-			typedef container_ope_type ope_type;//ノード操作型
-			typedef NODE_TYPE node_type;//ノード型
 
 			//ノード比較用プレディケート関数オブジェクト
 			//※trueでlhsの方が小さい（並び順が正しい）
@@ -185,6 +187,10 @@ namespace priority_queue
 			typedef dummyLock lock_type;//ロックオブジェクト型
 			//※コンテナ側ではロック制御しない
 		};
+
+		//コンテナ型
+		//※コンテナを変更する場合、派生クラスで改めて container_type を実装する。
+		typedef GASHA_ binary_heap::container<container_ope_type> container_type;
 	};
 	
 	//--------------------
@@ -213,14 +219,17 @@ namespace priority_queue
 	//　enqueueBegin()～enqueueEnd()、dequeueBegin()～dequeueEnd()
 	//　というメソッドを用意している。内部のバッファを直接参照するので高速。
 	//　なお、begin～end の間はロックが行われる点に注意。
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE, class CONTAINER_TYPE = binary_heap::container<typename OPE_TYPE::container_ope_type, _TABLE_SIZE> >
+	template<class OPE_TYPE>
 	class container
 	{
 	public:
 		//型
 		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
-		typedef CONTAINER_TYPE container_type;//コンテナ型
+		typedef typename ope_type::container_type container_type;//コンテナ型
 		typedef typename container_type::status_t status_t;//ステータス型
+	public:
+		//定数
+		static const size_type TABLE_SIZE = ope_type::TABLE_SIZE;//配列要素数
 	public:
 		//--------------------
 		//単一操作オブジェクト（安全なエンキュー／デキュー操作クラス）
@@ -497,11 +506,11 @@ namespace priority_queue
 		};
 
 		//優先度付きキュー操作用構造体
-		struct ope : public baseOpe<ope, node, core_priority_type, core_seq_no_type>
+		struct ope : public baseOpe<ope, _TABLE_SIZE, node, core_priority_type, core_seq_no_type>
 		{
-			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::node_type node_type;
-			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::priority_type priority_type;
-			typedef typename baseOpe<ope, node, core_priority_type, core_seq_no_type>::seq_no_type seq_no_type;
+			typedef typename baseOpe<ope, _TABLE_SIZE, node, core_priority_type, core_seq_no_type>::node_type node_type;
+			typedef typename baseOpe<ope, _TABLE_SIZE, node, core_priority_type, core_seq_no_type>::priority_type priority_type;
+			typedef typename baseOpe<ope, _TABLE_SIZE, node, core_priority_type, core_seq_no_type>::seq_no_type seq_no_type;
 			
 			//優先度を取得
 			inline static priority_type getPriority(const node_type& node){ return node.m_priority; }
@@ -518,15 +527,15 @@ namespace priority_queue
 		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//優先度付きキューコンテナアダプタ
-		class con : public container<ope_type, _TABLE_SIZE>
+		class con : public container<ope_type>
 		{
 		public:
 		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
-			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
+			using container<ope_type>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デフォルトコンスタラクタ
 			inline con() :
-				container<ope_type, _TABLE_SIZE>()
+				container<ope_type>()
 			{}
 		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デストラクタ
@@ -545,12 +554,12 @@ namespace priority_queue
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
 //優先度付きキュー操作用テンプレート構造体
-template<class OPE_TYPE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
-using pQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
+template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename NODE_TYPE, typename PRIORITY_TYPE = std::int32_t, typename SEQ_NO_TYPE = std::uint32_t>
+using pQueue_baseOpe = priority_queue::baseOpe<OPE_TYPE, _TABLE_SIZE, NODE_TYPE, PRIORITY_TYPE, SEQ_NO_TYPE>;
 
 //優先度付きキューコンテナアダプタ
-template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using pQueue = priority_queue::container<OPE_TYPE, _TABLE_SIZE>;
+template<class OPE_TYPE>
+using pQueue = priority_queue::container<OPE_TYPE>;
 
 //シンプル優先度付きキューコンテナアダプタ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>

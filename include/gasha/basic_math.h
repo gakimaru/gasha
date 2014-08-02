@@ -17,6 +17,8 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
+#include <gasha/limits.h>//限界値
+
 #include <cstddef>//std::size_t
 #include <type_traits>//C++11 std::conditional, std:integral_constant
 
@@ -578,38 +580,46 @@ void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
 //基本演算
 //--------------------------------------------------------------------------------
 
+//演算方法指定用の型
+struct wraparound_type{};//ラップアラウンド演算指定用構造体
+struct saturation_type{};//飽和演算指定用構造体
+
+//演算方法指定用の定数
+extern const wraparound_type wraparound;//ラップアラウンド演算指定用
+extern const saturation_type saturation;//飽和演算指定用
+
 //演算
 //※戻り値は演算後の値
 template<typename T>
 inline T inc(const T value);//インクリメント
 template<typename T>
-inline T incWA(const T value, const T max, const T min = static_cast<T>(0));//インクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T inc(const T value, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T incSA(const T value, const T max, const T min = static_cast<T>(0));//インクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T inc(const T value, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T dec(const T value);//デクリメント
 template<typename T>
-inline T decWA(const T value, const T max, const T min = static_cast<T>(0));//デクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T dec(const T value, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T decSA(const T value, const T max, const T min = static_cast<T>(0));//デクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T dec(const T value, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T add(const T lhs, const T rhs);//加算
 template<typename T>
-inline T addWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//加算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T addSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//加算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T add(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T sub(const T lhs, const T rhs);//減算
 template<typename T>
-inline T subWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//減算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T subSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//減算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T sub(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T mul(const T lhs, const T rhs);//乗算
 template<typename T>
-inline T mulWA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//乗算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T mulSA(const T lhs, const T rhs, const T max, const T min = static_cast<T>(0));//乗算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T mul(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T div(const T lhs, const T rhs);//除算
 template<typename T>
@@ -635,33 +645,33 @@ inline T bitOff(const T lhs, const T rhs);//ビットオフ（ビット反転し
 template<typename T>
 inline T inc_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//インクリメント
 template<typename T>
-inline T incWA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※ラップアラウンド演算（wrap-around）
+inline T inc_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※ラップアラウンド演算（wrap-around）
 template<typename T>
-inline T incSA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※飽和演算（saturation）
+inline T inc_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min);//インクリメント ※飽和演算（saturation）
 template<typename T>
 inline T dec_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//デクリメント
 template<typename T>
-inline T decWA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※ラップアラウンド演算（wrap-around）
+inline T dec_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※ラップアラウンド演算（wrap-around）
 template<typename T>
-inline T decSA_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※飽和演算（saturation）
+inline T dec_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min);//デクリメント ※飽和演算（saturation）
 template<typename T>
 inline T add_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//加算
 template<typename T>
-inline T addWA_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※ラップアラウンド演算（wrap-around）
+inline T add_wraparound_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※ラップアラウンド演算（wrap-around）
 template<typename T>
-inline T addSA_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※飽和演算（saturation）
+inline T add_saturation_policy(const T lhs, const T rhs, const T max, const T min);//加算 ※飽和演算（saturation）
 template<typename T>
 inline T sub_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//減算
 template<typename T>
-inline T subWA_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※ラップアラウンド演算（wrap-around）
+inline T sub_wraparound_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※ラップアラウンド演算（wrap-around）
 template<typename T>
-inline T subSA_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※飽和演算（saturation）
+inline T sub_saturation_policy(const T lhs, const T rhs, const T max, const T min);//減算 ※飽和演算（saturation）
 template<typename T>
 inline T mul_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//乗算
 template<typename T>
-inline T mulWA_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※ラップアラウンド演算（wrap-around）
+inline T mul_wraparound_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※ラップアラウンド演算（wrap-around）
 template<typename T>
-inline T mulSA_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※飽和演算（saturation）
+inline T mul_saturation_policy(const T lhs, const T rhs, const T max, const T min);//乗算 ※飽和演算（saturation）
 template<typename T>
 inline T div_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//除算
 template<typename T>
@@ -675,9 +685,9 @@ inline T bitXor_policy(const T lhs, const T rhs, const T max_dummy, const T min_
 template<typename T>
 inline T bitNot_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy);//ビット反転
 template<typename T>
-inline T lShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//左シフト
+inline T lShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy);//左シフト
 template<typename T>
-inline T rShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//右シフト
+inline T rShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy);//右シフト
 template<typename T>
 inline T bitOn_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy);//ビットオン（論理和）
 template<typename T>
@@ -701,7 +711,7 @@ inline bool isOn(const T lhs, const T rhs);//ビットが立っているか？
 template<typename T>
 inline bool isOff(const T lhs, const T rhs);//ビットが立っているか？
 template<typename T>
-inline bool logicalAnd(const T lhs, const T rhs);//比較 &&
+inline bool logicalAnd(const T lhs, const T rhs);//比較 
 template<typename T>
 inline bool logicalOr(const T lhs, const T rhs);//比較 ||
 template<typename T>

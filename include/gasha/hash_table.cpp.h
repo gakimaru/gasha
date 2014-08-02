@@ -32,8 +32,8 @@ namespace hash_table
 	//イテレータ用の型
 	
 	//参照を更新
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::set::update(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type primary_index, const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* value, const bool is_deleted)
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::set::update(const typename container<OPE_TYPE>::index_type index, const typename container<OPE_TYPE>::index_type primary_index, const typename container<OPE_TYPE>::key_type key, const typename container<OPE_TYPE>::value_type* value, const bool is_deleted)
 	{
 		m_index = index;
 		m_primaryIndex = primary_index;
@@ -43,8 +43,8 @@ namespace hash_table
 	}
 
 	//ムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::set& container<OPE_TYPE, _TABLE_SIZE>::set::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::set&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::set& container<OPE_TYPE>::set::operator=(typename container<OPE_TYPE>::set&& rhs)
 	{
 		m_index = rhs.m_index;
 		m_primaryIndex = rhs.m_primaryIndex;
@@ -54,8 +54,8 @@ namespace hash_table
 		return *this;
 	}
 	//コピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::set& container<OPE_TYPE, _TABLE_SIZE>::set::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::set& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::set& container<OPE_TYPE>::set::operator=(const typename container<OPE_TYPE>::set& rhs)
 	{
 		m_index = rhs.m_index;
 		m_primaryIndex = rhs.m_primaryIndex;
@@ -65,8 +65,8 @@ namespace hash_table
 		return *this;
 	}
 	//ムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::set::set(typename container<OPE_TYPE, _TABLE_SIZE>::set&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::set::set(typename container<OPE_TYPE>::set&& obj) :
 		m_index(obj.m_index),
 		m_primaryIndex(obj.m_primaryIndex),
 		m_key(obj.m_key),
@@ -74,8 +74,8 @@ namespace hash_table
 		m_isDeleted(obj.m_isDeleted)
 	{}
 	//コピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::set::set(const typename container<OPE_TYPE, _TABLE_SIZE>::set& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::set::set(const typename container<OPE_TYPE>::set& obj) :
 		m_index(obj.m_index),
 		m_primaryIndex(obj.m_primaryIndex),
 		m_key(obj.m_key),
@@ -83,8 +83,8 @@ namespace hash_table
 		m_isDeleted(obj.m_isDeleted)
 	{}
 	//コストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::set::set(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type primary_index, const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key, const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* value, const bool is_deleted) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::set::set(const typename container<OPE_TYPE>::index_type index, const typename container<OPE_TYPE>::index_type primary_index, const typename container<OPE_TYPE>::key_type key, const typename container<OPE_TYPE>::value_type* value, const bool is_deleted) :
 		m_index(index),
 		m_primaryIndex(primary_index),
 		m_key(key),
@@ -97,8 +97,8 @@ namespace hash_table
 	
 #ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
 	//演算オペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const typename container<OPE_TYPE>::iterator& rhs) const
 	{
 		if (!m_set.m_value && !rhs.m_set.m_value)
 			return 0;
@@ -135,8 +135,8 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::iterator::update(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::iterator::update(const typename container<OPE_TYPE>::index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index >= static_cast<index_type>(m_con->m_size))
 		if (index >= static_cast<index_type>(TABLE_SIZE))
@@ -145,15 +145,15 @@ namespace hash_table
 			m_set.update(index, m_con->calcIndex(m_con->m_keyTable[index]), m_con->m_keyTable[index], reinterpret_cast<const value_type*>(m_con->m_table[index]), m_con->m_deleted[index]);
 		return m_set.m_index;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateNext() const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateNext() const
 	{
 		const index_type prev_index = m_set.m_index;
 		const index_type index = update(m_con->getNextIndex(prev_index));
 		m_isEnd = (prev_index != INVALID_INDEX && index == INVALID_INDEX);
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updatePrev() const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updatePrev() const
 	{
 		if (m_isEnd)
 		{
@@ -164,8 +164,8 @@ namespace hash_table
 		update(m_con->getPrevIndex(m_set.m_index));
 		m_isEnd = false;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step == 0)
 			return;
@@ -182,8 +182,8 @@ namespace hash_table
 		update(index);
 		m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step <= 0)
 			return updateForward(-step);
@@ -203,8 +203,8 @@ namespace hash_table
 		m_isEnd = false;
 	}
 	//ムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -212,8 +212,8 @@ namespace hash_table
 		return *this;
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -229,8 +229,8 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	//コピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = rhs.m_set;
@@ -238,8 +238,8 @@ namespace hash_table
 		return *this;
 	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = rhs.m_set;
@@ -255,15 +255,15 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(obj.m_isEnd)
 	{}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(false)
@@ -278,15 +278,15 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	//コピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_set(obj.m_set),
 		m_isEnd(obj.m_isEnd)
 	{}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR//std::forward_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_set(obj.m_set),
 		m_isEnd(false)
@@ -301,8 +301,8 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	//コンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const container& con, const bool is_end) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
 		m_isEnd(is_end)
@@ -314,8 +314,8 @@ namespace hash_table
 				m_isEnd = true;
 		}
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const container& con, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container& con, const typename container<OPE_TYPE>::index_type index) :
 		m_con(&con),
 		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
 		m_isEnd(false)
@@ -329,8 +329,8 @@ namespace hash_table
 	
 #ifdef GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE//std::forward_iterator_tag には本来必要ではない
 	//演算オペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::difference_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator-(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const typename container<OPE_TYPE>::reverse_iterator& rhs) const
 	{
 		if (!m_set.m_value && !rhs.m_set.m_value)
 			return 0;
@@ -367,8 +367,8 @@ namespace hash_table
 	}
 #endif//GASHA_HASH_TABLE_ENABLE_RANDOM_ACCESS_INTERFACE
 	//参照を更新
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::update(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::reverse_iterator::update(const typename container<OPE_TYPE>::index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index >= static_cast<index_type>(m_con->m_size))
 		if (index >= static_cast<index_type>(TABLE_SIZE))
@@ -377,15 +377,15 @@ namespace hash_table
 			m_set.update(index, m_con->calcIndex(m_con->m_keyTable[index]), m_con->m_keyTable[index], reinterpret_cast<const value_type*>(m_con->m_table[index]), m_con->m_deleted[index]);
 		return m_set.m_index;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateNext() const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateNext() const
 	{
 		const index_type prev_index = m_set.m_index;
 		const index_type index = update(m_con->getPrevIndex(prev_index));
 		m_isEnd = (prev_index != INVALID_INDEX && index == INVALID_INDEX);
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updatePrev() const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updatePrev() const
 	{
 		if (m_isEnd)
 		{
@@ -396,8 +396,8 @@ namespace hash_table
 		update(m_con->getNextIndex(m_set.m_index));
 		m_isEnd = false;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateForward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateForward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step == 0)
 			return;
@@ -414,8 +414,8 @@ namespace hash_table
 		update(index);
 		m_isEnd = (index != INVALID_INDEX && index == INVALID_INDEX && _step == 0);
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type step) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::updateBackward(const typename container<OPE_TYPE>::difference_type step) const
 	{
 		if (step <= 0)
 			return updateForward(-step);
@@ -435,16 +435,16 @@ namespace hash_table
 		m_isEnd = false;
 	}
 	//ムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = std::move(rhs.m_set);
@@ -459,16 +459,16 @@ namespace hash_table
 		return *this;
 	}
 	//コピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = rhs.m_set;
 		m_isEnd = rhs.m_isEnd;
 		return *this;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_set = rhs.m_set;
@@ -483,14 +483,14 @@ namespace hash_table
 		return *this;
 	}
 	//ムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(obj.m_isEnd)
 	{}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_set(std::move(obj.m_set)),
 		m_isEnd(false)
@@ -504,14 +504,14 @@ namespace hash_table
 		}
 	}
 	//コピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_set(obj.m_set),
 		m_isEnd(obj.m_isEnd)
 	{}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_set(obj.m_set),
 		m_isEnd(false)
@@ -525,8 +525,8 @@ namespace hash_table
 		}
 	}
 	//コンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
 		m_isEnd(is_end)
@@ -538,8 +538,8 @@ namespace hash_table
 				m_isEnd = true;
 		}
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const container& con, const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, const typename container<OPE_TYPE>::index_type index) :
 		m_con(&con),
 		m_set(INVALID_INDEX, INVALID_INDEX, ope_type::INVALID_KEY, nullptr, false),
 		m_isEnd(false)
@@ -552,8 +552,8 @@ namespace hash_table
 	//コンテナ本体のメソッド
 
 	//最適化されていないデータ件数を取得
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	int container<OPE_TYPE, _TABLE_SIZE>::getNotOptimizedCount() const
+	template<class OPE_TYPE>
+	int container<OPE_TYPE>::getNotOptimizedCount() const
 	{
 		int count = 0;
 		for (index_type index = 0; index < TABLE_SIZE; ++index)
@@ -567,8 +567,8 @@ namespace hash_table
 	}
 
 	//メソッド：インデックスを取得
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::getFirstIndex() const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::getFirstIndex() const
 	{
 		if (m_usingCount == 0 || m_deletedCount == m_usingCount)
 			return INVALID_INDEX;
@@ -579,8 +579,8 @@ namespace hash_table
 		}
 		return INVALID_INDEX;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::getLastIndex() const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::getLastIndex() const
 	{
 		if (m_usingCount == 0 || m_deletedCount == m_usingCount)
 			return INVALID_INDEX;
@@ -591,8 +591,8 @@ namespace hash_table
 		}
 		return INVALID_INDEX;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::getNextIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::getNextIndex(const typename container<OPE_TYPE>::index_type index) const
 	{
 		index_type next_index = index == INVALID_INDEX ? 0 : index + 1;
 		if (index < 0 || index >= TABLE_SIZE - 1 || m_usingCount == 0 || m_deletedCount == m_usingCount)
@@ -604,8 +604,8 @@ namespace hash_table
 		}
 		return INVALID_INDEX;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::getPrevIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::getPrevIndex(const typename container<OPE_TYPE>::index_type index) const
 	{
 		const std::size_t table_size = TABLE_SIZE;//【注】最適化オプションを付けていないと、三項演算子が実体のポインタを参照して直値展開されなくなり、結果リンクエラーになることがある（GCCで確認）
 		index_type now_index = index == INVALID_INDEX ? table_size : index;
@@ -619,8 +619,8 @@ namespace hash_table
 		return INVALID_INDEX;
 	}
 	//キーで検索してインデックスを取得（共通）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::index_type container<OPE_TYPE, _TABLE_SIZE>::_findIndexCommon(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::index_type container<OPE_TYPE>::_findIndexCommon(const typename container<OPE_TYPE>::key_type key) const
 	{
 		if (m_usingCount == 0 || m_deletedCount == m_usingCount)
 			return INVALID_INDEX;
@@ -638,8 +638,8 @@ namespace hash_table
 	}
 	
 	//キーで検索して値を取得（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	const typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_findValue(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	template<class OPE_TYPE>
+	const typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::_findValue(const typename container<OPE_TYPE>::key_type key) const
 	{
 		const index_type index = _findIndex(key);//検索してインデックスを取得
 		if (index == INVALID_INDEX)
@@ -648,8 +648,8 @@ namespace hash_table
 	}
 	
 	//キーで検索してイテレータを取得
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::_find(iterator& ite, const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_find(iterator& ite, const typename container<OPE_TYPE>::key_type key) const
 	{
 		const index_type index = _findIndex(key);
 		if (index == INVALID_INDEX)
@@ -658,8 +658,8 @@ namespace hash_table
 	}
 	
 	//キー割り当て（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_assign(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::_assign(const typename container<OPE_TYPE>::key_type key)
 	{
 		if (m_usingCount == static_cast<int>(TABLE_SIZE) && m_deletedCount == 0 && ope_type::REPLACE_ATTR == replaceAttr_t::NEVER_REPLACE)
 			return nullptr;
@@ -705,8 +705,8 @@ namespace hash_table
 	}
 	
 	//キー割り当てして値を挿入（コピー）（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::value_type* container<OPE_TYPE, _TABLE_SIZE>::_insert(const key_type key, const value_type& value)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::_insert(const key_type key, const value_type& value)
 	{
 		value_type* assigned_value = _assign(key);
 		if (!assigned_value)
@@ -716,8 +716,8 @@ namespace hash_table
 	}
 	
 	//インデックスを指定して削除
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::_eraseByIndex(const typename container<OPE_TYPE, _TABLE_SIZE>::index_type index)
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_eraseByIndex(const typename container<OPE_TYPE>::index_type index)
 	{
 		value_type* data_p = reinterpret_cast<value_type*>(&m_table[index]);
 		ope_type::callDestructor(data_p);//デストラクタ呼び出し
@@ -726,8 +726,8 @@ namespace hash_table
 	}
 
 	//キーを削除（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_erase(const typename container<OPE_TYPE, _TABLE_SIZE>::key_type key)
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_erase(const typename container<OPE_TYPE>::key_type key)
 	{
 		const index_type index = _findIndex(key);//検索してインデックスを取得
 		if (index == INVALID_INDEX)//検索失敗なら削除失敗
@@ -739,8 +739,8 @@ namespace hash_table
 	}
 	
 	//リハッシュ（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_rehash()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_rehash()
 	{
 		if (m_usingCount == 0 || m_deletedCount == 0)
 			return false;
@@ -785,8 +785,8 @@ namespace hash_table
 	}
 	
 	//クリア（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::_clear()
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_clear()
 	{
 		for (index_type index = 0; index < TABLE_SIZE; ++index)
 		{
@@ -801,8 +801,8 @@ namespace hash_table
 	}
 
 	//デストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::~container()
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::~container()
 	{}
 
 }//namespace hash_table
@@ -813,21 +813,23 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //明示的なインスタンス化
 
 //開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define GASHA_INSTANCING_hTable(OPE_TYPE, _TABLE_SIZE) \
-	template class GASHA_ hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+#define GASHA_INSTANCING_hTable(OPE_TYPE) \
+	template class GASHA_ hash_table::container<OPE_TYPE>;
 
 //シンプル開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
 //※キー型を省略する場合
 #define GASHA_INSTANCING_simpleHTable(VALUE_TYPE, _TABLE_SIZE) \
 	template class GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>; \
-	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE>::ope>;
 //※キー型を指定する場合
 #define GASHA_INSTANCING_simpleHTable_withKey(VALUE_TYPE, _TABLE_SIZE, KEY_TYPE) \
 	template class GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>; \
-	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope, _TABLE_SIZE>;
+	template class GASHA_ hash_table::container<typename GASHA_ hash_table::simpleContainer<VALUE_TYPE, _TABLE_SIZE, KEY_TYPE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -867,8 +869,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_HASH_TABLE_CPP_H
 

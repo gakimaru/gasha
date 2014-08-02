@@ -22,28 +22,42 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //名前付きデータ参照
 //--------------------------------------------------------------------------------
 
-//----------------------------------------
-//名前付きデータ参照クラス
-
-//初期化メソッド（一回限り）
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::initializeOnce()
+namespace named_ref
 {
-	GASHA_ callConstructor<table_type>(&m_refTableBuff);
-}
+	//----------------------------------------
+	//名前付きデータ参照クラス
 
-//静的フィールド
+	//初期化メソッド（一回限り）
+	template<class OPE_TYPE>
+	void table<OPE_TYPE>::initializeOnce()
+	{
+		GASHA_ callConstructor<table_type>(&m_refTableBuff);
+	}
 
-//ハッシュテーブル初期化済み
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-std::once_flag namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::m_initialized;
-//ハッシュテーブル（バッファ）
-//※アラインメントサイズ分バッファサイズを余計に確保する
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-char namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::m_refTableBuff[namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::TABLE_BUFF_SIZE];
-//明示的な初期化指定用
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInit_type namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInit;
+	//静的フィールド
+
+	//ハッシュテーブル初期化済み
+	template<class OPE_TYPE>
+	std::once_flag table<OPE_TYPE>::m_initialized;
+	//ハッシュテーブル（バッファ）
+	//※アラインメントサイズ分バッファサイズを余計に確保する
+	template<class OPE_TYPE>
+	char table<OPE_TYPE>::m_refTableBuff[table<OPE_TYPE>::TABLE_BUFF_SIZE];
+	
+	//明示的な初期化指定用
+	template<class OPE_TYPE>
+	const typename table<OPE_TYPE>::explicitInit_type table<OPE_TYPE>::explicitInit;
+	//ラップアラウンド演算指定用
+	template<class OPE_TYPE>
+	const typename table<OPE_TYPE>::wraparound_type table<OPE_TYPE>::wraparound;
+	//飽和演算指定用
+	template<class OPE_TYPE>
+	const typename table<OPE_TYPE>::saturation_type table<OPE_TYPE>::saturation;
+	//読み取り専用指定用
+	template<class OPE_TYPE>
+	const typename table<OPE_TYPE>::readonly_type table<OPE_TYPE>::readonly;
+
+}//namespace named_ref
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 
@@ -51,16 +65,14 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //明示的なインスタンス化
 
 //開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
-#define GASHA_INSTANCING_namedRef(IDENTIFIER_TYPE, _TABLE_SIZE) \
-	template class GASHA_ hash_table::container<typename GASHA_ namedRef<IDENTIFIER_TYPE, _TABLE_SIZE>::tableOpe, _TABLE_SIZE>; \
-	template class GASHA_ namedRef<IDENTIFIER_TYPE, _TABLE_SIZE>;
-
-#define GASHA_INSTANCING_namedRef_withLock(IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY) \
-	template class GASHA_ hash_table::container<typename GASHA_ namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::tableOpe, _TABLE_SIZE>; \
-	template class GASHA_ namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>;
+#define GASHA_INSTANCING_namedRef(OPE_TYPE) \
+	template class GASHA_ hash_table::container<typename GASHA_ named_ref::table<OPE_TYPE>::tableOpe>; \
+	template class GASHA_ named_ref::table<OPE_TYPE>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -100,8 +112,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_NAMED_REF_CPP_H
 

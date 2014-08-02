@@ -16,12 +16,14 @@
 
 #include <gasha/named_ref.h>//名前付きデータ参照【宣言部】
 
-#include <gasha/simple_assert.h>//シンプルアサーション
+#include <gasha/basic_math.h>//基本算術
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定・処理：callConstructor()
 #include <gasha/memory.h>//メモリ操作：adjustAlign()
-#include <gasha/basic_math.h>//基本算術：sign()
+#include <gasha/limits.h>//限界値
+#include <gasha/simple_assert.h>//シンプルアサーション
 
-#include <type_traits>//std::declval()
+#include <utility>//C++11 std::move()
+#include <cstddef>//std::intptr_t
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
@@ -29,977 +31,1101 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //名前付きデータ参照
 //--------------------------------------------------------------------------------
 
-//----------------------------------------
-//名前付きデータ参照クラス
-
-//--------------------
-//参照情報
-
-//コンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refInfo::refInfo(const GASHA_ crc32_t name_crc, const T& ref) :
-	m_nameCrc(name_crc),
-	m_typeInfo(&typeid(T)),
-	m_loadRef(&ref),
-	m_storeRef(nullptr)
-{}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& ref) :
-	m_nameCrc(name_crc),
-	m_typeInfo(&typeid(T)),
-	m_loadRef(&ref),
-	m_storeRef(&ref)
-{}
-
-//デフォルトコンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refInfo::refInfo() :
-	m_nameCrc(0),
-	m_typeInfo(nullptr),
-	m_loadRef(nullptr),
-	m_storeRef(nullptr)
-{}
-
-//デストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refInfo::~refInfo()
-{}
-
-//--------------------
-//参照情報プロキシー
-
-//オペレータ
-
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const T* namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::operator->() const
+namespace named_ref
 {
-	return reinterpret_cast<const T*>(m_refInfo.m_loadRef);
-}
+	//----------------------------------------
+	//名前付きデータ参照クラス
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T* namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::operator->()
-{
-	return reinterpret_cast<T*>(m_refInfo.m_storeRef);
-}
+	//--------------------
+	//参照情報
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const T& namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::operator*() const
-{
-	return *reinterpret_cast<const T*>(m_refInfo.m_loadRef);
-}
+	//アクセッサ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T& table<OPE_TYPE>::refInfo::max() const
+	{
+		if (sizeof(T) <= sizeof(void*))
+		{
+			const std::intptr_t p = reinterpret_cast<std::intptr_t>(&m_refMax);
+			return *reinterpret_cast<const T*>(p);
+		}
+		return *reinterpret_cast<const T*>(m_refMax);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T& table<OPE_TYPE>::refInfo::min() const
+	{
+		if (sizeof(T) <= sizeof(void*))
+		{
+			const std::intptr_t p = reinterpret_cast<std::intptr_t>(&m_refMin);
+			return *reinterpret_cast<const T*>(p);
+		}
+		return *reinterpret_cast<const T*>(m_refMin);
+	}
+	
+	//メソッド
+	template<class OPE_TYPE>
+	template<typename T>
+	inline void table<OPE_TYPE>::refInfo::setMinMax(const T& max, const T& min)
+	{
+		//(sizeof(T) <= sizeof(void*) の時は、max/min の参照ではなく値を保持する（void* に値を強引に書き込む）
+		if (sizeof(T) <= sizeof(void*))
+		{
+			{
+				const std::intptr_t p = reinterpret_cast<std::intptr_t>(&m_refMax);
+				*reinterpret_cast<T*>(p) = max;
+			}
+			{
+			const std::intptr_t p = reinterpret_cast<std::intptr_t>(&m_refMin);
+				*reinterpret_cast<T*>(p) = min;
+			}
+		}
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T& namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::operator*()
-{
-	return *reinterpret_cast<T*>(m_refInfo.m_storeRef);
-}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value) :
+		m_nameCrc(name_crc),
+		m_typeInfo(&typeid(T)),
+		m_accessType(WRITABLE),
+		m_ref(&value),
+		m_refMax(nullptr),
+		m_refMin(nullptr)
+	{}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const wraparound_type&, const T& max, const T& min) :
+		m_nameCrc(name_crc),
+		m_typeInfo(&typeid(T)),
+		m_accessType(WRITABLE_WRAPAROUND),
+		m_ref(&value),
+		m_refMax(&max),
+		m_refMin(&min)
+	{
+		setMinMax(max, min);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const saturation_type&, const T& max, const T& min) :
+		m_nameCrc(name_crc),
+		m_typeInfo(&typeid(T)),
+		m_accessType(WRITABLE_SATURATION),
+		m_ref(&value),
+		m_refMax(&max),
+		m_refMin(&min)
+	{
+		setMinMax(max, min);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, const T& value) :
+		m_nameCrc(name_crc),
+		m_typeInfo(&typeid(T)),
+		m_accessType(READ_ONLY),
+		m_ref(&value),
+		m_refMax(nullptr),
+		m_refMin(nullptr)
+	{}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, const T& value, const readonly_type&) :
+		m_nameCrc(name_crc),
+		m_typeInfo(&typeid(T)),
+		m_accessType(READ_ONLY),
+		m_ref(&value),
+		m_refMax(nullptr),
+		m_refMin(nullptr)
+	{}
 
-//ムーブコンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::refProxy(typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template refProxy<T>&& obj) :
-	m_refInfo(obj.m_refInfo),
-	m_lock(std::move(obj.m_lock))
-{}
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline table<OPE_TYPE>::refInfo::refInfo() :
+		m_nameCrc(0),
+		m_typeInfo(nullptr),
+		m_accessType(READ_ONLY),
+		m_ref(nullptr),
+		m_refMax(nullptr),
+		m_refMin(nullptr)
+	{}
 
-//コンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::refProxy(const refInfo& ref_info, GASHA_ unique_shared_lock<lock_type>&& lock) :
-	m_refInfo(ref_info),
-	m_lock(std::move(lock))
-{}
+	//デストラクタ
+	template<class OPE_TYPE>
+	inline table<OPE_TYPE>::refInfo::~refInfo()
+	{}
 
-//デフォルトコンストラクタ
-//template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-//template<typename T>
-//inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::refProxy() :
-//	m_refInfo(),
-//	m_lock()
-//{}
+	//--------------------
+	//参照情報プロキシー
 
-//デストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::refProxy<T>::~refProxy()
-{}
+	//オペレータ
 
-//--------------------
-///読み取り専用参照情報プロキシー
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T* table<OPE_TYPE>::refProxy<T>::operator->() const
+	{
+		return reinterpret_cast<const T*>(m_refInfo.m_ref);
+	}
 
-//オペレータ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T* table<OPE_TYPE>::refProxy<T>::operator->()
+	{
+		return const_cast<T*>(reinterpret_cast<const T*>(m_refInfo.m_ref));
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const T* namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::operator->() const
-{
-	return reinterpret_cast<const T*>(m_refInfo.m_loadRef);
-}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T& table<OPE_TYPE>::refProxy<T>::operator*() const
+	{
+		return *reinterpret_cast<const T*>(m_refInfo.m_ref);
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const T& namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::operator*() const
-{
-	return *reinterpret_cast<const T*>(m_refInfo.m_loadRef);
-}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T& table<OPE_TYPE>::refProxy<T>::operator*()
+	{
+		return *const_cast<T*>(reinterpret_cast<const T*>(m_refInfo.m_ref));
+	}
 
-//ムーブコンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::constRefProxy(const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template constRefProxy<T>&& obj) :
-m_refInfo(obj.m_refInfo),
-m_lock(std::move(obj.m_lock))
-{}
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refProxy<T>::refProxy(typename table<OPE_TYPE>::template refProxy<T>&& obj) :
+		m_refInfo(obj.m_refInfo),
+		m_lock(std::move(obj.m_lock))
+	{}
 
-//コンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::constRefProxy(const refInfo& ref_info, GASHA_ unique_shared_lock<lock_type>&& lock) :
-m_refInfo(ref_info),
-m_lock(std::move(lock))
-{}
+	//コンストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refProxy<T>::refProxy(const refInfo& ref_info, GASHA_ unique_shared_lock<lock_type>&& lock) :
+		m_refInfo(ref_info),
+		m_lock(std::move(lock))
+	{}
 
-//デフォルトコンストラクタ
-//template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-//template<typename T>
-//inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::constRefProxy() :
-//	m_refInfo(),
-//	m_lock()
-//{}
+	//デフォルトコンストラクタ
+	//template<class OPE_TYPE>
+	//template<typename T>
+	//inline table<OPE_TYPE>::refProxy<T>::refProxy() :
+	//	m_refInfo(),
+	//	m_lock()
+	//{}
 
-//デストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::constRefProxy<T>::~constRefProxy()
-{}
+	//デストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::refProxy<T>::~refProxy()
+	{}
 
-//--------------------
-//名前付きデータ参照本体
+	//--------------------
+	///読み取り専用参照情報プロキシー
 
-//データ参照情報取得時のアサーション
-//※読み込み操作用
+	//オペレータ
+
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T* table<OPE_TYPE>::constRefProxy<T>::operator->() const
+	{
+		return reinterpret_cast<const T*>(m_refInfo.m_ref);
+	}
+
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T& table<OPE_TYPE>::constRefProxy<T>::operator*() const
+	{
+		return *reinterpret_cast<const T*>(m_refInfo.m_ref);
+	}
+
+	//ムーブコンストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::constRefProxy<T>::constRefProxy(const typename table<OPE_TYPE>::template constRefProxy<T>&& obj) :
+		m_refInfo(obj.m_refInfo),
+		m_lock(std::move(obj.m_lock))
+	{}
+
+	//コンストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::constRefProxy<T>::constRefProxy(const refInfo& ref_info, GASHA_ unique_shared_lock<lock_type>&& lock) :
+		m_refInfo(ref_info),
+		m_lock(std::move(lock))
+	{}
+
+	//デフォルトコンストラクタ
+	//template<class OPE_TYPE>
+	//template<typename T>
+	//inline table<OPE_TYPE>::constRefProxy<T>::constRefProxy() :
+	//	m_refInfo(),
+	//	m_lock()
+	//{}
+
+	//デストラクタ
+	template<class OPE_TYPE>
+	template<typename T>
+	inline table<OPE_TYPE>::constRefProxy<T>::~constRefProxy()
+	{}
+
+	//--------------------
+	//名前付きデータ参照本体
+
+	//データ参照情報取得時のアサーション
+	//※読み込み操作用
 #define GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc) \
 	GASHA_SIMPLE_ASSERT(info != nullptr, "name_crc(0x%08x) is not registered.", name_crc); \
-	GASHA_SIMPLE_ASSERT(info->m_typeInfo && *info->m_typeInfo == typeid(T), "name_crc(0x%08x)'s type and T are different types.", name_crc); \
-	GASHA_SIMPLE_ASSERT(info->m_loadRef != nullptr, "name_crc(0x%08x) has not reference for read operation.", name_crc);
-//※書き込み操作用
+	GASHA_SIMPLE_ASSERT(info->m_typeInfo && *info->m_typeInfo == typeid(T), "name_crc(0x%08x)'s type and T are different types.(%s and %s)", name_crc, info->m_typeInfo->name(), typeid(T).name()); \
+	GASHA_SIMPLE_ASSERT(info->m_ref != nullptr, "name_crc(0x%08x) has not reference for read operation.", name_crc);
+	//※書き込み操作用
 #define GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc) \
 	GASHA_SIMPLE_ASSERT(info != nullptr, "name_crc(0x%08x) is not registered.", name_crc); \
-	GASHA_SIMPLE_ASSERT(info->m_typeInfo && *info->m_typeInfo == typeid(T), "name_crc(0x%08x)'s type and T are different types.", name_crc); \
-	GASHA_SIMPLE_ASSERT(info->m_storeRef != nullptr, "name_crc(0x%08x) has not reference for write operatuib.", name_crc);
+	GASHA_SIMPLE_ASSERT(info->m_typeInfo && *info->m_typeInfo == typeid(T), "name_crc(0x%08x)'s type and T are different types.(%s and %s)", name_crc, info->m_typeInfo->name(), typeid(T).name()); \
+	GASHA_SIMPLE_ASSERT(info->m_ref != nullptr && info->m_accessType != READ_ONLY, "name_crc(0x%08x) has not reference for write operatuib.", name_crc);
 
-//登録済みチェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isRegistered(const GASHA_ crc32_t name_crc) const
-{
-	return m_refTable->at(name_crc) != nullptr;
-}
+	//登録済みチェック
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::isRegistered(const GASHA_ crc32_t name_crc) const
+	{
+		return m_refTable->at(name_crc) != nullptr;
+	}
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::isRegistered(const char* name) const
+	{
+		return isRegistered(GASHA_ calcCRC32(name));
+	}
 
-//登録済みチェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isRegistered(const char* name) const
-{
-	return isRegistered(GASHA_ calcCRC32(name));
-}
+	//読み取り専用チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isReadOnly(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && info->m_accessType == READ_ONLY && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isReadOnly(const char* name) const
+	{
+		return isReadOnly<T>(GASHA_ calcCRC32(name));
+	}
 
-//読み取り専用チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isReadOnly(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	return info && info->m_loadRef && !info->m_storeRef && info->m_typeInfo && *info->m_typeInfo == typeid(T);
-}
+	//読み取り可能チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isReadable(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isReadable(const char* name) const
+	{
+		return isReadable<T>(GASHA_ calcCRC32(name));
+	}
 
-//読み取り専用チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isReadOnly(const char* name) const
-{
-	return isReadOnly<T>(GASHA_ calcCRC32(name));
-}
+	//書き込み可能チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritable(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && info->m_accessType != READ_ONLY && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritable(const char* name) const
+	{
+		return isWritable<T>(GASHA_ calcCRC32(name));
+	}
+	//ラップアラウンド演算／飽和演算で書き込み可能チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableRanged(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && (info->m_accessType == WRITABLE_WRAPAROUND || info->m_accessType == WRITABLE_SATURATION) && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableRanged(const char* name) const
+	{
+		return isWritableRanged<T>(GASHA_ calcCRC32(name));
+	}
 
-//読み取り可能チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isReadable(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	return info && info->m_loadRef && info->m_typeInfo && *info->m_typeInfo == typeid(T);
-}
+	//ラップアラウンド演算で書き込み可能チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableWraparound(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && info->m_accessType == WRITABLE_WRAPAROUND && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableWraparound(const char* name) const
+	{
+		return isWritableWraparound<T>(GASHA_ calcCRC32(name));
+	}
 
-//読み取り可能チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isReadable(const char* name) const
-{
-	return isWritable<T>(GASHA_ calcCRC32(name));
-}
+	//飽和演算で書き込み可能チェック
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableSaturation(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		return info && info->m_ref && info->m_accessType == WRITABLE_SATURATION && info->m_typeInfo && *info->m_typeInfo == typeid(T);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isWritableSaturation(const char* name) const
+	{
+		return isWritableSaturation<T>(GASHA_ calcCRC32(name));
+	}
 
-//書き込み可能チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isWritable(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	return info && info->m_storeRef && info->m_typeInfo && *info->m_typeInfo == typeid(T);
-}
+	//データ参照
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const typename table<OPE_TYPE>::template constRefProxy<T> table<OPE_TYPE>::ref(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		return constRefProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock_shared));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const typename table<OPE_TYPE>::template constRefProxy<T> table<OPE_TYPE>::ref(const char* name) const
+	{
+		return ref<T>(GASHA_ calcCRC32(name));
+	}
 
-//書き込み可能チェック
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isWritable(const char* name) const
-{
-	return isWritable<T>(GASHA_ calcCRC32(name));
-}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline typename table<OPE_TYPE>::template refProxy<T> table<OPE_TYPE>::ref(const GASHA_ crc32_t name_crc)
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
+		return refProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline typename table<OPE_TYPE>::template refProxy<T> table<OPE_TYPE>::ref(const char* name)
+	{
+		return ref<T>(GASHA_ calcCRC32(name));
+	}
 
-//データ参照
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template constRefProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ref(const char* name) const
-{
-	return ref<T>(GASHA_ calcCRC32(name));
-}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const typename table<OPE_TYPE>::template constRefProxy<T> table<OPE_TYPE>::cref(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		return constRefProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock_shared));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const typename table<OPE_TYPE>::template constRefProxy<T> table<OPE_TYPE>::cref(const char* name) const
+	{
+		return cref<T>(GASHA_ calcCRC32(name));
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template constRefProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ref(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-	return constRefProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock_shared));
-}
+	//ラップアラウンド演算／飽和演算用の最大値取得
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T table<OPE_TYPE>::max(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		return info->max<T>();
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T table<OPE_TYPE>::max(const char* name) const
+	{
+		return max<T>(GASHA_ calcCRC32(name));
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template refProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ref(const char* name)
-{
-	return ref<T>(GASHA_ calcCRC32(name));
-}
+	//ラップアラウンド演算／飽和演算用の最小値取得
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T table<OPE_TYPE>::min(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		return info->min<T>();
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline const T table<OPE_TYPE>::min(const char* name) const
+	{
+		return min<T>(GASHA_ calcCRC32(name));
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template refProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ref(const GASHA_ crc32_t name_crc)
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-	return refProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock));
-}
+	//データ取得
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::load(const GASHA_ crc32_t name_crc) const
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		auto lock = info->m_lock.lockSharedScoped();
+		return *reinterpret_cast<const T*>(info->m_ref);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::load(const char* name) const
+	{
+		return load<T>(GASHA_ calcCRC32(name));
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template constRefProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::cref(const char* name) const
-{
-	return cref<T>(GASHA_ calcCRC32(name));
-}
+	//データ更新
+	template<class OPE_TYPE>
+	template<typename T>
+	inline void table<OPE_TYPE>::store(const GASHA_ crc32_t name_crc, const T value)
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
+		auto lock = info->m_lock.lockScoped();
+		*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline void table<OPE_TYPE>::store(const char* name, const T value)
+	{
+		return store<T>(GASHA_ calcCRC32(name), value);
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::template constRefProxy<T> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::cref(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-	return constRefProxy<T>(*info, GASHA_ unique_shared_lock<lock_type>(info->m_lock, GASHA_ with_lock_shared));
-}
+	//データ交換
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::exchange(const GASHA_ crc32_t name_crc, const T value)
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
+		auto lock = info->m_lock.lockScoped();
+		const T before_value = *reinterpret_cast<const T*>(info->m_ref);
+		*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
+		return before_value;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::exchange(const char* name, const T value)
+	{
+		return exchange<T>(GASHA_ calcCRC32(name), value);
+	}
+	//演算
+	template<class OPE_TYPE>
+	template<typename T, typename T2, class OPERATOR_POLICY, class OPERATOR_WRAPAROUND_POLICY, class OPERATOR_SATURATION_POLICY>
+	inline T table<OPE_TYPE>::calcurate(const GASHA_ crc32_t name_crc, OPERATOR_POLICY ope, OPERATOR_WRAPAROUND_POLICY ope_wraparound, OPERATOR_SATURATION_POLICY ope_saturation, const T2 rhs)
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
+		if (info->m_accessType == WRITABLE)
+		{
+			auto lock = info->m_lock.lockScoped();
+			const T new_value = ope(*reinterpret_cast<const T*>(info->m_ref), rhs, GASHA_ numeric_limits<T>::zero(), GASHA_ numeric_limits<T>::zero());
+			*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = new_value;
+			return new_value;
+		}
+		else if (info->m_accessType == WRITABLE_WRAPAROUND)
+		{
+			auto lock = info->m_lock.lockScoped();
+			const T new_value = ope_wraparound(*reinterpret_cast<const T*>(info->m_ref), rhs, info->max<T>(), info->min<T>());
+			*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = new_value;
+			return new_value;
+		}
+		else if (info->m_accessType == WRITABLE_SATURATION)
+		{
+			auto lock = info->m_lock.lockScoped();
+			const T new_value = ope_saturation(*reinterpret_cast<const T*>(info->m_ref), rhs, info->max<T>(), info->min<T>());
+			*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = new_value;
+			return new_value;
+		}
+		return GASHA_ numeric_limits<T>::zero();//ダミー
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::inc(const GASHA_ crc32_t name_crc)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ inc_policy<T>, GASHA_ inc_wraparound_policy<T>, GASHA_ inc_saturation_policy<T>, GASHA_ numeric_limits<T>::zero());
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::inc(const char* name)
+	{
+		return inc<T>(GASHA_ calcCRC32(name));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::dec(const GASHA_ crc32_t name_crc)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ dec_policy<T>, GASHA_ dec_wraparound_policy<T>, GASHA_ dec_saturation_policy<T>, GASHA_ numeric_limits<T>::zero());
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::dec(const char* name)
+	{
+		return dec<T>(GASHA_ calcCRC32(name));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::add(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ add_policy<T>, GASHA_ add_wraparound_policy<T>, GASHA_ add_saturation_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::add(const char* name, const T rhs)
+	{
+		return add<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::sub(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ sub_policy<T>, GASHA_ sub_wraparound_policy<T>, GASHA_ sub_saturation_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::sub(const char* name, const T rhs)
+	{
+		return sub<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::mul(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ mul_policy<T>, GASHA_ mul_wraparound_policy<T>, GASHA_ mul_saturation_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::mul(const char* name, const T rhs)
+	{
+		return mul<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::div(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ div_policy<T>, GASHA_ div_policy<T>, GASHA_ div_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::div(const char* name, const T rhs)
+	{
+		return div<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::mod(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ mod_policy<T>, GASHA_ mod_policy<T>, GASHA_ mod_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::mod(const char* name, const T rhs)
+	{
+		return mod<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitAnd(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitAnd_policy<T>, GASHA_ bitAnd_policy<T>, GASHA_ bitAnd_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitAnd(const char* name, const T rhs)
+	{
+		return bitAnd<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOr(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitOr_policy<T>, GASHA_ bitOr_policy<T>, GASHA_ bitOr_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOr(const char* name, const T rhs)
+	{
+		return bitOr<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitXor(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitXor_policy<T>, GASHA_ bitXor_policy<T>, GASHA_ bitXor_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitXor(const char* name, const T rhs)
+	{
+		return bitXor<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitNot(const GASHA_ crc32_t name_crc)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitNot_policy<T>, GASHA_ bitNot_policy<T>, GASHA_ bitNot_policy<T>, GASHA_ numeric_limits<T>::zero());
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitNot(const char* name)
+	{
+		return bitNot<T>(GASHA_ calcCRC32(name));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::lShift(const GASHA_ crc32_t name_crc, const int rhs)
+	{
+		return calcurate<T, int>(name_crc, GASHA_ lShift_policy<T>, GASHA_ lShift_policy<T>, GASHA_ lShift_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::lShift(const char* name, const int rhs)
+	{
+		return lShift<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::rShift(const GASHA_ crc32_t name_crc, const int rhs)
+	{
+		return calcurate<T, int>(name_crc, GASHA_ rShift_policy<T>, GASHA_ rShift_policy<T>, GASHA_ rShift_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::rShift(const char* name, const int rhs)
+	{
+		return rShift<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOn(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitOn_policy<T>, GASHA_ bitOn_policy<T>, GASHA_ bitOn_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOn(const char* name, const T rhs)
+	{
+		return bitOn<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOff(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return calcurate<T, T>(name_crc, GASHA_ bitOff_policy<T>, GASHA_ bitOff_policy<T>, GASHA_ bitOff_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline T table<OPE_TYPE>::bitOff(const char* name, const T rhs)
+	{
+		return bitOff<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	//比較
+	template<class OPE_TYPE>
+	template<typename T, class OPERATOR_POLICY>
+	inline bool table<OPE_TYPE>::compare(const GASHA_ crc32_t name_crc, OPERATOR_POLICY ope, const T rhs)
+	{
+		const refInfo* info = m_refTable->at(name_crc);
+		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
+		auto lock = info->m_lock.lockSharedScoped();
+		return ope(*reinterpret_cast<const T*>(info->m_ref), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::eq(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ eq_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::eq(const char* name, const T rhs)
+	{
+		return eq<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::ne(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ ne_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::ne(const char* name, const T rhs)
+	{
+		return ne<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::gt(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ gt_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::gt(const char* name, const T rhs)
+	{
+		return gt<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::ge(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ ge_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::ge(const char* name, const T rhs)
+	{
+		return ge<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::lt(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ lt_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::lt(const char* name, const T rhs)
+	{
+		return lt<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::le(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ le_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::le(const char* name, const T rhs)
+	{
+		return le<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::logicalAnd(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ logicalAnd_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::logicalAnd(const char* name, const T rhs)
+	{
+		return logicalAnd<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::logicalOr(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ logicalOr_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::logicalOr(const char* name, const T rhs)
+	{
+		return logicalOr<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isOn(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ isOn_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isOn(const char* name, const T rhs)
+	{
+		return isOn<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isOff(const GASHA_ crc32_t name_crc, const T rhs)
+	{
+		return compare<T>(name_crc, GASHA_ isOff_policy<T>, rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isOff(const char* name, const T rhs)
+	{
+		return isOff<T>(GASHA_ calcCRC32(name), rhs);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isTrue(const GASHA_ crc32_t name_crc)
+	{
+		return compare<T>(name_crc, GASHA_ isTrue_policy<T>, GASHA_ numeric_limits<T>::zero());
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isTrue(const char* name)
+	{
+		return isTrue<T>(GASHA_ calcCRC32(name));
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isFalse(const GASHA_ crc32_t name_crc)
+	{
+		return compare<T>(name_crc, GASHA_ isFalse_policy<T>, GASHA_ numeric_limits<T>::zero());
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::isFalse(const char* name)
+	{
+		return isFalse<T>(GASHA_ calcCRC32(name));
+	}
+	
+	//データ参照登録
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const crc32_t name_crc, T& ref)
+	{
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref)
+	{
+		return regist(GASHA_ calcCRC32(name), ref);
+	}
 
-//データ取得
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::load(const char* name) const
-{
-	return load<T>(GASHA_ calcCRC32(name));
-}
+	//※ラップアラウンド演算用
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T&& max, const T&& min)
+	{
+		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, wraparound, max, min);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_type&, const T&& max, const T&& min)
+	{
+		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
+		return regist(GASHA_ calcCRC32(name), ref, wraparound, max, min);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T& max, const T& min)
+	{
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, wraparound, max, min);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_type&, const T& max, const T& min)
+	{
+		return regist(GASHA_ calcCRC32(name), ref, wraparound, max, min);
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::load(const GASHA_ crc32_t name_crc) const
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-	auto lock = info->m_lock.lockSharedScoped();
-	return *reinterpret_cast<const T*>(info->m_loadRef);
-}
+	//※飽和演算用
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T&& max, const T&& min)
+	{
+		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, saturation, max, min);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_type&, const T&& max, const T&& min)
+	{
+		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
+		return regist(GASHA_ calcCRC32(name), ref, saturation, max, min);
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T& max, const T& min)
+	{
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, saturation, max, min);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_type&, const T& max, const T& min)
+	{
+		return regist(GASHA_ calcCRC32(name), ref, saturation, max, min);
+	}
 
-//データ更新
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::store(const char* name, const T value)
-{
-	return store<T>(GASHA_ calcCRC32(name), value);
-}
+	//※読み取り専用
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const crc32_t name_crc, const T& ref)
+	{
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, const T& ref)
+	{
+		return regist(GASHA_ calcCRC32(name), ref);
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::store(const GASHA_ crc32_t name_crc, const T value)
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-	auto lock = info->m_lock.lockScoped();
-	*reinterpret_cast<T*>(info->m_storeRef) = value;
-}
+	//※読み取り専用
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const crc32_t name_crc, const T& ref, const readonly_type&)
+	{
+		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, readonly);
+		return info ? true : false;
+	}
+	template<class OPE_TYPE>
+	template<typename T>
+	inline bool table<OPE_TYPE>::regist(const char* name, const T& ref, const readonly_type&)
+	{
+		return regist(GASHA_ calcCRC32(name), ref, readonly);
+	}
 
-//データ交換
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::exchange(const GASHA_ crc32_t name_crc, const T value)
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-	auto lock = info->m_lock.lockScoped();
-	const T before_value = *reinterpret_cast<T*>(info->m_storeRef);
-	*reinterpret_cast<T*>(info->m_storeRef) = value;
-	return before_value;
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::exchange(const char* name, const T value)
-{
-	return exchange<T>(GASHA_ calcCRC32(name), value);
-}
-//演算
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T, class OPERATOR_POLICY>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::calcurate(const GASHA_ crc32_t name_crc, OPERATOR_POLICY ope, const T rhs, const T max, const T min)
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-	auto lock = info->m_lock.lockScoped();
-	const T new_value = ope(*reinterpret_cast<T*>(info->m_storeRef), rhs, max, min);
-	*reinterpret_cast<T*>(info->m_storeRef) = new_value;
-	return new_value;
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::inc(const GASHA_ crc32_t name_crc)
-{
-	return calcurate<T>(name_crc, GASHA_ inc_policy<T>, static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::inc(const char* name)
-{
-	return inc<T>(GASHA_ calcCRC32(name));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::incWA(const GASHA_ crc32_t name_crc, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ incWA_policy<T>, static_cast<T>(0), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::incWA(const char* name, const T max, const T min)
-{
-	return incWA<T>(GASHA_ calcCRC32(name), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::incSA(const GASHA_ crc32_t name_crc, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ incSA_policy<T>, static_cast<T>(0), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::incSA(const char* name, const T max, const T min)
-{
-	return incSA<T>(GASHA_ calcCRC32(name), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::dec(const GASHA_ crc32_t name_crc)
-{
-	return calcurate<T>(name_crc, GASHA_ dec_policy<T>, static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::dec(const char* name)
-{
-	return dec<T>(GASHA_ calcCRC32(name));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::decWA(const GASHA_ crc32_t name_crc, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ decWA_policy<T>, static_cast<T>(0), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::decWA(const char* name, const T max, const T min)
-{
-	return decWA<T>(GASHA_ calcCRC32(name), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::decSA(const GASHA_ crc32_t name_crc, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ decSA_policy<T>, static_cast<T>(0), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::decSA(const char* name, const T max, const T min)
-{
-	return decSA<T>(GASHA_ calcCRC32(name), max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::add(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ add_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::add(const char* name, const T rhs)
-{
-	return add<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::addWA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ addWA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::addWA(const char* name, const T rhs, const T max, const T min)
-{
-	return addWA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::addSA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ addSA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::addSA(const char* name, const T rhs, const T max, const T min)
-{
-	return addSA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::sub(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ sub_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::sub(const char* name, const T rhs)
-{
-	return sub<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::subWA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ subWA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::subWA(const char* name, const T rhs, const T max, const T min)
-{
-	return subWA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::subSA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ subSA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::subSA(const char* name, const T rhs, const T max, const T min)
-{
-	return subSA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mul(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ mul_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mul(const char* name, const T rhs)
-{
-	return mul<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mulWA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ mulWA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mulWA(const char* name, const T rhs, const T max, const T min)
-{
-	return mulWA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mulSA(const GASHA_ crc32_t name_crc, const T rhs, const T max, const T min)
-{
-	return calcurate<T>(name_crc, GASHA_ mulSA_policy<T>, rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mulSA(const char* name, const T rhs, const T max, const T min)
-{
-	return mulSA<T>(GASHA_ calcCRC32(name), rhs, max, min);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::div(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ div_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::div(const char* name, const T rhs)
-{
-	return div<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mod(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ mod_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::mod(const char* name, const T rhs)
-{
-	return mod<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitAnd(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ bitAnd_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitAnd(const char* name, const T rhs)
-{
-	return bitAnd<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOr(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ bitOr_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOr(const char* name, const T rhs)
-{
-	return bitOr<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitXor(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ bitXor_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitXor(const char* name, const T rhs)
-{
-	return bitXor<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitNot(const GASHA_ crc32_t name_crc)
-{
-	return calcurate<T>(name_crc, GASHA_ bitNot_policy<T>, static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitNot(const char* name)
-{
-	return bitNot<T>(GASHA_ calcCRC32(name));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lShift(const GASHA_ crc32_t name_crc, const int rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ lShift_policy<T>, static_cast<T>(rhs), static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lShift(const char* name, const int rhs)
-{
-	return lShift<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::rShift(const GASHA_ crc32_t name_crc, const int rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ rShift_policy<T>, static_cast<T>(rhs), static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::rShift(const char* name, const int rhs)
-{
-	return rShift<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOn(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ bitOn_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOn(const char* name, const T rhs)
-{
-	return bitOn<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOff(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return calcurate<T>(name_crc, GASHA_ bitOff_policy<T>, rhs, static_cast<T>(0), static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline T namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::bitOff(const char* name, const T rhs)
-{
-	return bitOff<T>(GASHA_ calcCRC32(name), rhs);
-}
-//比較
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T, class OPERATOR_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::compare(const GASHA_ crc32_t name_crc, OPERATOR_POLICY ope, const T rhs)
-{
-	const refInfo* info = m_refTable->at(name_crc);
-	GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-	auto lock = info->m_lock.lockSharedScoped();
-	return ope(*reinterpret_cast<const T*>(info->m_loadRef), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::eq(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ eq_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::eq(const char* name, const T rhs)
-{
-	return eq<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ne(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ ne_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ne(const char* name, const T rhs)
-{
-	return ne<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::gt(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ gt_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::gt(const char* name, const T rhs)
-{
-	return gt<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ge(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ ge_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::ge(const char* name, const T rhs)
-{
-	return ge<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lt(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ lt_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lt(const char* name, const T rhs)
-{
-	return lt<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::le(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ le_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::le(const char* name, const T rhs)
-{
-	return le<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::logicalAnd(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ logicalAnd_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::logicalAnd(const char* name, const T rhs)
-{
-	return logicalAnd<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::logicalOr(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ logicalOr_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::logicalOr(const char* name, const T rhs)
-{
-	return logicalOr<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isOn(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ isOn_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isOn(const char* name, const T rhs)
-{
-	return isOn<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isOff(const GASHA_ crc32_t name_crc, const T rhs)
-{
-	return compare<T>(name_crc, GASHA_ isOff_policy<T>, rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isOff(const char* name, const T rhs)
-{
-	return isOff<T>(GASHA_ calcCRC32(name), rhs);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isTrue(const GASHA_ crc32_t name_crc)
-{
-	return compare<T>(name_crc, GASHA_ isTrue_policy<T>, static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isTrue(const char* name)
-{
-	return isTrue<T>(GASHA_ calcCRC32(name));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isFalse(const GASHA_ crc32_t name_crc)
-{
-	return compare<T>(name_crc, GASHA_ isFalse_policy<T>, static_cast<T>(0));
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::isFalse(const char* name)
-{
-	return isFalse<T>(GASHA_ calcCRC32(name));
-}
+	//データ登録解除
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::unregist(const GASHA_ crc32_t name_crc)
+	{
+		return m_refTable->erase(name_crc);
+	}
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::unregist(const char* name)
+	{
+		return unregist(GASHA_ calcCRC32(name));
+	}
 
-//データ参照登録
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::regist(const crc32_t name_crc, T& ref)
-{
-	const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref);
-	return info ? true : false;
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::regist(const char* name, T& ref)
-{
-	return regist(GASHA_ calcCRC32(name), ref);
-}
+	//クリア
+	template<class OPE_TYPE>
+	inline void table<OPE_TYPE>::clear()
+	{
+		m_refTable->clear();
+	}
+	//初期状態にする
+	template<class OPE_TYPE>
+	inline void table<OPE_TYPE>::initialize()
+	{
+		std::call_once(m_initialized, initializeOnce);
+	}
 
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::regist(const crc32_t name_crc, const T& ref)
-{
-	const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref);
-	return info ? true : false;
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-template<typename T>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::regist(const char* name, const T& ref)
-{
-	return regist(GASHA_ calcCRC32(name), ref);
-}
+	//明示的な再初期化
+	template<class OPE_TYPE>
+	inline void table<OPE_TYPE>::explicitInitialize()
+	{
+		initializeOnce();
+	}
 
-//データ登録解除
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::unregist(const GASHA_ crc32_t name_crc)
-{
-	return m_refTable->erase(name_crc);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::unregist(const char* name)
-{
-	return unregist(GASHA_ calcCRC32(name));
-}
+	//ハッシュテーブルアクセス：アクセッサ
+	template<class OPE_TYPE>
+	inline std::size_t table<OPE_TYPE>::max_size() const
+	{
+		return m_refTable->max_size();
+	}
+	template<class OPE_TYPE>
+	inline std::size_t table<OPE_TYPE>::size() const
+	{
+		return m_refTable->size();
+	}
+	template<class OPE_TYPE>
+	inline std::size_t table<OPE_TYPE>::remain() const
+	{
+		return m_refTable->remain();
+	}
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::empty() const
+	{
+		return m_refTable->empty();
+	}
+	template<class OPE_TYPE>
+	inline bool table<OPE_TYPE>::full() const
+	{
+		return m_refTable->full();
+	}
 
-//クリア
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::clear()
-{
-	m_refTable->clear();
-}
-//初期状態にする
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::initialize()
-{
-	std::call_once(m_initialized, initializeOnce);
-}
+	//ハッシュテーブルアクセス：ロック取得系メソッド
+	//単一ロック取得
+	template<class OPE_TYPE>
+	inline GASHA_ unique_shared_lock<typename table<OPE_TYPE>::lock_type> table<OPE_TYPE>::lockUnique(const GASHA_ with_lock_shared_t&) const
+	{
+		return m_refTable->lockUnique(GASHA_ with_lock_shared);
+	}
+	template<class OPE_TYPE>
+	inline GASHA_ unique_shared_lock<typename table<OPE_TYPE>::lock_type> table<OPE_TYPE>::lockUnique(const GASHA_ try_to_lock_shared_t&) const
+	{
+		return m_refTable->lockUnique(GASHA_ try_to_lock_shared);
+	}
+	//スコープロック取得
+	template<class OPE_TYPE>
+	inline GASHA_ shared_lock_guard<typename table<OPE_TYPE>::lock_type> table<OPE_TYPE>::lockSharedScoped() const
+	{
+		return m_refTable->lockSharedScoped();
+	}
+	//ハッシュテーブルアクセス：イテレータ取得系メソッド
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::iterator table<OPE_TYPE>::cbegin() const
+	{
+		return m_refTable->cbegin();
+	}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::iterator table<OPE_TYPE>::cend() const
+	{
+		return m_refTable->cend();
+	}
 
-//明示的な再初期化
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline void namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInitialize()
-{
-	initializeOnce();
-}
-
-//ハッシュテーブルアクセス：アクセッサ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline std::size_t namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::max_size() const
-{
-	return m_refTable->max_size();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline std::size_t namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::size() const
-{
-	return m_refTable->size();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline std::size_t namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::remain() const
-{
-	return m_refTable->remain();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::empty() const
-{
-	return m_refTable->empty();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline bool namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::full() const
-{
-	return m_refTable->full();
-}
-
-//ハッシュテーブルアクセス：ロック取得系メソッド
-//単一ロック取得
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline GASHA_ unique_shared_lock<typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lock_type> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lockUnique(const GASHA_ with_lock_shared_t&) const
-{
-	return m_refTable->lockUnique(GASHA_ with_lock_shared);
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline GASHA_ unique_shared_lock<typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lock_type> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lockUnique(const GASHA_ try_to_lock_shared_t&) const
-{
-	return m_refTable->lockUnique(GASHA_ try_to_lock_shared);
-}
-//スコープロック取得
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline GASHA_ shared_lock_guard<typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lock_type> namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::lockSharedScoped() const
-{
-	return m_refTable->lockSharedScoped();
-}
-//ハッシュテーブルアクセス：イテレータ取得系メソッド
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::cbegin() const
-{
-	return m_refTable->cbegin();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::cend() const
-{
-	return m_refTable->cend();
-}
-
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::begin() const
-{
-	return m_refTable->begin();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::end() const
-{
-	return m_refTable->end();
-}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::iterator table<OPE_TYPE>::begin() const
+	{
+		return m_refTable->begin();
+	}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::iterator table<OPE_TYPE>::end() const
+	{
+		return m_refTable->end();
+	}
 #ifdef GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
-//リバースイテレータを取得
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::reverse_iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::crbegin() const
-{
-	return m_refTable->crbegin();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::reverse_iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::crend() const
-{
-	return m_refTable->crend();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::reverse_iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::rbegin() const
-{
-	return m_refTable->rbegin();
-}
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::reverse_iterator namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::rend() const
-{
-	return m_refTable->rend();
-}
+	//リバースイテレータを取得
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::reverse_iterator table<OPE_TYPE>::crbegin() const
+	{
+		return m_refTable->crbegin();
+	}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::reverse_iterator table<OPE_TYPE>::crend() const
+	{
+		return m_refTable->crend();
+	}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::reverse_iterator table<OPE_TYPE>::rbegin() const
+	{
+		return m_refTable->rbegin();
+	}
+	template<class OPE_TYPE>
+	inline const typename table<OPE_TYPE>::reverse_iterator table<OPE_TYPE>::rend() const
+	{
+		return m_refTable->rend();
+	}
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 
-//明示的な初期化用コンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::namedRef(const typename namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::explicitInit_type&)
-{
-	explicitInitialize();
-}
+	//明示的な初期化用コンストラクタ
+	template<class OPE_TYPE>
+	inline table<OPE_TYPE>::table(const typename table<OPE_TYPE>::explicitInit_type&)
+	{
+		explicitInitialize();
+	}
 
-//デフォルトコンストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::namedRef() :
-	m_refTable(reinterpret_cast<table_type*>(GASHA_ adjustAlign<char, alignof(table_type)>(m_refTableBuff)))
-{
-//	initialize();//実行しない
-}
+	//デフォルトコンストラクタ
+	template<class OPE_TYPE>
+	inline table<OPE_TYPE>::table() :
+		m_refTable(reinterpret_cast<table_type*>(GASHA_ adjustAlign<char, alignof(table_type)>(m_refTableBuff)))
+	{
+		//	initialize();//実行しない
+	}
 
-//デストラクタ
-template<class IDENTIFIER_TYPE, std::size_t _TABLE_SIZE, class LOCK_POLICY>
-inline namedRef<IDENTIFIER_TYPE, _TABLE_SIZE, LOCK_POLICY>::~namedRef()
-{}
+	//デストラクタ
+	template<class OPE_TYPE>
+	inline table<OPE_TYPE>::~table()
+	{}
+}//namespace named_ref
+
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

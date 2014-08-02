@@ -118,10 +118,10 @@ namespace linked_list
 	//			inline bool operator()(const node_type& lhs, const ???& rhs) const { return lhs.??? == rhs; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
-	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効な共有ロック型（sharedSpinLockなど）を lock_type 型として定義する。
+	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
 	struct baseOpe
@@ -130,8 +130,8 @@ namespace linked_list
 		typedef OPE_TYPE ope_type;//ノード操作型
 		typedef NODE_TYPE node_type;//ノード型
 
-		//ロック型
-		typedef dummySharedLock lock_type;//ロックオブジェクト型
+		//ロックポリシー
+		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を

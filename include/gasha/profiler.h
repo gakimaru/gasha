@@ -154,7 +154,7 @@ public:
 public:
 	//----------------------------------------
 	//文字列プール操作型
-	struct strPoolOpe : public GASHA_ hash_table::baseOpe<strPoolOpe, strPoolInfo, GASHA_ crc32_t>
+	struct strPoolOpe : public GASHA_ hash_table::baseOpe<strPoolOpe, STR_POOL_TABLE_SIZE, strPoolInfo, GASHA_ crc32_t>
 	{
 		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 
@@ -163,7 +163,7 @@ public:
 	};
 public:
 	typedef GASHA_PROFILER_STACK_ALLOCATOR_POLICY<STR_POOL_BUFF_SIZE> strPoolBuff_type;//文字列プールバッファ型
-	typedef GASHA_ hash_table::container<strPoolOpe, STR_POOL_TABLE_SIZE> strPoolTable_type;//文字列プールテーブル型
+	typedef GASHA_ hash_table::container<strPoolOpe> strPoolTable_type;//文字列プールテーブル型
 public:
 	//----------------------------------------
 	//処理時間情報
@@ -531,7 +531,7 @@ public:
 public:
 	//----------------------------------------
 	//スレッド情報操作型
-	struct threadInfoOpe : public GASHA_ hash_table::baseOpe<threadInfoOpe, threadInfo, GASHA_ crc32_t>
+	struct threadInfoOpe : public GASHA_ hash_table::baseOpe<threadInfoOpe, THREAD_INFO_TABLE_SIZE, threadInfo, GASHA_ crc32_t>
 	{
 		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
 
@@ -570,7 +570,7 @@ public:
 	#endif//GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 	};
 public:
-	typedef GASHA_ hash_table::container<threadInfoOpe, THREAD_INFO_TABLE_SIZE> threadInfoTable_type;//スレッド情報テーブル型
+	typedef GASHA_ hash_table::container<threadInfoOpe> threadInfoTable_type;//スレッド情報テーブル型
 	typedef GASHA_ singly_linked_list::container<threadInfoListOpe> threadInfoLink_type;//スレッド情報連結リスト型
 
 #ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化

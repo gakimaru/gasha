@@ -501,22 +501,22 @@ inline T inc(const T value)
 	return new_value;
 }
 template<typename T>
-inline T incWA(const T value, const T max, const T min)
+inline T inc(const T value, const wraparound_type&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value < max)
 		++new_value;
-	else
+	if (new_value > max)
 		new_value = min;
 	return new_value;
 }
 template<typename T>
-inline T incSA(const T value, const T max, const T min)
+inline T inc(const T value, const saturation_type&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value < max)
 		++new_value;
-	else
+	if (new_value > max)
 		new_value = max;
 	return new_value;
 }
@@ -528,22 +528,22 @@ inline T dec(const T value)
 	return new_value;
 }
 template<typename T>
-inline T decWA(const T value, const T max, const T min)
+inline T dec(const T value, const wraparound_type&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value > min)
 		--new_value;
-	else
+	if (new_value < min)
 		new_value = max;
 	return new_value;
 }
 template<typename T>
-inline T decSA(const T value, const T max, const T min)
+inline T dec(const T value, const saturation_type&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value > min)
 		--new_value;
-	else
+	if (new_value < min)
 		new_value = min;
 	return new_value;
 }
@@ -555,12 +555,12 @@ inline T add(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T addWA(const T lhs, const T rhs, const T max, const T min)
+inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
 	new_value += rhs;
-	if (value_range > static_cast<T>(0))
+	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
 		while (new_value > max)
 			new_value -= value_range;
@@ -572,13 +572,13 @@ inline T addWA(const T lhs, const T rhs, const T max, const T min)
 	return new_value;
 }
 template<typename T>
-inline T addSA(const T lhs, const T rhs, const T max, const T min)
+inline T add(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value += rhs;
-	if (new_value > max || (new_value < lhs && rhs > static_cast<T>(0)))
+	if (new_value > max || (new_value < lhs && rhs > GASHA_ numeric_limits<T>::zero()))
 		new_value = max;
-	if (new_value < min || (new_value > lhs && rhs < static_cast<T>(0)))
+	if (new_value < min || (new_value > lhs && rhs < GASHA_ numeric_limits<T>::zero()))
 		new_value = min;
 	return new_value;
 }
@@ -590,12 +590,12 @@ inline T sub(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T subWA(const T lhs, const T rhs, const T max, const T min)
+inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
 	new_value -= rhs;
-	if (value_range > static_cast<T>(0))
+	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
 		while (new_value > max)
 			new_value -= value_range;
@@ -607,13 +607,13 @@ inline T subWA(const T lhs, const T rhs, const T max, const T min)
 	return new_value;
 }
 template<typename T>
-inline T subSA(const T lhs, const T rhs, const T max, const T min)
+inline T sub(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value -= rhs;
-	if (new_value > max || (new_value < lhs && rhs < static_cast<T>(0)))
+	if (new_value > max || (new_value < lhs && rhs < GASHA_ numeric_limits<T>::zero()))
 		new_value = max;
-	if (new_value < min || (new_value > lhs && rhs > static_cast<T>(0)))
+	if (new_value < min || (new_value > lhs && rhs > GASHA_ numeric_limits<T>::zero()))
 		new_value = min;
 	return new_value;
 }
@@ -625,12 +625,12 @@ inline T mul(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T mulWA(const T lhs, const T rhs, const T max, const T min)
+inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
 	new_value *= rhs;
-	if (value_range > static_cast<T>(0))
+	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
 		while (new_value > max)
 			new_value -= value_range;
@@ -642,7 +642,7 @@ inline T mulWA(const T lhs, const T rhs, const T max, const T min)
 	return new_value;
 }
 template<typename T>
-inline T mulSA(const T lhs, const T rhs, const T max, const T min)
+inline T mul(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value *= rhs;
@@ -690,7 +690,7 @@ inline T bitXor(const T lhs, const T rhs)
 template<typename T>
 inline T bitNot(const T value)
 {
-	T new_value = ~value;
+	const T new_value = ~value;
 	return new_value;
 }
 template<typename T>
@@ -732,14 +732,14 @@ inline T inc_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T m
 	return inc<T>(lhs);
 }
 template<typename T>
-inline T incWA_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+inline T inc_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min)
 {
-	return incWA<T>(lhs, max, min);
+	return inc<T>(lhs, wraparound, max, min);
 }
 template<typename T>
-inline T incSA_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+inline T inc_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min)
 {
-	return incSA<T>(lhs, max, min);
+	return inc<T>(lhs, saturation, max, min);
 }
 template<typename T>
 inline T dec_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy)
@@ -747,14 +747,14 @@ inline T dec_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T m
 	return dec<T>(lhs);
 }
 template<typename T>
-inline T decWA_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+inline T dec_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min)
 {
-	return decWA<T>(lhs, max, min);
+	return dec<T>(lhs, wraparound, max, min);
 }
 template<typename T>
-inline T decSA_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+inline T dec_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min)
 {
-	return decSA<T>(lhs, max, min);
+	return dec<T>(lhs, saturation, max, min);
 }
 template<typename T>
 inline T add_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
@@ -762,14 +762,14 @@ inline T add_policy(const T lhs, const T rhs, const T max_dummy, const T min_dum
 	return add<T>(lhs, rhs);
 }
 template<typename T>
-inline T addWA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T add_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return addWA<T>(lhs, rhs, max, min);
+	return add<T>(lhs, rhs, wraparound, max, min);
 }
 template<typename T>
-inline T addSA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T add_saturation_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return addSA<T>(lhs, rhs, max, min);
+	return add<T>(lhs, rhs, saturation, max, min);
 }
 template<typename T>
 inline T sub_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
@@ -777,14 +777,14 @@ inline T sub_policy(const T lhs, const T rhs, const T max_dummy, const T min_dum
 	return sub<T>(lhs, rhs);
 }
 template<typename T>
-inline T subWA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T sub_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return subWA<T>(lhs, rhs, max, min);
+	return sub<T>(lhs, rhs, wraparound, max, min);
 }
 template<typename T>
-inline T subSA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T sub_saturation_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return subSA<T>(lhs, rhs, max, min);
+	return sub<T>(lhs, rhs, saturation, max, min);
 }
 template<typename T>
 inline T mul_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
@@ -792,14 +792,14 @@ inline T mul_policy(const T lhs, const T rhs, const T max_dummy, const T min_dum
 	return mul<T>(lhs, rhs);
 }
 template<typename T>
-inline T mulWA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T mul_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return mulWA<T>(lhs, rhs, max, min);
+	return mul<T>(lhs, rhs, wraparound, max, min);
 }
 template<typename T>
-inline T mulSA_policy(const T lhs, const T rhs, const T max, const T min)
+inline T mul_saturation_policy(const T lhs, const T rhs, const T max, const T min)
 {
-	return mulSA<T>(lhs, rhs, max, min);
+	return mul<T>(lhs, rhs, saturation, max, min);
 }
 template<typename T>
 inline T div_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
@@ -832,14 +832,14 @@ inline T bitNot_policy(const T lhs, const T rhs_dummy, const T max_dummy, const 
 	return bitNot<T>(lhs);
 }
 template<typename T>
-inline T lShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+inline T lShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy)
 {
-	return lShift<T>(lhs, static_cast<int>(rhs));
+	return lShift<T>(lhs, rhs);
 }
 template<typename T>
-inline T rShift_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+inline T rShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy)
 {
-	return rShift<T>(lhs, static_cast<int>(rhs));
+	return rShift<T>(lhs, rhs);
 }
 template<typename T>
 inline T bitOn_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
@@ -886,12 +886,12 @@ inline bool le(const T lhs, const T rhs)
 template<typename T>
 inline bool isOn(const T lhs, const T rhs)
 {
-	return (lhs & rhs) != static_cast<T>(0);
+	return (lhs & rhs) != GASHA_ numeric_limits<T>::zero();
 }
 template<typename T>
 inline bool isOff(const T lhs, const T rhs)
 {
-	return (lhs & rhs) == static_cast<T>(0);
+	return (lhs & rhs) == GASHA_ numeric_limits<T>::zero();
 }
 template<typename T>
 inline bool logicalAnd(const T lhs, const T rhs)
@@ -906,12 +906,12 @@ inline bool logicalOr(const T lhs, const T rhs)
 template<typename T>
 inline bool isTrue(const T value)
 {
-	return value != static_cast<T>(0);
+	return value != GASHA_ numeric_limits<T>::zero();
 }
 template<typename T>
 inline bool isFalse(const T value)
 {
-	return value == static_cast<T>(0);
+	return value == GASHA_ numeric_limits<T>::zero();
 }
 //※ポリシー用
 template<typename T>

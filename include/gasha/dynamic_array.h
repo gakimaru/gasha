@@ -111,9 +111,9 @@ namespace dynamic_array
 	//			inline int operator()(const value_type& lhs, const ???& rhs) const { return rhs - lhs.???; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
+	//		//　有効なロック型（sharedSpinLockなど）を lock_type 型として定義する。
 	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//
 	//		//デストラクタ呼び出し ※必要に応じて実装
@@ -130,7 +130,7 @@ namespace dynamic_array
 		typedef OPE_TYPE ope_type;//要素操作型
 		typedef VALUE_TYPE value_type;//要素型
 
-		//ロック型
+		//ロックポリシー
 		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
