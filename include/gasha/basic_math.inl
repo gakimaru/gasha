@@ -562,6 +562,10 @@ inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	new_value += rhs;
 	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
+		while (rhs > GASHA_ numeric_limits<T>::zero() && new_value < min)
+			new_value -= value_range;
+		while (rhs < GASHA_ numeric_limits<T>::zero() && new_value > max)
+			new_value += value_range;
 		while (new_value > max)
 			new_value -= value_range;
 		while (new_value < min)
@@ -597,6 +601,10 @@ inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	new_value -= rhs;
 	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
+		while (rhs > GASHA_ numeric_limits<T>::zero() && new_value > max)
+			new_value += value_range;
+		while (rhs < GASHA_ numeric_limits<T>::zero() && new_value < min)
+			new_value -= value_range;
 		while (new_value > max)
 			new_value -= value_range;
 		while (new_value < min)
@@ -632,6 +640,10 @@ inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	new_value *= rhs;
 	if (value_range > GASHA_ numeric_limits<T>::zero())
 	{
+		while (sign<T>(lhs) == sign<T>(rhs) && new_value < min)
+			new_value -= value_range;
+		while (sign<T>(lhs) != sign<T>(rhs) && new_value > max)
+			new_value += value_range;
 		while (new_value > max)
 			new_value -= value_range;
 		while (new_value < min)
