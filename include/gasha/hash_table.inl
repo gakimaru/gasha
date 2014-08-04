@@ -19,6 +19,8 @@
 
 #include <gasha/allocator_common.h>//アロケータ共通設定・処理：コンストラクタ／デストラクタ呼び出し
 
+#include <utility>//C++11 std::forward
+
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 namespace hash_table
@@ -598,7 +600,7 @@ namespace hash_table
 		value_type* assigned_value = _assign(key);
 		if (!assigned_value)
 			return nullptr;
-		GASHA_ callConstructor<value_type>(assigned_value, args...);//コンストラクタ呼び出し
+		GASHA_ callConstructor<value_type>(assigned_value, std::forward<Tx>(args)...);//コンストラクタ呼び出し
 		return assigned_value;
 	}
 
@@ -608,19 +610,19 @@ namespace hash_table
 	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::emplace(const typename container<OPE_TYPE>::key_type key, Tx&&... args)
 	{
 		lock_guard<lock_type> lock(m_lock);//排他ロック（ライトロック）取得（関数を抜ける時に自動開放）
-		return _emplace(key, args...);
+		return _emplace(key, std::forward<Tx>(args)...);
 	}
 	template<class OPE_TYPE>
 	template<typename... Tx>
 	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::emplace(const char* key, Tx&&... args)
 	{
-		return emplace(GASHA_ calcCRC32(key), args...);
+		return emplace(GASHA_ calcCRC32(key), std::forward<Tx>(args)...);
 	}
 	template<class OPE_TYPE>
 	template<typename... Tx>
 	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::emplace(const std::string& key, Tx&&... args)
 	{
-		return emplace(GASHA_ calcCRC32(key.c_str()), args...);
+		return emplace(GASHA_ calcCRC32(key.c_str()), std::forward<Tx>(args)...);
 	}
 
 	//値を初期化して自動的にキー割り当て
@@ -628,7 +630,7 @@ namespace hash_table
 	template<typename... Tx>
 	inline typename container<OPE_TYPE>::value_type* container<OPE_TYPE>::emplaceAuto(Tx&&... args)
 	{
-		value_type value(args...);
+		value_type value(std::forward<Tx>(args)...);
 		return insertAuto(value);
 	}
 

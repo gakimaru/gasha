@@ -60,7 +60,7 @@ public:
 
 public:
 	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 
 public:
 	//モニター
@@ -101,7 +101,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logQueueMonitor(const explicitInit_type&);
+	inline logQueueMonitor(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	inline logQueueMonitor();
 	//デストラクタ
@@ -123,7 +123,7 @@ private:
 	static std::condition_variable m_cond;//条件変数
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化

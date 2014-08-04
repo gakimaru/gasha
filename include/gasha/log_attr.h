@@ -95,7 +95,7 @@ public:
 	//型
 	typedef std::uint32_t attr_value_type;//ログ属性の値
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 public:
 	//定数
 	static const attr_value_type DEFAULT_ATTR = GASHA_DEFAULT_LOG_ATTR;//デフォルト属性
@@ -199,7 +199,7 @@ public:
 	//コピーコンストラクタ
 	inline logAttr(const logAttr& obj) = delete;
 	//明示的な初期化用コンストラクタ
-	inline logAttr(const explicitInit_type&);
+	inline logAttr(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	logAttr();
 	//デストラクタ
@@ -266,7 +266,7 @@ public:
 public:
 	inline logAttr(logAttr&& obj){}//ムーブコンストラクタ
 	inline logAttr(const logAttr& obj) = delete;//コピーコンストラクタ
-	inline logAttr(const explicitInit_type&){}//明示的な初期化用コンストラクタ
+	inline logAttr(const explicitInit_tag&){}//明示的な初期化用コンストラクタ
 	inline logAttr(){}//デフォルトコンストラクタ
 	inline ~logAttr(){}//デストラクタ
 private:
@@ -277,7 +277,7 @@ private:
 
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

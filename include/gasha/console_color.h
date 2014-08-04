@@ -24,7 +24,7 @@ class consoleColor
 {
 public:
 	//型
-	struct stdColor_type{};//コンソールカラーリセット用構造体
+	struct stdColor_tag{};//コンソールカラーリセット用構造体
 public:
 	//定数
 	//カラー値
@@ -119,7 +119,7 @@ public:
 	//コンストラクタ
 	inline consoleColor(const color_t fore, const color_t back = STANDARD, const attr_t attr = NOATTR);
 	//リセット用コンストラクタ
-	inline consoleColor(const stdColor_type&);
+	inline consoleColor(const stdColor_tag&);
 	//デフォルトコンストラクタ
 	inline consoleColor();
 	//デストラクタ
@@ -163,7 +163,7 @@ public:
 	inline consoleColor(consoleColor&& obj){}//ムーブコンストラクタ
 	inline consoleColor(const consoleColor& obj){}//コピーコンストラクタ
 	inline consoleColor(const color_t fore, const color_t back = STANDARD, const attr_t attr = NOATTR){}//コンストラクタ
-	inline consoleColor(const stdColor_type&){}//リセット用コンストラクタ
+	inline consoleColor(const stdColor_tag&){}//リセット用コンストラクタ
 	inline consoleColor(){}//デフォルトコンストラクタ
 	inline ~consoleColor(){}//デストラクタ
 
@@ -171,7 +171,7 @@ public:
 
 public:
 	//静的フィールド
-	static const stdColor_type stdColor;
+	static const stdColor_tag stdColor;
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

@@ -581,45 +581,45 @@ void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M]);
 //--------------------------------------------------------------------------------
 
 //演算方法指定用の型
-struct wraparound_type{};//ラップアラウンド演算指定用構造体
-struct saturation_type{};//飽和演算指定用構造体
+struct wraparound_tag{};//ラップアラウンド演算指定用構造体
+struct saturation_tag{};//飽和演算指定用構造体
 
 //演算方法指定用の定数
-extern const wraparound_type wraparound;//ラップアラウンド演算指定用
-extern const saturation_type saturation;//飽和演算指定用
+extern const wraparound_tag wraparound;//ラップアラウンド演算指定用
+extern const saturation_tag saturation;//飽和演算指定用
 
 //演算
 //※戻り値は演算後の値
 template<typename T>
 inline T inc(const T value);//インクリメント
 template<typename T>
-inline T inc(const T value, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T inc(const T value, const wraparound_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T inc(const T value, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T inc(const T value, const saturation_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//インクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T dec(const T value);//デクリメント
 template<typename T>
-inline T dec(const T value, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T dec(const T value, const wraparound_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T dec(const T value, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T dec(const T value, const saturation_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//デクリメント ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T add(const T lhs, const T rhs);//加算
 template<typename T>
-inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T add(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T add(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T add(const T lhs, const T rhs, const saturation_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//加算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T sub(const T lhs, const T rhs);//減算
 template<typename T>
-inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T sub(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T sub(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T sub(const T lhs, const T rhs, const saturation_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//減算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T mul(const T lhs, const T rhs);//乗算
 template<typename T>
-inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
+inline T mul(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※ラップアラウンド演算（wrap-around）：演算結果が範囲を超えたらループする
 template<typename T>
-inline T mul(const T lhs, const T rhs, const saturation_type&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
+inline T mul(const T lhs, const T rhs, const saturation_tag&, const T max, const T min = GASHA_ numeric_limits<T>::zero());//乗算 ※飽和演算（saturation）：演算結果が範囲を超えたら限界値を返す
 template<typename T>
 inline T div(const T lhs, const T rhs);//除算
 template<typename T>

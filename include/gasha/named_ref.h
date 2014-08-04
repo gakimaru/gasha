@@ -24,7 +24,6 @@
 #pragma warning(push)//【VC++】ワーニング設定を退避
 #pragma warning(disable: 4530)//【VC++】C4530を抑える
 #include <mutex>//C++11 std::call_once
-#include <functional>//C++11 std::function
 #pragma warning(pop)//【VC++】ワーニング設定を復元
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -54,6 +53,7 @@ namespace named_ref
 
 		//定数
 		static const std::size_t TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ（元の指定サイズ）※扱えるデータの要素数
+		static const std::size_t AUTO_REHASH_RATIO = 25;//自動リハッシュ実行の基準割合(0～100) ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
 
 		//ロックポリシー
 		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
@@ -63,12 +63,6 @@ namespace named_ref
 		//　lock_type 型として再定義する。
 	};
 
-	//--------------------
-	//基本型定義マクロ
-	#define GASHA_DECLARE_OPE_TYPES(OPE_TYPE) \
-		typedef OPE_TYPE ope_type; \
-		typedef typename ope_type::lock_type lock_type;
-
 	//----------------------------------------
 	//名前付きデータ参照クラス
 	template<class OPE_TYPE>
@@ -76,16 +70,18 @@ namespace named_ref
 	{
 	public:
 		//型
-		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
+		typedef OPE_TYPE ope_type;
+		typedef typename ope_type::lock_type lock_type;
 	public:
 		//定数
-		static const std::size_t TABLE_SIZE = ope_type::TABLE_SIZE;
+		static const std::size_t TABLE_SIZE = ope_type::TABLE_SIZE;//テーブルサイズ
+		static const std::size_t AUTO_REHASH_RATIO = ope_type::AUTO_REHASH_RATIO;//自動リハッシュ実行の基準割合
 	public:
 		//型
-		struct explicitInit_type{};//明示的な初期化用構造体
-		typedef GASHA_ wraparound_type wraparound_type;//ラップアラウンド演算指定用構造体
-		typedef GASHA_ saturation_type saturation_type;//飽和演算指定用構造体
-		struct readonly_type{};//読み取り専用指定用構造体
+		struct explicitInit_tag{};//明示的な初期化用構造体
+		typedef GASHA_ wraparound_tag wraparound_tag;//ラップアラウンド演算指定用構造体
+		typedef GASHA_ saturation_tag saturation_tag;//飽和演算指定用構造体
+		struct readonly_tag{};//読み取り専用指定用構造体
 		//--------------------
 		//参照情報
 		enum refAccess_type//参照情報へのアクセス種別
@@ -121,13 +117,13 @@ namespace named_ref
 			template<typename T>
 			inline refInfo(const GASHA_ crc32_t name_crc, T& value);
 			template<typename T>
-			inline refInfo(const GASHA_ crc32_t name_crc, T& value, const wraparound_type&, const T& max, const T& min);
+			inline refInfo(const GASHA_ crc32_t name_crc, T& value, const wraparound_tag&, const T& max, const T& min);
 			template<typename T>
-			inline refInfo(const GASHA_ crc32_t name_crc, T& value, const saturation_type&, const T& max, const T& min);
+			inline refInfo(const GASHA_ crc32_t name_crc, T& value, const saturation_tag&, const T& max, const T& min);
 			template<typename T>
 			inline refInfo(const GASHA_ crc32_t name_crc, const T& value);
 			template<typename T>
-			inline refInfo(const GASHA_ crc32_t name_crc, const T& value, const readonly_type&);
+			inline refInfo(const GASHA_ crc32_t name_crc, const T& value, const readonly_tag&);
 			//デフォルトコンストラクタ
 			inline refInfo();
 			//デストラクタ
@@ -203,6 +199,7 @@ namespace named_ref
 		struct tableOpe : public GASHA_ hash_table::baseOpe<tableOpe, TABLE_SIZE, refInfo, GASHA_ crc32_t>
 		{
 			typedef typename table<OPE_TYPE>::lock_type lock_type;//ロック型
+			static const std::size_t AUTO_REHASH_RATIO = table<OPE_TYPE>::AUTO_REHASH_RATIO;//自動リハッシュ実行の基準割合
 		};
 		//ハッシュテーブル型
 		typedef GASHA_ hash_table::container<tableOpe> table_type;
@@ -438,23 +435,23 @@ namespace named_ref
 		//※ラップアラウンド演算用
 		//※max, min は、sizeof(T) <= sizeof(void*) なら内部に保持し、sizeof(T) > sizeof(void*) なら参照を保持する点に注意。
 		template<typename T>
-		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T&& max, const T&& min);
+		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_tag&, const T&& max, const T&& min);
 		template<typename T>
-		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T& max, const T& min);
+		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_tag&, const T& max, const T& min);
 		template<typename T>
-		inline bool regist(const char* name, T& ref, const wraparound_type&, const T&& max, const T&& min);
+		inline bool regist(const char* name, T& ref, const wraparound_tag&, const T&& max, const T&& min);
 		template<typename T>
-		inline bool regist(const char* name, T& ref, const wraparound_type&, const T& max, const T& min);
+		inline bool regist(const char* name, T& ref, const wraparound_tag&, const T& max, const T& min);
 		//※飽和演算用
 		//※max, min は、sizeof(T) <= sizeof(void*) なら内部に保持し、sizeof(T) > sizeof(void*) なら参照を保持する点に注意。
 		template<typename T>
-		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T&& max, const T&& min);
+		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_tag&, const T&& max, const T&& min);
 		template<typename T>
-		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T& max, const T& min);
+		inline bool regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_tag&, const T& max, const T& min);
 		template<typename T>
-		inline bool regist(const char* name, T& ref, const saturation_type&, const T&& max, const T&& min);
+		inline bool regist(const char* name, T& ref, const saturation_tag&, const T&& max, const T&& min);
 		template<typename T>
-		inline bool regist(const char* name, T& ref, const saturation_type&, const T& max, const T& min);
+		inline bool regist(const char* name, T& ref, const saturation_tag&, const T& max, const T& min);
 		//※読み取り専用
 		template<typename T>
 		inline bool regist(const GASHA_ crc32_t name_crc, const T& ref);
@@ -462,9 +459,9 @@ namespace named_ref
 		inline bool regist(const char* name, const T& ref);
 		//※読み取り専用
 		template<typename T>
-		inline bool regist(const GASHA_ crc32_t name_crc, const T& ref, const readonly_type&);
+		inline bool regist(const GASHA_ crc32_t name_crc, const T& ref, const readonly_tag&);
 		template<typename T>
-		inline bool regist(const char* name, const T& ref, const readonly_type&);
+		inline bool regist(const char* name, const T& ref, const readonly_tag&);
 		//データ登録解除
 		//※登録解除できた場合は true を返し、未登録などの理由で登録解除できなかった場合は false を返す。
 		inline bool unregist(const GASHA_ crc32_t name_crc);
@@ -516,7 +513,7 @@ namespace named_ref
 #endif//GASHA_HASH_TABLE_ENABLE_REVERSE_ITERATOR
 	public:
 		//明示的な初期化用コンストラクタ
-		inline table(const explicitInit_type&);
+		inline table(const explicitInit_tag&);
 		//デフォルトコンストラクタ
 		inline table();
 		//デストラクタ
@@ -526,14 +523,14 @@ namespace named_ref
 		table_type* m_refTable;//ハッシュテーブル（参照）
 	private:
 		//静的フィールド
-		static std::once_flag m_initialized;//ハッシュテーブル初期化済み
+		static std::once_flag m_initialized;//テーブル初期化済み
 		static char m_refTableBuff[];//ハッシュテーブル（バッファ）
 	public:
 		//静的フィールド
-		static const explicitInit_type explicitInit;//明示的な初期化指定用
-		static const wraparound_type wraparound;//ラップアラウンド演算指定用
-		static const saturation_type saturation;//飽和演算指定用
-		static const readonly_type readonly;//読み取り専用指定用
+		static const explicitInit_tag explicitInit;//明示的な初期化指定用
+		static const wraparound_tag wraparound;//ラップアラウンド演算指定用
+		static const saturation_tag saturation;//飽和演算指定用
+		static const readonly_tag readonly;//読み取り専用指定用
 	};
 }//namespace named_ref
 

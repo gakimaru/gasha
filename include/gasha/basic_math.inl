@@ -501,7 +501,7 @@ inline T inc(const T value)
 	return new_value;
 }
 template<typename T>
-inline T inc(const T value, const wraparound_type&, const T max, const T min)
+inline T inc(const T value, const wraparound_tag&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value < max)
@@ -511,7 +511,7 @@ inline T inc(const T value, const wraparound_type&, const T max, const T min)
 	return new_value;
 }
 template<typename T>
-inline T inc(const T value, const saturation_type&, const T max, const T min)
+inline T inc(const T value, const saturation_tag&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value < max)
@@ -528,7 +528,7 @@ inline T dec(const T value)
 	return new_value;
 }
 template<typename T>
-inline T dec(const T value, const wraparound_type&, const T max, const T min)
+inline T dec(const T value, const wraparound_tag&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value > min)
@@ -538,7 +538,7 @@ inline T dec(const T value, const wraparound_type&, const T max, const T min)
 	return new_value;
 }
 template<typename T>
-inline T dec(const T value, const saturation_type&, const T max, const T min)
+inline T dec(const T value, const saturation_tag&, const T max, const T min)
 {
 	T new_value = value;
 	if (new_value > min)
@@ -555,7 +555,7 @@ inline T add(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
+inline T add(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
@@ -576,7 +576,7 @@ inline T add(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	return new_value;
 }
 template<typename T>
-inline T add(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
+inline T add(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value += rhs;
@@ -594,7 +594,7 @@ inline T sub(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
+inline T sub(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
@@ -615,7 +615,7 @@ inline T sub(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	return new_value;
 }
 template<typename T>
-inline T sub(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
+inline T sub(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value -= rhs;
@@ -633,7 +633,7 @@ inline T mul(const T lhs, const T rhs)
 	return new_value;
 }
 template<typename T>
-inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, const T min)
+inline T mul(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	const T value_range = range<T>(max, min);
@@ -654,7 +654,7 @@ inline T mul(const T lhs, const T rhs, const wraparound_type&, const T max, cons
 	return new_value;
 }
 template<typename T>
-inline T mul(const T lhs, const T rhs, const saturation_type&, const T max, const T min)
+inline T mul(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
 {
 	T new_value = lhs;
 	new_value *= rhs;

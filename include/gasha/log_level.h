@@ -229,7 +229,7 @@ class logLevelContainer
 	friend class _private::regSpecialLogLevel;
 public:
 	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 	//--------------------
 	//イテレータ宣言
 	class iterator;
@@ -514,7 +514,7 @@ private:
 	static void initializeOnce();
 public:
 	//明示的な初期化用コンストラクタ
-	inline logLevelContainer(const explicitInit_type&);
+	inline logLevelContainer(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	inline logLevelContainer();
 	//デストラクタ
@@ -557,7 +557,7 @@ public:
 	inline void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* new_console){}
 	inline void replaceEachConsole(const logLevel::purpose_type purpose, iConsole* src_console, iConsole* new_console){}//置き換え元のコンソールを指定する場合
 public:
-	inline logLevelContainer(const explicitInit_type&){}//明示的な初期化用コンストラクタ
+	inline logLevelContainer(const explicitInit_tag&){}//明示的な初期化用コンストラクタ
 	inline logLevelContainer(){}//デフォルトコンストラクタ
 	inline ~logLevelContainer(){}//デストラクタ
 
@@ -565,7 +565,7 @@ public:
 
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 //----------------------------------------

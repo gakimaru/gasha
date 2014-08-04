@@ -285,7 +285,7 @@ inline logMask::logMask(logMask&& obj) :
 }
 
 //明示的な初期化用コンストラクタ
-inline logMask::logMask(const explicitInit_type&) :
+inline logMask::logMask(const explicitInit_tag&) :
 	m_refType(isGlobal),
 	m_maskRef(&m_globalMask),
 	m_prevTlsMask(nullptr)

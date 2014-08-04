@@ -111,7 +111,7 @@ public:
 	};
 public:
 	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 public:
 	//クラス／構造体宣言
 	struct strPoolInfo;
@@ -157,6 +157,7 @@ public:
 	struct strPoolOpe : public GASHA_ hash_table::baseOpe<strPoolOpe, STR_POOL_TABLE_SIZE, strPoolInfo, GASHA_ crc32_t>
 	{
 		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
+		static const std::size_t AUTO_REHASH_RATIO = 0;//自動リハッシュなし ※削除しないのでリハッシュ不要
 
 		//キーを取得
 		inline static key_type getKey(const value_type& value){ return value.m_strCrc; }
@@ -534,6 +535,7 @@ public:
 	struct threadInfoOpe : public GASHA_ hash_table::baseOpe<threadInfoOpe, THREAD_INFO_TABLE_SIZE, threadInfo, GASHA_ crc32_t>
 	{
 		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
+		static const std::size_t AUTO_REHASH_RATIO = 0;//自動リハッシュなし ※削除しないのでリハッシュ不要
 
 	#ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 		
@@ -644,7 +646,7 @@ private:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline profiler(const explicitInit_type&);
+	inline profiler(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	profiler();
 	//デストラクタ
@@ -684,7 +686,7 @@ public:
 	inline std::size_t getProfileInfo(const GASHA_ threadId& thread_id, profileInfo* array, const std::size_t max_size, const profileOrder_type order = descOfMaxPeriodicTime){ return 0; }//プロファイル情報を取得
 	inline void clear(){}//クリア
 public:
-	inline profiler(const explicitInit_type&){}//明示的な初期化用コンストラクタ
+	inline profiler(const explicitInit_tag&){}//明示的な初期化用コンストラクタ
 	inline profiler(){}//デフォルトコンストラクタ
 	inline ~profiler(){}//デストラクタ
 
@@ -692,7 +694,7 @@ public:
 
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

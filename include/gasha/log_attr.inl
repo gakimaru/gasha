@@ -162,7 +162,7 @@ inline logAttr::logAttr(logAttr&& obj) :
 
 
 //明示的な初期化用コンストラクタ
-inline logAttr::logAttr(const explicitInit_type&) :
+inline logAttr::logAttr(const explicitInit_tag&) :
 	m_refType(isGlobal),
 	m_attrRef(&m_globalAttr),
 	m_prevTlsAttr(nullptr)

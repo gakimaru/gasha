@@ -71,7 +71,7 @@ inline void logQueue::resume()
 }
 
 //明示的な初期化用コンストラクタ
-inline logQueue::logQueue(const explicitInit_type&)
+inline logQueue::logQueue(const explicitInit_tag&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};

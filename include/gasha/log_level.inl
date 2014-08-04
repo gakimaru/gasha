@@ -195,7 +195,7 @@ inline logLevel::info* logLevelContainer::getInfo(const logLevel::level_type val
 }
 
 //明示的な初期化用コンストラクタ
-inline logLevelContainer::logLevelContainer(const explicitInit_type&)
+inline logLevelContainer::logLevelContainer(const explicitInit_tag&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
 }

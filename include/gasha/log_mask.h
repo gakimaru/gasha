@@ -43,7 +43,7 @@ public:
 	typedef GASHA_ logPurpose::purpose_type purpose_type;//ログ用途の値
 	typedef GASHA_ logLevel::level_type level_type;//ログレベルの値
 	typedef GASHA_ logCategory::category_type category_type;//ログカテゴリの値
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途数
@@ -449,7 +449,7 @@ public:
 	//コピーコンストラクタ
 	inline logMask(const logMask& obj) = delete;
 	//明示的な初期化用コンストラクタ
-	inline logMask(const explicitInit_type&);
+	inline logMask(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	logMask();
 	//デストラクタ
@@ -537,7 +537,7 @@ public:
 public:
 	inline logMask(logMask&& obj){}//ムーブコンストラクタ
 	inline logMask(const logMask& obj) = delete;//コピーコンストラクタ
-	inline logMask(const explicitInit_type&){}//明示的な初期化用コンストラクタ
+	inline logMask(const explicitInit_tag&){}//明示的な初期化用コンストラクタ
 	inline logMask(){}//デフォルトコンストラクタ
 	inline ~logMask(){}//デストラクタ
 private:
@@ -548,7 +548,7 @@ private:
 
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

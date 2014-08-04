@@ -95,7 +95,7 @@ namespace named_ref
 	{}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const wraparound_type&, const T& max, const T& min) :
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const wraparound_tag&, const T& max, const T& min) :
 		m_nameCrc(name_crc),
 		m_typeInfo(&typeid(T)),
 		m_accessType(WRITABLE_WRAPAROUND),
@@ -107,7 +107,7 @@ namespace named_ref
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const saturation_type&, const T& max, const T& min) :
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, T& value, const saturation_tag&, const T& max, const T& min) :
 		m_nameCrc(name_crc),
 		m_typeInfo(&typeid(T)),
 		m_accessType(WRITABLE_SATURATION),
@@ -129,7 +129,7 @@ namespace named_ref
 	{}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, const T& value, const readonly_type&) :
+	inline table<OPE_TYPE>::refInfo::refInfo(const GASHA_ crc32_t name_crc, const T& value, const readonly_tag&) :
 		m_nameCrc(name_crc),
 		m_typeInfo(&typeid(T)),
 		m_accessType(READ_ONLY),
@@ -279,7 +279,7 @@ namespace named_ref
 #define GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc) \
 	GASHA_SIMPLE_ASSERT(info != nullptr, "name_crc(0x%08x) is not registered.", name_crc); \
 	GASHA_SIMPLE_ASSERT(info->m_typeInfo && *info->m_typeInfo == typeid(T), "name_crc(0x%08x)'s type and T are different types.(%s and %s)", name_crc, info->m_typeInfo->name(), typeid(T).name()); \
-	GASHA_SIMPLE_ASSERT(info->m_ref != nullptr && info->m_accessType != READ_ONLY, "name_crc(0x%08x) has not reference for write operatuib.", name_crc);
+	GASHA_SIMPLE_ASSERT(info->m_ref != nullptr && info->m_accessType != READ_ONLY, "name_crc(0x%08x) has not reference for write operation.", name_crc);
 
 	//登録済みチェック
 	template<class OPE_TYPE>
@@ -467,8 +467,10 @@ namespace named_ref
 	{
 		const refInfo* info = m_refTable->at(name_crc);
 		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-		auto lock = info->m_lock.lockSharedScoped();
-		return *reinterpret_cast<const T*>(info->m_ref);
+		{
+			auto lock = info->m_lock.lockSharedScoped();
+			return *reinterpret_cast<const T*>(info->m_ref);
+		}
 	}
 	template<class OPE_TYPE>
 	template<typename T>
@@ -484,8 +486,10 @@ namespace named_ref
 	{
 		const refInfo* info = m_refTable->at(name_crc);
 		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-		auto lock = info->m_lock.lockScoped();
-		*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
+		{
+			auto lock = info->m_lock.lockScoped();
+			*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
+		}
 	}
 	template<class OPE_TYPE>
 	template<typename T>
@@ -501,10 +505,12 @@ namespace named_ref
 	{
 		const refInfo* info = m_refTable->at(name_crc);
 		GASHA_NAMED_REF_ASSERT_FOR_WRITE_OPERATION(info, name_crc);
-		auto lock = info->m_lock.lockScoped();
-		const T before_value = *reinterpret_cast<const T*>(info->m_ref);
-		*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
-		return before_value;
+		{
+			auto lock = info->m_lock.lockScoped();
+			const T before_value = *reinterpret_cast<const T*>(info->m_ref);
+			*const_cast<T*>(reinterpret_cast<const T*>(info->m_ref)) = value;
+			return before_value;
+		}
 	}
 	template<class OPE_TYPE>
 	template<typename T>
@@ -729,8 +735,10 @@ namespace named_ref
 	{
 		const refInfo* info = m_refTable->at(name_crc);
 		GASHA_NAMED_REF_ASSERT_FOR_READ_OPERATION(info, name_crc);
-		auto lock = info->m_lock.lockSharedScoped();
-		return ope(*reinterpret_cast<const T*>(info->m_ref), rhs);
+		{
+			auto lock = info->m_lock.lockSharedScoped();
+			return ope(*reinterpret_cast<const T*>(info->m_ref), rhs);
+		}
 	}
 	template<class OPE_TYPE>
 	template<typename T>
@@ -895,7 +903,7 @@ namespace named_ref
 	//※ラップアラウンド演算用
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T&& max, const T&& min)
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_tag&, const T&& max, const T&& min)
 	{
 		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
 		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, wraparound, max, min);
@@ -903,21 +911,21 @@ namespace named_ref
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_type&, const T&& max, const T&& min)
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_tag&, const T&& max, const T&& min)
 	{
 		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
 		return regist(GASHA_ calcCRC32(name), ref, wraparound, max, min);
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_type&, const T& max, const T& min)
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const wraparound_tag&, const T& max, const T& min)
 	{
 		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, wraparound, max, min);
 		return info ? true : false;
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_type&, const T& max, const T& min)
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const wraparound_tag&, const T& max, const T& min)
 	{
 		return regist(GASHA_ calcCRC32(name), ref, wraparound, max, min);
 	}
@@ -925,7 +933,7 @@ namespace named_ref
 	//※飽和演算用
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T&& max, const T&& min)
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_tag&, const T&& max, const T&& min)
 	{
 		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
 		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, saturation, max, min);
@@ -933,21 +941,21 @@ namespace named_ref
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_type&, const T&& max, const T&& min)
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_tag&, const T&& max, const T&& min)
 	{
 		static_assert(sizeof(T) <= sizeof(void*), "max/min must been lvalue reference.");
 		return regist(GASHA_ calcCRC32(name), ref, saturation, max, min);
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_type&, const T& max, const T& min)
+	inline bool table<OPE_TYPE>::regist(const GASHA_ crc32_t name_crc, T& ref, const saturation_tag&, const T& max, const T& min)
 	{
 		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, saturation, max, min);
 		return info ? true : false;
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_type&, const T& max, const T& min)
+	inline bool table<OPE_TYPE>::regist(const char* name, T& ref, const saturation_tag&, const T& max, const T& min)
 	{
 		return regist(GASHA_ calcCRC32(name), ref, saturation, max, min);
 	}
@@ -970,14 +978,14 @@ namespace named_ref
 	//※読み取り専用
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const crc32_t name_crc, const T& ref, const readonly_type&)
+	inline bool table<OPE_TYPE>::regist(const crc32_t name_crc, const T& ref, const readonly_tag&)
 	{
 		const refInfo* info = m_refTable->emplace(name_crc, name_crc, ref, readonly);
 		return info ? true : false;
 	}
 	template<class OPE_TYPE>
 	template<typename T>
-	inline bool table<OPE_TYPE>::regist(const char* name, const T& ref, const readonly_type&)
+	inline bool table<OPE_TYPE>::regist(const char* name, const T& ref, const readonly_tag&)
 	{
 		return regist(GASHA_ calcCRC32(name), ref, readonly);
 	}
@@ -1107,7 +1115,7 @@ namespace named_ref
 
 	//明示的な初期化用コンストラクタ
 	template<class OPE_TYPE>
-	inline table<OPE_TYPE>::table(const typename table<OPE_TYPE>::explicitInit_type&)
+	inline table<OPE_TYPE>::table(const typename table<OPE_TYPE>::explicitInit_tag&)
 	{
 		explicitInitialize();
 	}

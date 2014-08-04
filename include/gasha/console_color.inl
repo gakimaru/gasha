@@ -111,7 +111,7 @@ inline consoleColor::consoleColor(const consoleColor::color_t fore, const consol
 {}
 
 //リセット用コンストラクタ
-inline consoleColor::consoleColor(const stdColor_type&) :
+inline consoleColor::consoleColor(const stdColor_tag&) :
 	m_fore(STANDARD),
 	m_back(STANDARD),
 	m_attr(NOATTR)
