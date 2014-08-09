@@ -15,7 +15,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
-#include <gasha/allocator_adapter.h>//アロケータアダプター
+#include <gasha/allocator_adapter.h>//アロケータアダプタ
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -70,7 +70,7 @@ public:
 	inline size_type poolRemain() const { return m_poolSize - m_usingPoolSize; }//残りのプール数
 
 public:
-	//アロケータアダプター取得
+	//アロケータアダプタ取得
 	inline GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>> adapter(){ GASHA_ allocatorAdapter<poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:

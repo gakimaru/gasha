@@ -238,7 +238,7 @@ namespace priority_queue
 		{
 		public:
 			//型
-			typedef container container_adapter_type;//コンテナアダプター型
+			typedef container container_adapter_type;//コンテナアダプタ型
 			typedef typename container_adapter_type::node_type node_type;//ノード型
 			typedef typename container_adapter_type::status_t status_t;//ステータス型
 			typedef typename container_adapter_type::priority_type priority_type;//優先度型

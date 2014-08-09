@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // archive/output_archive_adapter.h
-// アーカイブ/アーカイブ書き込みアダプタークラス【宣言部】
+// アーカイブ/アーカイブ書き込みアダプタクラス【宣言部】
 //
 // Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/archive/archive_adapter_base.h>//アーカイブ/アーカイブアダプター基底クラス
+#include <gasha/archive/archive_adapter_base.h>//アーカイブ/アーカイブアダプタ基底クラス
 #include <gasha/serialization/type_ctrl_base.h>//アーカイブ/型操作基底クラス
 #include <gasha/archive/results.h>//アーカイブ/処理結果
 
@@ -25,11 +25,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace archive
 {
 	//--------------------------------------------------------------------------------
-	//アーカイブ/アーカイブ書き込みアダプタークラス
+	//アーカイブ/アーカイブ書き込みアダプタクラス
 	//--------------------------------------------------------------------------------
 
 	//--------------------
-	//アーカイブ書き込みアダプタークラス
+	//アーカイブ書き込みアダプタクラス
 	class outputArchiveAdapter : public GASHA_ archive::archiveAdapterBase
 	{
 		template<class FORMAT>

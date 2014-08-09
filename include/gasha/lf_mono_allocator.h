@@ -14,7 +14,7 @@
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
 #include <gasha/memory.h>//メモリ操作：adjustStaticAlign, adjustAlign()
-#include <gasha/allocator_adapter.h>//アロケータアダプター
+#include <gasha/allocator_adapter.h>//アロケータアダプタ
 
 #include <cstddef>//std::size_t
 #include <cstdint>//C++11 std::uint32_t
@@ -42,7 +42,7 @@ public:
 	inline bool isAllocated() const { return m_size.load() > 0; }//アロケート中か？
 
 public:
-	//アロケータアダプター取得
+	//アロケータアダプタ取得
 	inline GASHA_ allocatorAdapter<lfMonoAllocator> adapter(){ GASHA_ allocatorAdapter<lfMonoAllocator> adapter(*this, name(), mode()); return adapter; }
 
 public:

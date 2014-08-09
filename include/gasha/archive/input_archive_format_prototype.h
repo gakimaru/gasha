@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/archive/archive_format_base.h>//アーカイブ/アーカイブフォーマット基底クラス
-#include <gasha/archive/input_archive_adapter.h>//アーカイブ/アーカイブ読み込みアダプター
+#include <gasha/archive/input_archive_adapter.h>//アーカイブ/アーカイブ読み込みアダプタ
 #include <gasha/serialization/item_info_base.h>//アーカイブ/データ項目情報基底クラス
 #include <gasha/serialization/version.h>//シリアライズ/バージョン
 

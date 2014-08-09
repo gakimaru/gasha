@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
-#include <gasha/allocator_adapter.h>//アロケータアダプター
+#include <gasha/allocator_adapter.h>//アロケータアダプタ
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -73,7 +73,7 @@ public:
 	inline size_type remain() const;//残りサイズ（バイト数）
 
 public:
-	//アロケータアダプター取得
+	//アロケータアダプタ取得
 	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:

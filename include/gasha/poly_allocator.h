@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/i_allocator_adapter.h>//アロケータアダプターインターフェース
+#include <gasha/i_allocator_adapter.h>//アロケータアダプタインターフェース
 #include <gasha/std_allocator.h>//標準アロケータ
 #include <gasha/chrono.h>//時間処理ユーティリティ
 
@@ -82,10 +82,10 @@ struct debugAllocationObserver
 	//delete時のコールバック関数
 	std::function<void(const iAllocatorAdapter& adapter, const void* p, const deleteMethod_type method, const debugAllocationInfo* info)> m_atDelete;
 	
-	//アロケータアダプター変更時のコールバック関数 
+	//アロケータアダプタ変更時のコールバック関数 
 	std::function<void(const iAllocatorAdapter& adapter, const iAllocatorAdapter& next_adapter)> m_atChangeAllocator;
 
-	//アロケータアダプター復帰時のコールバック関数 
+	//アロケータアダプタ復帰時のコールバック関数 
 	std::function<void(const iAllocatorAdapter& adapter, const iAllocatorAdapter& prev_adapter)> m_atReturnAllocator;
 
 	//コンストラクタ
@@ -121,8 +121,8 @@ public:
 	//アクセッサ
 	inline const char* name() const;//アロケータ名
 	inline const char* mode() const;//アロケータの実装モード名
-	inline const GASHA_ iAllocatorAdapter* adapter() const;//アダプター
-	inline GASHA_ iAllocatorAdapter* adapter();//アダプター
+	inline const GASHA_ iAllocatorAdapter* adapter() const;//アダプタ
+	inline GASHA_ iAllocatorAdapter* adapter();//アダプタ
 
 public:
 	//オペレータ
@@ -160,11 +160,11 @@ private:
 	//コールバック
 	void callbackAtNew(void *p, std::size_t size, const GASHA_ newMethod_type method);
 	void callbackAtDelete(void *p, const GASHA_ deleteMethod_type method);
-	void callbackAtChangeAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& next_adapter);//アロケータアダプター変更時のコールバック
-	void callbackAtReturnAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& prev_adapter);//アロケータアダプター復帰時のコールバック
+	void callbackAtChangeAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& next_adapter);//アロケータアダプタ変更時のコールバック
+	void callbackAtReturnAllocator(const GASHA_ iAllocatorAdapter& adapter, const GASHA_ iAllocatorAdapter& prev_adapter);//アロケータアダプタ復帰時のコールバック
 
 public:
-	//標準アロケータアダプターの強制初期化
+	//標準アロケータアダプタの強制初期化
 	//※二重に呼び出されても問題ないので public
 	void initlaizeStdAllocatorAdapter();
 
@@ -172,7 +172,7 @@ public:
 	//コンストラクタ
 	inline polyAllocator(GASHA_ iAllocatorAdapter& adapter);
 	//デフォルトコンストラクタ
-	//※現在設定されているアダプター、および、観察者を扱う。
+	//※現在設定されているアダプタ、および、観察者を扱う。
 	inline polyAllocator();
 	//デストラクタ
 	inline ~polyAllocator();
@@ -185,13 +185,13 @@ private:
 	bool m_isChanged;//アロケータ変更時
 	//静的フィールド
 	static GASHA_ stdAllocator<> m_stdAllocator;//標準アロケータ
-	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプター
-	static thread_local  GASHA_ iAllocatorAdapter* m_adapter;//現在のアロケータアダプター
+	static GASHA_ allocatorAdapter<GASHA_ stdAllocator<>> m_stdAllocatorAdapter;//標準アロケータアダプタ
+	static thread_local  GASHA_ iAllocatorAdapter* m_adapter;//現在のアロケータアダプタ
 	static thread_local const GASHA_ debugAllocationObserver* m_observer;//現在の観察者
 	static thread_local std::size_t m_align;//現在のアラインメントサイズ（一時利用のみ）
 	static thread_local const GASHA_ debugAllocationInfo* m_debugInfo;//現在のデバッグ情報（一時利用のみ）
 #else//GASHA_ENABLE_POLY_ALLOCATOR
-	static GASHA_ iAllocatorAdapter* m_dummyAdapter;//アロケータアダプターダミー
+	static GASHA_ iAllocatorAdapter* m_dummyAdapter;//アロケータアダプタダミー
 #endif//GASHA_ENABLE_POLY_ALLOCATOR
 };
 
