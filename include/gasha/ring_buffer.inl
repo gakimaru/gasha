@@ -583,7 +583,7 @@ namespace ring_buffer
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value) const
 	{
 		iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, typename ope_type::predicateForFind());
 		return found;
@@ -591,7 +591,7 @@ namespace ring_buffer
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class PREDICATE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate) const
 	{
 		iterator found = GASHA_ iteratorLinearSearchValue(begin(), end(), value, predicate);
 		return found;
@@ -599,7 +599,7 @@ namespace ring_buffer
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate) const
 	{
 		iterator found = GASHA_ iteratorLinearSearch(begin(), end(), predicate);
 		return found;
@@ -609,7 +609,7 @@ namespace ring_buffer
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value) const
 	{
 		iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, typename ope_type::comparisonForSearch());
 		return found;
@@ -617,7 +617,7 @@ namespace ring_buffer
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class COMPARISON>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison) const
 	{
 		iterator found = GASHA_ iteratorBinarySearchValue(begin(), end(), value, comparison);
 		return found;
@@ -625,7 +625,7 @@ namespace ring_buffer
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class COMPARISON>
-	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
+	inline typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison) const
 	{
 		iterator found = GASHA_ iteratorBinarySearch(begin(), end(), comparison);
 		return found;

@@ -508,9 +508,9 @@ namespace dynamic_array
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value) const
 	{
-		value_type* found = GASHA_ linearSearchValue(_refFront(), m_size, value, typename ope_type::predicateForFind());
+		const value_type* found = GASHA_ linearSearchValue(_refFront(), m_size, value, typename ope_type::predicateForFind());
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;
@@ -518,9 +518,9 @@ namespace dynamic_array
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class PREDICATE>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate) const
 	{
-		value_type* found = GASHA_ linearSearchValue(_refFront(), m_size, value, predicate);
+		const value_type* found = GASHA_ linearSearchValue(_refFront(), m_size, value, predicate);
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;
@@ -528,9 +528,9 @@ namespace dynamic_array
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate) const
 	{
-		value_type* found = GASHA_ linearSearch(_refFront(), m_size, predicate);
+		const value_type* found = GASHA_ linearSearch(_refFront(), m_size, predicate);
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;
@@ -539,9 +539,9 @@ namespace dynamic_array
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value) const
 	{
-		value_type* found = GASHA_ binarySearchValue(_refFront(), m_size, value, typename ope_type::comparisonForSearch());
+		const value_type* found = GASHA_ binarySearchValue(_refFront(), m_size, value, typename ope_type::comparisonForSearch());
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;
@@ -549,9 +549,9 @@ namespace dynamic_array
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison) const
 	{
-		value_type* found = GASHA_ binarySearchValue(_refFront(), m_size, value, comparison);
+		const value_type* found = GASHA_ binarySearchValue(_refFront(), m_size, value, comparison);
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;
@@ -559,9 +559,9 @@ namespace dynamic_array
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binary_search(COMPARISON comparison) const
 	{
-		value_type* found = GASHA_ binarySearch(_refFront(), m_size, comparison);
+		const value_type* found = GASHA_ binarySearch(_refFront(), m_size, comparison);
 		const index_type index = found ? _refIndex(found) : INVALID_INDEX;
 		iterator ite(*this, index);
 		return ite;

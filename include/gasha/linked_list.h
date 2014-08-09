@@ -669,15 +669,15 @@ namespace linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value);
+		iterator findValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate);
+		iterator findValue(const V& value, PREDICATE predicate) const;
 		
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate);
+		iterator find(PREDICATE predicate) const;
 
 	#ifdef GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//二分探索
@@ -686,14 +686,14 @@ namespace linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binarySearchValue(const V& value);
+		iterator binarySearchValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison);
+		iterator binarySearchValue(const V& value, COMPARISON comparison) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
-		iterator binarySearch(COMPARISON comparison);
+		iterator binarySearch(COMPARISON comparison) const;
 	#endif//GASHA_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド

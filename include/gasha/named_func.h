@@ -32,6 +32,15 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //名前付き関数
+//※関数／ラムダ式／関数オブジェクト／クラスメンバー関数に対して、名前を付けて管理。
+//※名前付き関数（テーブル）自体はシングルトンとして振る舞う。
+//※名前と戻り値の型、引数の型さえ分かっていれば、extern や include なしに、どこからでも呼び出し可能。
+//※設定により、グループごとの共有ロック／排他ロックが可能。
+//※操作用構造体を複数用意することにより、複数のインスタンスを作成可能。ロック制御の有無はインスタンスごとに設定。
+//※グループ設定により、特定グループの情報の列挙が可能。
+//※デバッグ機能の作成に便利。デバッグメニューから所定の機能を実行するなど。
+//※スクリプトの処理に便利。スクリプト用の関数を一つ一つ作成せずに、名前付き関数を透過的に呼び出すことで生産性を向上できる。
+//　また、名前付きデータ参照で取得したオブジェクトに対して、名前付き関数でメンバー関数を呼び出すような利用法も可能。
 //--------------------------------------------------------------------------------
 
 namespace named_func
@@ -93,7 +102,7 @@ namespace named_func
 		};
 		//関数情報
 		struct groupInfo;
-		struct funcInfoKey
+		struct infoKey
 		{
 			//フィールド
 			union
@@ -109,23 +118,23 @@ namespace named_func
 			//キャストオペレータ
 			inline operator infoKey_type() const { return m_key; }
 			//比較オペレータ
-			inline bool operator<(const funcInfoKey& rhs) const;
-			inline bool operator==(const funcInfoKey& rhs) const;
-			inline bool operator!=(const funcInfoKey& rhs) const;
+			inline bool operator<(const infoKey& rhs) const;
+			inline bool operator==(const infoKey& rhs) const;
+			inline bool operator!=(const infoKey& rhs) const;
 			inline bool operator==(const infoKey_type& rhs) const;
 			//ムーブ／コピーオペレータ
-			inline funcInfoKey& operator=(funcInfoKey&& rhs);
-			inline funcInfoKey& operator=(const funcInfoKey& rhs);
+			inline infoKey& operator=(infoKey&& rhs);
+			inline infoKey& operator=(const infoKey& rhs);
 			//ムーブ／コピーコンストラクタ
-			inline funcInfoKey(funcInfoKey&& obj);
-			inline funcInfoKey(const funcInfoKey& obj);
+			inline infoKey(infoKey&& obj);
+			inline infoKey(const infoKey& obj);
 			//コンストラクタ
-			inline funcInfoKey(GASHA_ crc32_t group_name_crc, GASHA_ crc32_t name_crc);
+			inline infoKey(GASHA_ crc32_t group_name_crc, GASHA_ crc32_t name_crc);
 		};
 		struct funcInfo
 		{
 			//フィールド
-			funcInfoKey m_key;//ハッシュキー
+			infoKey m_key;//ハッシュキー
 			const std::type_info* m_retTypeInfo;//型情報 ※戻り値の型
 			const std::type_info* m_objTypeInfo;//型情報 ※オブジェクトの型 ※nullptrならオブジェクト用ではない
 			func_type m_funcType;//関数種別
@@ -136,7 +145,7 @@ namespace named_func
 			inline bool operator<(const funcInfo& rhs) const;
 			inline bool operator==(const funcInfo& rhs) const;
 			inline bool operator!=(const funcInfo& rhs) const;
-			inline bool operator==(const funcInfoKey& rhs) const;
+			inline bool operator==(const infoKey& rhs) const;
 			inline bool operator==(const infoKey_type& rhs) const;
 
 			//コンストラクタ
@@ -157,7 +166,7 @@ namespace named_func
 		//※テーブル操作時は、関数グループテーブルのロックを使用
 		struct funcTableOpe : public GASHA_ hash_table::baseOpe<funcTableOpe, FUNC_TABLE_SIZE, funcInfo, infoKey_type>
 		{
-			static const std::size_t AUTO_REHASH_RATIO = 0;//自動リハッシュなし ※リハッシュすると、オブジェクトのポインタがずれて、連結リストに問題が生じる可能性がある
+			static const std::size_t AUTO_REHASH_RATIO = 0;//自動リハッシュなし ※リハッシュすると、連結リストに問題が生じるので禁止
 		};
 		//ハッシュテーブル型
 		typedef GASHA_ hash_table::container<funcTableOpe> funcTable_type;
@@ -272,7 +281,9 @@ namespace named_func
 		inline void _objProc(OBJ& obj, const std::function<void()>& func, const writableFunc_tag&, LOCK_TYPE&& lock_obj, Tx&&... args);
 	public:
 		//関数呼び出し
-		//※戻り値のスコープを抜けるまで、const関数なら共有ロックを、書き込み可能関数なら排他ロックを取得する
+		//※グループごとにロックオブジェクトを保持し、呼び出し中はconst関数なら共有ロックを、書き込み可能関数なら排他ロックを取得する。
+		//※グループが違っていれば、同じ関数名を使用可能（名前付き定数とは異なる）。
+		//※グループ不要時は 0 または nullptr を指定する。この場合、ロック制御を行わないので注意。
 		//※戻り値あり
 		//※const関数
 		template<typename RET, typename... Tx>
@@ -296,8 +307,10 @@ namespace named_func
 		template<typename... Tx>
 		inline void proc(const char* group_name, const char* name, Tx&&... args);
 		//オブジェクトメンバー関数呼び出し
-		//※オブジェクトを引数指定する
-		//※戻り値のスコープを抜けるまで、const関数なら共有ロックを、書き込み可能関数なら排他ロックを取得する
+		//※オブジェクトを引数指定する。
+		//※グループごとにロックオブジェクトを保持し、呼び出し中はconst関数なら共有ロックを、書き込み可能関数なら排他ロックを取得する。
+		//※グループが違っていれば、同じ関数名を使用可能（名前付き定数とは異なる）。
+		//※グループ不要時は 0 または nullptr を指定する。この場合、ロック制御を行わないので注意。
 		//※戻り値あり
 		//※const関数
 		template<typename RET, class OBJ, typename... Tx>
@@ -358,6 +371,9 @@ namespace named_func
 	public:
 		//関数登録
 		//※登録できた場合は true を返し、既に登録済みなどの理由で登録できなかった場合は false を返す。
+		//※グループごとにロックオブジェクトを保持し、関数呼び出し時にロック制御を行う。
+		//※グループが違っていれば、同じ関数名を使用可能（名前付き定数とは異なる）。
+		//※グループ不要時は 0 または nullptr を指定する。この場合、ロック制御を行わないので注意。
 		template<class FUNC_SPEC, class FUNCTION>
 		bool regist(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function);
 		template<class FUNC_SPEC, class FUNCTION>
@@ -368,6 +384,10 @@ namespace named_func
 		template<class FUNC_SPEC, class FUNCTION>
 		inline bool regist(const char* group_name, const char* name, FUNCTION function, const constFunc_tag&);
 		//オブジェクトメンバー関数登録
+		//※登録できた場合は true を返し、既に登録済みなどの理由で登録できなかった場合は false を返す。
+		//※グループごとにロックオブジェクトを保持し、関数呼び出し時にロック制御を行う。
+		//※グループが違っていれば、同じ関数名を使用可能（名前付き定数とは異なる）。
+		//※グループ不要時は 0 または nullptr を指定する。この場合、ロック制御を行わないので注意。
 		template<class FUNC_SPEC, class FUNCTION>
 		bool registObj(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function);
 		template<class FUNC_SPEC, class FUNCTION>
@@ -463,6 +483,18 @@ namespace named_func
 		static const writableFunc_tag writableFunc;//書き込み可能関数指定用
 	};
 }//namespace named_func
+
+//--------------------
+//クラスの別名
+//※ネームスペースの指定を省略してクラスを使用するための別名
+
+//名前付き関数操作用テンプレート構造体
+template<class OPE_TYPE, std::size_t _GROUP_TABLE_SIZE, std::size_t _TABLE_SIZE>
+using namedFunc_baseOpe = named_func::baseOpe<OPE_TYPE, _GROUP_TABLE_SIZE, _TABLE_SIZE>;
+
+//名前付き関数
+template<class OPE_TYPE>
+using namedFunc = named_func::table<OPE_TYPE>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

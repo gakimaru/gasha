@@ -15,6 +15,7 @@
 #include <gasha/hash_table.h>//開番地法ハッシュテーブル
 #include <gasha/rb_tree.h>//赤黒木
 #include <gasha/singly_linked_list.h>//片方向連結リスト
+#include <gasha/str_pool.h>//文字列プール
 #include <gasha/crc32.h>//CRC32計算
 #include <gasha/chrono.h>//時間処理ユーティリティ
 #include <gasha/thread_id.h>//スレッドID
@@ -22,14 +23,12 @@
 #ifdef GASHA_PROFILER_WITHOUT_THREAD_SAFE
 
 //非スレッドセーフ
-#include <gasha/stack_allocator.h>//スタックアロケータ
 #include <gasha/pool_allocator.h>//プールアロケータ
 #include <gasha/dummy_shared_lock.h>//ダミー共有ロック
 
 #else//GASHA_PROFILER_WITHOUT_THREAD_SAFE
 
 //スレッドセーフ
-#include <gasha/lf_stack_allocator.h>//ロックフリースタックアロケータ
 #include <gasha/lf_pool_allocator.h>//ロックフリープールアロケータ
 #include <gasha/shared_spin_lock.h>//共有スピンロック
 
@@ -114,7 +113,6 @@ public:
 	struct explicitInit_tag{};//明示的な初期化用構造体
 public:
 	//クラス／構造体宣言
-	struct strPoolInfo;
 	class timeInfo;
 	class profileInfo;
 	class threadInfo;
@@ -122,49 +120,8 @@ public:
 	struct threadInfoOpe;
 	struct threadInfoListOpe;
 public:
-	//----------------------------------------
-	//文字列プール情報
-	struct strPoolInfo
-	{
-		//フィールド
-		GASHA_ crc32_t m_strCrc;//文字列のCRC（キー）
-		const char* m_str;//文字列
-	public:
-		//比較オペレータ
-		inline bool operator==(const strPoolInfo& rhs) const { return m_strCrc == rhs.m_strCrc; }
-		inline bool operator!=(const strPoolInfo& rhs) const { return m_strCrc != rhs.m_strCrc; }
-		inline bool operator<(const strPoolInfo& rhs) const { return m_strCrc < rhs.m_strCrc; }
-	public:
-		//ムーブオペレータ
-		inline strPoolInfo& operator=(strPoolInfo&& rhs);
-		//コピーオペレータ
-		inline strPoolInfo& operator=(const strPoolInfo& rhs);
-	public:
-		//ムーブコンストラクタ
-		inline strPoolInfo(strPoolInfo&& obj);
-		//コピーコンストラクタ
-		inline strPoolInfo(const strPoolInfo& obj);
-		//コンストラクタ
-		inline strPoolInfo(const GASHA_ crc32_t str_crc, const char* str);
-		//デフォルトコンストラクタ
-		inline strPoolInfo();
-		//デストラクタ
-		inline ~strPoolInfo();
-	};
-public:
-	//----------------------------------------
-	//文字列プール操作型
-	struct strPoolOpe : public GASHA_ hash_table::baseOpe<strPoolOpe, STR_POOL_TABLE_SIZE, strPoolInfo, GASHA_ crc32_t>
-	{
-		typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
-		static const std::size_t AUTO_REHASH_RATIO = 0;//自動リハッシュなし ※削除しないのでリハッシュ不要
-
-		//キーを取得
-		inline static key_type getKey(const value_type& value){ return value.m_strCrc; }
-	};
-public:
-	typedef GASHA_PROFILER_STACK_ALLOCATOR_POLICY<STR_POOL_BUFF_SIZE> strPoolBuff_type;//文字列プールバッファ型
-	typedef GASHA_ hash_table::container<strPoolOpe> strPoolTable_type;//文字列プールテーブル型
+	typedef GASHA_PROFILER_LOCK_POLICY lock_type;//ロック型
+	typedef GASHA_ strPool<STR_POOL_BUFF_SIZE, STR_POOL_TABLE_SIZE, lock_type> strPool_type;//文字列プール型
 public:
 	//----------------------------------------
 	//処理時間情報
@@ -459,7 +416,7 @@ public:
 	private:
 		profileInfo* regProfile(const GASHA_ crc32_t name_crc, const char* name, profileInfoPool_type& pool);//プロファイル情報登録
 		inline profileInfo* refProfile(const GASHA_ crc32_t name_crc);//プロファイル情報参照
-		bool add(const strPoolInfo& pooled_name, const GASHA_ sec_t elapsed_time, profileInfoPool_type& pool);//処理時間加算
+		bool add(const GASHA_ crc32_t name_crc, const char* name, const GASHA_ sec_t elapsed_time, profileInfoPool_type& pool);//処理時間加算
 		bool sumup(const profileSumup_type type);//処理時間集計
 	public:
 		//プロファイル情報を取得
@@ -632,9 +589,9 @@ public:
 
 private:
 	//文字列プール登録
-	const strPoolInfo* regStrPool(const char* name, GASHA_ crc32_t& name_crc);
+	const char* regStrPool(const char* name, GASHA_ crc32_t& name_crc);
 	//文字列プール参照
-	inline const strPoolInfo* refStrPool(const GASHA_ crc32_t name_crc);
+	inline const char* refStrPool(const GASHA_ crc32_t name_crc);
 	//スレッド情報登録
 	threadInfo* regThread(const GASHA_ threadId& thread_id);
 	//スレッド情報参照
@@ -655,8 +612,7 @@ public:
 private:
 	//静的フィールド
 	static std::once_flag m_initialized;//初期化済み
-	static strPoolBuff_type m_strPoolBuff;//文字列プールバッファ
-	static strPoolTable_type m_strPoolTable;//文字列プールテーブル
+	static strPool_type m_strPool;//文字列プール
 	static profileInfoPool_type m_profileInfoPool;//プロファイル情報プール
 	static threadInfoTable_type m_threadInfoTable;//スレッド情報テーブル
 	static threadInfoLink_type m_threadInfoList;//スレッド情報連結リスト

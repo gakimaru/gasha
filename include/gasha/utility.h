@@ -66,6 +66,24 @@ template<typename T1, typename T2, typename T3, typename... Tx> inline constexpr
 template<typename T1, typename T2>
 inline constexpr T1 minIf(const T1 n1, const T2 n2, const T1 null_value = static_cast<T1>(0));
 
+//----------------------------------------
+//nullptr以外の値を取得
+//----------------------------------------
+
+//値が一つの nvl()
+//※nullptr 時は "(null)" を返す
+template<typename T> inline constexpr const T* nvl(const T* n1);
+
+//値が二つの nvl()
+template<typename T> inline constexpr const T* nvl(const T* n1, const T* n2);
+template<typename T> inline constexpr T* nvl(T* n1, T* n2);
+
+//値が三つ以上の nvl() : 再帰処理
+//※テンプレートの特殊化ではなく、関数のオーバーロードで再起を終結させる
+//nxが空になったら、引数が二つの関数が呼ばれる
+template<typename T, typename... Tx> inline constexpr const T* nvl(const T* n1, const T* n2, const T* n3, const Tx&... nx);
+template<typename T, typename... Tx> inline constexpr T* nvl(T* n1, T* n2, T* n3, Tx&&... nx);
+
 //--------------------------------------------------------------------------------
 //値の交換
 //--------------------------------------------------------------------------------

@@ -22,7 +22,6 @@
 #include <gasha/simple_assert.h>//シンプルアサーション
 
 #include <utility>//C++11 std::move(), std::forward()
-#include <cstddef>//std::intptr_t
 #include <type_traits>//C++11 std::is_const
 
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
@@ -41,49 +40,49 @@ namespace named_func
 
 	//オペレータ
 	template<class OPE_TYPE>
-	inline bool table<OPE_TYPE>::funcInfoKey::operator<(const typename table<OPE_TYPE>::funcInfoKey& rhs) const
+	inline bool table<OPE_TYPE>::infoKey::operator<(const typename table<OPE_TYPE>::infoKey& rhs) const
 	{
 		return m_key < rhs.m_key;
 	}
 	template<class OPE_TYPE>
-	inline bool table<OPE_TYPE>::funcInfoKey::operator==(const typename table<OPE_TYPE>::funcInfoKey& rhs) const
+	inline bool table<OPE_TYPE>::infoKey::operator==(const typename table<OPE_TYPE>::infoKey& rhs) const
 	{
 		return m_key == rhs.m_key;
 	}
 	template<class OPE_TYPE>
-	inline bool table<OPE_TYPE>::funcInfoKey::operator!=(const typename table<OPE_TYPE>::funcInfoKey& rhs) const
+	inline bool table<OPE_TYPE>::infoKey::operator!=(const typename table<OPE_TYPE>::infoKey& rhs) const
 	{
 		return m_key != rhs.m_key;
 	}
 	template<class OPE_TYPE>
-	inline bool table<OPE_TYPE>::funcInfoKey::operator==(const typename table<OPE_TYPE>::infoKey_type& rhs) const
+	inline bool table<OPE_TYPE>::infoKey::operator==(const typename table<OPE_TYPE>::infoKey_type& rhs) const
 	{
 		return m_key == rhs;
 	}
 	//ムーブ／コピーオペレータ
 	template<class OPE_TYPE>
-	inline typename table<OPE_TYPE>::funcInfoKey& table<OPE_TYPE>::funcInfoKey::operator=(typename table<OPE_TYPE>::funcInfoKey&& rhs)
+	inline typename table<OPE_TYPE>::infoKey& table<OPE_TYPE>::infoKey::operator=(typename table<OPE_TYPE>::infoKey&& rhs)
 	{
 		m_key = rhs.m_key;
 		return *this;
 	}
 	template<class OPE_TYPE>
-	inline typename table<OPE_TYPE>::funcInfoKey& table<OPE_TYPE>::funcInfoKey::operator=(const typename table<OPE_TYPE>::funcInfoKey& rhs)
+	inline typename table<OPE_TYPE>::infoKey& table<OPE_TYPE>::infoKey::operator=(const typename table<OPE_TYPE>::infoKey& rhs)
 	{
 		m_key = rhs.m_key; return *this;
 	}
 	//ムーブ／コピーコンストラクタ
 	template<class OPE_TYPE>
-	inline table<OPE_TYPE>::funcInfoKey::funcInfoKey(typename table<OPE_TYPE>::funcInfoKey&& obj) :
+	inline table<OPE_TYPE>::infoKey::infoKey(typename table<OPE_TYPE>::infoKey&& obj) :
 		m_key(obj.m_key)
 	{}
 	template<class OPE_TYPE>
-	inline table<OPE_TYPE>::funcInfoKey::funcInfoKey(const typename table<OPE_TYPE>::funcInfoKey& obj) :
+	inline table<OPE_TYPE>::infoKey::infoKey(const typename table<OPE_TYPE>::infoKey& obj) :
 		m_key(obj.m_key)
 	{}
 	//コンストラクタ
 	template<class OPE_TYPE>
-	inline table<OPE_TYPE>::funcInfoKey::funcInfoKey(GASHA_ crc32_t group_name_crc, GASHA_ crc32_t name_crc) :
+	inline table<OPE_TYPE>::infoKey::infoKey(GASHA_ crc32_t group_name_crc, GASHA_ crc32_t name_crc) :
 		m_groupNameCrc(group_name_crc),
 		m_nameCrc(name_crc)
 	{}
@@ -105,7 +104,7 @@ namespace named_func
 		return m_key != rhs.m_key;
 	}
 	template<class OPE_TYPE>
-	inline bool table<OPE_TYPE>::funcInfo::operator==(const typename table<OPE_TYPE>::funcInfoKey& rhs) const
+	inline bool table<OPE_TYPE>::funcInfo::operator==(const typename table<OPE_TYPE>::infoKey& rhs) const
 	{
 		return m_key == rhs;
 	}
@@ -233,7 +232,7 @@ namespace named_func
 	//※関数操作用
 #define GASHA_NAMED_FUNC_ASSERT_FOR_FUNCTION(RET, group_info, func_info, group_name_crc, name_crc) \
 	GASHA_SIMPLE_ASSERT(func_info != nullptr, "name_crc(0x%08x:0x%08x) is not registered.", group_name_crc, name_crc); \
-	GASHA_SIMPLE_ASSERT(func_info->m_retTypeInfo, "name_crc(0x%08x:0x%08x)' has not return-types.", group_name_crc, name_crc); \
+	GASHA_SIMPLE_ASSERT(func_info->m_retTypeInfo, "name_crc(0x%08x:0x%08x)' has not return-type.", group_name_crc, name_crc); \
 	if (func_info->m_retTypeInfo) \
 	{ \
 		GASHA_SIMPLE_ASSERT(*func_info->m_retTypeInfo == typeid(RET), "name_crc(0x%08x:0x%08x)'s type and RET are different return-types.(%s and %s)", group_name_crc, name_crc, func_info->m_retTypeInfo->name(), typeid(RET).name()); \
@@ -244,7 +243,7 @@ namespace named_func
 	//※オブジェクト操作用
 #define GASHA_NAMED_FUNC_ASSERT_FOR_OBJ(RET, OBJ, group_info, func_info, group_name_crc, name_crc) \
 	GASHA_SIMPLE_ASSERT(func_info != nullptr, "name_crc(0x%08x:0x%08x) is not registered.", group_name_crc, name_crc); \
-	GASHA_SIMPLE_ASSERT(func_info->m_retTypeInfo, "name_crc(0x%08x:0x%08x)' has not return-types.", group_name_crc, name_crc); \
+	GASHA_SIMPLE_ASSERT(func_info->m_retTypeInfo, "name_crc(0x%08x:0x%08x)' has not return-type.", group_name_crc, name_crc); \
 	if (func_info->m_retTypeInfo) \
 	{ \
 		GASHA_SIMPLE_ASSERT(*func_info->m_retTypeInfo == typeid(RET), "name_crc(0x%08x:0x%08x)'s type and RET are different return-types.(%s and %s)", group_name_crc, name_crc, func_info->m_retTypeInfo->name(), typeid(RET).name()); \
@@ -261,7 +260,7 @@ namespace named_func
 	template<class OPE_TYPE>
 	inline bool table<OPE_TYPE>::isRegistered(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		return m_funcTable->at(key.m_key) != nullptr;
 	}
 	template<class OPE_TYPE>
@@ -275,7 +274,7 @@ namespace named_func
 	template<typename RET>
 	inline bool table<OPE_TYPE>::isConstType(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		const funcInfo* info = m_funcTable->at(key.m_key);
 		return info && info->m_func && info->m_funcType == CONST_FUNCTION && info->m_retTypeInfo && *info->m_retTypeInfo == typeid(RET) && !info->m_objTypeInfo;
 	}
@@ -289,7 +288,7 @@ namespace named_func
 	template<typename RET, class OBJ>
 	inline bool table<OPE_TYPE>::isConstObj(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		const funcInfo* info = m_funcTable->at(key.m_key);
 		return info && info->m_func && info->m_funcType == CONST_FUNCTION && info->m_retTypeInfo && *info->m_retTypeInfo == typeid(RET) && *info->m_objTypeInfo == typeid(OBJ);
 	}
@@ -305,7 +304,7 @@ namespace named_func
 	template<typename RET>
 	inline bool table<OPE_TYPE>::isWritable(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		const funcInfo* info = m_funcTable->at(key.m_key);
 		return info && info->m_func && info->m_funcType != CONST_FUNCTION && info->m_retTypeInfo && *info->m_retTypeInfo == typeid(RET) && !info->m_objTypeInfo;
 	}
@@ -319,7 +318,7 @@ namespace named_func
 	template<typename RET, class OBJ>
 	inline bool table<OPE_TYPE>::isWritableObj(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		const funcInfo* info = m_funcTable->at(key.m_key);
 		return info && info->m_func && info->m_funcType != CONST_FUNCTION && info->m_retTypeInfo && *info->m_retTypeInfo == typeid(RET) && *info->m_objTypeInfo == typeid(OBJ);
 	}
@@ -408,7 +407,7 @@ namespace named_func
 	template<typename RET, typename... Tx>
 	RET table<OPE_TYPE>::func(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args) const
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_FUNCTION(RET, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -427,7 +426,7 @@ namespace named_func
 	template<typename RET, typename... Tx>
 	RET table<OPE_TYPE>::func(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args)
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_FUNCTION(RET, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -457,7 +456,7 @@ namespace named_func
 	template<typename... Tx>
 	void table<OPE_TYPE>::proc(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args) const
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_FUNCTION(void, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -476,7 +475,7 @@ namespace named_func
 	template<typename... Tx>
 	void table<OPE_TYPE>::proc(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args)
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_FUNCTION(void, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -507,7 +506,7 @@ namespace named_func
 	template<typename RET, class OBJ, typename... Tx>
 	RET table<OPE_TYPE>::func(const OBJ& obj, const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args) const
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_OBJ(RET, OBJ, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -526,7 +525,7 @@ namespace named_func
 	template<typename RET, class OBJ, typename... Tx>
 	RET table<OPE_TYPE>::func(OBJ& obj, const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args)
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_OBJ(RET, OBJ, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -556,7 +555,7 @@ namespace named_func
 	template<class OBJ, typename... Tx>
 	void table<OPE_TYPE>::proc(const OBJ& obj, const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args) const
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_OBJ(void, OBJ, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -575,7 +574,7 @@ namespace named_func
 	template<class OBJ, typename... Tx>
 	void table<OPE_TYPE>::proc(OBJ& obj, const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, Tx&&... args)
 	{
-		const groupInfo* group_info = findGroup(group_name_crc);
+		const groupInfo* group_info = group_name_crc == 0 ? nullptr : findGroup(group_name_crc);
 		const funcInfo* func_info = findFunc(group_name_crc, name_crc);
 		GASHA_NAMED_FUNC_ASSERT_FOR_OBJ(void, OBJ, group_info, func_info, group_name_crc, name_crc);
 		if (group_info)
@@ -606,15 +605,12 @@ namespace named_func
 	bool table<OPE_TYPE>::regist(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function)
 	{
 		groupInfo* group_info = nullptr;
-		if (group_name_crc != 0)
-		{
-			group_info = registAndGetGroup(group_name_crc);
-			if (!group_info)
-				return false;
-		}
+		group_info = registAndGetGroup(group_name_crc);
+		if (!group_info)
+			return false;
 		{
 			auto lock = m_groupTable->lockScoped();
-			funcInfoKey key(group_name_crc, name_crc);
+			infoKey key(group_name_crc, name_crc);
 			funcSpec<FUNC_SPEC> spec(function);
 			funcInfo* func_info = m_funcTable->emplace(key.m_key, group_name_crc, name_crc, spec.m_func, writableFunc);
 			if (group_info && func_info)
@@ -634,15 +630,12 @@ namespace named_func
 	bool table<OPE_TYPE>::regist(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function, const constFunc_tag&)
 	{
 		groupInfo* group_info = nullptr;
-		if (group_name_crc != 0)
-		{
-			group_info = registAndGetGroup(group_name_crc);
-			if (!group_info)
-				return false;
-		}
+		group_info = registAndGetGroup(group_name_crc);
+		if (!group_info)
+			return false;
 		{
 			auto lock = m_groupTable->lockScoped();
-			funcInfoKey key(group_name_crc, name_crc);
+			infoKey key(group_name_crc, name_crc);
 			funcSpec<FUNC_SPEC> spec(function);
 			funcInfo* func_info = m_funcTable->emplace(key.m_key, group_name_crc, name_crc, spec.m_func, constFunc);
 			if (group_info && func_info)
@@ -662,15 +655,12 @@ namespace named_func
 	bool table<OPE_TYPE>::registObj(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function)
 	{
 		groupInfo* group_info = nullptr;
-		if (group_name_crc != 0)
-		{
-			group_info = registAndGetGroup(group_name_crc);
-			if (!group_info)
-				return false;
-		}
+		group_info = registAndGetGroup(group_name_crc);
+		if (!group_info)
+			return false;
 		{
 			auto lock = m_groupTable->lockScoped();
-			funcInfoKey key(group_name_crc, name_crc);
+			infoKey key(group_name_crc, name_crc);
 			memberFuncSpec<FUNC_SPEC> spec(function);
 			typename memberFuncSpec<FUNC_SPEC>::object_type* obj_p = nullptr;
 			funcInfo* func_info = m_funcTable->emplace(key.m_key, group_name_crc, name_crc, obj_p, spec.m_func, writableFunc);
@@ -691,15 +681,12 @@ namespace named_func
 	bool table<OPE_TYPE>::registObj(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc, FUNCTION function, const constFunc_tag&)
 	{
 		groupInfo* group_info = nullptr;
-		if (group_name_crc != 0)
-		{
-			group_info = registAndGetGroup(group_name_crc);
-			if (!group_info)
-				return false;
-		}
+		group_info = registAndGetGroup(group_name_crc);
+		if (!group_info)
+			return false;
 		{
 			auto lock = m_groupTable->lockScoped();
-			funcInfoKey key(group_name_crc, name_crc);
+			infoKey key(group_name_crc, name_crc);
 			memberFuncSpec<FUNC_SPEC> spec(function);
 			typename memberFuncSpec<FUNC_SPEC>::object_type* obj_p = nullptr;
 			funcInfo* func_info = m_funcTable->emplace(key.m_key, name_crc, group_name_crc, obj_p, spec.m_func, constFunc);
@@ -875,7 +862,7 @@ namespace named_func
 	inline const typename table<OPE_TYPE>::funcInfo* table<OPE_TYPE>::findFunc(const GASHA_ crc32_t group_name_crc, const GASHA_ crc32_t name_crc) const
 	{
 		auto lock = m_groupTable->lockSharedScoped();
-		funcInfoKey key(group_name_crc, name_crc);
+		infoKey key(group_name_crc, name_crc);
 		return m_funcTable->at(key.m_key);
 	}
 	template<class OPE_TYPE>

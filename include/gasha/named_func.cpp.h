@@ -94,7 +94,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //----------------------------------------
 //明示的なインスタンス化
 
-//開番地法ハッシュテーブルコンテナの明示的なインスタンス化用マクロ
+//名前付き関数の明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_namedFunc(OPE_TYPE) \
 	template class GASHA_ hash_table::container<typename GASHA_ named_func::table<OPE_TYPE>::groupTableOpe>; \
 	template class GASHA_ hash_table::container<typename GASHA_ named_func::table<OPE_TYPE>::funcTableOpe>; \

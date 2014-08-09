@@ -730,7 +730,7 @@ namespace linked_list
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value) const
 	{
 		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, typename ope_type::predicateForFind());
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
@@ -739,7 +739,7 @@ namespace linked_list
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class PREDICATE>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::findValue(const V& value, PREDICATE predicate) const
 	{
 		const node_type* found_node = linearSearchValue<ope_type>(m_first, value, predicate);
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
@@ -748,7 +748,7 @@ namespace linked_list
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class PREDICATE>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::find(PREDICATE predicate) const
 	{
 		const node_type* found_node = linearSearch<ope_type>(m_first, predicate);
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
@@ -760,7 +760,7 @@ namespace linked_list
 	//※探索値指定版
 	template<class OPE_TYPE>
 	template<typename V>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value) const
 	{
 		const node_type* found_node = linked_list::binarySearchValue<ope_type>(m_first, value, typename ope_type::comparisonForSearch());
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
@@ -769,7 +769,7 @@ namespace linked_list
 	//※比較関数＋値指定版
 	template<class OPE_TYPE>
 	template<typename V, class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearchValue(const V& value, COMPARISON comparison) const
 	{
 		const node_type* found_node = linked_list::binarySearchValue<ope_type>(m_first, value, comparison);
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
@@ -778,7 +778,7 @@ namespace linked_list
 	//※比較関数指定版
 	template<class OPE_TYPE>
 	template<class COMPARISON>
-	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearch(COMPARISON comparison)
+	typename container<OPE_TYPE>::iterator container<OPE_TYPE>::binarySearch(COMPARISON comparison) const
 	{
 		const node_type* found_node = linked_list::binarySearch<ope_type>(m_first, comparison);
 		iterator found(*this, const_cast<node_type*>(found_node), found_node == nullptr);
