@@ -61,8 +61,8 @@ inline void stdAllocatorImpl_Align::free(void* p)
 //標準アロケータクラス
 
 //バッファの全体サイズ（バイト数）
-template<class LOCK_TYPE, class IMPL>
-inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::maxSize() const
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline typename stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::size_type stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::maxSize() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -74,8 +74,8 @@ inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE,
 }
 
 //使用中のサイズ（バイト数）
-template<class LOCK_TYPE, class IMPL>
-inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::size() const
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline typename stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::size_type stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::size() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -87,8 +87,8 @@ inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE,
 }
 
 //残りサイズ（バイト数）
-template<class LOCK_TYPE, class IMPL>
-inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE, IMPL>::remain() const
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline typename stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::size_type stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::remain() const
 {
 #ifdef GASHA_HAS_MALLINFO
 	//mallinfoが使える場合
@@ -100,8 +100,8 @@ inline typename stdAllocator<LOCK_TYPE, IMPL>::size_type stdAllocator<LOCK_TYPE,
 }
 
 //メモリ確保
-template<class LOCK_TYPE, class IMPL>
-inline void* stdAllocator<LOCK_TYPE, IMPL>::alloc(const std::size_t size, const std::size_t align)
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline void* stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	void* p = implemnt_type::alloc(size, align);
 #ifdef GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
@@ -113,8 +113,8 @@ inline void* stdAllocator<LOCK_TYPE, IMPL>::alloc(const std::size_t size, const 
 }
 
 //メモリ解放
-template<class LOCK_TYPE, class IMPL>
-inline bool stdAllocator<LOCK_TYPE, IMPL>::free(void* p)
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline bool stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -125,9 +125,9 @@ inline bool stdAllocator<LOCK_TYPE, IMPL>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class LOCK_TYPE, class IMPL>
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
 template<typename T, typename...Tx>
-T* stdAllocator<LOCK_TYPE, IMPL>::newObj(Tx&&... args)
+T* stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -135,9 +135,9 @@ T* stdAllocator<LOCK_TYPE, IMPL>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class LOCK_TYPE, class IMPL>
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
 template<typename T, typename...Tx>
-T* stdAllocator<LOCK_TYPE, IMPL>::newArray(const std::size_t num, Tx&&... args)
+T* stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -154,9 +154,9 @@ T* stdAllocator<LOCK_TYPE, IMPL>::newArray(const std::size_t num, Tx&&... args)
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class LOCK_TYPE, class IMPL>
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
 template<typename T>
-bool stdAllocator<LOCK_TYPE, IMPL>::deleteObj(T* p)
+bool stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -167,9 +167,9 @@ bool stdAllocator<LOCK_TYPE, IMPL>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class LOCK_TYPE, class IMPL>
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
 template<typename T>
-bool stdAllocator<LOCK_TYPE, IMPL>::deleteArray(T* p, const std::size_t num)
+bool stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -185,8 +185,8 @@ bool stdAllocator<LOCK_TYPE, IMPL>::deleteArray(T* p, const std::size_t num)
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE, class IMPL>
-inline bool stdAllocator<LOCK_TYPE, IMPL>::_free(void* p)
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline bool stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::_free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -195,8 +195,8 @@ inline bool stdAllocator<LOCK_TYPE, IMPL>::_free(void* p)
 }
 
 //ポインタが範囲内か判定
-template<class LOCK_TYPE, class IMPL>
-inline bool stdAllocator<LOCK_TYPE, IMPL>::isInUsingRange(void* p)
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline bool stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::isInUsingRange(void* p)
 {
 	return true;//判定できないので常に true を返す
 
@@ -210,13 +210,13 @@ inline bool stdAllocator<LOCK_TYPE, IMPL>::isInUsingRange(void* p)
 }
 
 //コンストラクタ
-template<class LOCK_TYPE, class IMPL>
-inline stdAllocator<LOCK_TYPE, IMPL>::stdAllocator()
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::stdAllocator()
 {}
 
 //デストラクタ
-template<class LOCK_TYPE, class IMPL>
-inline stdAllocator<LOCK_TYPE, IMPL>::~stdAllocator()
+template<class LOCK_POLICY, class IMPLEMENT_POLICY>
+inline stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>::~stdAllocator()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

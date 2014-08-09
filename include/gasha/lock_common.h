@@ -54,35 +54,38 @@ extern const defer_lock_t defer_lock;
 //----------------------------------------
 //コンテキストスイッチ
 
-struct force_switch_t {};//確実なスイッチ
-extern const force_switch_t force_switch;
+struct zeroSleepContextSwitch_tag {};//ゼロスリープでスイッチ
+extern const zeroSleepContextSwitch_tag zeroSleepContextSwitch;
 
-struct short_sleep_switch_t {};//短いスリープでスイッチ
-extern const short_sleep_switch_t short_sleep_switch;
+struct shortSleepContextSwitch_tag {};//短いスリープでスイッチ
+extern const shortSleepContextSwitch_tag shortSleepContextSwitch;
 
-struct yield_switch_t {};//イールド
-extern const yield_switch_t yield_switch;
+struct forceContextSwitch_tag {};//確実なスイッチ
+extern const forceContextSwitch_tag forceContextSwitch;
+
+struct yieldContextSwitch_tag {};//イールド
+extern const yieldContextSwitch_tag yieldContextSwitch;
 
 //コンテキストスイッチ
-inline void contextSwitch();//ゼロスリープでコンテキストスイッチ
-inline void contextSwitch(const short_sleep_switch_t);//短いスリープでスイッチ
-inline void contextSwitch(const force_switch_t);//確実なコンテキストスイッチ
-inline void contextSwitch(const yield_switch_t);//イールド ※実際にはコンテキストスイッチではなく、同じ優先度の他のスレッドに一時的に処理を譲るだけなので注意。
+inline void contextSwitch(const zeroSleepContextSwitch_tag&);//ゼロスリープでコンテキストスイッチ
+inline void contextSwitch(const shortSleepContextSwitch_tag&);//短いスリープでスイッチ
+inline void contextSwitch(const forceContextSwitch_tag&);//確実なコンテキストスイッチ
+inline void contextSwitch(const yieldContextSwitch_tag&);//イールド ※実際にはコンテキストスイッチではなく、同じ優先度の他のスレッドに一時的に処理を譲るだけなので注意。
 
 //デフォルトコンテキストスイッチ
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
-inline void defaultContextSwitch(){ contextSwitch(force_switch); }//確実なスイッチ
+inline void defaultContextSwitch(){ contextSwitch(forceContextSwitch); }//確実なスイッチ
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_FORCE
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
-inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短いスリープでスイッチ
+inline void defaultContextSwitch(){ contextSwitch(shortSleepContextSwitch); }//短いスリープでスイッチ
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
-inline void defaultContextSwitch(){ contextSwitch(yield_switch); }//イールド
+inline void defaultContextSwitch(){ contextSwitch(yieldContextSwitch); }//イールド
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
 #ifdef GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
-inline void defaultContextSwitch(){ contextSwitch(); }//ゼロスリープでコンテキストスイッチ
+inline void defaultContextSwitch(){ contextSwitch(zeroSleepContextSwitch); }//ゼロスリープでコンテキストスイッチ
 #else//GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
-inline void defaultContextSwitch(){ contextSwitch(short_sleep_switch); }//短いスリープでスイッチ
+inline void defaultContextSwitch(){ contextSwitch(shortSleepContextSwitch); }//短いスリープでスイッチ
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_ZERO_SLEEP
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_YIELD
 #endif//GASHA_DEFAULT_CONTEXT_SWITH_IS_SHORT_SLEEP

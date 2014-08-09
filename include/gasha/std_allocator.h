@@ -14,7 +14,7 @@
 //--------------------------------------------------------------------------------
 
 #include <gasha/allocator_common.h>//メモリアロケータ共通設定
-#include <gasha/allocator_adapter.h>//アロケータアダプター
+#include <gasha/allocator_adapter.h>//アロケータアダプタ
 #include <gasha/dummy_lock.h>//ダミーロック
 
 #include <cstddef>//std::size_t
@@ -55,13 +55,13 @@ public:
 //標準アロケータクラス
 //※内部で _aligned_malloc(), _aligned_free() を使用してメモリを確保。
 //※基本的にそのままでスレッドセーフのはずだが、コンパイラによってスレッドセーブでない場合は、ロック型を指定することができる。
-template<class LOCK_TYPE = GASHA_ dummyLock, class IMPL = stdAllocatorImpl_NoAlign>
+template<class LOCK_POLICY = GASHA_ dummyLock, class IMPLEMENT_POLICY = stdAllocatorImpl_NoAlign>
 class stdAllocator
 {
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
-	typedef IMPL implemnt_type;//実装型
+	typedef LOCK_POLICY lock_type;//ロック型
+	typedef IMPLEMENT_POLICY implemnt_type;//実装型
 	typedef std::uint32_t size_type;//サイズ型
 
 public:
@@ -73,8 +73,8 @@ public:
 	inline size_type remain() const;//残りサイズ（バイト数）
 
 public:
-	//アロケータアダプター取得
-	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE, IMPL>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_TYPE, IMPL>> adapter(*this, name(), mode()); return adapter; }
+	//アロケータアダプタ取得
+	inline GASHA_ allocatorAdapter<stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>> adapter(){ GASHA_ allocatorAdapter<stdAllocator<LOCK_POLICY, IMPLEMENT_POLICY>> adapter(*this, name(), mode()); return adapter; }
 
 public:
 	//メソッド
@@ -127,8 +127,8 @@ private:
 //----------------------------------------
 //標準アロケータ別名定義：アライメント対応標準アロケータ
 
-template<class LOCK_TYPE = GASHA_ dummyLock>
-using stdAlignAllocator = stdAllocator<LOCK_TYPE, stdAllocatorImpl_Align>;
+template<class LOCK_POLICY = GASHA_ dummyLock>
+using stdAlignAllocator = stdAllocator<LOCK_POLICY, stdAllocatorImpl_Align>;
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

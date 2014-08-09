@@ -71,7 +71,7 @@ inline std::size_t logWorkBuff::spprintf_halfSized(char* message, std::size_t& p
 }
 
 //明示的な初期化用コンストラクタ
-inline logWorkBuff::logWorkBuff(const explicitInit_type&)
+inline logWorkBuff::logWorkBuff(const explicitInit_tag&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};

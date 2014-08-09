@@ -30,8 +30,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //スタックアロケータクラス
 
 //メモリ確保
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const std::size_t align)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void* stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
@@ -61,8 +61,8 @@ void* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::alloc(const std::size_t size, const
 
 //使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::rewind(void* p)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (!isInUsingRange(p))//正しいポインタか判定
@@ -72,8 +72,8 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(void* p)
 }
 
 //デバッグ情報作成
-template<class LOCK_TYPE, class AUTO_CLEAR>
-std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+std::size_t stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -84,8 +84,8 @@ std::size_t stackAllocator<LOCK_TYPE, AUTO_CLEAR>::debugInfo(char* message, cons
 }
 
 //使用中のサイズと数を取得
-template<class LOCK_TYPE, class AUTO_CLEAR>
-void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& size, typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type& count)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+void stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::getSizeAndCount(typename stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& size, typename stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type& count)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を取得
@@ -94,8 +94,8 @@ void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::getSizeAndCount(typename stackAlloca
 }
 
 //使用中のサイズと数をリセット
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type size, const typename stackAllocator<LOCK_TYPE, AUTO_CLEAR>::size_type count)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::resetSizeAndCount(const typename stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type size, const typename stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::size_type count)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (m_size < size || m_count < count)//現在の値の方が小さい場合は失敗
@@ -107,13 +107,13 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::resetSizeAndCount(const typename sta
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE, class AUTO_CLEAR>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::_free(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::_free(void* p)
 {
 	//メモリ確保数を更新
 	--m_count;
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClear(*this);
 	return true;
 }
@@ -128,16 +128,16 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_stackAllocator() \
 	template class GASHA_ stackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ stackAllocator<LOCK_POLICY>;
 
 //スマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_smartStackAllocator() \
 	template class GASHA_ stackAllocator<GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ stackAllocator<LOCK_TYPE, GASHA_ stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartStackAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ stackAllocator<LOCK_POLICY, GASHA_ stackAllocatorAutoClear>;
 
 #if 0//不要
 //バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
@@ -146,9 +146,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE>; \
 	template class GASHA_ stackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class GASHA_ stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>; \
+	template class GASHA_ stackAllocator<LOCK_POLICY>;
 
 //バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -156,9 +156,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>; \
 	template class GASHA_ stackAllocator<GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
-	template class GASHA_ stackAllocator<LOCK_TYPE, GASHA_ stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ stackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<LOCK_POLICY, GASHA_ stackAllocatorAutoClear>;
 
 //型指定バッファ付きスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -167,10 +167,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ stackAllocator_withBuff<sizeof(T) * _NUM>; \
 	template class GASHA_ stackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class GASHA_ stackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_stackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_POLICY>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY>; \
+	template class GASHA_ stackAllocator<LOCK_POLICY>;
 
 //型指定バッファ付きスマートスタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -179,14 +179,16 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ dummyLock, GASHA_ stackAllocatorAutoClear>; \
 	template class GASHA_ stackAllocator<GASHA_ dummyLock, stackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
-	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE, GASHA_ stackAllocatorAutoClear>; \
-	template class GASHA_ stackAllocator<LOCK_TYPE, stackAllocatorAutoClear>;
+#define GASHA_INSTANCING_smartStackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ stackAllocator_withType<T, _NUM, LOCK_POLICY, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY, GASHA_ stackAllocatorAutoClear>; \
+	template class GASHA_ stackAllocator<LOCK_POLICY, stackAllocatorAutoClear>;
 #endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -226,8 +228,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_STACK_ALLOCATOR_CPP_H
 

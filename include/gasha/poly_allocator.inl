@@ -60,8 +60,8 @@ debugAllocationObserver::debugAllocationObserver():
 //アクセッサ
 inline const char* polyAllocator::name() const{ return m_adapter->name(); };//アロケータ名
 inline const char* polyAllocator::mode() const{ return m_adapter->mode(); };//アロケータの実装モード名
-inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return m_adapter; };//アダプター
-inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return m_adapter; };//アダプター
+inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return m_adapter; };//アダプタ
+inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return m_adapter; };//アダプタ
 
 //オペレータ
 inline const GASHA_ iAllocatorAdapter& polyAllocator::operator*() const { return *m_adapter; }
@@ -79,8 +79,8 @@ inline polyAllocator::operator GASHA_ iAllocatorAdapter&() { return *m_adapter; 
 //アクセッサ
 inline const char* polyAllocator::name() const{ return ""; };//アロケータ名
 inline const char* polyAllocator::mode() const{ return ""; };//アロケータの実装モード名
-inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return nullptr; };//アダプター
-inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return nullptr; };//アダプター
+inline const GASHA_ iAllocatorAdapter* polyAllocator::adapter() const{ return nullptr; };//アダプタ
+inline GASHA_ iAllocatorAdapter* polyAllocator::adapter(){ return nullptr; };//アダプタ
 
 //オペレータ
 inline const GASHA_ iAllocatorAdapter& polyAllocator::operator*() const { return *m_dummyAdapter; }
@@ -176,7 +176,7 @@ inline polyAllocator::polyAllocator(GASHA_ iAllocatorAdapter& adapter) :
 	m_isChanged(true)
 {
 #ifdef GASHA_INCOMPLETE_TLS_INITIALIZER
-	if (!m_adapter)//アダプターが未初期化状態なら、現在のアラインメントサイズも初期化（TLSが正しく初期化できない環境用）
+	if (!m_adapter)//アダプタが未初期化状態なら、現在のアラインメントサイズも初期化（TLSが正しく初期化できない環境用）
 		m_align = DEFAULT_ALIGN;
 #endif//GASHA_INCOMPLETE_TLS_INITIALIZER
 	callbackAtChangeAllocator(*m_adapter, adapter);

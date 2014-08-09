@@ -192,7 +192,7 @@ class logCategoryContainer
 	friend class _private::regSpecialLogCategory;
 public:
 	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 	//--------------------
 	//イテレータ宣言
 	class iterator;
@@ -477,7 +477,7 @@ private:
 	static void initializeOnce();
 public:
 	//明示的な初期化用コンストラクタ
-	inline logCategoryContainer(const explicitInit_type&);
+	inline logCategoryContainer(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	inline logCategoryContainer();
 	//デストラクタ
@@ -516,7 +516,7 @@ public:
 	inline const_reverse_iterator crbegin() const { return reverse_iterator(); }//開始constイテレータを取得
 	inline const_reverse_iterator crend() const { return reverse_iterator(); }//終端constイテレータを取得
 public:
-	inline logCategoryContainer(const explicitInit_type&){}//明示的な初期化用コンストラクタ
+	inline logCategoryContainer(const explicitInit_tag&){}//明示的な初期化用コンストラクタ
 	inline logCategoryContainer(){}//デフォルトコンストラクタ
 	inline ~logCategoryContainer(){}//デストラクタ
 
@@ -524,7 +524,7 @@ public:
 
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 //----------------------------------------

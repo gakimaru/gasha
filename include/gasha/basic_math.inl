@@ -23,6 +23,71 @@
 GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
+//符号判定
+//--------------------------------------------------------------------------------
+
+//----------------------------------------
+//【ランタイム版】符号判定（sign）
+template<typename T>
+inline constexpr int sign(const T value)
+{
+	return
+		value > 0 ? 1 :
+		value < 0 ? -1 :
+		0;
+}
+template<>
+inline constexpr int sign<float>(const float value)
+{
+	return
+		value > 0.f ? 1 :
+		value < 0.f ? -1 :
+		0;
+}
+template<>
+inline constexpr int sign<double>(const double value)
+{
+	return
+		value > 0. ? 1 :
+		value < 0. ? -1 :
+		0;
+}
+template<>
+inline constexpr int sign<bool>(const bool value)
+{
+	return
+		value ? 1 :
+		0;
+}
+
+//--------------------------------------------------------------------------------
+//範囲計算
+//--------------------------------------------------------------------------------
+
+//----------------------------------------
+//【ランタイム版】範囲計算（range）
+template<typename T>
+inline constexpr T range(const T max, const T min)
+{
+	return max - min + static_cast<T>(1);
+}
+template<>
+inline constexpr float range<float>(const float max, const float min)
+{
+	return max - min;
+}
+template<>
+inline constexpr double range<double>(const double max, const double min)
+{
+	return max - min;
+}
+template<>
+inline constexpr bool range<bool>(const bool max, const bool min)
+{
+	return !(max == min);
+}
+
+//--------------------------------------------------------------------------------
 //べき乗
 //--------------------------------------------------------------------------------
 
@@ -416,6 +481,510 @@ void mulLU(T(&mat_result)[N][M], const T(&mat1)[N][NM], const T(&mat2)[NM][M])
 		for (std::size_t j = 0; j < M; ++j)
 			mat_result[i][j] = static_cast<T>(0);
 	_private::_mulLU2<T, N, M, NM, N - 1, M - 1, NM - 1>::calc(mat_result, mat1, mat2);
+}
+
+//--------------------------------------------------------------------------------
+//基本演算
+//--------------------------------------------------------------------------------
+
+#pragma warning(push)//【VC++】ワーニング設定を退避
+#pragma warning(disable: 4068)//【VC++】C4068を抑える
+//#pragma GCC diagnostic push//【GCC】ワーニング設定を退避 ※問題箇所だけワーニングを抑えて復元しても、結局ワーニングが出るのでpush/popしない
+#pragma GCC diagnostic ignored "-Wstrict-overflow"//【GCC】"strict-overflow"を抑える
+
+//演算
+template<typename T>
+inline T inc(const T value)
+{
+	T new_value = value;
+	++new_value;
+	return new_value;
+}
+template<typename T>
+inline T inc(const T value, const wraparound_tag&, const T max, const T min)
+{
+	T new_value = value;
+	if (new_value < max)
+		++new_value;
+	if (new_value > max)
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T inc(const T value, const saturation_tag&, const T max, const T min)
+{
+	T new_value = value;
+	if (new_value < max)
+		++new_value;
+	if (new_value > max)
+		new_value = max;
+	return new_value;
+}
+template<typename T>
+inline T dec(const T value)
+{
+	T new_value = value;
+	--new_value;
+	return new_value;
+}
+template<typename T>
+inline T dec(const T value, const wraparound_tag&, const T max, const T min)
+{
+	T new_value = value;
+	if (new_value > min)
+		--new_value;
+	if (new_value < min)
+		new_value = max;
+	return new_value;
+}
+template<typename T>
+inline T dec(const T value, const saturation_tag&, const T max, const T min)
+{
+	T new_value = value;
+	if (new_value > min)
+		--new_value;
+	if (new_value < min)
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T add(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value += rhs;
+	return new_value;
+}
+template<typename T>
+inline T add(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	const T value_range = range<T>(max, min);
+	new_value += rhs;
+	if (value_range > GASHA_ numeric_limits<T>::zero())
+	{
+		while (rhs > GASHA_ numeric_limits<T>::zero() && new_value < min)
+			new_value -= value_range;
+		while (rhs < GASHA_ numeric_limits<T>::zero() && new_value > max)
+			new_value += value_range;
+		while (new_value > max)
+			new_value -= value_range;
+		while (new_value < min)
+			new_value += value_range;
+	}
+	else
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T add(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	new_value += rhs;
+	if (new_value > max || (new_value < lhs && rhs > GASHA_ numeric_limits<T>::zero()))
+		new_value = max;
+	if (new_value < min || (new_value > lhs && rhs < GASHA_ numeric_limits<T>::zero()))
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T sub(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value -= rhs;
+	return new_value;
+}
+template<typename T>
+inline T sub(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	const T value_range = range<T>(max, min);
+	new_value -= rhs;
+	if (value_range > GASHA_ numeric_limits<T>::zero())
+	{
+		while (rhs > GASHA_ numeric_limits<T>::zero() && new_value > max)
+			new_value += value_range;
+		while (rhs < GASHA_ numeric_limits<T>::zero() && new_value < min)
+			new_value -= value_range;
+		while (new_value > max)
+			new_value -= value_range;
+		while (new_value < min)
+			new_value += value_range;
+	}
+	else
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T sub(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	new_value -= rhs;
+	if (new_value > max || (new_value < lhs && rhs < GASHA_ numeric_limits<T>::zero()))
+		new_value = max;
+	if (new_value < min || (new_value > lhs && rhs > GASHA_ numeric_limits<T>::zero()))
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T mul(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value *= rhs;
+	return new_value;
+}
+template<typename T>
+inline T mul(const T lhs, const T rhs, const wraparound_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	const T value_range = range<T>(max, min);
+	new_value *= rhs;
+	if (value_range > GASHA_ numeric_limits<T>::zero())
+	{
+		while (sign<T>(lhs) == sign<T>(rhs) && new_value < min)
+			new_value -= value_range;
+		while (sign<T>(lhs) != sign<T>(rhs) && new_value > max)
+			new_value += value_range;
+		while (new_value > max)
+			new_value -= value_range;
+		while (new_value < min)
+			new_value += value_range;
+	}
+	else
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T mul(const T lhs, const T rhs, const saturation_tag&, const T max, const T min)
+{
+	T new_value = lhs;
+	new_value *= rhs;
+	if (new_value > max || (new_value < lhs && sign<T>(lhs) == sign<T>(rhs)))
+		new_value = max;
+	if (new_value < min || (new_value > lhs && sign<T>(lhs) != sign<T>(rhs)))
+		new_value = min;
+	return new_value;
+}
+template<typename T>
+inline T div(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value /= rhs;
+	return new_value;
+}
+template<typename T>
+inline T mod(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value %= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitAnd(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value &= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitOr(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value |= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitXor(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value ^= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitNot(const T value)
+{
+	const T new_value = ~value;
+	return new_value;
+}
+template<typename T>
+inline T lShift(const T lhs, const int rhs)
+{
+	T new_value = lhs;
+	new_value <<= rhs;
+	return new_value;
+}
+template<typename T>
+inline T rShift(const T lhs, const int rhs)
+{
+	T new_value = lhs;
+	new_value >>= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitOn(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value |= rhs;
+	return new_value;
+}
+template<typename T>
+inline T bitOff(const T lhs, const T rhs)
+{
+	T new_value = lhs;
+	new_value &= (~rhs);
+	return new_value;
+}
+
+//#pragma GCC diagnostic pop//【GCC】ワーニング設定を復元
+#pragma warning(pop)//【VC++】ワーニング設定を復元
+
+//※ポリシー用
+template<typename T>
+inline T inc_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy)
+{
+	return inc<T>(lhs);
+}
+template<typename T>
+inline T inc_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+{
+	return inc<T>(lhs, wraparound, max, min);
+}
+template<typename T>
+inline T inc_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+{
+	return inc<T>(lhs, saturation, max, min);
+}
+template<typename T>
+inline T dec_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy)
+{
+	return dec<T>(lhs);
+}
+template<typename T>
+inline T dec_wraparound_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+{
+	return dec<T>(lhs, wraparound, max, min);
+}
+template<typename T>
+inline T dec_saturation_policy(const T lhs, const T rhs_dummy, const T max, const T min)
+{
+	return dec<T>(lhs, saturation, max, min);
+}
+template<typename T>
+inline T add_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return add<T>(lhs, rhs);
+}
+template<typename T>
+inline T add_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return add<T>(lhs, rhs, wraparound, max, min);
+}
+template<typename T>
+inline T add_saturation_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return add<T>(lhs, rhs, saturation, max, min);
+}
+template<typename T>
+inline T sub_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return sub<T>(lhs, rhs);
+}
+template<typename T>
+inline T sub_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return sub<T>(lhs, rhs, wraparound, max, min);
+}
+template<typename T>
+inline T sub_saturation_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return sub<T>(lhs, rhs, saturation, max, min);
+}
+template<typename T>
+inline T mul_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return mul<T>(lhs, rhs);
+}
+template<typename T>
+inline T mul_wraparound_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return mul<T>(lhs, rhs, wraparound, max, min);
+}
+template<typename T>
+inline T mul_saturation_policy(const T lhs, const T rhs, const T max, const T min)
+{
+	return mul<T>(lhs, rhs, saturation, max, min);
+}
+template<typename T>
+inline T div_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return div<T>(lhs, rhs);
+}
+template<typename T>
+inline T mod_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return mod<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitAnd_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return bitAnd<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitOr_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return bitOr<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitXor_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return bitXor<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitNot_policy(const T lhs, const T rhs_dummy, const T max_dummy, const T min_dummy)
+{
+	return bitNot<T>(lhs);
+}
+template<typename T>
+inline T lShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy)
+{
+	return lShift<T>(lhs, rhs);
+}
+template<typename T>
+inline T rShift_policy(const T lhs, const int rhs, const T max_dummy, const T min_dummy)
+{
+	return rShift<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitOn_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return bitOn<T>(lhs, rhs);
+}
+template<typename T>
+inline T bitOff_policy(const T lhs, const T rhs, const T max_dummy, const T min_dummy)
+{
+	return bitOff<T>(lhs, rhs);
+}
+
+//比較
+template<typename T>
+inline bool eq(const T lhs, const T rhs)
+{
+	return lhs == rhs;
+}
+template<typename T>
+inline bool ne(const T lhs, const T rhs)
+{
+	return lhs != rhs;
+}
+template<typename T>
+inline bool gt(const T lhs, const T rhs)
+{
+	return lhs > rhs;
+}
+template<typename T>
+inline bool ge(const T lhs, const T rhs)
+{
+	return lhs >= rhs;
+}
+template<typename T>
+inline bool lt(const T lhs, const T rhs)
+{
+	return lhs < rhs;
+}
+template<typename T>
+inline bool le(const T lhs, const T rhs)
+{
+	return lhs <= rhs;
+}
+template<typename T>
+inline bool isOn(const T lhs, const T rhs)
+{
+	return (lhs & rhs) != GASHA_ numeric_limits<T>::zero();
+}
+template<typename T>
+inline bool isOff(const T lhs, const T rhs)
+{
+	return (lhs & rhs) == GASHA_ numeric_limits<T>::zero();
+}
+template<typename T>
+inline bool logicalAnd(const T lhs, const T rhs)
+{
+	return lhs && rhs;
+}
+template<typename T>
+inline bool logicalOr(const T lhs, const T rhs)
+{
+	return lhs || rhs;
+}
+template<typename T>
+inline bool isTrue(const T value)
+{
+	return value != GASHA_ numeric_limits<T>::zero();
+}
+template<typename T>
+inline bool isFalse(const T value)
+{
+	return value == GASHA_ numeric_limits<T>::zero();
+}
+//※ポリシー用
+template<typename T>
+inline bool eq_policy(const T lhs, const T rhs)
+{
+	return eq(lhs, rhs);
+}
+template<typename T>
+inline bool ne_policy(const T lhs, const T rhs)
+{
+	return ne(lhs, rhs);
+}
+template<typename T>
+inline bool gt_policy(const T lhs, const T rhs)
+{
+	return gt(lhs, rhs);
+}
+template<typename T>
+inline bool ge_policy(const T lhs, const T rhs)
+{
+	return ge(lhs, rhs);
+}
+template<typename T>
+inline bool lt_policy(const T lhs, const T rhs)
+{
+	return lt(lhs, rhs);
+}
+template<typename T>
+inline bool le_policy(const T lhs, const T rhs)
+{
+	return le(lhs, rhs);
+}
+template<typename T>
+inline bool isOn_policy(const T lhs, const T rhs)
+{
+	return isOn(lhs, rhs);
+}
+template<typename T>
+inline bool isOff_policy(const T lhs, const T rhs)
+{
+	return isOff(lhs, rhs);
+}
+template<typename T>
+inline bool logicalAnd_policy(const T lhs, const T rhs)
+{
+	return logicalAnd(lhs, rhs);
+}
+template<typename T>
+inline bool logicalOr_policy(const T lhs, const T rhs)
+{
+	return logicalOr(lhs, rhs);
+}
+template<typename T>
+inline bool isTrue_policy(const T lhs, const T rhs_dummy)
+{
+	return isTrue(lhs);
+}
+template<typename T>
+inline bool isFalse_policy(const T lhs, const T rhs_dummy)
+{
+	return isFalse(lhs);
 }
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

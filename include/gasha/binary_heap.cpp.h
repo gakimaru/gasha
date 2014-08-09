@@ -31,8 +31,8 @@ namespace binary_heap
 	//イテレータのメソッド
 	
 	//参照を更新
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::update(const index_type index) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::update(const index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
 		if (index > static_cast<index_type>(m_con->m_used))
@@ -46,14 +46,14 @@ namespace binary_heap
 			m_value = const_cast<value_type*>(m_con->_refNode(m_index));
 		}
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::iterator::addIndexAndUpdate(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type add) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
 		update(static_cast<index_type>(static_cast<difference_type>(m_index) + add));
 	}
 	//ムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -61,8 +61,8 @@ namespace binary_heap
 		return *this;
 	}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -71,8 +71,8 @@ namespace binary_heap
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -80,8 +80,8 @@ namespace binary_heap
 		return *this;
 	}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::iterator& container<OPE_TYPE, _TABLE_SIZE>::iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::iterator& container<OPE_TYPE>::iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -90,15 +90,15 @@ namespace binary_heap
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//ムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -107,15 +107,15 @@ namespace binary_heap
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
 #ifdef GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR//std::input_iterator_tag には本来必要ではない
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -124,8 +124,8 @@ namespace binary_heap
 	}
 #endif//GASHA_BINARY_HEAP_ENABLE_REVERSE_ITERATOR
 	//コンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::iterator::iterator(const container& con, const bool is_end) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::iterator::iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -142,8 +142,8 @@ namespace binary_heap
 
 	//メソッド
 	//参照を更新
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::update(const index_type index) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::update(const index_type index) const
 	{
 		//if (index == INVALID_INDEX || index < 0 || index > static_cast<index_type>(m_con->m_used))
 		if (index > static_cast<index_type>(m_con->m_used))
@@ -157,22 +157,22 @@ namespace binary_heap
 			m_value = const_cast<value_type*>(m_con->_refNode(m_index)) - 1;
 		}
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::addIndexAndUpdate(const typename container<OPE_TYPE, _TABLE_SIZE>::difference_type add) const
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::reverse_iterator::addIndexAndUpdate(const typename container<OPE_TYPE>::difference_type add) const
 	{
 		update(static_cast<index_type>(static_cast<difference_type>(m_index) - add));
 	}
 	//ムーブオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::reverse_iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
 		m_value = rhs.m_value;
 		return *this;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(typename container<OPE_TYPE>::iterator&& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -180,16 +180,16 @@ namespace binary_heap
 		return *this;
 	}
 	//コピーオペレータ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::reverse_iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
 		m_value = rhs.m_value;
 		return *this;
 	}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::operator=(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& rhs)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::reverse_iterator& container<OPE_TYPE>::reverse_iterator::operator=(const typename container<OPE_TYPE>::iterator& rhs)
 	{
 		m_con = rhs.m_con;
 		m_index = rhs.m_index;
@@ -197,14 +197,14 @@ namespace binary_heap
 		return *this;
 	}
 	//ムーブコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::reverse_iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE, _TABLE_SIZE>::iterator&& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(typename container<OPE_TYPE>::iterator&& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -212,14 +212,14 @@ namespace binary_heap
 		update(m_index);
 	}
 	//コピーコンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::reverse_iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(obj.m_value)
 	{}
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE, _TABLE_SIZE>::iterator& obj) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const typename container<OPE_TYPE>::iterator& obj) :
 		m_con(obj.m_con),
 		m_index(obj.m_index),
 		m_value(nullptr)
@@ -227,8 +227,8 @@ namespace binary_heap
 		update(m_index);
 	}
 	//コンストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::reverse_iterator::reverse_iterator(const container& con, const bool is_end) :
 		m_con(&con),
 		m_index(INVALID_INDEX),
 		m_value(nullptr)
@@ -244,8 +244,8 @@ namespace binary_heap
 	//単一操作オブジェクト（安全なプッシュ／ポップ操作クラス）
 	
 	//プッシュ終了
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushEnd()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::uniqueOperation::node_type* container<OPE_TYPE>::uniqueOperation::pushEnd()
 	{
 		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return nullptr;
@@ -255,8 +255,8 @@ namespace binary_heap
 	}
 
 	//プッシュ取り消し
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::pushCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::uniqueOperation::pushCancel()
 	{
 		if (m_status != status_t::PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return false;
@@ -266,8 +266,8 @@ namespace binary_heap
 	}
 
 	//ポップ開始
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::node_type* container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popBegin()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::uniqueOperation::node_type* container<OPE_TYPE>::uniqueOperation::popBegin()
 	{
 		if (m_status == status_t::PUSH_BEGINNING || m_status == status_t::POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -278,8 +278,8 @@ namespace binary_heap
 	}
 
 	//ポップ終了
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popEnd()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::uniqueOperation::popEnd()
 	{
 		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
@@ -289,8 +289,8 @@ namespace binary_heap
 	}
 
 	//ポップ取り消し
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::popCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::uniqueOperation::popCancel()
 	{
 		if (m_status != status_t::POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
@@ -300,8 +300,8 @@ namespace binary_heap
 	}
 
 	//デストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::uniqueOperation::~uniqueOperation()
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::uniqueOperation::~uniqueOperation()
 	{
 		pushEnd();//プッシュ終了
 		popEnd();//ポップ終了
@@ -311,8 +311,8 @@ namespace binary_heap
 	//コンテナ本体のメソッド
 
 	//最大の深さを取得
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	int container<OPE_TYPE, _TABLE_SIZE>::maxDepth() const
+	template<class OPE_TYPE>
+	int container<OPE_TYPE>::maxDepth() const
 	{
 		if (m_used == 0)
 			return -1;
@@ -327,8 +327,8 @@ namespace binary_heap
 	}
 		
 	//プッシュ（本体）：ムーブ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type&& src)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::_pushCopying(typename container<OPE_TYPE>::node_type&& src)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -341,8 +341,8 @@ namespace binary_heap
 	}
 	
 	//プッシュ（本体）：コピー
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushCopying(const typename container<OPE_TYPE, _TABLE_SIZE>::node_type& src)
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::_pushCopying(const typename container<OPE_TYPE>::node_type& src)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -355,8 +355,8 @@ namespace binary_heap
 	}
 		
 	//プッシュ終了（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_pushEnd()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::_pushEnd()
 	{
 		if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return nullptr;
@@ -370,8 +370,8 @@ namespace binary_heap
 	}
 		
 	//プッシュ終了
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::pushEnd()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::pushEnd()
 	{
 		const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
 		node_type* new_obj = _pushEnd();//プッシュ終了
@@ -381,8 +381,8 @@ namespace binary_heap
 	}
 		
 	//プッシュ取り消し（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_pushCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_pushCancel()
 	{
 		if (m_status != PUSH_BEGINNING)//プッシュ開始中以外なら処理しない
 			return false;
@@ -391,8 +391,8 @@ namespace binary_heap
 	}
 		
 	//プッシュ取り消し
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::pushCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::pushCancel()
 	{
 		const bool unlock = (m_status == PUSH_BEGINNING);//プッシュ開始中ならアンロックする
 		const bool result = _pushCancel();//プッシュ取り消し
@@ -402,8 +402,8 @@ namespace binary_heap
 	}
 	
 	//ポップ（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_popCopying(typename container<OPE_TYPE, _TABLE_SIZE>::node_type& dst)
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_popCopying(typename container<OPE_TYPE>::node_type& dst)
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return false;
@@ -415,8 +415,8 @@ namespace binary_heap
 	}
 	
 	//ポップ開始（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::_popBegin()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::_popBegin()
 	{
 		if (m_status == PUSH_BEGINNING || m_status == POP_BEGINNING)//プッシュ／ポップ開始中なら処理しない
 			return nullptr;
@@ -427,8 +427,8 @@ namespace binary_heap
 	}
 	
 	//ポップ開始
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	typename container<OPE_TYPE, _TABLE_SIZE>::node_type* container<OPE_TYPE, _TABLE_SIZE>::popBegin()
+	template<class OPE_TYPE>
+	typename container<OPE_TYPE>::node_type* container<OPE_TYPE>::popBegin()
 	{
 		m_lock.lock();//ロックを取得（そのまま関数を抜ける）
 		node_type* obj = _popBegin();//ポップ開始
@@ -438,8 +438,8 @@ namespace binary_heap
 	}
 	
 	//ポップ終了（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_popEnd()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_popEnd()
 	{
 		if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
@@ -457,8 +457,8 @@ namespace binary_heap
 	}
 	
 	//ポップ終了
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::popEnd()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::popEnd()
 	{
 		const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
 		const bool result = _popEnd();//ポップ終了
@@ -468,8 +468,8 @@ namespace binary_heap
 	}
 	
 	//ポップ取り消し（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::_popCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::_popCancel()
 	{
 		if (m_status != POP_BEGINNING)//ポップ開始中以外なら処理しない
 			return false;
@@ -478,8 +478,8 @@ namespace binary_heap
 	}
 	
 	//ポップ取り消し
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	bool container<OPE_TYPE, _TABLE_SIZE>::popCancel()
+	template<class OPE_TYPE>
+	bool container<OPE_TYPE>::popCancel()
 	{
 		const bool unlock = (m_status == POP_BEGINNING);//ポップ開始中ならアンロックする
 		const bool result = _popCancel();//ポップ取り消し
@@ -489,8 +489,8 @@ namespace binary_heap
 	}
 	
 	//クリア（本体）
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	void container<OPE_TYPE, _TABLE_SIZE>::_clear()
+	template<class OPE_TYPE>
+	void container<OPE_TYPE>::_clear()
 	{
 		if (m_used == 0)
 			return;
@@ -504,16 +504,16 @@ namespace binary_heap
 	
 	//クリア
 	//※処理中、ロックを取得する
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	inline void container<OPE_TYPE, _TABLE_SIZE>::clear()
+	template<class OPE_TYPE>
+	inline void container<OPE_TYPE>::clear()
 	{
 		lock_guard<lock_type> lock(m_lock);//ロック取得（関数を抜ける時に自動開放）
 		_clear();
 	}
 
 	//デストラクタ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-	container<OPE_TYPE, _TABLE_SIZE>::~container()
+	template<class OPE_TYPE>
+	container<OPE_TYPE>::~container()
 	{
 		pushCancel();//プッシュ取り消し
 		popCancel();//ポップ取り消し
@@ -527,16 +527,18 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 //明示的なインスタンス化
 
 //二分ヒープコンテナの明示的なインスタンス化用マクロ
-#define GASHA_INSTANCING_bHeap(OPE_TYPE, _TABLE_SIZE) \
-	template class GASHA_ binary_heap::container<OPE_TYPE, _TABLE_SIZE>;
+#define GASHA_INSTANCING_bHeap(OPE_TYPE) \
+	template class GASHA_ binary_heap::container<OPE_TYPE>;
 
 //シンプル二分ヒープコンテナの明示的なインスタンス化用マクロ
 #define GASHA_INSTANCING_simpleBHeap(NODE_TYPE, _TABLE_SIZE) \
 	template class GASHA_ binary_heap::simpleContainer<NODE_TYPE, _TABLE_SIZE>; \
-	template class GASHA_ binary_heap::container<typename GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope, _TABLE_SIZE>;
+	template class GASHA_ binary_heap::container<typename GASHA_ priority_queue::simpleContainer<NODE_TYPE, _TABLE_SIZE>::ope>;
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -576,8 +578,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_BINARY_HEAP_CPP_H
 

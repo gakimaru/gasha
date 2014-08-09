@@ -130,6 +130,7 @@ namespace rb_tree
 	//----------------------------------------
 	//イテレータのメソッド
 	
+#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	//演算オペレータ
 	template<class OPE_TYPE>
 	typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::iterator::operator-(const iterator& rhs) const
@@ -172,6 +173,8 @@ namespace rb_tree
 		}
 		return 0;
 	}
+#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
+	
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::iterator::updateNext() const
@@ -383,6 +386,7 @@ namespace rb_tree
 	//----------------------------------------
 	//リバースイテレータのメソッド
 	
+#ifdef GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE//std::bidirectional_iterator_tag には本来必要ではない
 	//演算オペレータ
 	template<class OPE_TYPE>
 	inline typename container<OPE_TYPE>::difference_type container<OPE_TYPE>::reverse_iterator::operator-(const reverse_iterator& rhs)
@@ -425,6 +429,8 @@ namespace rb_tree
 		}
 		return 0;
 	}
+#endif//GASHA_RB_TREE_ENABLE_RANDOM_ACCESS_INTERFACE
+	
 	//参照を更新
 	template<class OPE_TYPE>
 	void container<OPE_TYPE>::reverse_iterator::updateNext() const
@@ -732,6 +738,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -771,8 +779,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_RB_TREE_CPP_H
 

@@ -31,22 +31,22 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリコンソールクラス
 
 //改行出力
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-inline void memConsole<_BUFF_SIZE, LOCK_TYPE>::putCr()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+inline void memConsole<_BUFF_SIZE, LOCK_POLICY>::putCr()
 {
 	put("\n");
 }
 
 //カラー変更
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-inline void memConsole<_BUFF_SIZE, LOCK_TYPE>::changeColor(const GASHA_ consoleColor& color)
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+inline void memConsole<_BUFF_SIZE, LOCK_POLICY>::changeColor(const GASHA_ consoleColor& color)
 {
 	//なにもしない
 }
 
 //現在バッファリングされているサイズを取得
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-inline std::size_t memConsole<_BUFF_SIZE, LOCK_TYPE>::size()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+inline std::size_t memConsole<_BUFF_SIZE, LOCK_POLICY>::size()
 {
 	std::size_t size = m_ringBuff.size();
 	if (size == 0)
@@ -55,8 +55,8 @@ inline std::size_t memConsole<_BUFF_SIZE, LOCK_TYPE>::size()
 }
 
 //コンストラクタ
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-inline memConsole<_BUFF_SIZE, LOCK_TYPE>::memConsole(const char* name) :
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+inline memConsole<_BUFF_SIZE, LOCK_POLICY>::memConsole(const char* name) :
 	m_name(name),
 	m_ringBuff(m_mem),
 	m_posInBlock(0)

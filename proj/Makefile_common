@@ -77,6 +77,7 @@ CXXFLAGS := \
 #  -Wuninitialized
 #  -Wunknown-pragmas ←この警告を出したくない ... -Wno-unknown-pragmas
 #  -Wunused-value ←この警告を出したくない ... -Wno-unused-value
+#  -Wstrict-overflow ←この警告を出したくない（時がある） ... -Wno-strict-overflow ※現状、basic_math.h インクルード時のみ警告を抑えるようにしている
 #  以下、GCC4.8追加(?)
 #  -Wunused-local-typedefs ←この警告を出したくない ... -Wno-unused-local-typedefs
 # 以下、使用しているオプションの解説

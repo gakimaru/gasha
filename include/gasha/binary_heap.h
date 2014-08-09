@@ -83,8 +83,8 @@ namespace binary_heap
 	//二分ヒープ操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
 	//  //template<class OPE_TYPE, typename NODE_TYPE>
-	//  //struct 派生構造体名 : public binary_heap::baseOpe<派生構造体名, ノードの型>
-	//	struct ope : public binary_heap::baseOpe<ope, data_t>
+	//  //struct 派生構造体名 : public binary_heap::baseOpe<派生構造体名, テーブルサイズ, ノードの型>
+	//	struct ope : public binary_heap::baseOpe<ope, TABLE_SIZE, data_t>
 	//	{
 	//		//ノード比較用プレディケート関数オブジェクト
 	//		//※必要に応じて実装する
@@ -92,20 +92,23 @@ namespace binary_heap
 	//			inline bool operator()(const node_type& lhs, const node_type& rhs) const { return lhs.??? < rhs.???; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
-	//		typedef spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効なロック型（spinLockなど）を lock_type 型として定義する。
+	//		typedef spinLock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename NODE_TYPE>
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename NODE_TYPE>
 	struct baseOpe
 	{
 		//型
 		typedef OPE_TYPE ope_type;//ノード操作型
 		typedef NODE_TYPE node_type;//ノード型
+		
+		//定数
+		static const std::size_t TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ ※扱えるデータの要素数
 
-		//ロック型
-		typedef dummyLock lock_type;//ロックオブジェクト型
+		//ロックポリシー
+		typedef GASHA_ dummyLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効なロック型（spinLock など）を
@@ -166,7 +169,7 @@ namespace binary_heap
 	//　pushBegin()～pushEnd()、popBegin()～popEnd()
 	//　というメソッドを用意している。内部のバッファを直接参照するので高速。
 	//　なお、begin～end の間はロックが行われる点に注意。
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<class OPE_TYPE>
 	class container
 	{
 	public:
@@ -174,7 +177,7 @@ namespace binary_heap
 		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
-		static const size_type TABLE_SIZE = _TABLE_SIZE;//配列要素数
+		static const size_type TABLE_SIZE = ope_type::TABLE_SIZE;//配列要素数
 		static const index_type INVALID_INDEX = ~static_cast<index_type>(0);//無効なインデックス
 		enum status_t//ステータス
 		{
@@ -730,21 +733,21 @@ namespace binary_heap
 	{
 	public:
 		//二分ヒープ操作用構造体
-		struct ope : public baseOpe<ope, NODE_TYPE>{};
+		struct ope : public baseOpe<ope, _TABLE_SIZE, NODE_TYPE>{};
 
 		//基本型定義
 		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//二分ヒープコンテナ
-		class con : public container<ope_type, _TABLE_SIZE>
+		class con : public container<ope_type>
 		{
 		public:
 		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
-			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
+			using container<ope_type>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デフォルトコンスタラクタ
 			inline con() :
-				container<ope_type, _TABLE_SIZE>()
+				container<ope_type>()
 			{}
 		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デストラクタ
@@ -765,12 +768,12 @@ namespace binary_heap
 //※略称が bHeap では、「二項ヒープ」（Binomial Heap）と区別が付かないが、良しとする
 
 //二分ヒープ操作用テンプレート構造体
-template<class OPE_TYPE, typename NODE_TYPE>
-using bHeap_baseOpe = binary_heap::baseOpe<OPE_TYPE, NODE_TYPE>;
+template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename NODE_TYPE>
+using bHeap_baseOpe = binary_heap::baseOpe<OPE_TYPE, _TABLE_SIZE, NODE_TYPE>;
 
 //二分ヒープコンテナ
-template<class NODE_TYPE, std::size_t _TABLE_SIZE>
-using bHeap = binary_heap::container<NODE_TYPE, _TABLE_SIZE>;
+template<class NODE_TYPE>
+using bHeap = binary_heap::container<NODE_TYPE>;
 
 //シンプル二分ヒープコンテナ
 template<typename NODE_TYPE, std::size_t _TABLE_SIZE>

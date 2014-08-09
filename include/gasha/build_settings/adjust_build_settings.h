@@ -455,7 +455,7 @@
 #endif//GASHA_LOG_QUEUE_MONITOR_MAX_RETRY_COUNT
 
 //--------------------------------------------------------------------------------
-//【プロファイラー】
+//【プロファイラ】
 
 //「文字列プールバッファサイズ（バイト数）」が未定義なら、デフォルト値にする
 #if !defined(GASHA_PROFILER_STR_POOL_BUFF_SIZE)
@@ -476,6 +476,21 @@
 #if !defined(GASHA_PROFILER_THREAD_INFO_TABLE_SIZE)
 	#define GASHA_PROFILER_THREAD_INFO_TABLE_SIZE 64
 #endif//GASHA_PROFILER_THREAD_INFO_TABLE_SIZE
+
+//プロファイラのロックポリシーを設定
+#ifdef GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+	//非スレッドセーフ
+	#define GASHA_PROFILER_LOCK_POLICY GASHA_ dummySharedLock
+	#define GASHA_PROFILER_POOL_ALLOCATOR_POLICY GASHA_ poolAllocator_withType
+
+#else//GASHA_PROFILER_WITHOUT_THREAD_SAFE
+
+	//スレッドセーフ
+	#define GASHA_PROFILER_LOCK_POLICY GASHA_ sharedSpinLock
+	#define GASHA_PROFILER_POOL_ALLOCATOR_POLICY GASHA_ lfPoolAllocator_withType
+
+#endif//GASHA_PROFILER_WITHOUT_THREAD_SAFE
 
 //--------------------------------------------------------------------------------
 //【シングルトンデバッグ用処理】

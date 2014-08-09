@@ -106,7 +106,7 @@ inline void logQueueMonitor::reset()
 }
 
 //明示的な初期化用コンストラクタ
-inline logQueueMonitor::logQueueMonitor(const explicitInit_type&)
+inline logQueueMonitor::logQueueMonitor(const explicitInit_tag&)
 {
 	initializeOnce();//コンテナ初期化
 	auto dummy = [](){};

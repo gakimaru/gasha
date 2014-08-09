@@ -20,25 +20,25 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロック制御共通設定
 
 //ゼロスリープでコンテキストスイッチ
-inline void contextSwitch()
+inline void contextSwitch(const zeroSleepContextSwitch_tag&)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(0));
 }
 
 //短いスリープでスイッチ
-inline void contextSwitch(const short_sleep_switch_t)
+inline void contextSwitch(const shortSleepContextSwitch_tag&)
 {
 	std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 }
 
 //確実なコンテキストスイッチ
-inline void contextSwitch(const force_switch_t)
+inline void contextSwitch(const forceContextSwitch_tag&)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 //イールド
-inline void contextSwitch(const yield_switch_t)
+inline void contextSwitch(const yieldContextSwitch_tag&)
 {
 	std::this_thread::yield();
 }

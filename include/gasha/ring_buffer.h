@@ -109,10 +109,10 @@ namespace ring_buffer
 	//			inline int operator()(const value_type& lhs, const ???& rhs) const { return rhs - lhs.???; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
-	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効なロック型（sharedSpinLockなど）を lock_type 型として定義する。
+	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//
 	//		//デストラクタ呼び出し ※必要に応じて実装
 	//		//※デストラクタ呼び出しを抑制したい場合などに定義する。
@@ -128,8 +128,8 @@ namespace ring_buffer
 		typedef OPE_TYPE ope_type;//要素操作型
 		typedef VALUE_TYPE value_type;//要素型
 
-		//ロック型
-		typedef dummySharedLock lock_type;//ロックオブジェクト型
+		//ロックポリシー
+		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効なロック型（sharedSpinLock など）を
@@ -694,14 +694,14 @@ namespace ring_buffer
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		inline iterator findValue(const V& value);
+		inline iterator findValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		inline iterator findValue(const V& value, PREDICATE predicate);
+		inline iterator findValue(const V& value, PREDICATE predicate) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
-		inline iterator find(PREDICATE predicate);
+		inline iterator find(PREDICATE predicate) const;
 		
 		//二分探索
 		//※探索値指定版
@@ -709,14 +709,14 @@ namespace ring_buffer
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		inline iterator binarySearchValue(const V& value);
+		inline iterator binarySearchValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		inline iterator binarySearchValue(const V& value, COMPARISON comparison);
+		inline iterator binarySearchValue(const V& value, COMPARISON comparison) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
-		inline iterator binary_search(COMPARISON comparison);
+		inline iterator binary_search(COMPARISON comparison) const;
 	public:
 		//コンストラクタ
 		//※初期状態で使用中の要素数を指定する（-1で全要素を使用中にする）

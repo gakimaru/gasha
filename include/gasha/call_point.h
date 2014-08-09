@@ -62,7 +62,7 @@ public:
 	inline const callPoint* find() const;//直近のコールポイントを検索
 	const criticalCallPoint* findCritical() const;//直近の重大コールポイントを検索
 	inline void setAutoProfiling(const bool enabled);//自動プロファイリングを有効化／無効化
-	void profiling();//プロファイリングする ※現時点の経過時間をプロファイラーに記録する
+	void profiling();//プロファイリングする ※現時点の経過時間をプロファイラに記録する
 	//適切なカテゴリを取得
 	category_type properCategory(const category_type category);
 	//デバッグ情報作成

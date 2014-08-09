@@ -36,7 +36,7 @@ class logWorkBuff
 {
 public:
 	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
+	struct explicitInit_tag{};//明示的な初期化用構造体
 
 public:
 	//定数
@@ -88,7 +88,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logWorkBuff(const explicitInit_type&);
+	inline logWorkBuff(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	inline logWorkBuff();
 	//デストラクタ
@@ -106,7 +106,7 @@ private:
 	static GASHA_ lfPoolAllocator_withBuff<MAX_MESSAGE_SIZE, MESSAGE_POOL_SIZE> m_workBuff;//ワークバッファ
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化

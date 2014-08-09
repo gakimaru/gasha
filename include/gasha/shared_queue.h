@@ -32,13 +32,13 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 
 //--------------------------------------------------------------------------------
 //マルチスレッド共有キュークラス
-template<class T, std::size_t POOL_SIZE, class LOCK_TYPE = GASHA_ spinLock>
+template<class T, std::size_t POOL_SIZE, class LOCK_POLICY = GASHA_ spinLock>
 class sharedQueue
 {
 public:
 	//型
 	typedef T value_type;//値型
-	typedef LOCK_TYPE lock_type;//ロック型
+	typedef LOCK_POLICY lock_type;//ロック型
 
 	//キュー型
 	struct queue_t

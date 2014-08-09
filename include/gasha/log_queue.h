@@ -55,18 +55,6 @@ public:
 public:
 	//定数
 	static const purpose_type PURPOSE_NUM = GASHA_ logPurpose::NUM;//ログ用途の数
-public:
-	//バイナリヒープ操作型
-	struct queueOpe : public GASHA_ binary_heap::baseOpe<queueOpe, GASHA_ logPrintInfo>
-	{
-		//ロック型
-		typedef GASHA_ spinLock lock_type;//ロックオブジェクト型
-	};
-public:
-	//型
-	struct explicitInit_type{};//明示的な初期化用構造体
-public:
-	//定数
 	static const std::size_t MESSAGE_BUFF_SIZE = GASHA_LOG_QUEUE_MESSAGE_STACK_SIZE;//メッセージバッファサイズ
 	static const std::size_t QUEUE_SIZE = GASHA_LOG_QUEUE_NODE_SIZE;//最大キュー数
 	static const id_type INIT_ID = 1;//IDの初期値
@@ -75,6 +63,16 @@ public:
 #else//GASHA_LOG_QUEUE_NOWAIT
 	static const bool IS_NO_WAIT_MODE = false;
 #endif//GASHA_LOG_QUEUE_NOWAIT
+public:
+	//バイナリヒープ操作型
+	struct queueOpe : public GASHA_ binary_heap::baseOpe<queueOpe, QUEUE_SIZE, GASHA_ logPrintInfo>
+	{
+		//ロック型
+		typedef GASHA_ spinLock lock_type;//ロックオブジェクト型
+	};
+public:
+	//型
+	struct explicitInit_tag{};//明示的な初期化用構造体
 
 public:
 	//エンキュー
@@ -119,7 +117,7 @@ public:
 
 public:
 	//明示的な初期化用コンストラクタ
-	inline logQueue(const explicitInit_type&);
+	inline logQueue(const explicitInit_tag&);
 	//デフォルトコンストラクタ
 	inline logQueue();
 	//デストラクタ
@@ -136,10 +134,10 @@ private:
 	static std::atomic<bool> m_pause;//一時停止
 	static std::atomic<id_type> m_id;//キューID発番用
 	static GASHA_ lfSmartStackAllocator_withBuff<MESSAGE_BUFF_SIZE> m_messageBuff;//メッセージバッファ
-	static GASHA_ binary_heap::container<queueOpe, QUEUE_SIZE> m_queue;//ログキュー
+	static GASHA_ binary_heap::container<queueOpe> m_queue;//ログキュー
 public:
 	//静的フィールド
-	static const explicitInit_type explicitInit;//明示的な初期化指定用
+	static const explicitInit_tag explicitInit;//明示的な初期化指定用
 };
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化

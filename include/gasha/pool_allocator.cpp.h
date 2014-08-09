@@ -31,8 +31,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //プールアロケータクラス
 
 //メモリ確保
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, const std::size_t align)
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+void* poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	//サイズとアラインメントをチェック
 	const std::size_t _align = align == m_blockAlign ? 0 : align;
@@ -73,8 +73,8 @@ void* poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::alloc(const std::size_t size, co
 
 //メモリ解放（共通処理）
 //※ロック取得は呼び出し元で行う
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::index_type index)
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::free(void* p, const typename poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::index_type index)
 {
 	//if (!p)//nullptrの解放は常に成功扱い
 	//	return true;
@@ -87,8 +87,8 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p, const typename pool
 }
 
 //メモリ解放
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+bool poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -100,8 +100,8 @@ bool poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::free(void* p)
 }
 
 //デバッグ情報作成
-template<std::size_t _MAX_POOL_SIZE, class LOCK_TYPE>
-std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size, const bool with_detail) const
+template<std::size_t _MAX_POOL_SIZE, class LOCK_POLICY>
+std::size_t poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size, const bool with_detail) const
 {
 	auto print_node = [](char* message, const std::size_t max_size, std::size_t& message_len, const std::uint32_t& data) -> std::size_t
 	{
@@ -121,8 +121,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_poolAllocator(_MAX_POOL_SIZE) \
 	template class GASHA_ poolAllocator<_MAX_POOL_SIZE>;
 //※ロック指定版
-#define GASHA_INSTANCING_poolAllocator_withLock(_MAX_POOL_SIZE, LOCK_TYPE) \
-	template class GASHA_ poolAllocator<_MAX_POOL_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_poolAllocator_withLock(_MAX_POOL_SIZE, LOCK_POLICY) \
+	template class GASHA_ poolAllocator<_MAX_POOL_SIZE, LOCK_POLICY>;
 
 #if 0//不要
 //バッファ付きプールアロケータの明示的なインスタンス化用マクロ
@@ -131,9 +131,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN>; \
 	template class GASHA_ poolAllocator<_POOL_SIZE>;
 //※ロック指定版
-#define GASHA_INSTANCING_poolAllocator_withBuff_withLock(_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE) \
-	template class GASHA_ poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_TYPE>; \
-	template class GASHA_ poolAllocator<_POOL_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_poolAllocator_withBuff_withLock(_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_POLICY) \
+	template class GASHA_ poolAllocator_withBuff<_BLOCK_SIZE, _POOL_SIZE, _BLOCK_ALIGN, LOCK_POLICY>; \
+	template class GASHA_ poolAllocator<_POOL_SIZE, LOCK_POLICY>;
 
 //型指定バッファ付きプールアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -142,14 +142,16 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ poolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T)>; \
 	template class GASHA_ poolAllocator<_POOL_SIZE>;
 //※ロック指定版
-#define GASHA_INSTANCING_poolAllocator_withType_withLock(T, _POOL_SIZE, LOCK_TYPE) \
-	template class GASHA_ poolAllocator_withType<T, _POOL_SIZE, LOCK_TYPE>; \
-	template class GASHA_ poolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T), LOCK_TYPE>; \
-	template class GASHA_ poolAllocator<_POOL_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_poolAllocator_withType_withLock(T, _POOL_SIZE, LOCK_POLICY) \
+	template class GASHA_ poolAllocator_withType<T, _POOL_SIZE, LOCK_POLICY>; \
+	template class GASHA_ poolAllocator_withBuff<sizeof(T), _POOL_SIZE, alignof(T), LOCK_POLICY>; \
+	template class GASHA_ poolAllocator<_POOL_SIZE, LOCK_POLICY>;
 #endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -189,8 +191,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_POOL_ALLOCATOR_CPP_H
 

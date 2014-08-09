@@ -194,7 +194,7 @@ inline logCategory::info* logCategoryContainer::getInfo(const logCategory::categ
 }
 
 //明示的な初期化用コンストラクタ
-inline logCategoryContainer::logCategoryContainer(const explicitInit_type&)
+inline logCategoryContainer::logCategoryContainer(const explicitInit_tag&)
 {
 	std::call_once(m_initialized, initializeOnce);//コンテナ初期化（一回限り）
 }

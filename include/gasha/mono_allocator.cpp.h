@@ -31,8 +31,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //単一アロケータクラス
 
 //メモリ確保
-template<class LOCK_TYPE>
-void* monoAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::size_t align)
+template<class LOCK_POLICY>
+void* monoAllocator<LOCK_POLICY>::alloc(const std::size_t size, const std::size_t align)
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	if (m_size > 0)//既にメモリ確保中なら失敗
@@ -59,8 +59,8 @@ void* monoAllocator<LOCK_TYPE>::alloc(const std::size_t size, const std::size_t 
 }
 
 //デバッグ情報作成
-template<class LOCK_TYPE>
-std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message, const std::size_t max_size) const
+template<class LOCK_POLICY>
+std::size_t monoAllocator<LOCK_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	std::size_t message_len = 0;
@@ -71,8 +71,8 @@ std::size_t monoAllocator<LOCK_TYPE>::debugInfo(char* message, const std::size_t
 }
 
 //メモリ解放（共通処理）
-template<class LOCK_TYPE>
-bool monoAllocator<LOCK_TYPE>::_free(void* p)
+template<class LOCK_POLICY>
+bool monoAllocator<LOCK_POLICY>::_free(void* p)
 {
 	//バッファの使用中サイズを更新
 	m_size = 0;
@@ -89,8 +89,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_monoAllocator() \
 	template class GASHA_ monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_monoAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ monoAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_monoAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ monoAllocator<LOCK_POLICY>;
 
 #if 0//不要
 //バッファ付き単一アロケータの明示的なインスタンス化用マクロ
@@ -99,9 +99,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ monoAllocator_withBuff<_MAX_SIZE>; \
 	template class GASHA_ monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_monoAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class GASHA_ monoAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_monoAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ monoAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>; \
+	template class GASHA_ monoAllocator<LOCK_POLICY>;
 
 //型指定バッファ付き単一アロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -110,14 +110,16 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ monoAllocator_withBuff<sizeof(T) * _NUM>; \
 	template class GASHA_ monoAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_monoAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ monoAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class GASHA_ monoAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class GASHA_ monoAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_monoAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ monoAllocator_withType<T, _NUM, LOCK_POLICY>; \
+	template class GASHA_ monoAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY>; \
+	template class GASHA_ monoAllocator<LOCK_POLICY>;
 #endif
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -157,8 +159,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_MONO_ALLOCATOR_CPP_H
 

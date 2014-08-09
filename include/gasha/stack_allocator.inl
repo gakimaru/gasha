@@ -31,8 +31,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //スタック自動クリア
 
 //自動クリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void stackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline void stackAllocatorAutoClear::autoClear(stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator)
 {
 	if (allocator.m_count == 0)
 		allocator.m_size = 0;
@@ -42,8 +42,8 @@ inline void stackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CL
 //スタック自動クリア（ダミー）
 
 //自動クリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void dummyStackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AUTO_CLEAR>& allocator)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline void dummyStackAllocatorAutoClear::autoClear(stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>& allocator)
 {
 	//何もしない
 }
@@ -52,8 +52,8 @@ inline void dummyStackAllocatorAutoClear::autoClear(stackAllocator<LOCK_TYPE, AU
 //スタックアロケータクラス
 
 //メモリ解放
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -64,9 +64,9 @@ inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObj(Tx&&... args)
+T* stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -74,9 +74,9 @@ T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T, typename...Tx>
-T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&... args)
+T* stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -93,9 +93,9 @@ T* stackAllocator<LOCK_TYPE, AUTO_CLEAR>::newArray(const std::size_t num, Tx&&..
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
+bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -106,9 +106,9 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T>
-bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t num)
+bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -125,15 +125,15 @@ bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::deleteArray(T* p, const std::size_t 
 
 //使用中のサイズを指定位置に戻す
 //※位置指定版
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool  stackAllocator<LOCK_TYPE, AUTO_CLEAR>::rewind(const size_type pos)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline bool  stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::rewind(const size_type pos)
 {
 	return rewind(m_buffRef + pos);
 }
 
 //メモリクリア
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline void stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	//使用中のサイズとメモリ確保数を更新
@@ -142,8 +142,8 @@ inline void stackAllocator<LOCK_TYPE, AUTO_CLEAR>::clear()
 }
 
 //ポインタが範囲内か判定
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline bool stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::isInUsingRange(void* p)
 {
 #ifdef GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
 	GASHA_SIMPLE_ASSERT(p >= m_buffRef && p < m_buffRef + m_size, "Pointer is not in range.");
@@ -155,8 +155,8 @@ inline bool stackAllocator<LOCK_TYPE, AUTO_CLEAR>::isInUsingRange(void* p)
 }
 
 //コンストラクタ
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const std::size_t max_size) :
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::stackAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0),
@@ -167,34 +167,34 @@ inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(void* buff, const s
 	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_STACK_ALLOCATOR_ENABLE_ASSERTION
 }
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(T* buff, const std::size_t num) :
+inline stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::stackAllocator(T* buff, const std::size_t num) :
 	stackAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
 {}
-template<class LOCK_TYPE, class AUTO_CLEAR>
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename T, std::size_t N>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::stackAllocator(T(&buff)[N]) :
+inline stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::stackAllocator(T(&buff)[N]) :
 stackAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator<LOCK_TYPE, AUTO_CLEAR>::~stackAllocator()
+template<class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>::~stackAllocator()
 {}
 
 //--------------------------------------------------------------------------------
 //バッファ付きスタックアロケータクラス
 
 //コンストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, AUTO_CLEAR>::stackAllocator_withBuff() :
-stackAllocator<LOCK_TYPE, AUTO_CLEAR>(m_buff, MAX_SIZE)
+template<std::size_t _MAX_SIZE, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, AUTO_CLEAR_POLICY>::stackAllocator_withBuff() :
+stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>(m_buff, MAX_SIZE)
 {}
 
 //デストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, AUTO_CLEAR>::~stackAllocator_withBuff()
+template<std::size_t _MAX_SIZE, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY, AUTO_CLEAR_POLICY>::~stackAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
@@ -202,29 +202,29 @@ inline stackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE, AUTO_CLEAR>::~stackAllocato
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
+template<typename T, std::size_t _NUM, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
 template<typename... Tx>
-inline typename stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type* stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::newDefault(Tx&&... args)
+inline typename stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::value_type* stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::newDefault(Tx&&... args)
 {
 	return this->template newObj<value_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline bool stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::deleteDefault(typename stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::value_type*& p)
+template<typename T, std::size_t _NUM, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline bool stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::deleteDefault(typename stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::value_type*& p)
 {
 	return this->template deleteObj<value_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::stackAllocator_withType() :
-	stackAllocator<LOCK_TYPE, AUTO_CLEAR>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
+template<typename T, std::size_t _NUM, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::stackAllocator_withType() :
+	stackAllocator<LOCK_POLICY, AUTO_CLEAR_POLICY>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE, class AUTO_CLEAR>
-inline stackAllocator_withType<T, _NUM, LOCK_TYPE, AUTO_CLEAR>::~stackAllocator_withType()
+template<typename T, std::size_t _NUM, class LOCK_POLICY, class AUTO_CLEAR_POLICY>
+inline stackAllocator_withType<T, _NUM, LOCK_POLICY, AUTO_CLEAR_POLICY>::~stackAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

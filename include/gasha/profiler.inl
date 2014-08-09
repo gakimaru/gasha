@@ -27,51 +27,6 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 #ifdef GASHA_PROFILE_IS_AVAILABLE//プロファイル機能無効時はまるごと無効化
 
 //----------------------------------------
-//文字列プール情報
-
-//ムーブオペレータ
-inline profiler::strPoolInfo& profiler::strPoolInfo::operator=(profiler::strPoolInfo&& rhs)
-{
-	m_strCrc = rhs.m_strCrc;
-	m_str = rhs.m_str;
-	return *this;
-}
-
-//コピーオペレータ
-inline profiler::strPoolInfo& profiler::strPoolInfo::operator=(const profiler::strPoolInfo& rhs)
-{
-	m_strCrc = rhs.m_strCrc;
-	m_str = rhs.m_str;
-	return *this;
-}
-
-//ムーブコンストラクタ
-inline profiler::strPoolInfo::strPoolInfo(profiler::strPoolInfo&& obj) :
-	m_strCrc(obj.m_strCrc),
-	m_str(obj.m_str)
-{}
-
-//コピーコンストラクタ
-inline profiler::strPoolInfo::strPoolInfo(const profiler::strPoolInfo& obj) :
-	m_strCrc(obj.m_strCrc),
-	m_str(obj.m_str)
-{}
-
-//コンストラクタ
-inline profiler::strPoolInfo::strPoolInfo(const GASHA_ crc32_t str_crc, const char* str) :
-	m_strCrc(str_crc),
-	m_str(str)
-{}
-
-//デフォルトコンストラクタ
-inline profiler::strPoolInfo::strPoolInfo()
-{}
-
-//デストラクタ
-inline profiler::strPoolInfo::~strPoolInfo()
-{}
-
-//----------------------------------------
 //処理時間情報
 
 //平均算出
@@ -382,11 +337,9 @@ inline profiler::threadInfo::~threadInfo()
 //プロファイラクラス
 
 //文字列プール参照
-inline const profiler::strPoolInfo* profiler::refStrPool(const GASHA_ crc32_t name_crc)
+inline const char* profiler::refStrPool(const GASHA_ crc32_t name_crc)
 {
-	auto lock = m_strPoolTable.lockScoped();//共有ロック ※登録中の情報にアクセスする可能性がある
-	const profiler::strPoolInfo* str_info = m_strPoolTable.at(name_crc);
-	return str_info;
+	return m_strPool(name_crc);
 }
 
 //スレッド情報参照

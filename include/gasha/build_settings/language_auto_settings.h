@@ -607,6 +607,31 @@
 #endif//GASHA_IS_GCC
 
 //--------------------
+//コンストラクタ／デストラクタ属性
+//※main()関数実行前および終了後に実行される関数を定義するための属性
+#ifdef GASHA_IS_VC
+	//【注意】VC++は GASHA_CONSTRUCTOR_ATTRIBUTE が使えないので、先に初期化しなければならない
+	//　　　　静的変数の実体が配置された .cpp ファイルに #pragma init_seg(lib) を指定すると良い。
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY)
+	#define GASHA_DESTRUCTOR_ATTRIBUTE
+	#define GASHA_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY)
+#endif//GASHA_IS_VC
+#ifdef GASHA_IS_GCC
+	//【注意】プライオリティを設定すると、静的偏変数のコンストラクタより先に実行されるようになる点に注意！
+	//　　　　プライオリティを設定しない場合は、静的コンストラクタより後に実行される。
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE __attribute__((constructor))
+	//#define GASHA_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY) __attribute__((init_priority(PRIORITY)))
+	#define GASHA_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY) __attribute__((constructor(PRIORITY)))
+	#define GASHA_DESTRUCTOR_ATTRIBUTE __attribute__((destructor))
+	#define GASHA_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY(PRIORITY) __attribute__((destructor(PRIORITY)))
+	#define GASHA_HAS_CONSTRUCTOR_ATTRIBUTE
+	#define GASHA_HAS_CONSTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+	#define GASHA_HAS_DESTRUCTOR_ATTRIBUTE
+	#define GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+#endif//GASHA_IS_GCC
+
+//--------------------
 //CPU情報
 //※VC++仕様に合わせて下記関数を共通実装
 //  void __cpuid(int cpu_info[4], const int type);

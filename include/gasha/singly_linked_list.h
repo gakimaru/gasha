@@ -123,10 +123,10 @@ namespace singly_linked_list
 	//			inline bool operator()(const node_type& lhs, const ???& rhs) const { return lhs.??? == rhs; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
-	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効な共有ロック型（sharedSpinLockなど）を lock_type 型として定義する。
+	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//	};
 	template<class OPE_TYPE, typename NODE_TYPE>
 	struct baseOpe
@@ -135,8 +135,8 @@ namespace singly_linked_list
 		typedef OPE_TYPE ope_type;//ノード操作型
 		typedef NODE_TYPE node_type;//ノード型
 
-		//ロック型
-		typedef dummySharedLock lock_type;//ロックオブジェクト型
+		//ロックポリシー
+		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
@@ -767,14 +767,14 @@ namespace singly_linked_list
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value);
+		iterator findValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate);
+		iterator findValue(const V& value, PREDICATE predicate) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate);
+		iterator find(PREDICATE predicate) const;
 	#ifdef GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
 		//二分探索
 		//※探索値指定版
@@ -783,14 +783,14 @@ namespace singly_linked_list
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		//【注意】低速処理
 		template<typename V>
-		iterator binarySearchValue(const V& value);
+		iterator binarySearchValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison);
+		iterator binarySearchValue(const V& value, COMPARISON comparison) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
-		iterator binarySearch(COMPARISON comparison);
+		iterator binarySearch(COMPARISON comparison) const;
 	#endif//GASHA_SINGLY_LINKED_LIST_ENABLE_BINARY_SEARCH
 
 		//リスト操作系メソッド

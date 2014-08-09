@@ -37,15 +37,18 @@ namespace _private
 {
 	//固定バッファシングルトン（本体）
 	//※直接使用しないクラス
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
 	class singleton
 	{
 	public:
 		//型
 		typedef TARGET_CLASS class_type;//シングルトン対象クラス型
-		typedef LOCK_TYPE lock_type;//ロック型
+		typedef LOCK_POLICY lock_type;//ロック型
 		typedef GASHA_ unique_shared_lock<lock_type> unique_lock_type;//単一ロック型
-		typedef DEBUG_TYPE debug_type;//デバッグ処理型
+		typedef DEBUG_POLICY debug_type;//デバッグ処理型
+	public:
+		//定数
+		static const std::size_t INSTANCE_BUFF_SIZE = sizeof(class_type) + alignof(class_type);//インスタンスバッファサイズ
 	private:
 		//インスタンス生成用クラス
 		class createInstance_t
@@ -116,13 +119,13 @@ namespace _private
 		//※ロック制御を指定した場合、同時に単一ロックオブジェクトを生成し、デストラクタ時にロックを開放する。
 		//　try_to_lock に失敗した場合はインスタンスへの参照を得られない。
 		inline singleton(const char* procedure_name);//デフォルト：排他ロック
-		inline singleton(const char* procedure_name, const GASHA_ with_lock_t);//排他ロック
-		inline singleton(const char* procedure_name, const GASHA_ with_lock_shared_t);//共有ロック
-		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_t);//排他ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
-		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t);//共有ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
-		inline singleton(const char* procedure_name, const GASHA_ adopt_lock_t);//排他ロック状態を引き継ぐ（排他ロック済みであるものとして処理する）
-		inline singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t);//共有ロック状態を引き継ぐ（共有ロック済みであるものとして処理する）
-		inline singleton(const char* procedure_name, const GASHA_ defer_lock_t);//ロックなし（引数なし時と同じ）
+		inline singleton(const char* procedure_name, const GASHA_ with_lock_t&);//排他ロック
+		inline singleton(const char* procedure_name, const GASHA_ with_lock_shared_t&);//共有ロック
+		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_t&);//排他ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
+		inline singleton(const char* procedure_name, const GASHA_ try_to_lock_shared_t&);//共有ロックを試行し、可能ならロックを取得し、不可能ならインスタンスの参照に失敗
+		inline singleton(const char* procedure_name, const GASHA_ adopt_lock_t&);//排他ロック状態を引き継ぐ（排他ロック済みであるものとして処理する）
+		inline singleton(const char* procedure_name, const GASHA_ adopt_shared_lock_t&);//共有ロック状態を引き継ぐ（共有ロック済みであるものとして処理する）
+		inline singleton(const char* procedure_name, const GASHA_ defer_lock_t&);//ロックなし（引数なし時と同じ）
 		//デストラクタ
 		inline ~singleton();
 	private:
@@ -132,7 +135,7 @@ namespace _private
 		mutable typename debug_type::id_type m_debugId;//デバッグアクセスID
 	private:
 		//静的フィールド
-		static unsigned char m_staticInstanceBuff[];//静的シングルトンインスタンス用バッファ
+		static char m_staticInstanceBuff[];//静的シングルトンインスタンス用バッファ
 		static class_type* m_staticInstanceRef;//静的シングルトンインスタンス参照
 		static std::atomic<bool> m_staticInstanceIsCreated;//インスタンス生成済み ※インスタンスの明示的な破棄があるので、std::call_once を使用しない
 		static lock_type m_staticLock;//静的ロックオブジェクト
@@ -149,18 +152,18 @@ using singleton = _private::singleton<TARGET_CLASS, typename TARGET_CLASS::lock_
 //----------------------------------------
 //固定バッファシングルトン：シンプルシングルトン
 //※対象クラスメンバーに lock_type と debug_type の定義が不要。
-template<class TARGET_CLASS, class LOCK_TYPE = GASHA_ dummySharedLock, class DEBUG_TYPE = GASHA_ dummySingletonDebug>
-using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>;
+template<class TARGET_CLASS, class LOCK_POLICY = GASHA_ dummySharedLock, class DEBUG_POLICY = GASHA_ dummySingletonDebug>
+using simpleSingleton = _private::singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>;
 
 //----------------------------------------
 //通常／シンプルシングルトンのフレンド宣言用マクロ
 #define GASHA_SINGLETON_FRIEND_CLASS() \
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE> \
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY> \
 	friend class GASHA_ _private::singleton; \
 	template<class TARGET_CLASS> \
-	friend class gasha::is_default_constructible; \
+	friend class GASHA_ is_default_constructible; \
 	template<class TARGET_CLASS, typename... TARGET_CLASS_ARGS> \
-	friend class gasha::is_constructible; \
+	friend class GASHA_ is_constructible; \
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

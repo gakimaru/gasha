@@ -165,10 +165,10 @@ namespace rb_tree
 	//		//キーを比較 ※必要に応じて定義
 	//		inline static int compareKey(const key_type lhs, const key_type rhs){ return ???; }
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
-	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効な共有ロック型（sharedSpinLockなど）を lock_type 型として定義する。
+	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//	};
 	enum color_t//カラー型
 	{
@@ -187,8 +187,8 @@ namespace rb_tree
 		typedef KEY_TYPE key_type;//キー型
 		typedef rb_tree::color_t color_t;//カラー型
 
-		//ロック型
-		typedef dummySharedLock lock_type;//ロックオブジェクト型
+		//ロックポリシー
+		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を

@@ -33,12 +33,12 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //----------------------------------------
 //メモリコンソールクラス
 
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE = GASHA_ dummySharedLock>
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY = GASHA_ dummySharedLock>
 class memConsole : public GASHA_ iConsole
 {
 public:
 	//型
-	typedef LOCK_TYPE lock_type;//ロック型
+	typedef LOCK_POLICY lock_type;//ロック型
 	typedef int block_type;//ブロック型
 public:
 	//定数

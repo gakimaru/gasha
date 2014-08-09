@@ -35,22 +35,22 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //メモリコンソールクラス
 
 //出力開始
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::begin()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::begin()
 {
 	//何もしない
 }
 
 //出力終了
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::end()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::end()
 {
 	//何もしない
 }
 
 //出力
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::put(const char* str)
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::put(const char* str)
 {
 	auto lock = m_ringBuff.lockScoped();//スコープロック
 	if (!str)
@@ -93,22 +93,22 @@ void memConsole<_BUFF_SIZE, LOCK_TYPE>::put(const char* str)
 }
 
 //カラー変更
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::changeColor(GASHA_ consoleColor&& color)
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::changeColor(GASHA_ consoleColor&& color)
 {
 	//何もしない
 }
 
 //カラーリセット
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::resetColor()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::resetColor()
 {
 	//何もしない
 }
 
 //出力先が同じか判定
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-bool memConsole<_BUFF_SIZE, LOCK_TYPE>::isSame(const iConsole* rhs) const
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+bool memConsole<_BUFF_SIZE, LOCK_POLICY>::isSame(const iConsole* rhs) const
 {
 	const memConsole* _rhs = dynamic_cast<const memConsole*>(rhs);
 	if (!_rhs)
@@ -117,8 +117,8 @@ bool memConsole<_BUFF_SIZE, LOCK_TYPE>::isSame(const iConsole* rhs) const
 }
 
 //バッファをクリア
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::clear()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::clear()
 {
 	auto lock = m_ringBuff.lockScoped();//スコープロック
 	m_ringBuff.clear();
@@ -126,8 +126,8 @@ void memConsole<_BUFF_SIZE, LOCK_TYPE>::clear()
 }
 
 //バッファをコピー
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-std::size_t memConsole<_BUFF_SIZE, LOCK_TYPE>::copy(char* dst, const std::size_t max_size)
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+std::size_t memConsole<_BUFF_SIZE, LOCK_POLICY>::copy(char* dst, const std::size_t max_size)
 {
 	if (max_size == 0)
 		return 0;
@@ -169,8 +169,8 @@ std::size_t memConsole<_BUFF_SIZE, LOCK_TYPE>::copy(char* dst, const std::size_t
 }
 
 //バッファの内容を画面出力に出力
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-void memConsole<_BUFF_SIZE, LOCK_TYPE>::printScreen(std::FILE* fp)
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+void memConsole<_BUFF_SIZE, LOCK_POLICY>::printScreen(std::FILE* fp)
 {
 	auto lock = m_ringBuff.lockSharedScoped();//スコープ共有ロック
 	GASHA_ forEach(m_ringBuff, [&fp](const block_type& block)
@@ -184,8 +184,8 @@ void memConsole<_BUFF_SIZE, LOCK_TYPE>::printScreen(std::FILE* fp)
 }
 
 //デストラクタ
-template<std::size_t _BUFF_SIZE, class LOCK_TYPE>
-memConsole<_BUFF_SIZE, LOCK_TYPE>::~memConsole()
+template<std::size_t _BUFF_SIZE, class LOCK_POLICY>
+memConsole<_BUFF_SIZE, LOCK_POLICY>::~memConsole()
 {}
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
@@ -202,9 +202,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ memConsole<_BUFF_SIZE>; \
 	template class GASHA_ ring_buffer::container<typename GASHA_ memConsole<_BUFF_SIZE>::buffOpe>;
 //※ロック指定版
-#define GASHA_INSTANCING_memConsole_withLock(_BUFF_SIZE, LOCK_TYPE) \
-	template class GASHA_ memConsole<_BUFF_SIZE, LOCK_TYPE>; \
-	template class GASHA_ ring_buffer::container<typename GASHA_ memConsole<_BUFF_SIZE, LOCK_TYPE>::buffOpe>;
+#define GASHA_INSTANCING_memConsole_withLock(_BUFF_SIZE, LOCK_POLICY) \
+	template class GASHA_ memConsole<_BUFF_SIZE, LOCK_POLICY>; \
+	template class GASHA_ ring_buffer::container<typename GASHA_ memConsole<_BUFF_SIZE, LOCK_POLICY>::buffOpe>;
 
 #else//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
@@ -212,13 +212,15 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_memConsole(_BUFF_SIZE) \
 	template class GASHA_ memConsole<_BUFF_SIZE>;
 //※ロック指定版
-#define GASHA_INSTANCING_memConsole_withLock(_BUFF_SIZE, LOCK_TYPE) \
-	template class GASHA_ memConsole<_BUFF_SIZE, LOCK_TYPE>;
+#define GASHA_INSTANCING_memConsole_withLock(_BUFF_SIZE, LOCK_POLICY) \
+	template class GASHA_ memConsole<_BUFF_SIZE, LOCK_POLICY>;
 
 #endif//GASHA_LOG_IS_ENABLED//デバッグログ無効時はまるごと無効化
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -258,8 +260,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_MEM_CONSOLE_CPP_H
 

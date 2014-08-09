@@ -111,9 +111,9 @@ namespace dynamic_array
 	//			inline int operator()(const value_type& lhs, const ???& rhs) const { return rhs - lhs.???; }
 	//		};
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※ロックでコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効なロック型（spin_lockなど）を lock_type 型として定義する。
+	//		//　有効なロック型（sharedSpinLockなど）を lock_type 型として定義する。
 	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//
 	//		//デストラクタ呼び出し ※必要に応じて実装
@@ -130,7 +130,7 @@ namespace dynamic_array
 		typedef OPE_TYPE ope_type;//要素操作型
 		typedef VALUE_TYPE value_type;//要素型
 
-		//ロック型
+		//ロックポリシー
 		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
@@ -181,7 +181,7 @@ namespace dynamic_array
 
 	//----------------------------------------
 	//コンテナ破棄時の要素の自動クリア属性
-	//※STLのコンテナと同様に、コンテナの破棄と共にコンテナ内の要素を破棄（デストラクタ呼び出し）するなら、AUTO_CLEARを指定する。
+	//※STLのコンテナと同様に、コンテナの破棄と共にコンテナ内の要素を破棄（デストラクタ呼び出し）するなら、AUTO_CLEAR を指定する。
 	//※デフォルトは NEVER_CLEAR。本クラスは擬似コンテナであり、外部の要素を操作するため、コンテナの破棄に連動しないのが基本。
 	enum autoClearAttr_t
 	{
@@ -693,14 +693,14 @@ namespace dynamic_array
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator findValue(const V& value);
+		iterator findValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class PREDICATE>
-		iterator findValue(const V& value, PREDICATE predicate);
+		iterator findValue(const V& value, PREDICATE predicate) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class PREDICATE>
-		iterator find(PREDICATE predicate);
+		iterator find(PREDICATE predicate) const;
 		
 		//二分探索
 		//※探索値指定版
@@ -708,14 +708,14 @@ namespace dynamic_array
 		//※自動的な共有ロック取得は行わないので、マルチスレッドで利用する際は、
 		//　一連の処理ブロックの前後で共有ロック（リードロック）の取得と解放を行う必要がある
 		template<typename V>
-		iterator binarySearchValue(const V& value);
+		iterator binarySearchValue(const V& value) const;
 		//※比較関数＋値指定版
 		template<typename V, class COMPARISON>
-		iterator binarySearchValue(const V& value, COMPARISON comparison);
+		iterator binarySearchValue(const V& value, COMPARISON comparison) const;
 		//※比較関数指定版
 		//※値の指定は関数に含んでおく（クロージャを用いるなどする）
 		template<class COMPARISON>
-		iterator binary_search(COMPARISON comparison);
+		iterator binary_search(COMPARISON comparison) const;
 	
 	public:
 		//コンストラクタ

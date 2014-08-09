@@ -30,8 +30,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //ロックフリー双方向スタックアロケータクラス
 
 //デバッグ情報作成
-template<class AUTO_CLEAR>
-std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std::size_t max_size) const
+template<class AUTO_CLEAR_POLICY>
+std::size_t lfDualStackAllocator<AUTO_CLEAR_POLICY>::debugInfo(char* message, const std::size_t max_size) const
 {
 	std::size_t message_len = 0;
 	GASHA_ spprintf(message, max_size, message_len, "----- Debug-info for lfDualStackAllocator -----\n");
@@ -41,8 +41,8 @@ std::size_t lfDualStackAllocator<AUTO_CLEAR>::debugInfo(char* message, const std
 }
 
 //使用中のサイズと数を取得
-template<class AUTO_CLEAR>
-void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count)
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocator<AUTO_CLEAR_POLICY>::getSizeAndCount(typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& size, typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& count)
 {
 	while (true)
 	{
@@ -64,8 +64,8 @@ void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(typename lfDualStackAlloc
 			break;
 	}
 }
-template<class AUTO_CLEAR>
-void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(allocationOrder_t& order, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& size_desc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_asc, typename lfDualStackAllocator<AUTO_CLEAR>::size_type& count_desc)
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocator<AUTO_CLEAR_POLICY>::getSizeAndCount(allocationOrder_t& order, typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& size_asc, typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& size_desc, typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& count_asc, typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type& count_desc)
 {
 	while(true)
 	{
@@ -82,8 +82,8 @@ void lfDualStackAllocator<AUTO_CLEAR>::getSizeAndCount(allocationOrder_t& order,
 }
 
 //使用中のサイズと数をリセット
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size_desc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_asc, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count_desc)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size_asc, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size_desc, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type count_asc, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type count_desc)
 {
 	while (true)
 	{
@@ -117,8 +117,8 @@ bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t
 	}
 	return false;//ダミー
 }
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR>::size_type count)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::resetSizeAndCount(const allocationOrder_t order, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type size, const typename lfDualStackAllocator<AUTO_CLEAR_POLICY>::size_type count)
 {
 	while (true)
 	{
@@ -166,8 +166,8 @@ bool lfDualStackAllocator<AUTO_CLEAR>::resetSizeAndCount(const allocationOrder_t
 }
 
 //正順メモリ確保
-template<class AUTO_CLEAR>
-void* lfDualStackAllocator<AUTO_CLEAR>::_allocAsc(const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR_POLICY>
+void* lfDualStackAllocator<AUTO_CLEAR_POLICY>::_allocAsc(const std::size_t size, const std::size_t align)
 {
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
 	//※要求サイズが0でも必ずメモリを割り当てる点に注意（ただし、アラインメントは守らない）
@@ -207,8 +207,8 @@ void* lfDualStackAllocator<AUTO_CLEAR>::_allocAsc(const std::size_t size, const 
 }
 
 //逆順メモリ確保
-template<class AUTO_CLEAR>
-void* lfDualStackAllocator<AUTO_CLEAR>::_allocDesc(const std::size_t size, const std::size_t align)
+template<class AUTO_CLEAR_POLICY>
+void* lfDualStackAllocator<AUTO_CLEAR_POLICY>::_allocDesc(const std::size_t size, const std::size_t align)
 {
 	//サイズが0バイトならサイズを1に、アラインメントを0にする
 	//※要求サイズが0でも必ずメモリを割り当てる点に注意（ただし、アラインメントは守らない）
@@ -247,33 +247,33 @@ void* lfDualStackAllocator<AUTO_CLEAR>::_allocDesc(const std::size_t size, const
 }
 
 //正順メモリ解放（共通処理）
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::_freeAsc(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::_freeAsc(void* p)
 {
 	//メモリ確保数を更新
 	m_countAsc.fetch_sub(1);
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClearAsc(*this);
 	return true;
 }
 
 //逆順メモリ解放（共通処理）
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::_freeDesc(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::_freeDesc(void* p)
 {
 	//メモリ確保数を更新
 	m_countDesc.fetch_sub(1);
 	//自動クリア呼び出し
-	AUTO_CLEAR auto_clear;
+	AUTO_CLEAR_POLICY auto_clear;
 	auto_clear.autoClearDesc(*this);
 	return true;
 }
 
 //正順で使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::_rewindAsc(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::_rewindAsc(void* p)
 {
 	while(true)
 	{
@@ -297,8 +297,8 @@ bool lfDualStackAllocator<AUTO_CLEAR>::_rewindAsc(void* p)
 
 //逆順で使用中のサイズを指定位置に戻す
 //※ポインタ指定版
-template<class AUTO_CLEAR>
-bool lfDualStackAllocator<AUTO_CLEAR>::_rewindDesc(void* p)
+template<class AUTO_CLEAR_POLICY>
+bool lfDualStackAllocator<AUTO_CLEAR_POLICY>::_rewindDesc(void* p)
 {
 	while(true)
 	{
@@ -321,8 +321,8 @@ bool lfDualStackAllocator<AUTO_CLEAR>::_rewindDesc(void* p)
 }
 
 //正順のメモリクリア
-template<class AUTO_CLEAR>
-void lfDualStackAllocator<AUTO_CLEAR>::_clearAsc()
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocator<AUTO_CLEAR_POLICY>::_clearAsc()
 {
 	while(true)
 	{
@@ -350,8 +350,8 @@ void lfDualStackAllocator<AUTO_CLEAR>::_clearAsc()
 	return;//ダミー
 }
 //逆順のメモリクリア
-template<class AUTO_CLEAR>
-void lfDualStackAllocator<AUTO_CLEAR>::_clearDesc()
+template<class AUTO_CLEAR_POLICY>
+void lfDualStackAllocator<AUTO_CLEAR_POLICY>::_clearDesc()
 {
 	while(true)
 	{
@@ -389,15 +389,15 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_lfDualStackAllocator() \
 	template class GASHA_ lfDualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfDualStackAllocator_withLock(LOCK_TYPE) \
-	template class GASHA_ lfDualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_lfDualStackAllocator_withLock(LOCK_POLICY) \
+	template class GASHA_ lfDualStackAllocator<LOCK_POLICY>;
 
 //スマートロックフリー双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
 #define GASHA_INSTANCING_lfSmartDualStackAllocator() \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfSmartDualStackAllocator_withLock(LOCK_TYPE) \
+#define GASHA_INSTANCING_lfSmartDualStackAllocator_withLock(LOCK_POLICY) \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
 
 #if 0//不要
@@ -407,9 +407,9 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ lfDualStackAllocator_withBuff<_MAX_SIZE>; \
 	template class GASHA_ lfDualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
-	template class GASHA_ lfDualStackAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>; \
-	template class GASHA_ lfDualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_lfDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
+	template class GASHA_ lfDualStackAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>; \
+	template class GASHA_ lfDualStackAllocator<LOCK_POLICY>;
 
 //バッファ付きスマートロックフリー双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -417,7 +417,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ lfDualStackAllocator_withBuff<_MAX_SIZE, GASHA_ lfDualStackAllocatorAutoClear>; \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfSmartDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_TYPE) \
+#define GASHA_INSTANCING_lfSmartDualStackAllocator_withBuff_withLock(_MAX_SIZE, LOCK_POLICY) \
 	template class GASHA_ lfDualStackAllocator_withBuff<_MAX_SIZE, GASHA_ lfDualStackAllocatorAutoClear>; \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
 
@@ -428,10 +428,10 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ lfDualStackAllocator_withBuff<sizeof(T) * _NUM>; \
 	template class GASHA_ lfDualStackAllocator<>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfDualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
-	template class GASHA_ lfDualStackAllocator_withType<T, _NUM, LOCK_TYPE>; \
-	template class GASHA_ lfDualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_TYPE>; \
-	template class GASHA_ lfDualStackAllocator<LOCK_TYPE>;
+#define GASHA_INSTANCING_lfDualStackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
+	template class GASHA_ lfDualStackAllocator_withType<T, _NUM, LOCK_POLICY>; \
+	template class GASHA_ lfDualStackAllocator_withBuff<sizeof(T)* _NUM, LOCK_POLICY>; \
+	template class GASHA_ lfDualStackAllocator<LOCK_POLICY>;
 
 //型指定バッファ付きスマートロックフリー双方向スタックアロケータの明示的なインスタンス化用マクロ
 //※ロックなし版
@@ -440,7 +440,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 	template class GASHA_ lfDualStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ lfDualStackAllocatorAutoClear>; \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
 //※ロック指定版
-#define GASHA_INSTANCING_lfSmartDualStackAllocator_withType_withLock(T, _NUM, LOCK_TYPE) \
+#define GASHA_INSTANCING_lfSmartDualStackAllocator_withType_withLock(T, _NUM, LOCK_POLICY) \
 	template class GASHA_ lfDualStackAllocator_withType<T, _NUM, GASHA_ lfDualStackAllocatorAutoClear>; \
 	template class GASHA_ lfDualStackAllocator_withBuff<sizeof(T)* _NUM, GASHA_ lfDualStackAllocatorAutoClear>; \
 	template class GASHA_ lfDualStackAllocator<GASHA_ lfDualStackAllocatorAutoClear>;
@@ -448,6 +448,8 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -487,8 +489,6 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 #endif//GASHA_INCLUDED_LF_DUAL_STACK_ALLOCATOR_CPP_H
 

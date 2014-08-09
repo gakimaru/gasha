@@ -81,6 +81,26 @@ inline constexpr T1& minObj(T1&& obj1, T2&& obj2, T3&& obj3, Tx&&... nx){ return
 template<typename T1, typename T2>
 inline constexpr T1 minIf(const T1 n1, const T2 n2, const T1 null_value){ return n1 == null_value ? static_cast<T1>(n2) : min(n1, n2); }
 
+//----------------------------------------
+//0以外の値を取得
+//----------------------------------------
+
+//値が一つの nvl()
+template<typename T>
+inline constexpr const T* nvl(const T* n1){ return n1 != nullptr ? n1 : "(null)"; }
+
+//値が二つの nvl()
+template<typename T>
+inline constexpr const T* nvl(const T* n1, const T* n2){ return n1 != nullptr ? n1 : n2; }
+template<typename T>
+inline constexpr T* nvl(T* n1, T* n2){ return n1 != nullptr ? n1 : n2; }
+
+//値が三つ以上の nvl() : 再帰処理
+template<typename T, typename... Tx>
+inline constexpr const T* nvl(const T* n1, const T* n2, const T* n3, const Tx&... nx){ return n1 != nullptr ? n1 : GASHA_ nvl(n2, n3, nx...); }
+template<typename T, typename... Tx>
+inline constexpr T* nvl(T* n1, T* n2, T* n3, Tx&&... nx){ return n1 != nullptr ? n1 : GASHA_ nvl(n2, n3, std::forward<Tx>(nx)...); }
+
 //--------------------------------------------------------------------------------
 //値の交換
 //--------------------------------------------------------------------------------

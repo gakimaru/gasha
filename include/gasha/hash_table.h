@@ -105,9 +105,9 @@ namespace hash_table
 	//--------------------
 	//開番地法ハッシュテーブル操作用テンプレート構造体
 	//※CRTPを活用し、下記のような派生構造体を作成して使用する
-	//  //struct 派生構造体名 : public hash_table::baseOpe<派生構造体名, 要素の型>
+	//  //struct 派生構造体名 : public hash_table::baseOpe<派生構造体名, テーブルサイズ, 要素の型>
 	//	//※文字列キーを扱いたい場合は、キー型に crc32_t を指定すること
-	//	struct ope : public hash_table::baseOpe<ope, data_t, crc32_t>
+	//	struct ope : public hash_table::baseOpe<ope, TABLE_SIZE, data_t, crc32_t>
 	//	{
 	//		//データ置換属性 ※必要に応じて定義
 	//		static const replaceAttr_t REPLACE_ATTR = REPLACE;//キーが重複するデータは置換して登録する
@@ -115,12 +115,12 @@ namespace hash_table
 	//		//キーを取得 ※必要に応じて定義
 	//		inline static key_type getKey(const value_type& value){ return ???; }
 	//		
-	//		//ロック型 ※必要に応じて定義
+	//		//ロックポリシー ※必要に応じて定義
 	//		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
-	//		//　有効な共有ロック型（shared_spin_lockなど）を lock_type 型として定義する。
-	//		typedef shared_spin_lock lock_type;//ロックオブジェクト型
+	//		//　有効な共有ロック型（sharedSpinLockなど）を lock_type 型として定義する。
+	//		typedef sharedSpinLock lock_type;//ロックオブジェクト型
 	//	};
-	template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
+	template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
 	struct baseOpe
 	{
 		//型
@@ -129,6 +129,9 @@ namespace hash_table
 		typedef KEY_TYPE key_type;//キー型
 		typedef typename GASHA_ numeric_limits<key_type>::range_type key_range_type;//キーの範囲型
 		typedef hash_table::replaceAttr_t replaceAttr_t;//置換属性
+		
+		//定数
+		static const std::size_t TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ（元の指定サイズ）※扱えるデータの要素数
 		
 		//定数
 		//※デフォルト
@@ -153,7 +156,7 @@ namespace hash_table
 		}
 
 		//ロック型
-		typedef dummySharedLock lock_type;//ロックオブジェクト型
+		typedef GASHA_ dummySharedLock lock_type;//ロックオブジェクト型
 		//※デフォルトはダミーのため、一切ロック制御しない。
 		//※共有ロック（リード・ライトロック）でコンテナ操作をスレッドセーフにしたい場合は、
 		//　baseOpeの派生クラスにて、有効な共有ロック型（sharedSpinLock など）を
@@ -194,7 +197,7 @@ namespace hash_table
 	
 	//----------------------------------------
 	//ハッシュテーブルコンテナ
-	template<class OPE_TYPE, std::size_t _TABLE_SIZE>
+	template<class OPE_TYPE>
 	class container
 	{
 	public:
@@ -202,7 +205,7 @@ namespace hash_table
 		GASHA_DECLARE_OPE_TYPES(OPE_TYPE);
 	public:
 		//定数
-		static const size_type ORIGINAL_TABLE_SIZE = _TABLE_SIZE;//テーブルサイズ（元々指定されたサイズ）
+		static const size_type ORIGINAL_TABLE_SIZE = ope_type::TABLE_SIZE;//テーブルサイズ（元々指定されたサイズ）
 		static const size_type TABLE_SIZE = GASHA_ makeStaticPrimeGE<ORIGINAL_TABLE_SIZE>::value;//テーブルサイズ（指定サイズと同じか、それより大きい素数）
 		static const size_type TABLE_SIZE_EXTENDED = TABLE_SIZE - ORIGINAL_TABLE_SIZE;//指定サイズから拡張したサイズ
 		static const size_type  AUTO_REHASH_RATIO = static_cast<size_type>(ope_type::AUTO_REHASH_RATIO);//自動リハッシュ実行の基準割合 ※削除済み件数が全体サイズの一定割合以上になったら自動リハッシュ ※0で自動リハッシュなし
@@ -805,21 +808,21 @@ namespace hash_table
 	{
 	public:
 		//開番地法ハッシュテーブル操作用構造体
-		struct ope : public baseOpe<ope, VALUE_TYPE, KEY_TYPE>{};
+		struct ope : public baseOpe<ope, _TABLE_SIZE, VALUE_TYPE, KEY_TYPE>{};
 
 		//基本型定義
 		GASHA_DECLARE_OPE_TYPES(ope);
 
 		//開番地法ハッシュテーブルコンテナ
-		class con : public container<ope_type, _TABLE_SIZE>
+		class con : public container<ope_type>
 		{
 		public:
 		#ifdef GASHA_HAS_INHERITING_CONSTRUCTORS
-			using container<ope_type, _TABLE_SIZE>::container;//継承コンストラクタ
+			using container<ope_type>::container;//継承コンストラクタ
 		#else//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デフォルトコンスタラクタ
 			inline con() :
-				container<ope_type, _TABLE_SIZE>()
+				container<ope_type>()
 			{}
 		#endif//GASHA_HAS_INHERITING_CONSTRUCTORS
 			//デストラクタ
@@ -838,12 +841,12 @@ namespace hash_table
 //※ネームスペースの指定を省略してクラスを使用するための別名
 
 //開番地法ハッシュテーブル操作用テンプレート構造体
-template<class OPE_TYPE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
-using hTable_baseOpe = hash_table::baseOpe<OPE_TYPE, VALUE_TYPE, KEY_TYPE>;
+template<class OPE_TYPE, std::size_t _TABLE_SIZE, typename VALUE_TYPE, typename KEY_TYPE = std::uint32_t>
+using hTable_baseOpe = hash_table::baseOpe<OPE_TYPE, _TABLE_SIZE, VALUE_TYPE, KEY_TYPE>;
 
 //開番地法ハッシュテーブルコンテナ
-template<class OPE_TYPE, std::size_t _TABLE_SIZE>
-using hTable = hash_table::container<OPE_TYPE, _TABLE_SIZE>;
+template<class OPE_TYPE>
+using hTable = hash_table::container<OPE_TYPE>;
 
 //シンプル開番地法ハッシュテーブルコンテナ
 template<typename VALUE_TYPE, std::size_t _TABLE_SIZE, typename KEY_TYPE = std::uint32_t>

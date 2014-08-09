@@ -32,24 +32,25 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace _private
 {
 	//静的フィールド：静的シングルトンインスタンス用バッファ
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
-	unsigned char singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceBuff[sizeof(typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::class_type)];
+	//※アラインメントサイズ分バッファサイズを余分に確保する
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
+	char singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticInstanceBuff[singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::INSTANCE_BUFF_SIZE];
 
 	//静的フィールド：静的シングルトンインスタンス参照
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
-	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::class_type* singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceRef = nullptr;
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
+	typename singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::class_type* singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticInstanceRef = nullptr;
 
 	//静的フィールド：インスタンス生成済み
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
-	std::atomic<bool> singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticInstanceIsCreated(false);
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
+	std::atomic<bool> singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticInstanceIsCreated(false);
 
 	//静的フィールド：静的ロックオブジェクト
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
-	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::lock_type singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticLock;
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
+	typename singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::lock_type singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticLock;
 
 	//静的フィールド：デバッグ用オブジェクト
-	template<class TARGET_CLASS, class LOCK_TYPE, class DEBUG_TYPE>
-	typename singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::debug_type singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>::m_staticDebug;
+	template<class TARGET_CLASS, class LOCK_POLICY, class DEBUG_POLICY>
+	typename singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::debug_type singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>::m_staticDebug;
 }//namepace _private
 
 //----------------------------------------
@@ -71,21 +72,23 @@ namespace _private
 #define GASHA_INSTANCING_simpleSingleton(TARGET_CLASS) \
 	template class GASHA_ _private::singleton<TARGET_CLASS, GASHA_ dummySharedLock, GASHA_ dummySingletonDebug>;
 //※ロック指定、デバッグなし版
-#define GASHA_INSTANCING_simpleSingleton_withLock(TARGET_CLASS, LOCK_TYPE) \
-	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_TYPE, GASHA_ dummySingletonDebug>;
+#define GASHA_INSTANCING_simpleSingleton_withLock(TARGET_CLASS, LOCK_POLICY) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_POLICY, GASHA_ dummySingletonDebug>;
 //※ロックなし、デバッグ指定版
-#define GASHA_INSTANCING_simpleSingleton_withDebug(TARGET_CLASS, DEBUG_TYPE) \
-	template class GASHA_ _private::singleton<TARGET_CLASS, GASHA_ dummySharedLock, DEBUG_TYPE>;
+#define GASHA_INSTANCING_simpleSingleton_withDebug(TARGET_CLASS, DEBUG_POLICY) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, GASHA_ dummySharedLock, DEBUG_POLICY>;
 //※ロック指定、デバッグ指定版
-#define GASHA_INSTANCING_simpleSingleton_withLock_withDebug(TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE) \
-	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_TYPE, DEBUG_TYPE>;
+#define GASHA_INSTANCING_simpleSingleton_withLock_withDebug(TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY) \
+	template class GASHA_ _private::singleton<TARGET_CLASS, LOCK_POLICY, DEBUG_POLICY>;
 
 //※別途、必要に応じてシングルトンデバッグ用処理の明示的なインスタンス化も必要
 //    GASHA_INSTANCING_singletonDebug(_MAX_RECORDS);//ロックなし版
-//    GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_TYPE);//ロック指定版
+//    GASHA_INSTANCING_singletonDebug_withLock(_MAX_RECORDS, LOCK_POLICY);//ロック指定版
 
 //--------------------------------------------------------------------------------
 //【注】明示的インスタンス化に失敗する場合
+// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
+// 　同じ内容のものをコピーしています。
 //--------------------------------------------------------------------------------
 //【原因①】
 // 　対象クラスに必要なインターフェースが実装されていない。
@@ -125,8 +128,6 @@ namespace _private
 // 　GCCのコンパイラオプションに、 -fpermissive を指定し、エラーを警告に格下げする。
 // 　（最も手間がかからないが、常時多数の警告が出る状態になりかねないので注意。）
 //--------------------------------------------------------------------------------
-// ※このコメントは、「明示的なインスタンス化マクロ」が定義されている全てのソースコードに
-// 　同じ内容のものをコピーしています。
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
 

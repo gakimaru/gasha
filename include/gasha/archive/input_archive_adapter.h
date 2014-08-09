@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------------------------
 // archive/input_archive_adapter.h
-// アーカイブ/アーカイブ読み込みアダプター【宣言部】
+// アーカイブ/アーカイブ読み込みアダプタ【宣言部】
 //
 // Gakimaru's standard library for C++ - GASHA
 //   Copyright (c) 2014 Itagaki Mamoru
@@ -12,7 +12,7 @@
 //     https://github.com/gakimaru/gasha/blob/master/LICENSE
 //--------------------------------------------------------------------------------
 
-#include <gasha/archive/archive_adapter_base.h>//アーカイバブ/アーカイブアダプター基底クラス
+#include <gasha/archive/archive_adapter_base.h>//アーカイバブ/アーカイブアダプタ基底クラス
 #include <gasha/archive/results.h>//アーカイブ/処理結果
 #include <gasha/serialization/type_ctrl_base.h>//アーカイブ/型操作基底クラス
 
@@ -25,11 +25,11 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 namespace archive
 {
 	//--------------------------------------------------------------------------------
-	//アーカイブ/アーカイブ読み込みアダプター
+	//アーカイブ/アーカイブ読み込みアダプタ
 	//--------------------------------------------------------------------------------
 
 	//--------------------
-	//アーカイブ読み込みアダプタークラス
+	//アーカイブ読み込みアダプタクラス
 	class inputArchiveAdapter : public GASHA_ archive::archiveAdapterBase
 	{
 		template<class FORMAT>

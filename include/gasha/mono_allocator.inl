@@ -28,8 +28,8 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 //単一アロケータクラス
 
 //メモリ解放
-template<class LOCK_TYPE>
-inline bool monoAllocator<LOCK_TYPE>::free(void* p)
+template<class LOCK_POLICY>
+inline bool monoAllocator<LOCK_POLICY>::free(void* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -40,9 +40,9 @@ inline bool monoAllocator<LOCK_TYPE>::free(void* p)
 }
 
 //メモリ確保とコンストラクタ呼び出し
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T, typename...Tx>
-T* monoAllocator<LOCK_TYPE>::newObj(Tx&&... args)
+T* monoAllocator<LOCK_POLICY>::newObj(Tx&&... args)
 {
 	void* p = alloc(sizeof(T), alignof(T));
 	if (!p)
@@ -50,9 +50,9 @@ T* monoAllocator<LOCK_TYPE>::newObj(Tx&&... args)
 	return GASHA_ callConstructor<T>(p, std::forward<Tx>(args)...);
 }
 //※配列用
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T, typename...Tx>
-T* monoAllocator<LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
+T* monoAllocator<LOCK_POLICY>::newArray(const std::size_t num, Tx&&... args)
 {
 	void* p = alloc(sizeof(T) * num, alignof(T));
 	if (!p)
@@ -69,9 +69,9 @@ T* monoAllocator<LOCK_TYPE>::newArray(const std::size_t num, Tx&&... args)
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T>
-bool monoAllocator<LOCK_TYPE>::deleteObj(T* p)
+bool monoAllocator<LOCK_POLICY>::deleteObj(T* p)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -82,9 +82,9 @@ bool monoAllocator<LOCK_TYPE>::deleteObj(T* p)
 	return _free(p);
 }
 //※配列用
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T>
-bool monoAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
+bool monoAllocator<LOCK_POLICY>::deleteArray(T* p, const std::size_t num)
 {
 	if (!p)//nullptrの解放は常に成功扱い
 		return true;
@@ -100,16 +100,16 @@ bool monoAllocator<LOCK_TYPE>::deleteArray(T* p, const std::size_t num)
 }
 
 //強制クリア
-template<class LOCK_TYPE>
-inline void monoAllocator<LOCK_TYPE>::clear()
+template<class LOCK_POLICY>
+inline void monoAllocator<LOCK_POLICY>::clear()
 {
 	GASHA_ lock_guard<lock_type> lock(m_lock);//ロック（スコープロック）
 	m_size = 0;
 }
 
 //ポインタが範囲内か判定
-template<class LOCK_TYPE>
-inline bool monoAllocator<LOCK_TYPE>::isInUsingRange(void* p)
+template<class LOCK_POLICY>
+inline bool monoAllocator<LOCK_POLICY>::isInUsingRange(void* p)
 {
 #ifdef GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 	GASHA_SIMPLE_ASSERT(p >= m_buffRef && p < m_buffRef + m_size, "Pointer is not in range.");
@@ -121,8 +121,8 @@ inline bool monoAllocator<LOCK_TYPE>::isInUsingRange(void* p)
 }
 
 //コンストラクタ
-template<class LOCK_TYPE>
-inline monoAllocator<LOCK_TYPE>::monoAllocator(void* buff, const std::size_t max_size) :
+template<class LOCK_POLICY>
+inline monoAllocator<LOCK_POLICY>::monoAllocator(void* buff, const std::size_t max_size) :
 	m_buffRef(reinterpret_cast<char*>(buff)),
 	m_maxSize(static_cast<size_type>(max_size)),
 	m_size(0)
@@ -132,34 +132,34 @@ inline monoAllocator<LOCK_TYPE>::monoAllocator(void* buff, const std::size_t max
 	GASHA_SIMPLE_ASSERT(m_maxSize > 0, "max_size is zero.");
 #endif//GASHA_MONO_ALLOCATOR_ENABLE_ASSERTION
 }
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T>
-inline monoAllocator<LOCK_TYPE>::monoAllocator(T* buff, const std::size_t num) :
+inline monoAllocator<LOCK_POLICY>::monoAllocator(T* buff, const std::size_t num) :
 	monoAllocator(reinterpret_cast<void*>(buff), sizeof(T) * num)//C++11 委譲コンストラクタ
 {}
-template<class LOCK_TYPE>
+template<class LOCK_POLICY>
 template<typename T, std::size_t N>
-inline monoAllocator<LOCK_TYPE>::monoAllocator(T(&buff)[N]) :
+inline monoAllocator<LOCK_POLICY>::monoAllocator(T(&buff)[N]) :
 monoAllocator(reinterpret_cast<void*>(buff), sizeof(buff))//C++11 委譲コンストラクタ
 {}
 
 //デストラクタ
-template<class LOCK_TYPE>
-inline monoAllocator<LOCK_TYPE>::~monoAllocator()
+template<class LOCK_POLICY>
+inline monoAllocator<LOCK_POLICY>::~monoAllocator()
 {}
 
 //--------------------------------------------------------------------------------
 //バッファ付き単一アロケータクラス
 
 //コンストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE>
-inline monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>::monoAllocator_withBuff() :
-monoAllocator<LOCK_TYPE>(m_buff, MAX_SIZE)
+template<std::size_t _MAX_SIZE, class LOCK_POLICY>
+inline monoAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>::monoAllocator_withBuff() :
+monoAllocator<LOCK_POLICY>(m_buff, MAX_SIZE)
 {}
 
 //デストラクタ
-template<std::size_t _MAX_SIZE, class LOCK_TYPE>
-inline monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>::~monoAllocator_withBuff()
+template<std::size_t _MAX_SIZE, class LOCK_POLICY>
+inline monoAllocator_withBuff<_MAX_SIZE, LOCK_POLICY>::~monoAllocator_withBuff()
 {}
 
 //--------------------------------------------------------------------------------
@@ -167,29 +167,29 @@ inline monoAllocator_withBuff<_MAX_SIZE, LOCK_TYPE>::~monoAllocator_withBuff()
 //※型指定版
 
 //メモリ確保とコンストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE>
+template<typename T, std::size_t _NUM, class LOCK_POLICY>
 template<typename... Tx>
-inline typename monoAllocator_withType<T, _NUM, LOCK_TYPE>::value_type* monoAllocator_withType<T, _NUM, LOCK_TYPE>::newDefault(Tx&&... args)
+inline typename monoAllocator_withType<T, _NUM, LOCK_POLICY>::value_type* monoAllocator_withType<T, _NUM, LOCK_POLICY>::newDefault(Tx&&... args)
 {
 	return this->template newObj<value_type>(std::forward<Tx>(args)...);
 }
 
 //メモリ解放とデストラクタ呼び出し
-template<typename T, std::size_t _NUM, class LOCK_TYPE>
-inline bool monoAllocator_withType<T, _NUM, LOCK_TYPE>::deleteDefault(typename monoAllocator_withType<T, _NUM, LOCK_TYPE>::value_type*& p)
+template<typename T, std::size_t _NUM, class LOCK_POLICY>
+inline bool monoAllocator_withType<T, _NUM, LOCK_POLICY>::deleteDefault(typename monoAllocator_withType<T, _NUM, LOCK_POLICY>::value_type*& p)
 {
 	return this->template deleteObj<value_type>(p);
 }
 
 //コンストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE>
-inline monoAllocator_withType<T, _NUM, LOCK_TYPE>::monoAllocator_withType() :
-	monoAllocator<LOCK_TYPE>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
+template<typename T, std::size_t _NUM, class LOCK_POLICY>
+inline monoAllocator_withType<T, _NUM, LOCK_POLICY>::monoAllocator_withType() :
+	monoAllocator<LOCK_POLICY>(reinterpret_cast<void*>(m_buff), MAX_SIZE)
 {}
 
 //デストラクタ
-template<typename T, std::size_t _NUM, class LOCK_TYPE>
-inline monoAllocator_withType<T, _NUM, LOCK_TYPE>::~monoAllocator_withType()
+template<typename T, std::size_t _NUM, class LOCK_POLICY>
+inline monoAllocator_withType<T, _NUM, LOCK_POLICY>::~monoAllocator_withType()
 {}
 
 GASHA_NAMESPACE_END;//ネームスペース：終了
