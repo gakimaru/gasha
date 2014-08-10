@@ -12,7 +12,7 @@ Released under the [MIT license][MIT].
 
 ###最新の更新内容###
 Ver.`2.01` [master] `Aug.11.2014` M.Itagaki  
-> * 【ユニットテスト系】の処理を追加しました。  
+> * 【デバッグ機能系：ユニットテスト】の処理を追加しました。  
 > * その他、若干の追加と修正を行っています。  
 >
 > 改訂履歴は `ReleaseNotes.txt` を参照願います。
