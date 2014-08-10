@@ -60,6 +60,15 @@ public:
 	struct unsafe_t{};//高速登録（安全保証なし版）指定用の型
 
 public:
+	//アクセッサ
+	inline std::size_t maxSize() const;//最大登録数
+	inline std::size_t size() const;//登録数
+	inline std::size_t remain() const;//登録数残量
+	inline std::size_t buffMaxSize() const;//バッファ最大サイズ
+	inline std::size_t buffSize() const;//バッファ使用量
+	inline std::size_t buffRemain() const;//バッファ残量
+
+public:
 	//関数オペレータ
 	//※文字列参照
 	inline const char* operator()(const GASHA_ crc32_t key);

@@ -41,7 +41,7 @@ GASHA_NAMESPACE_BEGIN;//ネームスペース：開始
 template<typename... Tx>
 inline int winConsole::printf(const char* fmt, Tx&&... args) const
 {
-	std::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
+	return std::fprintf(m_handle, fmt, std::forward<Tx>(args)...);
 }
 
 //カラー変更

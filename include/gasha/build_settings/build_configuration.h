@@ -52,8 +52,8 @@
 //#define GASHA_OPTIMIZED//最大限の最適化
 //#define GASHA_FILE_SYSTEM_IS_ROM//ROM専用ファイルシステム
 //#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
-//#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
-//#define GASHA_IS_REGRESSION_TEST//回帰テストモード有効
+//#define GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
+//#define GASHA_UNIT_TEST_AUTO_RUN_ENABLED//ユニットテスト自動実行 ※GASHA_UT_AUTO_RUN() によるユニットテスト自動実行を有効化
 //#define GASHA_HAS_SYNBOMS//シンボル情報あり
 //#define GASHA_IS_STRIPPED_SYMBOLS//シンボル情報なし
 
@@ -218,7 +218,7 @@
 	#define GASHA_DEV_TOOLS_IS_AVAILABLE//開発ツール利用可能
 	#define GASHA_NO_OPTIMIZED//最適化なし
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
-	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
+	#define GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
 	#define GASHA_HAS_SYNBOMS//シンボル情報あり
 #endif//GASHA_BUILD_CONFIG_IS_DEBUG
 
@@ -235,7 +235,7 @@
 	#define GASHA_DEV_TOOLS_IS_AVAILABLE//開発ツール利用可能
 	#define GASHA_OPTIMIZED_MODERATELY//適度に最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
-	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
+	#define GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
 	#define GASHA_HAS_SYNBOMS//シンボル情報あり
 #endif//GASHA_BUILD_CONFIG_IS_DEBUG_MODERATE
 
@@ -250,7 +250,7 @@
 	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
-	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
+	#define GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
 	#define GASHA_HAS_SYNBOMS//シンボル情報あり
 #endif//GASHA_BUILD_CONFIG_IS_DEBUG_OPT
 
@@ -265,8 +265,8 @@
 	#define GASHA_PROFILE_IS_AVAILABLE//プロファイル機能利用可能
 	#define GASHA_OPTIMIZED//最大限の最適化
 	#define GASHA_FILE_SYSTEM_IS_FLEXIBLE//ローカル／ROM切り替えファイルシステム（ローカルデータで設定）
-	#define GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
-	#define GASHA_IS_REGRESSION_TEST//回帰テストモード有効
+	#define GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
+	#define GASHA_UNIT_TEST_AUTO_RUN_ENABLED//ユニットテスト自動実行
 	#define GASHA_HAS_SYNBOMS//シンボル情報あり
 #endif//GASHA_BUILD_CONFIG_IS_REGRESSION_TEST
 

@@ -37,6 +37,38 @@ inline strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::pool::po
 //----------------------------------------
 //文字列プールクラス
 
+//アクセッサ
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::maxSize() const//最大登録数
+{
+	return m_strPoolTable.max_size();
+}
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::size() const//登録数
+{
+	return m_strPoolTable.size();
+}
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::remain() const//登録数残量
+{
+	return m_strPoolTable.remain();
+}
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::buffMaxSize() const//最大バッファサイズ
+{
+	return m_strPoolBuff.maxSize();
+}
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::buffSize() const//バッファ使用量
+{
+	return m_strPoolBuff.size();
+}
+template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>
+inline std::size_t strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::buffRemain() const//バッファ残量
+{
+	return m_strPoolBuff.remain();
+}
+
 //関数オペレータ
 //※文字列参照
 template<std::size_t _STR_POOL_BUFF_SIZE, std::size_t _STR_POOL_TABLE_SIZE, class LOCK_POLICY>

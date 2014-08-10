@@ -350,6 +350,14 @@
 #endif//GASHA_STD_ALLOCATOR_ENABLE_ASSERTION
 
 //--------------------------------------------------------------------------------
+//【シングルトンデバッグ用処理】
+
+//シングルトンのデバッグ情報収集機能は、ビルド構成でデバッグ機能が有効でなければ無効化する
+#if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_DEBUG_FEATURE_IS_ENABLED)
+#undef GASHA_SINGLETON_DEBUG_ENABLED
+#endif//GASHA_SINGLETON_DEBUG_ENABLED
+
+//--------------------------------------------------------------------------------
 //【コンソール】
 
 //Windowsコマンドプロンプトは、対象プラットフォームがWindowsでなければ無効化する
@@ -493,12 +501,42 @@
 #endif//GASHA_PROFILER_WITHOUT_THREAD_SAFE
 
 //--------------------------------------------------------------------------------
-//【シングルトンデバッグ用処理】
+//【ユニットテスト】
 
-//シングルトンのデバッグ情報収集機能は、ビルド構成でデバッグ機能が有効でなければ無効化する
-#if defined(GASHA_SINGLETON_DEBUG_ENABLED) && !defined(GASHA_DEBUG_FEATURE_IS_ENABLED)
-	#undef GASHA_SINGLETON_DEBUG_ENABLED
-#endif//GASHA_SINGLETON_DEBUG_ENABLED
+//「ユニットテストの最大登録数」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_REGIST_NUM_MAX
+	#define GASHA_UNIT_TEST_REGIST_NUM_MAX (1024)
+#endif//GASHA_UNIT_TEST_REGIST_NUM_MAX
+
+//「ユニットテスト実行用のメモリアロケータサイズ」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_ALLOCATOR_SIZE 
+	#define GASHA_UNIT_TEST_ALLOCATOR_SIZE (2 * 1024)
+#endif//GASHA_UNIT_TEST_ALLOCATOR_SIZE 
+
+//「ユニットテスト登録の最大文字列数」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_STR_POOL_TABLE_SIZE
+	#define GASHA_UNIT_TEST_STR_POOL_TABLE_SIZE (1024)
+#endif//GASHA_UNIT_TEST_STR_POOL_TABLE_SIZE
+
+//「ユニットテスト登録の最大文字列サイズ」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_STR_POOL_BUFF_SIZE
+	#define GASHA_UNIT_TEST_STR_POOL_BUFF_SIZE (4 * 1024)
+#endif//GASHA_UNIT_TEST_STR_POOL_BUFF_SIZE
+
+//「ユニットテスト結果表示用のワークバッファサイズ」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_WORK_BUFF_SIZE
+	#define GASHA_UNIT_TEST_WORK_BUFF_SIZE (1 * 1024)
+#endif//GASHA_UNIT_TEST_WORK_BUFF_SIZE
+
+//「ユニットテスト自動実行時の対象モジュール」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_AUTO_RUN_TARGET_MODULE
+	#define GASHA_UNIT_TEST_AUTO_RUN_TARGET_MODULE nullptr
+#endif//GASHA_UNIT_TEST_AUTO_RUN_TARGET_MODULE
+
+//「ユニットテスト自動実行時の対象グループ」が未定義なら、デフォルト値にする
+#ifndef GASHA_UNIT_TEST_AUTO_RUN_TARGET_GROUP
+	#define GASHA_UNIT_TEST_AUTO_RUN_TARGET_GROUP 0
+#endif//GASHA_UNIT_TEST_AUTO_RUN_TARGET_GROUP
 
 #endif//GASHA_INCLUDED_ADJUST_BUILD_SETTINGS_H
 
