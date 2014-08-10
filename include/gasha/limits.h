@@ -35,7 +35,7 @@ public:
 	static const T MAX = 0;//最大値
 	static const T ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(T);//サイズ
-	static inline constexpr T zero(){ return 0; }//ゼロ
+	inline static constexpr T zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：bool型
 template<>
@@ -51,7 +51,7 @@ public:
 	static const bool MAX = true;//最大値
 	static const bool ZERO = false;//ゼロ
 	static const std::size_t SIZE = sizeof(bool);//サイズ
-	static inline constexpr bool zero(){ return false; }//ゼロ
+	inline static constexpr bool zero(){ return false; }//ゼロ
 };
 #if 0//整数型は、std::int*_t, std::uint*_t の特殊化のみ使用
 //型の限界値情報：char型
@@ -68,7 +68,7 @@ public:
 	static const char MAX = CHAR_MAX;//最大値
 	static const char ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(char);//サイズ
-	static inline constexpr char zero(){ return 0; }//ゼロ
+	inline static constexpr char zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：unsigned char型
 template<>
@@ -84,7 +84,7 @@ public:
 	static const unsigned char MAX = UCHAR_MAX;//最大値
 	static const unsigned char ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(unsigned char);//サイズ
-	static inline constexpr unsigned char zero(){ return 0; }//ゼロ
+	inline static constexpr unsigned char zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：short型
 template<>
@@ -100,7 +100,7 @@ public:
 	static const short MAX = SHRT_MAX;//最大値
 	static const short ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(short);//サイズ
-	static inline constexpr short zero(){ return 0; }//ゼロ
+	inline static constexpr short zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：unsigned short型
 template<>
@@ -116,7 +116,7 @@ public:
 	static const unsigned short MAX = USHRT_MAX;//最大値
 	static const unsigned short ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(unsigned short);//サイズ
-	static inline constexpr unsigned short zero(){ return 0; }//ゼロ
+	inline static constexpr unsigned short zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：int型
 template<>
@@ -132,7 +132,7 @@ public:
 	static const int MAX = INT_MAX;//最大値
 	static const int ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(int);//サイズ
-	static inline constexpr int zero(){ return 0; }//ゼロ
+	inline static constexpr int zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：unsigned int型
 template<>
@@ -148,7 +148,7 @@ public:
 	static const unsigned int MAX = UINT_MAX;//最大値
 	static const unsigned int ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(unsigned int);//サイズ
-	static inline constexpr unsigned int zero(){ return 0; }//ゼロ
+	inline static constexpr unsigned int zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：long型
 template<>
@@ -164,7 +164,7 @@ public:
 	static const long MAX = LONG_MAX;//最大値
 	static const long ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(long);//サイズ
-	static inline constexpr long zero(){ return 0; }//ゼロ
+	inline static constexpr long zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：unsigned int型
 template<>
@@ -180,7 +180,7 @@ public:
 	static const unsigned long MAX = ULONG_MAX;//最大値
 	static const unsigned long ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(unsigned long);//サイズ
-	static inline constexpr unsigned long zero(){ return 0; }//ゼロ
+	inline static constexpr unsigned long zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：long long型
 template<>
@@ -196,7 +196,7 @@ public:
 	static const long long MAX = LLONG_MAX;//最大値
 	static const long long ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(long long);//サイズ
-	static inline constexpr long long zero(){ return 0; }//ゼロ
+	inline static constexpr long long zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：unsigned long long型
 template<>
@@ -212,7 +212,7 @@ public:
 	static const unsigned long long MAX = ULLONG_MAX;//最大値
 	static const unsigned long long ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(unsigned long long);//サイズ
-	static inline constexpr unsigned long long zero(){ return 0; }//ゼロ
+	inline static constexpr unsigned long long zero(){ return 0; }//ゼロ
 };
 #endif
 //型の限界値情報：float型
@@ -229,7 +229,7 @@ public:
 	static const float MAX;//最大値
 	static const float ZERO;//ゼロ
 	static const std::size_t SIZE = sizeof(float);//サイズ
-	static inline constexpr float zero(){ return 0.f; }//ゼロ
+	inline static constexpr float zero(){ return 0.f; }//ゼロ
 };
 //型の限界値情報：double型
 template<>
@@ -245,7 +245,7 @@ public:
 	static const double MAX;//最大値
 	static const double ZERO;//ゼロ
 	static const std::size_t SIZE = sizeof(double);//サイズ
-	static inline constexpr double zero(){ return 0.; }//ゼロ
+	inline static constexpr double zero(){ return 0.; }//ゼロ
 };
 //型の限界値情報：std::int8_t型
 template<>
@@ -261,7 +261,7 @@ public:
 	static const std::int8_t MAX = INT8_MAX;//最大値
 	static const std::int8_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::int8_t);//サイズ
-	static inline constexpr std::int8_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::int8_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::uint8_t型
 template<>
@@ -277,7 +277,7 @@ public:
 	static const std::uint8_t MAX = UINT8_MAX;//最大値
 	static const std::uint8_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::uint8_t);//サイズ
-	static inline constexpr std::uint8_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::uint8_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::int16_t型
 template<>
@@ -293,7 +293,7 @@ public:
 	static const std::int16_t MAX = INT16_MAX;//最大値
 	static const std::int16_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::int16_t);//サイズ
-	static inline constexpr std::int16_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::int16_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::uint16_t型
 template<>
@@ -309,7 +309,7 @@ public:
 	static const std::uint16_t MAX = UINT16_MAX;//最大値
 	static const std::uint16_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::uint16_t);//サイズ
-	static inline constexpr std::uint16_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::uint16_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::int32_t型
 template<>
@@ -325,7 +325,7 @@ public:
 	static const std::int32_t MAX = INT32_MAX;//最大値
 	static const std::int32_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::int32_t);//サイズ
-	static inline constexpr std::int32_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::int32_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::uint32_t型
 template<>
@@ -341,7 +341,7 @@ public:
 	static const std::uint32_t MAX = UINT32_MAX;//最大値
 	static const std::uint32_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::uint32_t);//サイズ
-	static inline constexpr std::uint32_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::uint32_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::int64_t型
 template<>
@@ -357,7 +357,7 @@ public:
 	static const std::int64_t MAX = INT64_MAX;//最大値
 	static const std::int64_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::int64_t);//サイズ
-	static inline constexpr std::int64_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::int64_t zero(){ return 0; }//ゼロ
 };
 //型の限界値情報：std::uint64_t型
 template<>
@@ -373,7 +373,7 @@ public:
 	static const std::uint64_t MAX = UINT64_MAX;//最大値
 	static const std::uint64_t ZERO = 0;//ゼロ
 	static const std::size_t SIZE = sizeof(std::uint64_t);//サイズ
-	static inline constexpr std::uint64_t zero(){ return 0; }//ゼロ
+	inline static constexpr std::uint64_t zero(){ return 0; }//ゼロ
 };
 
 GASHA_NAMESPACE_END;//ネームスペース：終了

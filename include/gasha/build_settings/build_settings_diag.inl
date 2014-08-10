@@ -572,6 +572,11 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #else//GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
 	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((destructor(PRIORITY)))`(GCC style) is AVAILABLE.\n");
 #endif//GASHA_HAS_DESTRUCTOR_ATTRIBUTE_WITH_PRIORITY
+#ifdef GASHA_HAS_INIT_PRIORITY_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[Yes]       `__attribute__((init_priority(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#else//GASHA_HAS_INIT_PRIORITY_ATTRIBUTE
+	GASHA_ spprintf(message, max_size, message_len, "[No]        `__attribute__((init_priority(PRIORITY)))`(GCC style) is AVAILABLE.\n");
+#endif//GASHA_HAS_INIT_PRIORITY_ATTRIBUTE
 
 	//__cpuid 
 	//※C++11仕様ではなく、コンパイラ独自仕様の共通化
@@ -826,14 +831,14 @@ bool buildSettingsDiagnosticTest(char* message, const std::size_t max_size, std:
 #endif//GASHA_FILE_SYSTEM_IS_FLEXIBLE
 	GASHA_ spprintf(message, max_size, message_len, "\n");
 
-#ifdef GASHA_UNITE_TEST_ENABLED//ユニットテスト（の仕組みが）有効
+#ifdef GASHA_UNIT_TEST_ENABLED//ユニットテスト組み込み
 	GASHA_ spprintf(message, max_size, message_len, "[Yes] 'Unit-test' is AVAILABLE.");
-#ifdef GASHA_IS_REGRESSION_TEST//回帰テストモード有効
-	GASHA_ spprintf(message, max_size, message_len, " (woth REGRESSION-TEST)");
-#endif//GASHA_IS_REGRESSION_TEST
-#else//GASHA_UNITE_TEST_ENABLED
+#ifdef GASHA_UNIT_TEST_AUTO_RUN_ENABLED//ユニットテスト自動実行
+	GASHA_ spprintf(message, max_size, message_len, " (with auto-run for regression-test)");
+#endif//GASHA_UNIT_TEST_AUTO_RUN_ENABLED
+#else//GASHA_UNIT_TEST_ENABLED
 	GASHA_ spprintf(message, max_size, message_len, "[[No] 'Unit-test' is NOT available.");
-#endif//GASHA_UNITE_TEST_ENABLED
+#endif//GASHA_UNIT_TEST_ENABLED
 	GASHA_ spprintf(message, max_size, message_len, "\n");
 
 #ifdef GASHA_HAS_SYNBOMS//シンボル情報あり

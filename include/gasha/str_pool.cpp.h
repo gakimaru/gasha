@@ -98,7 +98,7 @@ GASHA_NAMESPACE_END;//ネームスペース：終了
 #define GASHA_INSTANCING_strPool(_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE) \
 	template class GASHA_ strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE>; \
 	template class GASHA_ stackAllocator<>; \
-	template class GASHA_ hash_table::container<typename GASHA_ strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY>::strPoolOpe>;
+	template class GASHA_ hash_table::container<typename GASHA_ strPool<_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE>::strPoolOpe>;
 
 //※ロック指定版
 #define GASHA_INSTANCING_strPool_withLock(_STR_POOL_BUFF_SIZE, _STR_POOL_TABLE_SIZE, LOCK_POLICY) \
